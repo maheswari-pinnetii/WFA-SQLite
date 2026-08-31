@@ -68,6 +68,36 @@ async function migrate() {
     }
     console.log('[SQLite Cloud] Schema alterations completed.');
 
+    // Apply performance indexes
+    console.log('[SQLite Cloud] Applying performance indexes...');
+    const performanceIndexes = [
+      'CREATE INDEX IF NOT EXISTS idx_employees_id ON employees(id);',
+      'CREATE INDEX IF NOT EXISTS idx_employees_code ON employees(employeeCode);',
+      'CREATE INDEX IF NOT EXISTS idx_employees_email ON employees(email);',
+      'CREATE INDEX IF NOT EXISTS idx_employees_role ON employees(role);',
+      'CREATE INDEX IF NOT EXISTS idx_employees_dept ON employees(department);',
+      'CREATE INDEX IF NOT EXISTS idx_employees_loc ON employees(location);',
+      'CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);',
+      'CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);',
+      'CREATE INDEX IF NOT EXISTS idx_attendancerecords_date ON attendancerecords(date);',
+      'CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_date ON attendancerecords(employeeId, date);',
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);',
+      'CREATE INDEX IF NOT EXISTS idx_skills_emp ON skills(employeeId);',
+      'CREATE INDEX IF NOT EXISTS idx_perf_emp ON performancerecords(employeeId);',
+      'CREATE INDEX IF NOT EXISTS idx_leave_emp ON leaverequests(employeeId);',
+      'CREATE INDEX IF NOT EXISTS idx_employees_created ON employees(createdAt);',
+      'CREATE INDEX IF NOT EXISTS idx_attendancerecords_created ON attendancerecords(createdAt);',
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(createdAt);'
+    ];
+    for (const idx of performanceIndexes) {
+      try {
+        await cloudDb.sql(idx);
+      } catch (e) {
+        // Suppress index errors if already exists
+      }
+    }
+    console.log('[SQLite Cloud] Performance indexes applied successfully.');
+
     // 2. Check if local SQLite database exists to upload data
     if (fs.existsSync(LOCAL_DB_PATH)) {
       console.log(`[SQLite Cloud] Found local SQLite database at ${LOCAL_DB_PATH}. Syncing data to cloud...`);
