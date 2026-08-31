@@ -17,7 +17,9 @@ import {
   LogOut as LogOutIcon,
   ChevronLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -47,6 +49,8 @@ export const Profile: React.FC = () => {
   const [securityLoading, setSecurityLoading] = useState(false);
   const [showRegenModal, setShowRegenModal] = useState(false);
   const [regenPassword, setRegenPassword] = useState('');
+  const [showRegenPassword, setShowRegenPassword] = useState(false);
+  const [showDisablePassword, setShowDisablePassword] = useState(false);
 
   const fetchMfaStatus = async () => {
     try {
@@ -755,14 +759,24 @@ export const Profile: React.FC = () => {
                     {showRegenModal ? (
                       <div className="space-y-3 mt-2 max-w-sm">
                         <label className="text-[10px] text-slate-400 font-bold block">Confirm Password</label>
-                        <input
-                          type="password"
-                          value={regenPassword}
-                          onChange={(e) => setRegenPassword(e.target.value)}
-                          placeholder="Enter your account password"
-                          className="auth-input text-xs"
-                          style={{ padding: '0.5rem' }}
-                        />
+                        <div className="relative flex items-center">
+                          <input
+                            type={showRegenPassword ? "text" : "password"}
+                            value={regenPassword}
+                            onChange={(e) => setRegenPassword(e.target.value)}
+                            placeholder="Enter your account password"
+                            className="auth-input text-xs w-full pr-8"
+                            style={{ padding: '0.5rem' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowRegenPassword(!showRegenPassword)}
+                            className="absolute right-2.5 text-slate-400 hover:text-slate-200"
+                            aria-label={showRegenPassword ? "Hide password" : "Show password"}
+                          >
+                            {showRegenPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        </div>
                         <div className="flex gap-2">
                           <button
                             onClick={handleRegenCodes}
@@ -846,14 +860,24 @@ export const Profile: React.FC = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="text-[10px] text-slate-400 font-bold block mb-1">Account Password</label>
-                    <input
-                      type="password"
-                      value={disablePassword}
-                      onChange={(e) => setDisablePassword(e.target.value)}
-                      placeholder="Enter account password"
-                      className="auth-input text-xs"
-                      style={{ padding: '0.5rem' }}
-                    />
+                    <div className="relative flex items-center">
+                      <input
+                        type={showDisablePassword ? "text" : "password"}
+                        value={disablePassword}
+                        onChange={(e) => setDisablePassword(e.target.value)}
+                        placeholder="Enter account password"
+                        className="auth-input text-xs w-full pr-8"
+                        style={{ padding: '0.5rem' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowDisablePassword(!showDisablePassword)}
+                        className="absolute right-2.5 text-slate-400 hover:text-slate-200"
+                        aria-label={showDisablePassword ? "Hide password" : "Show password"}
+                      >
+                        {showDisablePassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="text-[10px] text-slate-400 font-bold block mb-1">MFA/Recovery Code</label>

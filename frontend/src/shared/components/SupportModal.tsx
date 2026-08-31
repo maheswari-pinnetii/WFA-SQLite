@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaqAccordion } from './FaqAccordion';
 import {
   LifeBuoy,
   X,
@@ -94,34 +95,10 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
             </div>
           </div>
 
-          {/* Quick Help Guides */}
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Self-Service Knowledge Base</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <a
-                href="#rbac-guide"
-                onClick={(e) => e.preventDefault()}
-                className="p-3 rounded-xl bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center justify-between text-[var(--text-primary)] transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText size={16} className="text-blue-400" />
-                  <span>Understanding Role Access</span>
-                </div>
-                <ExternalLink size={14} className="text-slate-400" />
-              </a>
-
-              <a
-                href="#attendance-guide"
-                onClick={(e) => e.preventDefault()}
-                className="p-3 rounded-xl bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] flex items-center justify-between text-[var(--text-primary)] transition-colors"
-              >
-                <div className="flex items-center gap-2">
-                  <Clock size={16} className="text-cyan-400" />
-                  <span>Attendance & Clocking Help</span>
-                </div>
-                <ExternalLink size={14} className="text-slate-400" />
-              </a>
-            </div>
+          {/* Quick Help Guides & FAQs */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Frequently Asked Questions & Guides</h3>
+            <FaqAccordion />
           </div>
 
           {/* Submit Support Ticket Section */}

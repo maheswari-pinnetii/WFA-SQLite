@@ -3,13 +3,17 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import { EnterpriseHeader } from './components/EnterpriseHeader';
 import { Sidebar } from './components/Sidebar';
 import { SupportModal } from '../components/SupportModal';
+import { ShortcutsModal } from '../components/ShortcutsModal';
+import { CookieBanner } from '../components/CookieBanner';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTheme } from '../../design-system/theme/theme';
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { role } = useAuth();
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
 
   // Initialize collapsed state from localStorage (default to false / expanded on desktop)
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -43,6 +47,30 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const focusSearch = () => {
+    const searchInput = document.querySelector('input[type="search"], input[placeholder*="Search"]') as HTMLInputElement;
+    if (searchInput) {
+      searchInput.focus();
+    }
+  };
+
+  // Keyboard Shortcuts Hook
+  useKeyboardShortcuts({
+    onToggleShortcutsModal: () => setShortcutsModalOpen((prev) => !prev),
+    onToggleSidebar: toggleSidebar,
+    onToggleTheme: toggleTheme,
+    onFocusSearch: focusSearch,
+    onEscape: () => {
+      setSupportModalOpen(false);
+      setShortcutsModalOpen(false);
+      setMobileOpen(false);
+    }
+  });
+
   const getThemeClass = (userRole: string) => {
     switch (userRole) {
       case 'HR': return 'earth-theme';
@@ -58,12 +86,23 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
   return (
     <div data-role={role} className={`app-shell ${themeClass} h-screen min-h-screen flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
-      {/* Fixed Enterprise Header at root level spanning full width */}
-      <EnterpriseHeader onToggleSidebar={toggleSidebar} onOpenHelp={() => setSupportModalOpen(true)} />
+      {/* Accessibility Skip-to-content Link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[99999] focus:px-4 focus:py-2.5 focus:bg-blue-600 focus:text-white focus:font-extrabold focus:text-xs focus:rounded-xl focus:shadow-2xl focus:outline-none focus:ring-2 focus:ring-white"
+      >
+        Skip to main content
+      </a>
+
+      {/* Fixed Sticky Enterprise Header at root level spanning full width */}
+      <EnterpriseHeader
+        onToggleSidebar={toggleSidebar}
+        onOpenHelp={() => setSupportModalOpen(true)}
+      />
 
       {/* Main Body Wrapper (Below Header) */}
       <div className="main-body flex-1 flex overflow-hidden w-full relative">
-        {/* Sleek Dynamic Modular Sidebar Navigation */}
+        {/* Sleek Dynamic Modular Sidebar Navigation & Mobile Menu */}
         <Sidebar
           collapsed={collapsed}
           setCollapsed={setCollapsed}
@@ -72,8 +111,12 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           onOpenSupport={() => setSupportModalOpen(true)}
         />
 
-        {/* Main Content Area: Content */}
-        <main className="app-main flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
+        {/* Main Content Area */}
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="app-main flex-1 overflow-y-auto p-4 md:p-8 space-y-6 focus:outline-none"
+        >
           {children}
         </main>
       </div>
@@ -82,16 +125,32 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
       <footer className="app-footer shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex items-center justify-between text-xs text-slate-400">
         <span>&copy; {new Date().getFullYear()} Workforce Analytics. All rights reserved.</span>
         <div className="flex items-center gap-4">
-          <span className="cursor-pointer hover:text-white transition-colors" onClick={() => setSupportModalOpen(true)}>Support</span>
+          <button
+            onClick={() => setShortcutsModalOpen(true)}
+            className="cursor-pointer hover:text-white transition-colors flex items-center gap-1.5"
+            title="Press ? for keyboard shortcuts"
+          >
+            <span>Shortcuts</span>
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 border border-slate-700 text-slate-300">?</kbd>
+          </button>
+          <span className="cursor-pointer hover:text-white transition-colors" onClick={() => setSupportModalOpen(true)}>Support & FAQs</span>
           <span>v1.0.0</span>
         </div>
       </footer>
 
+      {/* Cookie Consent Banner */}
+      <CookieBanner />
 
       {/* Support & IT Helpdesk Modal */}
       <SupportModal
         isOpen={supportModalOpen}
         onClose={() => setSupportModalOpen(false)}
+      />
+
+      {/* Keyboard Shortcuts Modal */}
+      <ShortcutsModal
+        isOpen={shortcutsModalOpen}
+        onClose={() => setShortcutsModalOpen(false)}
       />
     </div>
   );
