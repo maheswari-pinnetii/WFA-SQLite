@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
           { label: 'Attendance History', path: '/admin/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Shifts', path: '/admin/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Shift Timings', path: '/admin/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
           { label: 'Corrections', path: '/admin/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
           { label: 'Approvals', path: '/admin/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
         ],
@@ -205,7 +205,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
           { label: 'Attendance History', path: '/hr/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Shifts', path: '/hr/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Shift Timings', path: '/hr/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
           { label: 'Corrections', path: '/hr/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
           { label: 'Approvals', path: '/hr/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
         ],
@@ -304,7 +304,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Shifts',
         items: [
-          { label: 'Team Shifts', path: '/manager/shifts', icon: <Timer size={18} strokeWidth={2} className="text-teal-400" /> },
+          { label: 'Team Shift Timings', path: '/manager/shifts', icon: <Timer size={18} strokeWidth={2} className="text-teal-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
         ],
       },
       {
@@ -375,7 +375,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Shifts',
         items: [
-          { label: 'Team Shifts', path: '/team-lead/shifts', icon: <Timer size={18} strokeWidth={2} className="text-teal-400" /> },
+          { label: 'Team Shift Timings', path: '/team-lead/shifts', icon: <Timer size={18} strokeWidth={2} className="text-teal-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
         ],
       },
       {
@@ -419,9 +419,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
       {
-        category: 'Schedules',
+        category: 'Schedules & Shifts',
         items: [
-          { label: 'Shift Timings', path: '/employee/shifts', icon: <ClipboardList size={18} strokeWidth={2} className="text-teal-400" /> },
+          { 
+            label: 'Employee Shift Timings', 
+            path: '/employee/shifts', 
+            icon: <Timer size={18} strokeWidth={2} className="text-teal-400" />,
+            badge: { text: '09:00 - 18:00', variant: 'emerald' }
+          },
         ],
       },
       {
