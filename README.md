@@ -26,7 +26,32 @@ Built with **SQLite** as its single source of truth (supporting both local file-
 - **HR Operations**: Employee roster management, leave policies, statutory compliance, payroll reports, and shift assignments.
 - **Manager**: Departmental analytics, team attendance rosters, correction approvals, and productivity telemetry.
 - **Team Lead**: Sprint deliverables, task progress tracking, shift schedules, and team performance metrics.
-- **Employee (My Workspace)**: Live attendance check-in/out, assigned shift timings, leave requests, sprint deliverables, and personal attendance history.
+- **Employee (My Workspace)**: 9-Step daily workflow suite including live attendance check-in/out, assigned shift timings, leave requests, kudos appreciations, and attendance corrections.
+
+---
+
+## 📍 Corporate Hubs & Geofenced Locations
+
+The organization operates exclusively across three strategic office centers in India:
+1. **Bengaluru Hub** (`Stackly Tech Park, Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103` — `12.9716° N, 77.5946° E`): Global Engineering & System Architecture Campus.
+2. **Salem Hub** (`Stackly Operations Hub, Meyyanur Bypass Road, Salem, Tamil Nadu 636004` — `11.6643° N, 78.1460° E`): Regional Support & People Operations Center.
+3. **Hyderabad Hub** (`Stackly Cyber Towers, HITEC City, Madhapur, Hyderabad, Telangana 500081` — `17.4435° N, 78.3772° E`): Innovation & Cloud Engineering Park.
+
+---
+
+## 🧭 Employee Dashboard 9-Step Workflow Suite
+
+The Employee Workspace is organized into a sequential, interactive 9-step daily routine with a sticky quick-navigation bar:
+
+1. **Step 01 • Daily Work Station & Check-In**: Profile summary, clearance badges, quick actions bar, and live geofenced biometric punch widget.
+2. **Step 02 • Productivity & Adherence KPIs**: Real-time hours worked today, weekly target progress (40h goal), lifetime adherence %, overtime tracking (1.5x tier), and timesheet submission lock.
+3. **Step 03 • Shift Schedule & Monthly Attendance Calendar**: 7-day upcoming roster preview, assigned duty timings (`09:00 AM – 06:00 PM`), shift swap request modal, and monthly attendance calendar with visual status dots (🟢 Present, 🟡 Holiday, 🟣 Leave, ⚪ Weekend).
+4. **Step 04 • Public Holidays & Leave Entitlements**: 2026 Gazetted corporate holidays, PTO Quotas with animated percentage progress bars (CL, SL, EL, Comp-Offs), and direct links to `/employee/leave` and `/employee/holidays`.
+5. **Step 05 • Leadership Accolades & Kudos**: Direct praise from Department Manager and Team Lead, live reactions (👏 Claps, ❤️ Hearts, 🚀 Rockets), and interactive thank-you reply modal.
+6. **Step 06 • Shift Adherence & Performance Analytics**: Weekly Regular vs Overtime multi-bar chart and Monthly Attendance distribution donut breakdown.
+7. **Step 07 • Team Live Presence & Timesheet Submissions**: Real-time colleague status across Bengaluru, Salem, and Hyderabad, monthly timesheet lock, and live activity stream.
+8. **Step 08 • Sprint Deliverables & Task Board**: Sprint 24 deliverables with priority badges, due dates, and status toggles (`TODO`, `IN_PROGRESS`, `COMPLETED`).
+9. **Step 09 • Audit Logs & Attendance Corrections**: Daily check-in / check-out history table, CSV export, and Punch Correction Request Desk for Manager/HR audit.
 
 ---
 
@@ -37,137 +62,54 @@ Stackly adheres to the standard enterprise shift formula:
 $$\mathbf{9\text{ Hours Shift}} = \mathbf{8\text{ Hours Net Work}} + \mathbf{1\text{ Hour Break (60 Mins)}}$$
 
 ### Corporate Shift Roster Registry:
-| Shift Name | Shift Code | Scheduled Hours | Working Hours | Break Allowance | Grace Window | Target Departments |
+| Shift Name | Shift Code | Scheduled Hours | Working Hours | Break Allowance | Grace Window | Target Hubs |
 | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
-| **General Day Shift** | `GS` | 09:00 AM – 06:00 PM | 8.0 Hours | 1.0 Hour (60m) | 15 Mins (09:15 AM) | Engineering, Product, Marketing |
-| **Morning Shift** | `MS` | 07:00 AM – 04:00 PM | 8.0 Hours | 1.0 Hour (60m) | 15 Mins (07:15 AM) | Customer Support, Tier-1 Ops |
-| **US / Night Core Shift** | `NS` | 06:30 PM – 03:30 AM | 8.0 Hours | 1.0 Hour (60m) | 15 Mins (06:45 PM) | Global Sales, Cloud Infra |
-
-- **Real-Time Synchronization**: When HR or Managers update shift allocations, employee dashboards dynamically reflect today's work schedule (`SCHEDULED TO WORK TODAY` vs `WEEKEND OFF`).
-- **Shift Swap Requests**: Employees can submit formal shift change requests directly from their dashboard with automated approval routing.
+| **General Day Shift** | `GS` | 09:00 AM – 06:00 PM | 8.0 Hours | 1.0 Hour (60m) | 15 Mins (09:15 AM) | Bengaluru, Salem, Hyderabad |
+| **Morning Shift** | `MS` | 07:00 AM – 04:00 PM | 8.0 Hours | 1.0 Hour (60m) | 15 Mins (07:15 AM) | Salem Support Hub |
+| **US / Night Core Shift** | `NS` | 06:30 PM – 03:30 AM | 8.0 Hours | 1.0 Hour (60m) | 15 Mins (06:45 PM) | Hyderabad Cloud Center |
 
 ---
 
-## 🌴 Absence & Leave Management System
+## 🌴 Absence & Statutory Public Holidays
 
-A multi-tier statutory leave policy engine supporting:
+### Leave Types & Quotas:
 - **Casual Leave (CL)**: 12 days / year (Personal matters and short emergencies)
 - **Sick Leave (SL)**: 12 days / year (Medical recovery with doctor notes for >2 days)
 - **Earned Leave (EL)**: 18 days / year (Vacations, carryover up to 15 days)
 - **Compensatory Off (Comp-Off)**: Earned credits for weekend / critical deployment work
 - **Maternity & Paternity Leave**: Statutory 180-day paid maternity and 15-day paternity leave
-- **Leave Without Pay (LWP)**: Unpaid leave quota when paid balances are exhausted
-- **Bereavement Leave**: 5 days compassionate leave
 
-### 📅 Public Holidays (CY 2026)
-Includes 10 mandatory statutory paid holidays with countdowns and calendar visualization (Gandhi Jayanti, Dussehra, Diwali, Christmas, New Year's Day, etc.).
-
----
-
-## 🛡️ Enterprise Zero-Trust Security Suite
-
-The backend API is safeguarded by defense-in-depth security middleware:
-1. **Open Redirect Defense**: Strict whitelist validation (`isValidRedirectUrl`) on all redirect routes.
-2. **Prototype Pollution & Deserialization Guard**: Sanitizes payload prototypes against malicious `__proto__` and `constructor` injections.
-3. **Mass Assignment Prevention**: Strips sensitive privileged fields (`role`, `isSuperAdmin`, `permissions`) from user updates.
-4. **Webhook Replay Protection**: Nonce verification and timestamp thresholding for third-party integrations.
-5. **Request Timeout Guard**: 30-second circuit breaker protecting database thread pools.
-6. **MFA & Multi-Tenant Isolation**: TOTP 2FA verification with cryptographically isolated tenant identifiers.
+### Public Holidays API & Calendar (CY 2026):
+- Dedicated route `/employee/holidays` with full 2026 calendar data.
+- Backend API endpoints: `GET /v1/holidays` and `GET /v1/attendance/holidays`.
+- CSV download and Google / Apple / Outlook `.iCal` calendar export.
 
 ---
 
-## 🛠️ Tech Stack
+## 🛡️ Enterprise Security Matrix
 
-- **Frontend**: React 18, TypeScript, Vite, Redux Toolkit, Recharts, Lucide Icons, Glassmorphic CSS Design System
-- **Backend**: Node.js, Express, tsx, JWT Auth, TOTP MFA, Helmet, CORS
-- **Database**: SQLite (`better-sqlite3` local engine & `@sqlitecloud/drivers` remote cluster)
-- **Testing**: Vitest (73 Unit & Integration Tests Passing), Playwright E2E
-
----
-
-## ⚡ Quick Start
-
-### 1. Installation
-```bash
-npm install
-```
-
-### 2. Environment Configuration
-Verify or populate `.env`:
-```env
-PORT=5001
-NODE_ENV=development
-JWT_SECRET=your_jwt_secret_key_minimum_256_bits
-JWT_REFRESH_SECRET=your_refresh_secret_key
-VITE_API_BASE_URL=http://localhost:5001
-```
-
-### 3. Database Initialization & Seeding
-```bash
-npm run seed
-```
-
-### 4. Start Development Server
-```bash
-npm run dev
-```
-
-The application will be served locally at:
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5001
+| Threat Vector | Attack Scenario | Implemented Defense Layer |
+| :--- | :--- | :--- |
+| **API Keys & Secrets** | Leaked tokens / secrets forgery | Server-side `.env`, `.gitignore` exclusion, zero client-side secret exposure |
+| **Authentication** | Brute-force, Credential Stuffing, Session Hijacking | Argon2id password hashing, sliding JWT sessions, HttpOnly cookies, TOTP 2FA |
+| **Input Validation** | SQL Injection, XSS, Prototype Pollution | Prepared SQL statements, DOM sanitization, prototype pollution sanitizer |
+| **IDOR & Multi-Tenancy** | Cross-tenant or unauthorized data access | Multi-tenant tenant scoping, granular RBAC permission guards (`RoleGuard`) |
+| **Page Navigation Restrictions** | Accessing unauthorized routes | Dynamic sidebar role scoping (restricted pages hidden from menu) + fallback guards |
+| **Infrastructure Security** | SSRF, Open Redirects, Webhook Replay | URL whitelist validator, nonce replay protection, request timeout circuit breakers |
 
 ---
 
-## 🧪 Testing & Verification
+## 🧪 Verification & Testing
 
-Run the comprehensive unit and integration test suite:
 ```bash
+# Run unit & integration test suite (73 / 73 passing)
 npm test
-```
-*Output: 7 test files, 73/73 tests passing (100% pass rate).*
 
-To build for production:
-```bash
+# Build production bundle
 npm run build
 ```
 
 ---
 
-## 🛡️ Default Role Credentials
-
-All accounts share the default development password: `StacklyWFA2026!`
-
-| Role | Email | Name | Default Shift |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@thestackly.com` | Sarah Connor | General Shift (09:00 - 18:00) |
-| **HR** | `hr@thestackly.com` | Elena Rostova | General Shift (09:00 - 18:00) |
-| **Manager** | `manager@thestackly.com` | David Sterling | General Shift (09:00 - 18:00) |
-| **Team Lead** | `lead@thestackly.com` | Marcus Vance | General Shift (09:00 - 18:00) |
-| **Employee** | `employee@thestackly.com` | Alex Mercer | General Shift (09:00 - 18:00) |
-
----
-
-## Developed By
-
-<div align="center">
-
-### Developed by **Maheswari Pinneti**
-
-**Frontend Developer at Stackly**
-
-<br />
-
-<img src="public/assets/images/logo.png" alt="Stackly Company Logo" width="180" />
-
-<br />
-<br />
-
-**Workforce Analytics Platform**
-
-Built with React, TypeScript, Express.js, SQLite, REST APIs, RBAC, and modern workforce analytics technologies.
-
----
-
-**© 2026 Maheswari Pinneti | Stackly**
-
-</div>
+## 📄 License
+MIT License. © 2026 Stackly Workforce Analytics.
