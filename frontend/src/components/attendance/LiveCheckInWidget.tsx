@@ -185,7 +185,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
   };
 
   return (
-    <div className="glass-panel p-6 space-y-6 bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl text-[var(--text-primary)] font-sans">
+    <div className="glass-panel p-6 space-y-6 bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl text-[var(--text-primary)] font-sans rounded-3xl">
       
       {/* Header and Sync States */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-color)] pb-4">
