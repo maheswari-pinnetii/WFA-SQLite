@@ -5,6 +5,7 @@ import PasswordField from './PasswordField';
 import AuthHeader from './AuthHeader';
 import AuthFooter from './AuthFooter';
 import { RoleType } from '../../theme/roles';
+import { AccountDetector } from '../../shared/components/AccountDetector';
 
 interface LoginFormProps {
   selectedRole: RoleType;
@@ -354,6 +355,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ selectedRole, onRoleChange
               required
               className="auth-input"
             />
+            <div className="mt-2">
+              <AccountDetector email={email} />
+            </div>
           </div>
 
           <div className="auth-form-group">

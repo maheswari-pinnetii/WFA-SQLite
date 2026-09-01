@@ -5,15 +5,29 @@ import { Sidebar } from './components/Sidebar';
 import { SupportModal } from '../components/SupportModal';
 import { ShortcutsModal } from '../components/ShortcutsModal';
 import { CookieBanner } from '../components/CookieBanner';
+import { OnboardingTourModal } from '../components/OnboardingTourModal';
+import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
+import { BetaFeedbackModal } from '../components/BetaFeedbackModal';
+import { PrivacySettingsModal } from '../components/PrivacySettingsModal';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTheme } from '../../design-system/theme/theme';
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [betaFeedbackOpen, setBetaFeedbackOpen] = useState(false);
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
+
+  useEffect(() => {
+    const completed = localStorage.getItem('has_completed_onboarding');
+    if (!completed) {
+      setOnboardingOpen(true);
+    }
+  }, []);
 
   // Initialize collapsed state from localStorage (default to false / expanded on desktop)
   const [collapsed, setCollapsed] = useState<boolean>(() => {
@@ -119,9 +133,27 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
       </div>
 
       {/* Small footprint dashboard footer spanning full width */}
-      <footer className="app-footer shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex items-center justify-between text-xs text-slate-400">
+      <footer className="app-footer shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
         <span>&copy; {new Date().getFullYear()} Workforce Analytics. All rights reserved.</span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
+          <button
+            onClick={() => setOnboardingOpen(true)}
+            className="cursor-pointer hover:text-blue-400 transition-colors"
+          >
+            Product Tour
+          </button>
+          <button
+            onClick={() => setBetaFeedbackOpen(true)}
+            className="cursor-pointer hover:text-purple-400 transition-colors flex items-center gap-1 font-semibold"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" /> Beta Feedback
+          </button>
+          <button
+            onClick={() => setPrivacyModalOpen(true)}
+            className="cursor-pointer hover:text-white transition-colors"
+          >
+            Privacy Settings
+          </button>
           <button
             onClick={() => setShortcutsModalOpen(true)}
             className="cursor-pointer hover:text-white transition-colors flex items-center gap-1.5"
@@ -131,12 +163,35 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
             <kbd className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 border border-slate-700 text-slate-300">?</kbd>
           </button>
           <span className="cursor-pointer hover:text-white transition-colors" onClick={() => setSupportModalOpen(true)}>Support & FAQs</span>
-          <span>v1.0.0</span>
+          <span className="text-slate-500 font-mono">v1.0.0</span>
         </div>
       </footer>
 
+      {/* Real-time Network Connectivity Status */}
+      <NetworkStatusBanner />
+
       {/* Cookie Consent Banner */}
       <CookieBanner />
+
+      {/* Onboarding Interactive Product Tour */}
+      <OnboardingTourModal
+        isOpen={onboardingOpen}
+        onClose={() => setOnboardingOpen(false)}
+        userName={user?.name}
+        userRole={role}
+      />
+
+      {/* Beta Feedback & Issue Reporter */}
+      <BetaFeedbackModal
+        isOpen={betaFeedbackOpen}
+        onClose={() => setBetaFeedbackOpen(false)}
+      />
+
+      {/* Privacy & Data Governance Modal */}
+      <PrivacySettingsModal
+        isOpen={privacyModalOpen}
+        onClose={() => setPrivacyModalOpen(false)}
+      />
 
       {/* Support & IT Helpdesk Modal */}
       <SupportModal
