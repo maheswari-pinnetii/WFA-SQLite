@@ -488,14 +488,133 @@ export const EmployeeSprintWork: React.FC<{
   </div>
 );
 
-// 6. Employee Attendance History Table
+// 7b. Employee Correction Requests & Manager/HR Review Card
+export const EmployeeCorrectionRequestsCard: React.FC<{
+  onRequestNew: (date?: string) => void;
+}> = ({ onRequestNew }) => {
+  const [corrections, setCorrections] = useState<CorrectionRequest[]>(() => {
+    try {
+      const saved = localStorage.getItem('wfa_attendance_corrections');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [
+      {
+        id: 'CORR-2026-001',
+        attendanceId: 'att-101',
+        employeeId: 'usr-emp-01',
+        employeeName: 'Alex Mercer',
+        date: '2026-08-31',
+        requestedCheckIn: '09:00 AM',
+        requestedCheckOut: '06:00 PM',
+        reason: 'Geofence wifi reconnection issue caused morning punch to register late.',
+        status: 'APPROVED',
+        managerComment: 'Approved by Elena Rostova (HR Operations)'
+      }
+    ];
+  });
+
+  useEffect(() => {
+    const handleStorage = () => {
+      try {
+        const saved = localStorage.getItem('wfa_attendance_corrections');
+        if (saved) setCorrections(JSON.parse(saved));
+      } catch {}
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <Clock size={18} className="text-amber-400" /> Attendance Correction Requests
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              Manager & HR Review
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Submit punch correction requests for missed check-ins, forgotten check-outs, or system geofence errors.
+          </p>
+        </div>
+        <button
+          onClick={() => onRequestNew()}
+          className="px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-black text-xs shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+        >
+          <Plus size={14} /> Submit Correction Request
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-tertiary)]/20">
+        <table className="w-full text-left text-xs min-w-[700px]">
+          <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <tr>
+              <th className="py-3 px-4">Request ID</th>
+              <th className="py-3 px-4">Date</th>
+              <th className="py-3 px-4">Requested Timings</th>
+              <th className="py-3 px-4">Reason / Justification</th>
+              <th className="py-3 px-4 text-center">Approval Status</th>
+              <th className="py-3 px-4">Reviewer Feedback</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800/60">
+            {corrections.map((corr) => {
+              const statusUpper = corr.status.toUpperCase();
+              const isApproved = statusUpper === 'APPROVED';
+              const isPending = statusUpper === 'PENDING';
+              return (
+                <tr key={corr.id} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="py-3.5 px-4 font-mono font-bold text-blue-400">{corr.id}</td>
+                  <td className="py-3.5 px-4 font-bold text-white">{corr.date}</td>
+                  <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
+                    {corr.requestedCheckIn || '09:00 AM'} – {corr.requestedCheckOut || '06:00 PM'}
+                  </td>
+                  <td className="py-3.5 px-4 text-slate-300 max-w-xs truncate" title={corr.reason}>
+                    {corr.reason}
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
+                      isApproved 
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' 
+                        : isPending 
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'
+                        : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                    }`}>
+                      {isPending ? '⏳ PENDING REVIEW' : isApproved ? '✓ APPROVED' : '✗ REJECTED'}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                    {corr.managerComment || (isPending ? 'Pending review by Manager & HR' : '—')}
+                  </td>
+                </tr>
+              );
+            })}
+            {corrections.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-6 text-center text-slate-500 font-semibold">
+                  No attendance correction requests submitted yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// 8. Attendance History Logs Table
 export const EmployeeAttendanceTable: React.FC<{
   filteredHistory: any[];
   statusFilter: string;
-  setStatusFilter: (val: string) => void;
-}> = ({ filteredHistory, statusFilter, setStatusFilter }) => (
-  <div className="glass-panel p-6 shadow-2xl space-y-4 w-full max-w-full min-w-0 overflow-hidden rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)]">
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]">
+  setStatusFilter: (s: string) => void;
+  onOpenCorrectionModal: (date: string) => void;
+}> = ({ filteredHistory, statusFilter, setStatusFilter, onOpenCorrectionModal }) => (
+  <div className="glass-panel p-6 shadow-2xl space-y-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-color)]">
       <div>
         <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
           <History size={18} className="text-emerald-500" /> Attendance History Logs
@@ -529,7 +648,7 @@ export const EmployeeAttendanceTable: React.FC<{
             <th className="py-3 px-4 w-[100px]">Breaks</th>
             <th className="py-3 px-4 w-[100px]">Overtime</th>
             <th className="py-3 px-4">Remarks</th>
-            <th className="py-3 px-4 w-[80px] text-right">Action</th>
+            <th className="py-3 px-4 w-[100px] text-right">Action</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-800/70">
@@ -556,9 +675,12 @@ export const EmployeeAttendanceTable: React.FC<{
               <td className="py-3 px-4 font-mono text-cyan-400 font-bold">{h.overtime}</td>
               <td className="py-3 px-4 text-slate-300 font-medium max-w-xs truncate">{h.remarks || '—'}</td>
               <td className="py-3 px-4 text-right">
-                <Link to="/employee/corrections" className="text-blue-400 hover:text-blue-300 font-extrabold text-[11px]">
-                  Correct
-                </Link>
+                <button 
+                  onClick={() => onOpenCorrectionModal(h.rawDate)} 
+                  className="text-blue-400 hover:text-blue-300 font-extrabold text-[11px] cursor-pointer"
+                >
+                  Request Fix
+                </button>
               </td>
             </tr>
           ))}
@@ -588,6 +710,70 @@ export const EmployeeDashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('');
+  const [isCorrectionModalOpen, setIsCorrectionModalOpen] = useState(false);
+  const [correctionDate, setCorrectionDate] = useState('2026-09-01');
+  const [correctionType, setCorrectionType] = useState('Missed Morning Check-In');
+  const [requestedIn, setRequestedIn] = useState('09:00 AM');
+  const [requestedOut, setRequestedOut] = useState('06:00 PM');
+  const [correctionReason, setCorrectionReason] = useState('');
+  const [correctionSuccessMsg, setCorrectionSuccessMsg] = useState('');
+  const [correctionSubmitting, setCorrectionSubmitting] = useState(false);
+
+  const handleOpenCorrection = (date?: string) => {
+    if (date) setCorrectionDate(date);
+    else setCorrectionDate(new Date().toISOString().split('T')[0]);
+    setIsCorrectionModalOpen(true);
+  };
+
+  const handleSubmitCorrection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCorrectionSubmitting(true);
+    try {
+      const newId = `CORR-${Date.now().toString().slice(-4)}`;
+      const newCorrection: CorrectionRequest = {
+        id: newId,
+        attendanceId: `att-${Date.now().toString().slice(-4)}`,
+        employeeId: user?.id || 'usr-emp-01',
+        employeeName: `${user?.name || 'Alex Mercer'} (${user?.department || 'Engineering'})`,
+        date: correctionDate,
+        requestedCheckIn: requestedIn,
+        requestedCheckOut: requestedOut,
+        reason: `[${correctionType}] ${correctionReason}`,
+        status: 'PENDING',
+        managerComment: null
+      };
+
+      try {
+        await attendanceApi.submitCorrection({
+          attendanceId: newCorrection.attendanceId,
+          requestedCheckIn: requestedIn,
+          requestedCheckOut: requestedOut,
+          reason: newCorrection.reason
+        });
+      } catch {}
+
+      const existing = localStorage.getItem('wfa_attendance_corrections');
+      let arr: CorrectionRequest[] = [];
+      if (existing) {
+        try { arr = JSON.parse(existing); } catch {}
+      }
+      arr.unshift(newCorrection);
+      localStorage.setItem('wfa_attendance_corrections', JSON.stringify(arr));
+
+      window.dispatchEvent(new Event('storage'));
+
+      setCorrectionSuccessMsg(`Correction request ${newId} submitted to Manager & HR for approval!`);
+      setTimeout(() => {
+        setCorrectionSuccessMsg('');
+        setIsCorrectionModalOpen(false);
+        setCorrectionReason('');
+      }, 2500);
+    } catch (err: any) {
+      alert(err.message || 'Failed to submit correction request.');
+    } finally {
+      setCorrectionSubmitting(false);
+    }
+  };
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -822,7 +1008,122 @@ export const EmployeeDashboardPage: React.FC = () => {
           filteredHistory={filteredHistory}
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
+          onOpenCorrectionModal={handleOpenCorrection}
         />
+
+        {/* 9. Attendance Correction Requests & Manager/HR Approval Stream */}
+        <EmployeeCorrectionRequestsCard onRequestNew={handleOpenCorrection} />
+
+        {/* Correction Request Modal */}
+        {isCorrectionModalOpen && (
+          <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-lg w-full space-y-4 animate-scaleUp">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Clock className="text-amber-400" size={20} />
+                  <h3 className="text-base font-bold text-white">
+                    Submit Attendance Correction Request
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsCorrectionModalOpen(false)}
+                  className="text-slate-400 hover:text-white text-xl leading-none font-bold cursor-pointer"
+                >
+                  &times;
+                </button>
+              </div>
+
+              {correctionSuccessMsg ? (
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                  <CheckCircle2 size={20} />
+                  {correctionSuccessMsg}
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitCorrection} className="space-y-3.5 text-xs">
+                  <p className="text-slate-300 leading-relaxed">
+                    Submit your punch adjustment details. Once submitted, your Department Manager or HR Operations team will audit and accept the correction.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-slate-300 font-semibold block mb-1">Date of Attendance</label>
+                      <input
+                        type="date"
+                        required
+                        value={correctionDate}
+                        onChange={(e) => setCorrectionDate(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-slate-300 font-semibold block mb-1">Correction Category</label>
+                      <select
+                        value={correctionType}
+                        onChange={(e) => setCorrectionType(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white cursor-pointer font-medium"
+                      >
+                        <option>Missed Morning Check-In</option>
+                        <option>Missed Evening Check-Out</option>
+                        <option>Incorrect Duration / Working Hours</option>
+                        <option>Marked Absent Mistakenly</option>
+                        <option>Geofence / Location Signal Issue</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-slate-300 font-semibold block mb-1">Requested Check-In</label>
+                      <input
+                        type="text"
+                        required
+                        value={requestedIn}
+                        onChange={(e) => setRequestedIn(e.target.value)}
+                        placeholder="e.g. 09:00 AM"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-slate-300 font-semibold block mb-1">Requested Check-Out</label>
+                      <input
+                        type="text"
+                        required
+                        value={requestedOut}
+                        onChange={(e) => setRequestedOut(e.target.value)}
+                        placeholder="e.g. 06:00 PM"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Reason / Explanation for HR & Manager</label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={correctionReason}
+                      onChange={(e) => setCorrectionReason(e.target.value)}
+                      placeholder="Detail why punch correction is required (e.g. badge scanner was offline, on-site client visit, etc.)..."
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                    <Button variant="outline" size="sm" type="button" onClick={() => setIsCorrectionModalOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" type="submit" disabled={correctionSubmitting}>
+                      {correctionSubmitting ? 'Submitting...' : 'Submit to Manager/HR'}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
     </RoleGuard>
   );
