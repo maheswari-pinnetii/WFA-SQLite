@@ -99,6 +99,35 @@ $$\mathbf{9\text{ Hours Shift}} = \mathbf{8\text{ Hours Net Work}} + \mathbf{1\t
 
 ---
 
+## 🍪 Cookie & Session Lifecycle Architecture
+
+Stackly employs a dual-token zero-trust session model designed to eliminate XSS token theft and protect against CSRF exploits:
+
+```
+[ Client Browser ]                              [ Backend API (Port 5001) ]
+       │                                                     │
+       ├──── POST /v1/auth/login ───────────────────────────>┤
+       │<─── Set-Cookie: refreshToken (HttpOnly, SameSite) ──┤ (Valid: 7 Days)
+       │<─── Response: { token: "15m-jwt-access-token" } ────┤
+       │                                                     │
+       ├──── GET /v1/attendance (Bearer AccessToken) ───────>┤
+       │<─── 401 Unauthorized (Token Expired) ───────────────┤
+       │                                                     │
+       ├──── POST /v1/auth/refresh (Cookie Auto-Attached) ──>┤
+       │<─── Set-Cookie: rotatedRefreshToken (HttpOnly) ─────┤
+       │<─── Response: { token: "new-15m-jwt-token" } ───────┤
+       │                                                     │
+       ├──── Retries original request transparently ─────────>┤ (Zero User Interruption)
+```
+
+### Security Attributes Enforced:
+- **`httpOnly: true`**: JavaScript cannot read the token via `document.cookie`, preventing cross-site scripting (XSS) credential extraction.
+- **`sameSite: 'lax'`**: Guarantees cookies are only dispatched from trusted navigation contexts, protecting against Cross-Site Request Forgery (CSRF).
+- **`secure: process.env.NODE_ENV === 'production'`**: Strict requirement for SSL/TLS encrypted HTTPS delivery in production deployments.
+- **`Token Rotation & Invalidation`**: Each silent refresh rotates the cryptographic refresh hash, and logout destroys both the cookie (`res.clearCookie`) and database session.
+
+---
+
 ## 🧪 Verification & Testing
 
 ```bash
