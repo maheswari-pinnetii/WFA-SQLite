@@ -127,3 +127,13 @@ export const getAuditLogs = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+export const getPublicHolidays = async (req, res) => {
+  try {
+    const data = await attendanceService.getPublicHolidays(getOrganizationId(req));
+    return res.json({ success: true, data });
+  } catch (err) {
+    console.error('getPublicHolidays Error:', err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

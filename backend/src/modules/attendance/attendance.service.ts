@@ -589,6 +589,143 @@ export class AttendanceService {
 
     return AuditLog.find(query);
   }
+
+  async getPublicHolidays(orgId: string): Promise<any[]> {
+    return [
+      {
+        id: 'hol-1',
+        name: "New Year's Day",
+        date: '2026-01-01',
+        day: 'Thursday',
+        quarter: 'Q1',
+        type: 'Mandatory',
+        isLongWeekend: false,
+        region: 'Global / All Locations',
+        description: 'Official corporate non-working day celebrating the start of the year.'
+      },
+      {
+        id: 'hol-2',
+        name: 'Martin Luther King Jr. Day',
+        date: '2026-01-19',
+        day: 'Monday',
+        quarter: 'Q1',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'US / Global HQ',
+        description: 'Federal holiday honoring civil rights leader Martin Luther King Jr.'
+      },
+      {
+        id: 'hol-3',
+        name: "Presidents' Day",
+        date: '2026-02-16',
+        day: 'Monday',
+        quarter: 'Q1',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'US / Global HQ',
+        description: 'Federal holiday honoring George Washington and American leadership.'
+      },
+      {
+        id: 'hol-4',
+        name: 'Spring Equinox / Floating Holiday 1',
+        date: '2026-03-20',
+        day: 'Friday',
+        quarter: 'Q1',
+        type: 'Floating / Optional',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Optional floating holiday for personal or cultural observances.'
+      },
+      {
+        id: 'hol-5',
+        name: 'Memorial Day',
+        date: '2026-05-25',
+        day: 'Monday',
+        quarter: 'Q2',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'National day of remembrance honoring fallen service members.'
+      },
+      {
+        id: 'hol-6',
+        name: 'Juneteenth National Independence Day',
+        date: '2026-06-19',
+        day: 'Friday',
+        quarter: 'Q2',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'US / Global HQ',
+        description: 'Commemorating the emancipation of enslaved African Americans.'
+      },
+      {
+        id: 'hol-7',
+        name: 'Independence Day (Observed)',
+        date: '2026-07-03',
+        day: 'Friday',
+        quarter: 'Q3',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Celebrating American Independence with a mandatory office shutdown.'
+      },
+      {
+        id: 'hol-8',
+        name: 'Labor Day',
+        date: '2026-09-07',
+        day: 'Monday',
+        quarter: 'Q3',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Honoring the American labor movement and national workforce.'
+      },
+      {
+        id: 'hol-9',
+        name: 'Autumn Harvest / Floating Holiday 2',
+        date: '2026-10-23',
+        day: 'Friday',
+        quarter: 'Q4',
+        type: 'Floating / Optional',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Optional floating holiday for personal or cultural observances.'
+      },
+      {
+        id: 'hol-10',
+        name: 'Thanksgiving Day',
+        date: '2026-11-26',
+        day: 'Thursday',
+        quarter: 'Q4',
+        type: 'Mandatory',
+        isLongWeekend: false,
+        region: 'Global / All Locations',
+        description: 'National holiday of gratitude and family celebration.'
+      },
+      {
+        id: 'hol-11',
+        name: 'Day After Thanksgiving (Black Friday)',
+        date: '2026-11-27',
+        day: 'Friday',
+        quarter: 'Q4',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Company-wide holiday creating a 4-Day Thanksgiving Long Weekend!'
+      },
+      {
+        id: 'hol-12',
+        name: 'Christmas Day',
+        date: '2026-12-25',
+        day: 'Friday',
+        quarter: 'Q4',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Global holiday celebration (3-Day Long Weekend).'
+      }
+    ];
+  }
 }
 
 export const attendanceService = new AttendanceService();

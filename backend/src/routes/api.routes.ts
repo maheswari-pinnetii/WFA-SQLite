@@ -104,6 +104,8 @@ router.post('/attendance/resume', authenticateToken, enforceScope, attendanceCon
 router.post('/attendance/check-out', authenticateToken, enforceScope, attendanceController.checkOut);
 router.get('/attendance/records', authenticateToken, enforceScope, attendanceController.getRecords);
 router.get('/attendance/shifts', authenticateToken, attendanceController.getShifts);
+router.get('/attendance/holidays', authenticateToken, attendanceController.getPublicHolidays);
+router.get('/holidays', authenticateToken, attendanceController.getPublicHolidays);
 router.get('/attendance/audit-logs', authenticateToken, attendanceController.getAuditLogs);
 
 // Persisted leave and task workflows
