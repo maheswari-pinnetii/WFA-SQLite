@@ -57,14 +57,23 @@ const isConnectionError = (err: any): boolean => {
   if (!err) return false;
   const msg = (err.message || '').toLowerCase();
   return (
-    msg.includes('connection unavailable') ||
+    msg.includes('connection') ||
+    msg.includes('unavailable') ||
     msg.includes('disconnected') ||
     msg.includes('paused') ||
     msg.includes('inactive') ||
     msg.includes('closed by the remote host') ||
+    msg.includes('socket') ||
+    msg.includes('tls') ||
+    msg.includes('timeout') ||
+    msg.includes('timed out') ||
+    msg.includes('econnrefused') ||
+    msg.includes('etimedout') ||
+    msg.includes('not connected') ||
     err.errorCode === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
     err.code === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
-    err.errorCode === '10010'
+    err.errorCode === '10010' ||
+    err.name === 'SQLiteCloudError'
   );
 };
 
