@@ -51,6 +51,7 @@ import { Profile } from '../../features/employee/pages/Profile';
 import { MyAttendance } from '../../features/employee/pages/MyAttendance';
 import { MyPerformance } from '../../features/employee/pages/MyPerformance';
 import { EmployeeRequestsPage } from '../../features/employee/pages/EmployeeRequestsPage';
+import { AbsenceManagementPage } from '../../features/employee/pages/AbsenceManagementPage';
 import { MyGoalsPage } from '../../features/employee/pages/MyGoalsPage';
 import { PayslipsPage } from '../../features/employee/pages/PayslipsPage';
 
@@ -242,7 +243,9 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/me/dashboard" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeDashboard /></RoleGuard>} />
                 <Route path="/me/profile" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
                 <Route path="/me/attendance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><MyAttendance /></RoleGuard>} />
-                <Route path="/me/leave" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
+                <Route path="/me/leave" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><AbsenceManagementPage /></RoleGuard>} />
+                <Route path="/me/absence" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><AbsenceManagementPage /></RoleGuard>} />
+                <Route path="/me/requests" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
                 <Route path="/me/performance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><MyPerformance /></RoleGuard>} />
                 <Route path="/me/notifications" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><EmployeeDashboard /></RoleGuard>} />
 
@@ -257,7 +260,9 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/employee/skills" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><SkillOverviewPage /></RoleGuard>} />
                 <Route path="/employee/skills-coverage" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><SkillCoveragePage /></RoleGuard>} />
                 <Route path="/employee/skills-gaps" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><SkillGapsPage /></RoleGuard>} />
-                <Route path="/employee/leave" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
+                <Route path="/employee/leave" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><AbsenceManagementPage /></RoleGuard>} />
+                <Route path="/employee/absence" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><AbsenceManagementPage /></RoleGuard>} />
+                <Route path="/employee/requests" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
                 <Route path="/employee/performance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><MyPerformance /></RoleGuard>} />
                 <Route path="/employee/goals" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><MyGoalsPage /></RoleGuard>} />
                 <Route path="/employee/payslips" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.ADMIN]}><PayslipsPage /></RoleGuard>} />

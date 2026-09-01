@@ -24,6 +24,7 @@ import {
   Network,
   Globe,
   Calendar,
+  CalendarDays,
   Timer,
   CheckSquare,
   ShieldAlert,
@@ -401,9 +402,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
       {
-        category: 'Attendance Management',
+        category: 'Time & Absence',
         items: [
           { label: 'My Attendance', path: '/employee/attendance', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
+          { label: 'Leave & Absence', path: '/employee/leave', icon: <CalendarDays size={18} strokeWidth={2} className="text-emerald-400" />, badge: { text: 'New', variant: 'emerald' } },
         ],
       },
       {
