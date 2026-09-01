@@ -47,7 +47,7 @@ export const AttendanceCalendarView: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6 shadow-2xl font-sans text-[var(--text-primary)] space-y-6">
+    <div className="glass-panel w-full h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6 shadow-2xl font-sans text-[var(--text-primary)] flex flex-col justify-between space-y-6">
       
       {/* Calendar Controls */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

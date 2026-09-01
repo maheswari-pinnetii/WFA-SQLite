@@ -84,7 +84,7 @@ export const EmployeeAttendanceTable: React.FC<{
   statusFilter: string;
   setStatusFilter: (val: string) => void;
 }> = ({ filteredHistory, statusFilter, setStatusFilter }) => (
-  <div className="glass-panel p-6 shadow-2xl space-y-4 w-full max-w-full min-w-0 overflow-hidden">
+  <div className="glass-panel p-6 shadow-2xl space-y-4 w-full max-w-full min-w-0 overflow-hidden rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)]">
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-color)]">
       <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
         <ClipboardList size={18} className="text-emerald-500" /> Attendance History
@@ -158,43 +158,56 @@ export const EmployeeAttendanceTable: React.FC<{
 
 // 4b. Leave Balance Card
 export const LeaveBalanceCard: React.FC = () => (
-  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)]">
+  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
     <div className="space-y-4">
-      <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-        <Layers size={18} className="text-purple-500" /> Your leave balance
-      </h3>
-      <div className="space-y-3 text-xs text-[var(--text-secondary)]">
-        <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/60">
-          <span className="font-semibold text-[var(--text-muted)]">Casual Leave</span>
-          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">2 / 2</span>
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+        <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+          <Layers size={18} className="text-purple-500" /> Your leave balance
+        </h3>
+        <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider bg-[var(--bg-tertiary)] px-2.5 py-1 rounded-full border border-[var(--border-color)]">
+          CY 2026
+        </span>
+      </div>
+      <div className="space-y-2 text-xs text-[var(--text-secondary)]">
+        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)]/40 hover:bg-[var(--bg-hover)] transition-colors">
+          <span className="font-semibold text-[var(--text-secondary)]">Casual Leave</span>
+          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-card)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">2 / 2</span>
         </div>
-        <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/60">
-          <span className="font-semibold text-[var(--text-muted)]">Sick Leave</span>
-          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">2 / 2</span>
+        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)]/40 hover:bg-[var(--bg-hover)] transition-colors">
+          <span className="font-semibold text-[var(--text-secondary)]">Sick Leave</span>
+          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-card)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">2 / 2</span>
         </div>
-        <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/60">
-          <span className="font-semibold text-[var(--text-muted)]">Maternity Leave</span>
-          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">0 / 0</span>
+        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)]/40 hover:bg-[var(--bg-hover)] transition-colors">
+          <span className="font-semibold text-[var(--text-secondary)]">Maternity Leave</span>
+          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-card)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">0 / 0</span>
         </div>
-        <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/60">
-          <span className="font-semibold text-[var(--text-muted)]">Paternity Leave</span>
-          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">0 / 0</span>
+        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)]/40 hover:bg-[var(--bg-hover)] transition-colors">
+          <span className="font-semibold text-[var(--text-secondary)]">Paternity Leave</span>
+          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-card)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">0 / 0</span>
         </div>
-        <div className="flex justify-between items-center py-1.5">
-          <span className="font-semibold text-[var(--text-muted)]">Marriage Leave</span>
-          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-tertiary)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">0 / 0</span>
+        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)]/40 hover:bg-[var(--bg-hover)] transition-colors">
+          <span className="font-semibold text-[var(--text-secondary)]">Marriage Leave</span>
+          <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-card)] px-2.5 py-0.5 rounded-lg border border-[var(--border-color)]">0 / 0</span>
         </div>
       </div>
     </div>
-    <div className="mt-4 pt-4 border-t border-[var(--border-color)]/60 text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-wider">
-      Available for Calendar Year 2026
+    <div className="mt-auto pt-6 border-t border-[var(--border-color)]/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <p className="text-xs text-[var(--text-secondary)] font-bold">
+        Need time off? Plan and submit requests.
+      </p>
+      <Link 
+        to="/employee/leave" 
+        className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
+      >
+        <Plus size={14} /> Apply Leave
+      </Link>
     </div>
   </div>
 );
 
-// 4c. Leave Actions Card
+// 4c. Leave Actions Card (Legacy standalone component preserved for backwards compatibility)
 export const LeaveActionsCard: React.FC = () => (
-  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)]">
+  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
     <div className="space-y-4">
       <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
         <HeartHandshake size={18} className="text-rose-500" /> Leave
@@ -437,23 +450,18 @@ export const EmployeeDashboardPage: React.FC = () => {
     <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]} requiredPermission={Permission.PROFILE_VIEW}>
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         
-        {/* Top Section - Attendance Actions (Left) and Leave Balance Card (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <LiveCheckInWidget />
-          </div>
-          <div>
-            <LeaveBalanceCard />
-          </div>
+        {/* Top Section - Live Attendance Actions */}
+        <div>
+          <LiveCheckInWidget />
         </div>
 
-        {/* Middle Section - Attendance Calendar (Left) and Leave Actions Card (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        {/* Middle Section - Attendance Calendar (Left) and Leave Balance Card (Right) in ONE row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <div className="w-full h-full">
             <AttendanceCalendarView />
           </div>
-          <div>
-            <LeaveActionsCard />
+          <div className="w-full h-full">
+            <LeaveBalanceCard />
           </div>
         </div>
 
