@@ -4,7 +4,7 @@ import apiRouter from './routes/api.routes.js';
 import { initDb, healthCheck } from './config/db.js';
 import { configureResilience, globalRateLimiter } from './middleware/resilience.js';
 import { inputSanitizer } from './middleware/validateInput.js';
-import { csrfProtection, ssrfGuard } from './middleware/securitySuite.js';
+import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
 import logger from './config/logger.js';
 
 const app = express();
@@ -31,7 +31,9 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
   credentials: true
 }));
+app.use(requestTimeoutGuard(30000));
 app.use(express.json({ limit: '10mb' }));
+app.use(prototypePollutionGuard);
 app.use(inputSanitizer);
 app.use(csrfProtection);
 app.use(ssrfGuard);
