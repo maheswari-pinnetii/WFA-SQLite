@@ -188,8 +188,8 @@ export const LeaveBalanceCard: React.FC = () => (
 
 // 4b. Employee Shift Timings & Schedule Card
 export const EmployeeShiftScheduleCard: React.FC = () => (
-  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
-    <div className="space-y-4">
+  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+    <div className="space-y-3.5">
       <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
         <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
           <Timer size={18} className="text-emerald-400" /> Employee Shift Timings
@@ -198,30 +198,45 @@ export const EmployeeShiftScheduleCard: React.FC = () => (
           General Shift (GS)
         </span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Scheduled Hours</span>
+
+      {/* Shift Duration Formula Callout */}
+      <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-emerald-950/40 border border-blue-500/30 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Clock size={16} className="text-blue-400 shrink-0" />
+          <span className="text-xs font-black text-white tracking-wide">
+            9 Hours Shift = 8 Hours Work + 1 Hour Break
+          </span>
+        </div>
+        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          Standard Policy
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Scheduled Shift</span>
           <p className="font-mono text-sm font-black text-white">09:00 AM – 06:00 PM</p>
-          <p className="text-[10px] text-slate-400">9.0 Hours (8.0h Net Work)</p>
+          <p className="text-[10px] text-slate-400">Total Shift Span: 9.0 Hours</p>
         </div>
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Grace Window</span>
-          <p className="font-mono text-sm font-black text-amber-400">15 Minutes</p>
-          <p className="text-[10px] text-slate-400">Late mark starts at 09:15 AM</p>
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Active Work Required</span>
+          <p className="font-mono text-sm font-black text-emerald-400">8.0 Hours / Day</p>
+          <p className="text-[10px] text-slate-400">40.0 Hours / Week (Mon–Fri)</p>
         </div>
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Lunch & Break</span>
-          <p className="font-mono text-sm font-black text-blue-400">60 Mins Total</p>
-          <p className="text-[10px] text-slate-400">Flexible window (13:00 – 14:00)</p>
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Break Allowance</span>
+          <p className="font-mono text-sm font-black text-amber-400">1.0 Hour (60 Mins)</p>
+          <p className="text-[10px] text-slate-400">Lunch + Refreshment breaks</p>
         </div>
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Working Pattern</span>
-          <p className="font-mono text-sm font-black text-emerald-400">Mon – Fri (5 Days)</p>
-          <p className="text-[10px] text-slate-400">Weekly Off: Saturday & Sunday</p>
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Grace & Overtime</span>
+          <p className="font-mono text-sm font-black text-cyan-400">15m Grace / OT &gt; 8h</p>
+          <p className="text-[10px] text-slate-400">OT rate calculated at 1.5x</p>
         </div>
       </div>
     </div>
-    <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+
+    <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
       <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Geofence: Stackly HQ Campus
       </span>

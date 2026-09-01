@@ -84,8 +84,11 @@ export const MyAttendance: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-white">General Day Shift (GS)</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">09:00 AM – 06:00 PM</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">9 Hours Shift</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">Grace period: 15 mins (up to 09:15 AM) &bull; Lunch: 60 mins &bull; Standard Shift: 9.0 hrs</p>
+            <p className="text-[11px] text-slate-300 mt-0.5">
+              <strong className="text-white">9 Hours Shift</strong> = <span className="text-emerald-400 font-bold">8 Hours Work</span> + <span className="text-amber-400 font-bold">1 Hour Break (60 Mins)</span> &bull; Grace window: 15 mins (up to 09:15 AM)
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
