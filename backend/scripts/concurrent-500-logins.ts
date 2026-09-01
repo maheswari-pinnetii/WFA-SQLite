@@ -24,16 +24,30 @@ async function testSimultaneous500Logins() {
   console.log('====================================================');
 
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  console.log('[SQLite Cloud] Connecting directly to remote cloud cluster...');
-  const cloudDb = new Database(cloudUrl);
-  
-  const users = await cloudDb.sql`
-    SELECT id, email, name, role FROM users 
-    WHERE role = 'EMPLOYEE' 
-    LIMIT 500
-  ` as { id: string; email: string; name: string; role: string }[];
+  let users: { id: string; email: string; name: string; role: string }[] = [];
 
-  console.log(`[SQLite Cloud] Retrieved ${users.length} employee accounts from Cloud database.`);
+  try {
+    console.log('[SQLite Cloud] Connecting directly to remote cloud cluster...');
+    const cloudDb = new Database(cloudUrl);
+    users = await cloudDb.sql`
+      SELECT id, email, name, role FROM users 
+      WHERE role = 'EMPLOYEE' 
+      LIMIT 500
+    ` as { id: string; email: string; name: string; role: string }[];
+    console.log(`[SQLite Cloud] Retrieved ${users.length} employee accounts from Cloud database.`);
+  } catch (err: any) {
+    console.log(`[Database Fallback] Reading 500 employees from local SQLite (wfa.sqlite)...`);
+    const BetterSqlite3 = (await import('better-sqlite3')).default;
+    const path = (await import('path')).default;
+    const dbPath = path.resolve('database/sqlite/wfa.sqlite');
+    const localDb = new BetterSqlite3(dbPath);
+    users = localDb.prepare(`
+      SELECT id, email, name, role FROM users 
+      WHERE role = 'EMPLOYEE' 
+      LIMIT 500
+    `).all() as any[];
+    console.log(`[Local SQLite] Retrieved ${users.length} employee accounts.`);
+  }
   console.log(`Starting concurrent login requests for all ${users.length} employees (concurrency pool: 50)...`);
 
   const startTime = Date.now();
