@@ -22,6 +22,16 @@ if (process.env.NODE_ENV !== 'test') {
 
   initSockets(io);
 
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      logger.error('server.port_in_use', `Port ${PORT} is already in use by another process. Please free port ${PORT} or configure a different PORT in .env.`);
+      process.exit(1);
+    } else {
+      logger.error('server.error', 'Server error occurred', { error: err.message });
+      process.exit(1);
+    }
+  });
+
   server.listen(PORT, () => {
     logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${PORT}`);
   });
