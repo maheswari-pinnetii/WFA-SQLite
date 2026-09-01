@@ -427,6 +427,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             icon: <Timer size={18} strokeWidth={2} className="text-teal-400" />,
             badge: { text: '09:00 - 18:00', variant: 'emerald' }
           },
+          { 
+            label: 'Public Holidays (2026)', 
+            path: '/hr/leaves', 
+            icon: <Calendar size={18} strokeWidth={2} className="text-amber-400" />,
+            badge: { text: '10 Days', variant: 'amber' }
+          },
         ],
       },
       {

@@ -247,6 +247,59 @@ export const EmployeeShiftScheduleCard: React.FC = () => (
   </div>
 );
 
+// 4c. Public & Company Holidays 2026 Card
+export const PublicHolidaysCard: React.FC = () => {
+  const holidays = [
+    { date: 'Oct 02, 2026', name: 'Gandhi Jayanti', type: 'Mandatory', day: 'Friday', badge: 'National Holiday' },
+    { date: 'Oct 20, 2026', name: 'Dussehra / Vijayadashami', type: 'Mandatory', day: 'Tuesday', badge: 'Festival' },
+    { date: 'Nov 08, 2026', name: 'Diwali / Deepavali', type: 'Mandatory', day: 'Sunday', badge: 'Major Festival' },
+    { date: 'Dec 25, 2026', name: 'Christmas Day', type: 'Mandatory', day: 'Friday', badge: 'Global Holiday' },
+    { date: 'Jan 01, 2027', name: "New Year's Day", type: 'Mandatory', day: 'Friday', badge: 'New Year' }
+  ];
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+      <div className="space-y-3.5">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+          <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+            <Calendar size={18} className="text-amber-400" /> Public Holidays (CY 2026)
+          </h3>
+          <span className="text-[10px] text-amber-400 font-black uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30">
+            10 Paid Holidays
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {holidays.map((h, i) => (
+            <div key={i} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:bg-slate-800/40 transition-colors">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-center shrink-0 w-11">
+                  <p className="text-[9px] font-bold uppercase">{h.day.slice(0, 3)}</p>
+                  <p className="text-xs font-black">{h.date.split(' ')[1].replace(',', '')}</p>
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white leading-tight">{h.name}</h4>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{h.date} &bull; {h.day}</p>
+                </div>
+              </div>
+              <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
+                {h.badge}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span className="text-[11px] text-slate-400">Paid statutory time-off</span>
+        <Link to="/hr/leaves" className="text-amber-400 hover:text-amber-300 font-bold text-[11px]">
+          Full Holiday Calendar &rarr;
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 // 5. Employee Sprint Work Table
 export const EmployeeSprintWork: React.FC<{
   tasks: Task[];
@@ -631,10 +684,13 @@ export const EmployeeDashboardPage: React.FC = () => {
           />
         </div>
 
-        {/* 6. Shift Timings, Calendar & Leave Balances */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        {/* 6. Shift Timings, Public Holidays, Calendar & Leave Balances */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           <div className="w-full h-full">
             <EmployeeShiftScheduleCard />
+          </div>
+          <div className="w-full h-full">
+            <PublicHolidaysCard />
           </div>
           <div className="w-full h-full">
             <AttendanceCalendarView />
