@@ -61,24 +61,26 @@ export const createSession = async (user: any, ipAddress: string = '', deviceFin
   const now = new Date().toISOString();
   const sessionExpiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
-  await userRepository.createSession({
-    id: sessionId,
-    userId: user.id,
-    deviceFingerprint,
-    ipAddress,
-    createdAt: now,
-    expiresAt: sessionExpiresAt,
-    revokedAt: null
-  });
-
-  await userRepository.createRefreshToken({
-    token_hash: refreshTokenHash,
-    sessionId,
-    tokenFamily,
-    parentHash: null,
-    expiresAt: sessionExpiresAt,
-    revokedAt: null
-  });
+  // Concurrently insert session and refresh token
+  await Promise.all([
+    userRepository.createSession({
+      id: sessionId,
+      userId: user.id,
+      deviceFingerprint,
+      ipAddress,
+      createdAt: now,
+      expiresAt: sessionExpiresAt,
+      revokedAt: null
+    }),
+    userRepository.createRefreshToken({
+      token_hash: refreshTokenHash,
+      sessionId,
+      tokenFamily,
+      parentHash: null,
+      expiresAt: sessionExpiresAt,
+      revokedAt: null
+    })
+  ]);
 
   const accessToken = signAccessToken(user);
 

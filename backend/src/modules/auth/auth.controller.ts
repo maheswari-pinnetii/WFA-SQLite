@@ -216,7 +216,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       return res.status(500).json({ success: false, message: 'Encryption verification failed' });
     }
 
-    await userRepository.resetFailedLogins(lookupEmail);
+    userRepository.resetFailedLogins(lookupEmail).catch(() => {});
 
     if (process.env.NODE_ENV === 'test') {
       const mfaSettings = await userRepository.findMfaSettingsByUserId(user.id);
