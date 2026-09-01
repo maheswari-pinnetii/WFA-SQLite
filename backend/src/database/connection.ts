@@ -87,6 +87,15 @@ export const initDb = async (): Promise<void> => {
 
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_settings_user ON mfa_settings(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_recovery_user ON mfa_recovery_codes(user_id)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_date ON attendancerecords(employeeId, date)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_status ON attendancerecords(employeeId, status)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_date ON attendancerecords(date)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_leaverequests_emp ON leaverequests(employeeId)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_leaverequests_status ON leaverequests(status)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_employees_dept ON employees(department)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp)`);
 
         // Perform health check write test
         const isHealthy = await healthCheck();
