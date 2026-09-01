@@ -172,6 +172,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
               <th className="py-3 px-4 w-[130px]">Team Lead</th>
               <th className="py-3 px-4 w-[100px]">Location</th>
               <th className="py-3 px-4 w-[140px]">Attendance Status</th>
+              <th className="py-3 px-4 w-[130px]">Shift Timings</th>
               <th className="py-3 px-4 w-[100px]">Check-In</th>
               <th className="py-3 px-4 w-[100px]">Check-Out</th>
               <th className="py-3 px-4 w-[110px]">Working Hours</th>
@@ -185,11 +186,11 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
           <tbody className="divide-y divide-[var(--border-color)] text-xs">
             {isLoading ? (
               <tr>
-                <td colSpan={19} className="px-5 py-8 text-center text-[var(--text-muted)] font-semibold">Loading employee workforce directory...</td>
+                <td colSpan={20} className="px-5 py-8 text-center text-[var(--text-muted)] font-semibold">Loading employee workforce directory...</td>
               </tr>
             ) : paginatedEmployees.length === 0 ? (
               <tr>
-                <td colSpan={19} className="px-5 py-8 text-center text-[var(--text-muted)]">
+                <td colSpan={20} className="px-5 py-8 text-center text-[var(--text-muted)]">
                   No matching employee records found.
                 </td>
               </tr>
@@ -274,6 +275,9 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                     </td>
                     <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
                       {(emp as any).attendance_status || 'Present'}
+                    </td>
+                    <td className="py-3 px-4 font-mono text-[var(--text-secondary)] font-semibold">
+                      {(emp as any).shiftTiming || (emp as any).shift || '09:00 - 18:00 (GS)'}
                     </td>
                     <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
                       {(emp as any).checkIn || '09:32 AM'}

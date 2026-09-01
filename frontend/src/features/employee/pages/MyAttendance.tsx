@@ -6,6 +6,7 @@ import { useAuth } from '../../../auth/hooks/useAuth';
 import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWidget';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
 import { AnalyticsOverview } from '../../../components/dashboard/AnalyticsOverview';
+import { Clock } from 'lucide-react';
 
 export const MyAttendance: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -71,6 +72,25 @@ export const MyAttendance: React.FC = () => {
       <div>
         <h2 className="text-2xl font-black text-white tracking-tight">My Personal Attendance & Shift Tracker</h2>
         <p className="text-xs text-slate-400 mt-1">Review live check-in timestamps, total hours in office, break times, and monthly calendar history.</p>
+      </div>
+
+      {/* Employee Shift Timings Banner */}
+      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <Clock size={20} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-white">General Day Shift (GS)</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">09:00 AM – 06:00 PM</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">Grace period: 15 mins (up to 09:15 AM) &bull; Lunch: 60 mins &bull; Standard Shift: 9.0 hrs</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-slate-300 font-medium">Working Days: <strong className="text-emerald-400 font-bold">Mon – Fri (5 Days)</strong></span>
+        </div>
       </div>
 
       {/* Live Check-In / Check-Out Widget */}

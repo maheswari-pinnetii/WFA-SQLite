@@ -186,6 +186,52 @@ export const LeaveBalanceCard: React.FC = () => (
   </div>
 );
 
+// 4b. Employee Shift Timings & Schedule Card
+export const EmployeeShiftScheduleCard: React.FC = () => (
+  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+        <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+          <Timer size={18} className="text-emerald-400" /> Employee Shift Timings
+        </h3>
+        <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+          General Shift (GS)
+        </span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Scheduled Hours</span>
+          <p className="font-mono text-sm font-black text-white">09:00 AM – 06:00 PM</p>
+          <p className="text-[10px] text-slate-400">9.0 Hours (8.0h Net Work)</p>
+        </div>
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Grace Window</span>
+          <p className="font-mono text-sm font-black text-amber-400">15 Minutes</p>
+          <p className="text-[10px] text-slate-400">Late mark starts at 09:15 AM</p>
+        </div>
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Lunch & Break</span>
+          <p className="font-mono text-sm font-black text-blue-400">60 Mins Total</p>
+          <p className="text-[10px] text-slate-400">Flexible window (13:00 – 14:00)</p>
+        </div>
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Working Pattern</span>
+          <p className="font-mono text-sm font-black text-emerald-400">Mon – Fri (5 Days)</p>
+          <p className="text-[10px] text-slate-400">Weekly Off: Saturday & Sunday</p>
+        </div>
+      </div>
+    </div>
+    <div className="mt-4 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+      <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Geofence: Stackly HQ Campus
+      </span>
+      <Link to="/employee/shifts" className="text-blue-400 hover:text-blue-300 font-bold text-[11px]">
+        Full Shift Details &rarr;
+      </Link>
+    </div>
+  </div>
+);
+
 // 5. Employee Sprint Work Table
 export const EmployeeSprintWork: React.FC<{
   tasks: Task[];
@@ -570,8 +616,11 @@ export const EmployeeDashboardPage: React.FC = () => {
           />
         </div>
 
-        {/* 6. Calendar & Leave Balances Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        {/* 6. Shift Timings, Calendar & Leave Balances */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          <div className="w-full h-full">
+            <EmployeeShiftScheduleCard />
+          </div>
           <div className="w-full h-full">
             <AttendanceCalendarView />
           </div>
