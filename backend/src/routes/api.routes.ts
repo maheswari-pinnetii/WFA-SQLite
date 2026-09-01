@@ -1,5 +1,5 @@
 import express from 'express';
-import * as authController from '../controllers/auth.controller.js';
+import * as authController from '../modules/auth/auth.controller.js';
 import * as attendanceController from '../controllers/attendance.controller.js';
 import * as analyticsController from '../controllers/analytics.controller.js';
 import * as workforceController from '../controllers/workforce.controller.js';

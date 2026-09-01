@@ -9,7 +9,9 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-600/20 active:scale-[0.98]',
+        primary: 'bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-600/20 active:scale-[0.98]',
         destructive: 'bg-red-600 text-white hover:bg-red-500 shadow-md shadow-red-600/20 active:scale-[0.98]',
+        danger: 'bg-red-600 text-white hover:bg-red-500 shadow-md shadow-red-600/20 active:scale-[0.98]',
         outline: 'border border-slate-700 bg-transparent hover:bg-slate-800/60 hover:text-white text-slate-300',
         secondary: 'bg-slate-800 text-slate-100 hover:bg-slate-700 active:scale-[0.98]',
         ghost: 'hover:bg-slate-800 hover:text-white text-slate-400',
@@ -35,31 +37,55 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  icon?: React.ReactNode;
+  isLoading?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
+  ({ className, variant, size, icon, isLoading, children, disabled, ...props }, ref) => {
     return (
       <button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        disabled={disabled || isLoading}
         {...props}
-      />
+      >
+        {isLoading ? (
+          <span className="inline-block w-3.5 h-3.5 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        ) : (
+          icon && <span className="inline-flex shrink-0 mr-1.5">{icon}</span>
+        )}
+        {children}
+      </button>
     );
   }
 );
 Button.displayName = 'Button';
 
-export const MotionButton = React.forwardRef<HTMLButtonElement, HTMLMotionProps<'button'> & VariantProps<typeof buttonVariants>>(
-  ({ className, variant, size, ...props }, ref) => {
+export interface MotionButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'>, VariantProps<typeof buttonVariants> {
+  children?: React.ReactNode;
+  icon?: React.ReactNode;
+  isLoading?: boolean;
+}
+
+export const MotionButton = React.forwardRef<HTMLButtonElement, MotionButtonProps>(
+  ({ className, variant, size, icon, isLoading, children, disabled, ...props }, ref) => {
     return (
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.97 }}
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref as any}
+        disabled={disabled || isLoading}
         {...props}
-      />
+      >
+        {isLoading ? (
+          <span className="inline-block w-3.5 h-3.5 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        ) : (
+          icon && <span className="inline-flex shrink-0 mr-1.5">{icon}</span>
+        )}
+        {children}
+      </motion.button>
     );
   }
 );
