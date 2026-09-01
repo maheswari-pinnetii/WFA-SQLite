@@ -187,65 +187,175 @@ export const LeaveBalanceCard: React.FC = () => (
 );
 
 // 4b. Employee Shift Timings & Schedule Card
-export const EmployeeShiftScheduleCard: React.FC = () => (
-  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
-    <div className="space-y-3.5">
-      <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
-        <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-          <Timer size={18} className="text-emerald-400" /> Employee Shift Timings
-        </h3>
-        <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
-          General Shift (GS)
-        </span>
-      </div>
+export const EmployeeShiftScheduleCard: React.FC = () => {
+  const [assignedShift, setAssignedShift] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wfa_employee_assigned_shift');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      name: 'General Day Shift',
+      code: 'GS',
+      startTime: '09:00 AM',
+      endTime: '06:00 PM',
+      totalHours: 9,
+      workHours: 8,
+      breakHours: 1,
+      graceMinutes: 15,
+      days: 'Mon - Fri'
+    };
+  });
 
-      {/* Shift Duration Formula Callout */}
-      <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-emerald-950/40 border border-blue-500/30 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Clock size={16} className="text-blue-400 shrink-0" />
-          <span className="text-xs font-black text-white tracking-wide">
-            9 Hours Shift = 8 Hours Work + 1 Hour Break
+  const [showSwapModal, setShowSwapModal] = useState(false);
+  const [swapReason, setSwapReason] = useState('');
+  const [swapSubmitted, setSwapSubmitted] = useState(false);
+
+  // Check today's schedule
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+  const handleSwapSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSwapSubmitted(true);
+    setTimeout(() => {
+      setSwapSubmitted(false);
+      setShowSwapModal(false);
+      setSwapReason('');
+    }, 2500);
+  };
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+      <div className="space-y-3.5">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+          <div>
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <Timer size={18} className="text-emerald-400" /> Assigned Shift Timings
+            </h3>
+            <p className="text-[11px] text-slate-400 mt-0.5">Assigned by HR & Department Manager</p>
+          </div>
+          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+            {assignedShift.code} &bull; {assignedShift.name}
           </span>
         </div>
-        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-          Standard Policy
-        </span>
+
+        {/* Live Today's Shift Status Alert */}
+        <div className={`p-3 rounded-2xl border flex items-center justify-between gap-2 ${
+          isWeekend 
+            ? 'bg-slate-900 border-slate-800 text-slate-400' 
+            : 'bg-gradient-to-r from-emerald-950/50 via-slate-900 to-blue-950/40 border-emerald-500/40 text-emerald-300'
+        }`}>
+          <div className="flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full ${isWeekend ? 'bg-slate-600' : 'bg-emerald-400 animate-pulse'}`}></span>
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-wide">
+                {isWeekend ? 'WEEKEND OFF' : 'SCHEDULED TO WORK TODAY'}
+              </p>
+              <p className="text-xs font-bold text-white font-mono">
+                {isWeekend ? 'Saturday & Sunday Rest Day' : `${assignedShift.startTime} – ${assignedShift.endTime}`}
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-950/80 border border-slate-800 text-slate-300">
+            {isWeekend ? 'Off Duty' : 'Active Duty'}
+          </span>
+        </div>
+
+        {/* Shift Duration Formula Callout */}
+        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Clock size={15} className="text-blue-400 shrink-0" />
+            <span className="text-xs font-black text-white">
+              {assignedShift.totalHours}h Shift = {assignedShift.workHours}h Work + {assignedShift.breakHours}h Break
+            </span>
+          </div>
+          <span className="text-[9px] font-bold text-slate-400">
+            60m Lunch Break
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+            <span className="text-[10px] text-slate-400 font-bold uppercase">Required Net Work</span>
+            <p className="font-mono text-sm font-black text-emerald-400">{assignedShift.workHours}.0 Hours / Day</p>
+            <p className="text-[10px] text-slate-400">40.0 Hours Weekly Standard</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+            <span className="text-[10px] text-slate-400 font-bold uppercase">Grace & Overtime</span>
+            <p className="font-mono text-sm font-black text-cyan-400">{assignedShift.graceMinutes}m Grace / OT &gt; 8h</p>
+            <p className="text-[10px] text-slate-400">OT Tier: 1.5x Hourly Base</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Scheduled Shift</span>
-          <p className="font-mono text-sm font-black text-white">09:00 AM – 06:00 PM</p>
-          <p className="text-[10px] text-slate-400">Total Shift Span: 9.0 Hours</p>
-        </div>
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Active Work Required</span>
-          <p className="font-mono text-sm font-black text-emerald-400">8.0 Hours / Day</p>
-          <p className="text-[10px] text-slate-400">40.0 Hours / Week (Mon–Fri)</p>
-        </div>
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Break Allowance</span>
-          <p className="font-mono text-sm font-black text-amber-400">1.0 Hour (60 Mins)</p>
-          <p className="text-[10px] text-slate-400">Lunch + Refreshment breaks</p>
-        </div>
-        <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Grace & Overtime</span>
-          <p className="font-mono text-sm font-black text-cyan-400">15m Grace / OT &gt; 8h</p>
-          <p className="text-[10px] text-slate-400">OT rate calculated at 1.5x</p>
-        </div>
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
+        <button 
+          onClick={() => setShowSwapModal(true)}
+          className="text-blue-400 hover:text-blue-300 font-bold text-[11px] cursor-pointer"
+        >
+          Request Shift Change / Swap &rarr;
+        </button>
+        <Link to="/employee/shifts" className="text-emerald-400 hover:text-emerald-300 font-bold text-[11px]">
+          Manage All Shifts &rarr;
+        </Link>
       </div>
-    </div>
 
-    <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-      <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
-        <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Geofence: Stackly HQ Campus
-      </span>
-      <Link to="/employee/shifts" className="text-blue-400 hover:text-blue-300 font-bold text-[11px]">
-        Full Shift Details &rarr;
-      </Link>
+      {/* Shift Swap Modal */}
+      {showSwapModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Timer className="text-blue-400" size={18} /> Request Shift Change / Swap
+              </h3>
+              <button onClick={() => setShowSwapModal(false)} className="text-slate-400 hover:text-white">&times;</button>
+            </div>
+
+            {swapSubmitted ? (
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 size={18} />
+                Shift swap request submitted to HR & Manager for approval!
+              </div>
+            ) : (
+              <form onSubmit={handleSwapSubmit} className="space-y-3 text-xs">
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Select Desired Shift</label>
+                  <select className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold cursor-pointer">
+                    <option>General Day Shift (09:00 AM – 06:00 PM)</option>
+                    <option>Morning Shift (07:00 AM – 04:00 PM)</option>
+                    <option>Night / US Shift (06:30 PM – 03:30 AM)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Reason for Shift Change</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={swapReason}
+                    onChange={(e) => setSwapReason(e.target.value)}
+                    placeholder="Enter reason for shift adjustment..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                  <Button variant="outline" size="sm" type="button" onClick={() => setShowSwapModal(false)}>
+                    Cancel
+                  </Button>
+                  <Button size="sm" type="submit">
+                    Submit Request
+                  </Button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-);
+  );
+};
 
 // 4c. Public & Company Holidays 2026 Card
 export const PublicHolidaysCard: React.FC = () => {
