@@ -406,16 +406,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
       {
-        category: 'Attendance Management',
+        category: 'Attendance & Clock',
         items: [
-          { label: 'My Attendance', path: '/employee/attendance', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-        ],
-      },
-      {
-        category: 'Requests',
-        items: [
+          { label: 'My Attendance Logs', path: '/employee/attendance', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
+          { label: 'Correction Requests', path: '/employee/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
           { label: 'Leave & PTO Requests', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Correction Requests', path: '/employee/corrections', icon: <FileText size={18} strokeWidth={2} className="text-blue-400" /> },
         ],
       },
       {
@@ -436,14 +431,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
       {
-        category: 'My Profile',
+        category: 'Performance & Goals',
         items: [
-          { label: 'My Profile', path: '/employee/profile', icon: <User size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'OKR Goals & Deliverables', path: '/employee/goals', icon: <Target size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Performance Reviews', path: '/employee/performance', icon: <Star size={18} strokeWidth={2} className="text-amber-400" /> },
+          { label: 'Skills Profile & Growth', path: '/employee/skills', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
         ],
       },
       {
-        category: 'Help & Support',
+        category: 'Payroll & Compensation',
         items: [
+          { label: 'Salary & Monthly Payslips', path: '/employee/payslips', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-emerald-400" /> },
+        ],
+      },
+      {
+        category: 'My Profile & Support',
+        items: [
+          { label: 'My Profile', path: '/employee/profile', icon: <User size={18} strokeWidth={2} className="text-purple-400" /> },
           { label: 'Help & Support', path: '#support', icon: <HelpCircle size={18} strokeWidth={2} className="text-slate-400" /> },
         ],
       },
