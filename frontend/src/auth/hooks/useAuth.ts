@@ -32,11 +32,13 @@ export const useAuth = () => {
     dispatch(logoutUserThunk());
   };
 
+  const setSession = (data: { user: any; token: string }) => dispatch(loginSuccessAction(data));
   const dismissError = () => dispatch(clearError());
 
   return {
     ...authState,
     login,
+    setSession,
     signup,
     verifyMfa,
     resendMfa,
