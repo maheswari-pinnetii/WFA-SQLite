@@ -9,6 +9,7 @@ import { OnboardingTourModal } from '../components/OnboardingTourModal';
 import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
 import { BetaFeedbackModal } from '../components/BetaFeedbackModal';
 import { PrivacySettingsModal } from '../components/PrivacySettingsModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useTheme } from '../../design-system/theme/theme';
 
@@ -166,6 +167,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           <span className="text-slate-500 font-mono">v1.0.0</span>
         </div>
       </footer>
+
+      {/* Responsive Mobile Bottom Navigation Bar */}
+      <MobileBottomNav onOpenMobileMenu={() => setMobileOpen(true)} />
 
       {/* Real-time Network Connectivity Status */}
       <NetworkStatusBanner />

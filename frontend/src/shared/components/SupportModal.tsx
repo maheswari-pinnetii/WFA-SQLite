@@ -81,21 +81,27 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {/* Quick Contact & SLA Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1">
+            <a
+              href="tel:+18005559321"
+              className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1 block hover:border-blue-500/80 transition-colors group cursor-pointer"
+            >
               <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
                 <Phone size={16} /> 24/7 Hotline
               </div>
-              <p className="text-sm font-black text-[var(--text-primary)]">+1 (800) 555-WFA</p>
-              <p className="text-[10px] text-slate-400">Instant Priority Tech Desk</p>
-            </div>
+              <p className="text-sm font-black text-[var(--text-primary)] group-hover:text-blue-400 group-hover:underline">+1 (800) 555-9321</p>
+              <p className="text-[10px] text-slate-400">Instant Priority Tech Desk (Click to call)</p>
+            </a>
 
-            <div className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1">
+            <a
+              href="mailto:support@thestackly.com"
+              className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1 block hover:border-purple-500/80 transition-colors group cursor-pointer"
+            >
               <div className="flex items-center gap-2 text-purple-400 font-bold text-xs">
                 <Mail size={16} /> Email Support
               </div>
-              <p className="text-xs font-black text-[var(--text-primary)] truncate">support@stacklyworkforce.com</p>
-              <p className="text-[10px] text-slate-400">Average response &lt; 15 mins</p>
-            </div>
+              <p className="text-xs font-black text-[var(--text-primary)] truncate group-hover:text-purple-400 group-hover:underline">support@thestackly.com</p>
+              <p className="text-[10px] text-slate-400">Response &lt; 15 mins (Click to email)</p>
+            </a>
 
             <div className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1">
               <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
