@@ -25,11 +25,326 @@ import {
   RefreshCw,
   Zap,
   History,
-  Timer
+  Timer,
+  Download,
+  Users,
+  Radio,
+  MapPin,
+  Palmtree,
+  Target,
+  CreditCard,
+  ArrowUpRight,
+  Activity,
+  Send,
+  Coffee,
+  Check
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
 import { Button } from '../../../components/ui/button';
+
+// 1a. Employee Quick Actions Command Bar
+export const EmployeeQuickActionsBar: React.FC<{
+  onOpenCorrection: () => void;
+}> = ({ onOpenCorrection }) => (
+  <div className="p-4 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl flex items-center justify-between gap-3 overflow-x-auto">
+    <div className="flex items-center gap-2.5 shrink-0">
+      <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Quick Actions:</span>
+    </div>
+    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+      <a
+        href="#check-in-section"
+        className="px-3 py-1.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+      >
+        <Clock size={14} /> Punch Clock
+      </a>
+      <button
+        onClick={onOpenCorrection}
+        className="px-3 py-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+      >
+        <ClipboardList size={14} /> Request Correction
+      </button>
+      <Link
+        to="/hr/leaves"
+        className="px-3 py-1.5 rounded-2xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <Palmtree size={14} /> Apply Leave / PTO
+      </Link>
+      <Link
+        to="/employee/shifts"
+        className="px-3 py-1.5 rounded-2xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <Timer size={14} /> View Shift Schedule
+      </Link>
+      <Link
+        to="/employee/payslips"
+        className="px-3 py-1.5 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <CreditCard size={14} /> Salary & Payslip
+      </Link>
+      <Link
+        to="/employee/goals"
+        className="px-3 py-1.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <Target size={14} /> OKR Goals
+      </Link>
+    </div>
+  </div>
+);
+
+// 1b. 7-Day Upcoming Shift Roster Schedule Card
+export const EmployeeUpcomingRosterCard: React.FC = () => {
+  const roster = [
+    { day: 'Mon', date: 'Sep 01', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Today (Active)', isToday: true, isOff: false },
+    { day: 'Tue', date: 'Sep 02', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Wed', date: 'Sep 03', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Thu', date: 'Sep 04', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Fri', date: 'Sep 05', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Sat', date: 'Sep 06', shift: 'Weekend Off', time: 'Rest Day', type: 'Weekend', isToday: false, isOff: true },
+    { day: 'Sun', date: 'Sep 07', shift: 'Weekend Off', time: 'Rest Day', type: 'Weekend', isToday: false, isOff: true },
+  ];
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+        <div>
+          <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+            <Calendar size={18} className="text-teal-400" /> 7-Day Shift Roster Schedule
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">Standard 9.0h Shift (8.0h Net Work + 1.0h Break)</p>
+        </div>
+        <span className="text-[10px] text-teal-400 font-black uppercase tracking-wider bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/30">
+          40.0h Target
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 text-center text-xs">
+        {roster.map((r, i) => (
+          <div
+            key={i}
+            className={`p-3 rounded-2xl border transition-all ${
+              r.isToday
+                ? 'bg-emerald-950/60 border-emerald-500/50 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/30'
+                : r.isOff
+                ? 'bg-slate-950/40 border-slate-800 text-slate-500'
+                : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800/40'
+            }`}
+          >
+            <span className={`text-[10px] font-black uppercase ${r.isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
+              {r.day}
+            </span>
+            <p className="font-bold text-xs text-white mt-0.5">{r.date}</p>
+            <p className={`font-mono text-[11px] font-bold mt-1 ${r.isToday ? 'text-emerald-300 font-extrabold' : r.isOff ? 'text-slate-500' : 'text-teal-400'}`}>
+              {r.time}
+            </p>
+            <span className={`inline-block mt-2 px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+              r.isToday
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                : r.isOff
+                ? 'bg-slate-800 text-slate-500'
+                : 'bg-slate-800 text-slate-300'
+            }`}>
+              {r.type}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// 1c. Team & Peer On-Duty Live Presence Card
+export const EmployeeTeamLivePresenceCard: React.FC = () => {
+  const teamMembers = [
+    { name: 'Marcus Vance', role: 'Team Lead', status: 'On-Duty (Office)', mode: 'HQ Campus', color: 'emerald', time: 'In at 08:55 AM' },
+    { name: 'David Sterling', role: 'Engineering Manager', status: 'On-Duty (Office)', mode: 'HQ Campus', color: 'emerald', time: 'In at 08:45 AM' },
+    { name: 'Sarah Connor', role: 'Senior Platform Engineer', status: 'Remote Active', mode: 'Home Office', color: 'blue', time: 'In at 09:00 AM' },
+    { name: 'Elena Rostova', role: 'QA Lead', status: 'On Break', mode: 'HQ Cafeteria', color: 'amber', time: 'Break 45m' },
+    { name: 'Vikram Sharma', role: 'Frontend Engineer', status: 'On Leave (CL)', mode: 'Paid PTO', color: 'purple', time: 'Returns Tomorrow' },
+  ];
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+          <div>
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <Users size={18} className="text-blue-400" /> Team Live Presence
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">Engineering & Product Core Team</p>
+          </div>
+          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 4 / 5 Active
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {teamMembers.map((m, i) => (
+            <div key={i} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:bg-slate-800/40 transition-colors">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                  m.color === 'emerald' ? 'bg-emerald-400 shadow-sm shadow-emerald-400' :
+                  m.color === 'blue' ? 'bg-blue-400' :
+                  m.color === 'amber' ? 'bg-amber-400 animate-pulse' : 'bg-purple-400'
+                }`} />
+                <div>
+                  <h4 className="text-xs font-bold text-white leading-tight">{m.name}</h4>
+                  <p className="text-[10px] text-slate-400">{m.role} &bull; {m.mode}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                  m.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                  m.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                  m.color === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                }`}>
+                  {m.status}
+                </span>
+                <p className="text-[9px] text-slate-500 font-mono mt-0.5">{m.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span className="text-[11px] text-slate-400">Geofence Live Radius: 100m</span>
+        <span className="text-blue-400 font-bold text-[11px]">Sync: Real-Time</span>
+      </div>
+    </div>
+  );
+};
+
+// 1d. Monthly Timesheet Summary & Export Card
+export const EmployeeTimesheetSummaryCard: React.FC = () => {
+  const [timesheetSubmitted, setTimesheetSubmitted] = useState(false);
+  const [downloadMsg, setDownloadMsg] = useState('');
+
+  const handleDownloadCsv = () => {
+    setDownloadMsg('Downloading Monthly Attendance CSV...');
+    setTimeout(() => setDownloadMsg(''), 3000);
+  };
+
+  const handleSubmitTimesheet = () => {
+    setTimesheetSubmitted(true);
+  };
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
+      <div className="space-y-3.5">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+          <div>
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <FileText size={18} className="text-indigo-400" /> Monthly Timesheet
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">Cycle: Aug 01 – Aug 31, 2026</p>
+          </div>
+          <span className="text-[10px] text-indigo-400 font-black uppercase tracking-wider bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30">
+            {timesheetSubmitted ? '✓ Submitted' : 'Pending Lock'}
+          </span>
+        </div>
+
+        {downloadMsg && (
+          <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-1.5 animate-fadeIn">
+            <Check size={14} /> {downloadMsg}
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+            <span className="text-[10px] text-slate-400 font-bold uppercase">Logged Regular Hours</span>
+            <p className="font-mono text-sm font-black text-white">152.50 / 160.0h</p>
+            <p className="text-[10px] text-slate-400">95.3% Monthly Target</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+            <span className="text-[10px] text-slate-400 font-bold uppercase">Approved Overtime</span>
+            <p className="font-mono text-sm font-black text-emerald-400">6.85 Hours</p>
+            <p className="text-[10px] text-slate-400">1.5x Overtime Rate</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+            <span className="text-[10px] text-slate-400 font-bold uppercase">Days Present</span>
+            <p className="font-mono text-sm font-black text-blue-400">19 Working Days</p>
+            <p className="text-[10px] text-slate-400">0 Unexcused Absences</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
+            <span className="text-[10px] text-slate-400 font-bold uppercase">Paid PTO Taken</span>
+            <p className="font-mono text-sm font-black text-purple-400">2 Days (CL/SL)</p>
+            <p className="text-[10px] text-slate-400">Manager Approved</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleDownloadCsv}
+          className="text-xs h-8 text-slate-300 font-bold"
+        >
+          <Download size={13} className="mr-1 text-indigo-400" /> Export CSV
+        </Button>
+        <Button
+          variant={timesheetSubmitted ? 'outline' : 'default'}
+          size="sm"
+          disabled={timesheetSubmitted}
+          onClick={handleSubmitTimesheet}
+          className="text-xs h-8 font-bold"
+        >
+          {timesheetSubmitted ? '✓ Timesheet Locked' : 'Submit for Manager Review'}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// 1e. Live Employee Activity & Audit Timeline Feed
+export const EmployeeActivityTimelineFeed: React.FC = () => {
+  const activities = [
+    { time: '09:02 AM', title: 'Checked In On-Time', desc: 'Geofence: Stackly HQ Campus (Office Mode)', type: 'checkin', icon: <Clock size={14} className="text-emerald-400" /> },
+    { time: '01:05 PM', title: 'Took Lunch Break', desc: 'Break duration: 45 minutes logged', type: 'break', icon: <Coffee size={14} className="text-amber-400" /> },
+    { time: '01:50 PM', title: 'Resumed Work Session', desc: 'Active shift resumed on workstation', type: 'resume', icon: <Activity size={14} className="text-blue-400" /> },
+    { time: 'Yesterday', title: 'Completed Sprint Task', desc: 'TSK-104: Build CSV Payroll Attendance Export Engine', type: 'task', icon: <CheckCircle2 size={14} className="text-teal-400" /> },
+    { time: 'Aug 31', title: 'Correction Approved', desc: 'Elena Rostova (HR Operations) approved CORR-2026-001', type: 'correction', icon: <Award size={14} className="text-purple-400" /> },
+  ];
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+          <div>
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <History size={18} className="text-amber-400" /> Recent Activity & Audit Trail
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">Real-time telemetry events and approvals</p>
+          </div>
+          <span className="text-[10px] text-slate-400 font-bold bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">
+            Live Stream
+          </span>
+        </div>
+
+        <div className="space-y-2.5 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-slate-800 pl-6">
+          {activities.map((a, i) => (
+            <div key={i} className="relative space-y-0.5 text-xs">
+              <div className="absolute -left-6 top-0.5 p-1 rounded-full bg-slate-900 border border-slate-700">
+                {a.icon}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-white">{a.title}</span>
+                <span className="text-[10px] font-mono text-slate-400">{a.time}</span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-tight">{a.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span className="text-[11px] text-slate-400">ISO 27001 Audit Compliant</span>
+        <span className="text-emerald-400 font-bold text-[11px]">Encrypted & Verified</span>
+      </div>
+    </div>
+  );
+};
 
 // 1. Employee Dashboard Overview / My Workspace Header
 export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => (
@@ -932,12 +1247,15 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* 1. Overview / My Workspace Header */}
         <EmployeeDashboardOverview user={user} />
 
-        {/* 2. Live Check-In / Check-Out Widget */}
+        {/* 2. Quick Actions Command Bar */}
+        <EmployeeQuickActionsBar onOpenCorrection={() => handleOpenCorrection()} />
+
+        {/* 3. Live Check-In / Check-Out Widget */}
         <div id="check-in-section" className="scroll-mt-6">
           <LiveCheckInWidget />
         </div>
 
-        {/* 3. Dashboard Filters Bar */}
+        {/* 4. Dashboard Filters Bar */}
         <EmployeeDashboardFilters
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}
@@ -947,7 +1265,7 @@ export const EmployeeDashboardPage: React.FC = () => {
           isLoading={loading}
         />
 
-        {/* 4. KPI Cards Grid (Work & Attendance Focused) */}
+        {/* 5. KPI Cards Grid (Work & Attendance Focused) */}
         <EmployeeKpiGrid
           hoursToday={hoursToday}
           hoursThisWeek={hoursThisWeek}
@@ -959,7 +1277,26 @@ export const EmployeeDashboardPage: React.FC = () => {
           timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
         />
 
-        {/* 5. Work & Attendance Charts Grid */}
+        {/* 6. 7-Day Shift Roster Schedule Preview */}
+        <EmployeeUpcomingRosterCard />
+
+        {/* 7. Shift Timings, Public Holidays, Calendar & Leave Balances */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+          <div className="w-full h-full">
+            <EmployeeShiftScheduleCard />
+          </div>
+          <div className="w-full h-full">
+            <PublicHolidaysCard />
+          </div>
+          <div className="w-full h-full">
+            <AttendanceCalendarView />
+          </div>
+          <div className="w-full h-full">
+            <LeaveBalanceCard />
+          </div>
+        </div>
+
+        {/* 8. Work & Attendance Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <AnalyticsBarChart
             title="Weekly Shift Hours & Overtime"
@@ -980,30 +1317,27 @@ export const EmployeeDashboardPage: React.FC = () => {
           />
         </div>
 
-        {/* 6. Shift Timings, Public Holidays, Calendar & Leave Balances */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        {/* 9. Team Presence, Monthly Timesheets, & Live Activity Timeline */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
           <div className="w-full h-full">
-            <EmployeeShiftScheduleCard />
+            <EmployeeTeamLivePresenceCard />
           </div>
           <div className="w-full h-full">
-            <PublicHolidaysCard />
+            <EmployeeTimesheetSummaryCard />
           </div>
           <div className="w-full h-full">
-            <AttendanceCalendarView />
-          </div>
-          <div className="w-full h-full">
-            <LeaveBalanceCard />
+            <EmployeeActivityTimelineFeed />
           </div>
         </div>
 
-        {/* 7. Sprint Work Deliverables Table */}
+        {/* 10. Sprint Work Deliverables Table */}
         <EmployeeSprintWork
           tasks={tasks}
           loading={loading}
           handleUpdateTaskStatus={handleUpdateTaskStatus}
         />
 
-        {/* 8. Attendance History Logs Table */}
+        {/* 11. Attendance History Logs Table */}
         <EmployeeAttendanceTable
           filteredHistory={filteredHistory}
           statusFilter={statusFilter}
@@ -1011,7 +1345,7 @@ export const EmployeeDashboardPage: React.FC = () => {
           onOpenCorrectionModal={handleOpenCorrection}
         />
 
-        {/* 9. Attendance Correction Requests & Manager/HR Approval Stream */}
+        {/* 12. Attendance Correction Requests & Manager/HR Approval Stream */}
         <EmployeeCorrectionRequestsCard onRequestNew={handleOpenCorrection} />
 
         {/* Correction Request Modal */}
