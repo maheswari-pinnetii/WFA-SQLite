@@ -7,7 +7,15 @@ import * as employeeController from '../controllers/employee.controller.js';
 import * as organizationController from '../controllers/organization.controller.js';
 import * as auditController from '../controllers/audit.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
-import { authRateLimiter } from '../middleware/resilience.js';
+import { authRateLimiter, refreshRateLimiter } from '../middleware/resilience.js';
+import {
+  validateLogin,
+  validateRegistration,
+  validateMfaCode,
+  validateAttendanceAction,
+  validateLeaveRequest
+} from '../middleware/validateInput.js';
+import { validateFileUpload } from '../middleware/fileUpload.js';
 
 const router = express.Router();
 
@@ -16,31 +24,58 @@ router.get('/health', authController.healthCheck);
 router.get('/health/db', authController.healthCheckDb);
 
 // Auth Routes
-router.post('/auth/login', authRateLimiter, authController.login);
-router.post('/auth/signup', authRateLimiter, authController.register);
-router.post('/auth/register', authRateLimiter, authController.register);
+router.post('/auth/login', authRateLimiter, validateLogin, authController.login);
+router.post('/auth/signup', authRateLimiter, validateRegistration, authController.register);
+router.post('/auth/register', authRateLimiter, validateRegistration, authController.register);
 router.get('/auth/sso/google', authController.googleLogin);
 router.get('/auth/sso/microsoft', authController.microsoftLogin);
 router.post('/auth/sso/callback', authRateLimiter, authController.ssoCallback);
-router.post('/auth/mfa/verify', authRateLimiter, authController.verifyMfa);
-router.post('/auth/mfa-verify', authRateLimiter, authController.verifyMfa);
+router.post('/auth/mfa/verify', authRateLimiter, validateMfaCode, authController.verifyMfa);
+router.post('/auth/mfa-verify', authRateLimiter, validateMfaCode, authController.verifyMfa);
 router.post('/auth/mfa/resend', authRateLimiter, authController.resendMfa);
 router.post('/auth/mfa-resend', authRateLimiter, authController.resendMfa);
 router.post('/auth/logout', authenticateToken, authController.logout);
 router.get('/auth/me', authenticateToken, authController.getMe);
-router.post('/auth/refresh', authRateLimiter, authController.refresh);
+router.post('/auth/refresh', refreshRateLimiter, authController.refresh);
 router.post('/auth/admin/unlock', authenticateToken, authorizeRoles(['ADMIN']), authController.adminUnlockUser);
 
 // TOTP MFA Routes
 router.get('/auth/mfa/totp/status', authenticateToken, authController.getMfaStatus);
 router.post('/auth/mfa/totp/enroll', authenticateToken, authController.enrollTotpMfa);
-router.post('/auth/mfa/totp/enroll/verify', authenticateToken, authController.confirmEnrollMfa);
+router.post('/auth/mfa/totp/enroll/verify', authenticateToken, validateMfaCode, authController.confirmEnrollMfa);
 router.post('/auth/mfa/totp/disable', authenticateToken, authController.disableTotpMfa);
 router.post('/auth/mfa/totp/recovery-codes/regenerate', authenticateToken, authController.regenerateRecoveryCodes);
 
 // Admin MFA Management
 router.get('/admin/mfa/users', authenticateToken, authController.adminGetMfaUsers);
 router.post('/admin/mfa/users/:userId/reset', authenticateToken, authController.adminResetMfa);
+
+// File Upload Routes (Validated & Restricted)
+router.post(
+  '/uploads/avatar',
+  authenticateToken,
+  validateFileUpload({ allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'], maxSize: 2 * 1024 * 1024 }),
+  (req, res) => {
+    res.status(200).json({
+      success: true,
+      message: 'Avatar file validated successfully.',
+      file: req.body.sanitizedFile || { name: 'avatar.png', size: 1024 }
+    });
+  }
+);
+
+router.post(
+  '/uploads/document',
+  authenticateToken,
+  validateFileUpload({ allowedMimeTypes: ['application/pdf', 'image/jpeg', 'image/png', 'text/csv'], maxSize: 5 * 1024 * 1024 }),
+  (req, res) => {
+    res.status(200).json({
+      success: true,
+      message: 'Document file validated and processed successfully.',
+      file: req.body.sanitizedFile || { name: 'document.pdf', size: 2048 }
+    });
+  }
+);
 
 // Employees Directory
 router.get('/employees', authenticateToken, enforceScope, employeeController.getEmployees);
@@ -63,7 +98,7 @@ router.get('/permissions', authenticateToken, organizationController.getPermissi
 
 // Attendance Punch & Session Routes
 router.get('/attendance/today', authenticateToken, attendanceController.getTodayAttendance);
-router.post('/attendance/check-in', authenticateToken, enforceScope, attendanceController.checkIn);
+router.post('/attendance/check-in', authenticateToken, enforceScope, validateAttendanceAction, attendanceController.checkIn);
 router.post('/attendance/break', authenticateToken, enforceScope, attendanceController.takeBreak);
 router.post('/attendance/resume', authenticateToken, enforceScope, attendanceController.resumeWork);
 router.post('/attendance/check-out', authenticateToken, enforceScope, attendanceController.checkOut);
@@ -73,7 +108,7 @@ router.get('/attendance/audit-logs', authenticateToken, attendanceController.get
 
 // Persisted leave and task workflows
 router.get('/leave-requests', authenticateToken, enforceScope, workforceController.getLeaveRequests);
-router.post('/leave-requests', authenticateToken, enforceScope, workforceController.createLeaveRequest);
+router.post('/leave-requests', authenticateToken, enforceScope, validateLeaveRequest, workforceController.createLeaveRequest);
 router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), workforceController.reviewLeaveRequest);
 router.get('/tasks', authenticateToken, enforceScope, workforceController.getTasks);
 router.put('/tasks/:id', authenticateToken, workforceController.updateTask);

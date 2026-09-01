@@ -3,6 +3,7 @@ import cors from 'cors';
 import apiRouter from './routes/api.routes.js';
 import { initDb, healthCheck } from './config/db.js';
 import { configureResilience, globalRateLimiter } from './middleware/resilience.js';
+import { inputSanitizer } from './middleware/validateInput.js';
 import logger from './config/logger.js';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
+app.use(inputSanitizer);
 
 // Apply Helmet, compression, request ID tracking, and logging
 configureResilience(app);
