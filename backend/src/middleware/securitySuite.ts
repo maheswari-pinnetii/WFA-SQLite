@@ -159,3 +159,122 @@ export const validatePasswordStrength = (password: string): { valid: boolean; re
   }
   return { valid: true };
 };
+
+// -------------------------------------------------------------
+// 6. Open Redirect Prevention Validator
+// -------------------------------------------------------------
+export const isValidRedirectUrl = (urlStr: string, allowedDomains: string[] = []): boolean => {
+  if (!urlStr || typeof urlStr !== 'string') return false;
+  // Prevent protocol-relative URLs (e.g. //evil.com) and javascript/data schemes
+  if (urlStr.startsWith('//') || urlStr.startsWith('\\') || /^\s*javascript:/i.test(urlStr) || /^\s*data:/i.test(urlStr)) {
+    return false;
+  }
+  // Allow safe relative paths
+  if (urlStr.startsWith('/') && !urlStr.startsWith('//')) {
+    return true;
+  }
+  try {
+    const parsed = new URL(urlStr);
+    const domainWhitelist = [
+      'localhost',
+      '127.0.0.1',
+      ...allowedDomains
+    ];
+    return domainWhitelist.includes(parsed.hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+};
+
+// -------------------------------------------------------------
+// 7. Object Prototype Pollution / Insecure Deserialization Guard
+// -------------------------------------------------------------
+export const sanitizePrototypeKeys = (obj: any): any => {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizePrototypeKeys);
+  }
+  const clean: Record<string, any> = {};
+  for (const key of Object.keys(obj)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      logger.warn('security.prototype_pollution.detected', `Stripped prototype pollution key: ${key}`);
+      continue;
+    }
+    clean[key] = sanitizePrototypeKeys(obj[key]);
+  }
+  return clean;
+};
+
+export const prototypePollutionGuard = (req: Request, res: Response, next: NextFunction) => {
+  if (req.body && typeof req.body === 'object') {
+    req.body = sanitizePrototypeKeys(req.body);
+  }
+  if (req.query && typeof req.query === 'object') {
+    req.query = sanitizePrototypeKeys(req.query);
+  }
+  next();
+};
+
+// -------------------------------------------------------------
+// 8. Mass Assignment Protection Filter
+// -------------------------------------------------------------
+export const preventMassAssignment = (allowedKeys: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (req.body && typeof req.body === 'object') {
+      const sanitized: Record<string, any> = {};
+      for (const key of allowedKeys) {
+        if (req.body[key] !== undefined) {
+          sanitized[key] = req.body[key];
+        }
+      }
+      req.body = sanitized;
+    }
+    next();
+  };
+};
+
+// -------------------------------------------------------------
+// 9. Webhook Replay & Timestamp Drift Defense
+// -------------------------------------------------------------
+export const webhookReplayGuard = (maxDriftSeconds: number = 300) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const timestampHeader = req.headers['x-webhook-timestamp'] || req.headers['x-stackly-timestamp'];
+    if (timestampHeader) {
+      const requestTime = parseInt(timestampHeader as string, 10);
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (isNaN(requestTime) || Math.abs(currentTime - requestTime) > maxDriftSeconds) {
+        logger.warn('security.webhook_replay.rejected', 'Rejected webhook due to timestamp drift exceeding limit', {
+          requestTime,
+          currentTime
+        });
+        return res.status(401).json({
+          success: false,
+          message: 'Webhook timestamp verification failed: Request has expired or clock drift exceeded allowed limit.'
+        });
+      }
+    }
+    next();
+  };
+};
+
+// -------------------------------------------------------------
+// 10. Request Timeout Guard (Prevents Slowloris / Hung Socket Attacks)
+// -------------------------------------------------------------
+export const requestTimeoutGuard = (timeoutMs: number = 30000) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    res.setTimeout(timeoutMs, () => {
+      logger.warn('security.timeout.triggered', `Request timed out after ${timeoutMs}ms`, {
+        route: req.originalUrl,
+        method: req.method,
+        ip: req.ip
+      });
+      if (!res.headersSent) {
+        res.status(408).json({
+          success: false,
+          message: 'Request timeout: Processing took longer than permitted threshold.'
+        });
+      }
+    });
+    next();
+  };
+};
