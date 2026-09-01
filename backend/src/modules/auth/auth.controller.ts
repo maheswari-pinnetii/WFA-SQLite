@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import crypto from 'crypto';
 import { logAudit, execute, query } from '../../database/connection.js';
 import * as authService from './auth.service.js';
 import { userRepository } from './auth.repository.js';
@@ -45,9 +46,6 @@ const getRefreshTokenFromRequest = (req: Request): string | undefined => {
   );
   return cookies.refreshToken;
 };
-
-
-import crypto from 'crypto';
 
 const passwordHashCache = new Map<string, boolean>();
 
@@ -680,8 +678,6 @@ export const adminGetMfaUsers = async (req: any, res: Response): Promise<any> =>
     return res.status(500).json({ success: false, message: err.message });
   }
 };
-
-import crypto from 'crypto';
 
 const base64UrlEncode = (str: Buffer): string => {
   return str.toString('base64')
