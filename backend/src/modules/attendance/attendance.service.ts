@@ -483,9 +483,34 @@ export class AttendanceService {
     correction.reviewedBy = reviewerName;
     await correction.save();
 
-    if (status === 'Approved') {
-      const checkInTime = new Date(`${correction.date}T${correction.requestedCheckIn}`).toISOString();
-      const checkOutTime = new Date(`${correction.date}T${correction.requestedCheckOut}`).toISOString();
+    if (status === 'Approved' || status === 'APPROVED') {
+      const parseTimeToIso = (dateStr: string, timeStr: string) => {
+        if (!timeStr) return new Date().toISOString();
+        if (timeStr.includes('T')) {
+          const d = new Date(timeStr);
+          if (!isNaN(d.getTime())) return d.toISOString();
+        }
+        const match = timeStr.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+        if (match) {
+          let hours = parseInt(match[1], 10);
+          const minutes = parseInt(match[2], 10);
+          const seconds = match[3] ? parseInt(match[3], 10) : 0;
+          const ampm = match[4]?.toUpperCase();
+          if (ampm === 'PM' && hours < 12) hours += 12;
+          if (ampm === 'AM' && hours === 12) hours = 0;
+          const paddedH = hours.toString().padStart(2, '0');
+          const paddedM = minutes.toString().padStart(2, '0');
+          const paddedS = seconds.toString().padStart(2, '0');
+          const d = new Date(`${dateStr}T${paddedH}:${paddedM}:${paddedS}Z`);
+          if (!isNaN(d.getTime())) return d.toISOString();
+        }
+        const fallback = new Date(`${dateStr} ${timeStr}`);
+        if (!isNaN(fallback.getTime())) return fallback.toISOString();
+        return new Date(`${dateStr}T09:00:00Z`).toISOString();
+      };
+
+      const checkInTime = parseTimeToIso(correction.date, correction.requestedCheckIn);
+      const checkOutTime = parseTimeToIso(correction.date, correction.requestedCheckOut);
 
       const existingRecord = await Attendance.findOne({
         employeeId: correction.employeeId,
