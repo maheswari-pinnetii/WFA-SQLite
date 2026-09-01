@@ -71,7 +71,7 @@ export const AttendanceManagement: React.FC = () => {
           <div>
             <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tight">Enterprise Attendance & Shift Control Center</h2>
             <p className="text-xs text-slate-400 mt-1">
-              Real-time daily punch logs, live clock-ins, hours in office calculations, and monthly compliance calendars across all departments.
+              Real-time daily punch logs, live check-ins, hours in office calculations, and monthly compliance calendars across all departments.
             </p>
           </div>
 
@@ -204,8 +204,8 @@ export const AttendanceManagement: React.FC = () => {
                   <tr>
                     <th className="py-3 px-4">Employee</th>
                     <th className="py-3 px-4">Department</th>
-                    <th className="py-3 px-4">Clock In</th>
-                    <th className="py-3 px-4">Clock Out</th>
+                    <th className="py-3 px-4">Check - In</th>
+                    <th className="py-3 px-4">Check - Out</th>
                     <th className="py-3 px-4">Office Hours</th>
                     <th className="py-3 px-4">Work Mode</th>
                     <th className="py-3 px-4">Status</th>

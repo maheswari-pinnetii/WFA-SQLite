@@ -208,7 +208,7 @@ export const TeamLeadDashboardPage: React.FC = () => {
           />
           <KPICard title="Present" value={`${directReports.filter(e => e.status === 'Active').length} Present`} change={5.2} trend="up" subtitle="On duty today" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
           <KPICard title="Absent" value="0 Absent" change={0.0} trend="neutral" subtitle="No unexcused absences" icon={<AlertTriangle size={20} />} accentColor="rose" />
-          <KPICard title="Late" value="1 Late" change={-1.5} trend="down" subtitle="Clocked in after shift target" icon={<Clock size={20} />} accentColor="amber" />
+          <KPICard title="Late" value="1 Late" change={-1.5} trend="down" subtitle="Checked in after shift target" icon={<Clock size={20} />} accentColor="amber" />
           <KPICard title="On Leave" value="0 On Leave" change={0.0} trend="neutral" subtitle="Approved team PTO" icon={<Calendar size={20} />} accentColor="blue" />
           <KPICard title="Working Hours" value="45 hrs today" change={8.0} trend="up" subtitle="Total squad contribution" icon={<Clock size={20} />} accentColor="rose" />
           <KPICard title="Tasks Pending" value={`${sprintTasks.filter(t => t.status !== 'COMPLETED').length} Pending`} change={2.0} trend="up" subtitle="Sprint tasks in backlog" icon={<FileText size={20} />} accentColor="blue" />

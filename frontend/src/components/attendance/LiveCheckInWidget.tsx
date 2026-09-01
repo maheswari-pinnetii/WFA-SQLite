@@ -199,7 +199,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
                   : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
                 : 'bg-rose-500/20 text-rose-500 border border-rose-500/30'
             }`}>
-              {activeRecord ? `● ${activeRecord.status.toUpperCase()}` : '○ CLOCKED OUT'}
+              {activeRecord ? `● ${activeRecord.status.toUpperCase()}` : '○ CHECKED OUT'}
             </span>
 
             {isOfflineMode ? (
@@ -234,7 +234,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
             onClick={handleCheckIn}
             className="w-full sm:flex-1 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer h-12"
           >
-            <Play size={16} strokeWidth={2.5} /> Clock In Now
+            <Play size={16} strokeWidth={2.5} /> Check - In Now
           </button>
         ) : (
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
@@ -242,7 +242,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
               onClick={handleCheckOut}
               className="w-full sm:flex-1 px-6 py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer h-12"
             >
-              <Square size={16} strokeWidth={2.5} /> Clock Out
+              <Square size={16} strokeWidth={2.5} /> Check - Out
             </button>
 
             {activeRecord.status !== 'On Break' ? (

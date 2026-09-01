@@ -104,7 +104,7 @@ export const CorrectionRequests: React.FC = () => {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={3}
-              placeholder="e.g. Forgot to clock in / power outage"
+              placeholder="e.g. Forgot to check - in / power outage"
               className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-white outline-none resize-none"
             />
           </div>

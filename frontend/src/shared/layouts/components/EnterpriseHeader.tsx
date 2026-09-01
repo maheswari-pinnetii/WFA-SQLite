@@ -42,7 +42,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   // Notifications State
   const [unreadCount, setUnreadCount] = useState(3);
   const [notifications, setNotifications] = useState([
-    { id: '1', title: 'Attendance Alert: 3 Late Clock-Ins', subtitle: 'HR Operations', time: '5m ago', type: 'warning', path: '/hr/attendance', read: false },
+    { id: '1', title: 'Attendance Alert: 3 Late Check-Ins', subtitle: 'HR Operations', time: '5m ago', type: 'warning', path: '/hr/attendance', read: false },
     { id: '2', title: 'Leave Request Pending Review', subtitle: 'Sarah Connor (Engineering)', time: '45m ago', type: 'info', path: '/manager/approvals', read: false },
     { id: '3', title: 'System Security Audit Completed', subtitle: 'Compliance Stream', time: '2h ago', type: 'success', path: '/admin/audit-logs', read: false },
   ]);

@@ -24,7 +24,7 @@ const DEFAULT_FAQS: FaqItem[] = [
   {
     id: 'faq-3',
     category: 'attendance',
-    question: 'What happens if I forget to clock in or check out on time?',
+    question: 'What happens if I forget to check - in or check - out on time?',
     answer: 'You can submit an Attendance Correction request under the Attendance section. Your designated Team Lead or Department Manager will receive an automated approval task to verify your punch.'
   },
   {
