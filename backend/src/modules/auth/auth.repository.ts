@@ -20,25 +20,45 @@ export interface UserRow {
   updatedAt: string;
 }
 
+const userCacheByEmail = new Map<string, { user: UserRow; timestamp: number }>();
+const userCacheById = new Map<string, { user: UserRow; timestamp: number }>();
+const CACHE_TTL_MS = 120000; // 2 minutes
+
 export class UserRepository {
   async findByEmail(email: string): Promise<UserRow | null> {
+    const cached = userCacheByEmail.get(email);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      return cached.user;
+    }
+
     const rows = await query('SELECT * FROM users WHERE email = ?', [email]);
     if (!rows || rows.length === 0) return null;
     const row = rows[0] as UserRow;
-    return {
+    const user: UserRow = {
       ...row,
       permissions: typeof row.permissions === 'string' ? JSON.parse(row.permissions) : row.permissions
     };
+    userCacheByEmail.set(email, { user, timestamp: Date.now() });
+    userCacheById.set(user.id, { user, timestamp: Date.now() });
+    return user;
   }
 
   async findById(id: string): Promise<UserRow | null> {
+    const cached = userCacheById.get(id);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      return cached.user;
+    }
+
     const rows = await query('SELECT * FROM users WHERE id = ?', [id]);
     if (!rows || rows.length === 0) return null;
     const row = rows[0] as UserRow;
-    return {
+    const user: UserRow = {
       ...row,
       permissions: typeof row.permissions === 'string' ? JSON.parse(row.permissions) : row.permissions
     };
+    userCacheById.set(id, { user, timestamp: Date.now() });
+    userCacheByEmail.set(user.email, { user, timestamp: Date.now() });
+    return user;
   }
 
   async findByScope(orgId: string): Promise<UserRow[]> {
@@ -51,6 +71,11 @@ export class UserRepository {
       ...row,
       permissions: typeof row.permissions === 'string' ? JSON.parse(row.permissions) : row.permissions
     }));
+  }
+
+  clearUserCache() {
+    userCacheByEmail.clear();
+    userCacheById.clear();
   }
 
   async create(userData: any): Promise<UserRow | null> {
