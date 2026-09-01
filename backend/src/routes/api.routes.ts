@@ -47,8 +47,8 @@ router.post('/auth/mfa/totp/disable', authenticateToken, authController.disableT
 router.post('/auth/mfa/totp/recovery-codes/regenerate', authenticateToken, authController.regenerateRecoveryCodes);
 
 // Admin MFA Management
-router.get('/admin/mfa/users', authenticateToken, authController.adminGetMfaUsers);
-router.post('/admin/mfa/users/:userId/reset', authenticateToken, authController.adminResetMfa);
+router.get('/admin/mfa/users', authenticateToken, authorizeRoles(['ADMIN']), authController.adminGetMfaUsers);
+router.post('/admin/mfa/users/:userId/reset', authenticateToken, authorizeRoles(['ADMIN']), authController.adminResetMfa);
 
 // File Upload Routes (Validated & Restricted)
 router.post(
