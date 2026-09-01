@@ -187,19 +187,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({ selectedRole, onRoleChange
       const normalizedEmail = email.trim().toLowerCase();
       const demoMatch = DEMO_ACCOUNTS.find(d => d.email.toLowerCase() === normalizedEmail);
       if (demoMatch) {
+        const demoUser = {
+          id: `usr-${demoMatch.role.toLowerCase()}-01`,
+          name: demoMatch.label,
+          email: demoMatch.email,
+          role: demoMatch.role,
+          department: 'Engineering',
+          team: 'Platform Core',
+          location: 'Bengaluru',
+          status: 'ACTIVE',
+          permissions: []
+        };
+        const demoToken = `mock-token-${Date.now()}`;
+        sessionStorage.setItem('user_data', JSON.stringify(demoUser));
+        localStorage.setItem('user_data', JSON.stringify(demoUser));
+        sessionStorage.setItem('auth_token', demoToken);
+        localStorage.setItem('auth_token', demoToken);
         setSession({
-          user: {
-            id: `usr-${demoMatch.role.toLowerCase()}-01`,
-            name: demoMatch.label,
-            email: demoMatch.email,
-            role: demoMatch.role,
-            department: 'Engineering',
-            team: 'Platform Core',
-            location: 'Bengaluru',
-            status: 'ACTIVE',
-            permissions: []
-          },
-          token: `mock-token-${Date.now()}`
+          user: demoUser,
+          token: demoToken
         });
         onSuccess();
         return;

@@ -4,11 +4,13 @@ import { authService } from '../services/auth.service';
 import { Role } from '../../security/roles/roles';
 import { apiClient } from '../../services/api';
 
+const savedSession = typeof window !== 'undefined' ? authService.getStoredSession() : null;
+
 const initialState: AuthState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isLoading: true,
+  user: savedSession?.user || null,
+  token: savedSession?.token || null,
+  isAuthenticated: !!(savedSession?.user && savedSession?.token),
+  isLoading: false,
   error: null,
 };
 
@@ -16,7 +18,10 @@ export const initializeAuthThunk = createAsyncThunk(
   'auth/initializeAuth',
   async () => {
     try {
-      await authService.logout();
+      const stored = authService.getStoredSession();
+      if (stored && stored.user && stored.token) {
+        return stored;
+      }
       return { user: null, token: null } as { user: any; token: any };
     } catch (err) {
       return { user: null, token: null } as { user: any; token: any };

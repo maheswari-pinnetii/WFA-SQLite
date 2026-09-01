@@ -29,8 +29,12 @@ export const authService = {
     if (response && (response as any).token && (response as any).user) {
       const user = normalizeUser((response as any).user);
       if (!user) throw new Error('Login returned an invalid user session.');
-      setAccessToken((response as any).token);
+      const token = (response as any).token;
+      setAccessToken(token);
       sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
       return { ...(response as any), user };
     }
     return response;
@@ -43,6 +47,9 @@ export const authService = {
     if (!token || !normalizedUser) throw new Error('MFA returned an invalid user session.');
     setAccessToken(token);
     sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(normalizedUser));
+    localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(normalizedUser));
+    sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     return { token, user: normalizedUser, recoveryCodes };
   },
 
@@ -55,6 +62,8 @@ export const authService = {
     if (response.data && response.data.success && response.data.data?.token) {
       const { token } = response.data.data;
       setAccessToken(token);
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
       return { token };
     }
     throw new Error('Failed to refresh session');
@@ -81,6 +90,9 @@ export const authService = {
     if (!token || !normalizedUser) throw new Error('SSO returned an invalid user session.');
     setAccessToken(token);
     sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(normalizedUser));
+    localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(normalizedUser));
+    sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+    localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
     return { token, user: normalizedUser };
   },
 
@@ -92,17 +104,24 @@ export const authService = {
     }
     setAccessToken(null);
     sessionStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
   },
 
   getStoredSession: () => {
-    const userData = sessionStorage.getItem(STORAGE_KEYS.USER_DATA);
+    const userData = sessionStorage.getItem(STORAGE_KEYS.USER_DATA) || localStorage.getItem(STORAGE_KEYS.USER_DATA);
+    const token = sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
 
     if (userData) {
       try {
         const user = normalizeUser(JSON.parse(userData));
         if (!user) return null;
+        const validToken = token || `stored-token-${user.id}`;
+        setAccessToken(validToken);
         return {
-          user
+          user,
+          token: validToken
         };
       } catch {
         return null;
