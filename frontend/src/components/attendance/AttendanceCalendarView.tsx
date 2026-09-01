@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Calendar as CalendarIcon, CheckCircle2 } from 'lucide-react';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
-const YEARS = Array.from({ length: 16 }, (_, i) => (2020 + i).toString()); // 2020 to 2035
+const YEARS = Array.from({ length: 7 }, (_, i) => (2024 + i).toString()); // 2024 to 2030
 
 export const AttendanceCalendarView: React.FC = () => {
-  const [selectedMonth, setSelectedMonth] = useState('August');
+  const [selectedMonth, setSelectedMonth] = useState('September');
   const [selectedYear, setSelectedYear] = useState('2026');
 
   const monthIndex = MONTHS.indexOf(selectedMonth);
@@ -47,118 +47,149 @@ export const AttendanceCalendarView: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel w-full h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6 shadow-2xl font-sans text-[var(--text-primary)] flex flex-col justify-between space-y-6">
-      
-      {/* Calendar Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Prev Button */}
+    <div className="glass-panel w-full h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl p-6 shadow-2xl font-sans text-[var(--text-primary)] flex flex-col justify-between space-y-4">
+      {/* Header with Title & Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]/60">
+        <div className="flex items-center gap-2">
+          <CalendarIcon size={18} className="text-blue-400" />
+          <h3 className="text-base font-extrabold text-[var(--text-primary)]">
+            Attendance Calendar
+          </h3>
+          <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live
+          </span>
+        </div>
+
+        {/* Compact Controls */}
+        <div className="flex items-center gap-1.5">
           <button 
             onClick={handlePrevMonth}
-            className="p-2 rounded-xl bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] text-[var(--text-secondary)] transition-colors cursor-pointer"
+            title="Previous Month"
+            className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
           >
-            <ChevronLeft size={16} />
-          </button>
-          {/* Next Button */}
-          <button 
-            onClick={handleNextMonth}
-            className="p-2 rounded-xl bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] text-[var(--text-secondary)] transition-colors cursor-pointer"
-          >
-            <ChevronRight size={16} />
+            <ChevronLeft size={14} />
           </button>
 
-          {/* Month Dropdown Selector */}
+          {/* Month Selector */}
           <div className="relative">
             <select 
               value={selectedMonth} 
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="appearance-none bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] rounded-xl px-4 py-2 pr-10 text-xs font-bold text-[var(--text-primary)] focus:outline-none cursor-pointer"
+              className="appearance-none bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg px-2.5 py-1 pr-6 text-xs font-bold text-white focus:outline-none cursor-pointer"
             >
               {MONTHS.map((m) => (
-                <option key={m} value={m}>{m}</option>
+                <option key={m} value={m}>{m.slice(0, 3)}</option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+            <ChevronDown size={11} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
 
-          {/* Year Dropdown Selector */}
+          {/* Year Selector */}
           <div className="relative">
             <select 
               value={selectedYear} 
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="appearance-none bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] rounded-xl px-4 py-2 pr-10 text-xs font-bold text-[var(--text-primary)] focus:outline-none cursor-pointer"
+              className="appearance-none bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg px-2 py-1 pr-5 text-xs font-bold text-white focus:outline-none cursor-pointer"
             >
               {YEARS.map((y) => (
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
-            <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] pointer-events-none" />
+            <ChevronDown size={11} className="absolute right-1 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           </div>
-        </div>
 
-        {/* Today Button */}
-        <button 
-          onClick={handleGoToToday}
-          className="w-full sm:w-auto px-4 py-2 bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] border border-[var(--border-color)] text-xs font-bold rounded-xl text-[var(--text-primary)] transition-colors cursor-pointer"
-        >
-          Today
-        </button>
+          <button 
+            onClick={handleNextMonth}
+            title="Next Month"
+            className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
+          >
+            <ChevronRight size={14} />
+          </button>
+
+          <button 
+            onClick={handleGoToToday}
+            className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-bold rounded-lg text-blue-400 transition-colors cursor-pointer"
+          >
+            Today
+          </button>
+        </div>
       </div>
 
       {/* Calendar Grid Container */}
-      <div className="space-y-4">
-        
+      <div className="space-y-2">
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-[var(--text-muted)] tracking-wider">
-          <div>Su</div>
+        <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-extrabold text-slate-400 tracking-wider">
+          <div className="text-rose-400/80">Su</div>
           <div>Mo</div>
           <div>Tu</div>
           <div>We</div>
           <div>Th</div>
           <div>Fr</div>
-          <div>Sa</div>
+          <div className="text-cyan-400/80">Sa</div>
         </div>
 
-        {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-2 text-center">
-          {/* Empty Slots */}
+        {/* Calendar Days Grid */}
+        <div className="grid grid-cols-7 gap-1.5 text-center">
           {emptySlots.map((_, idx) => (
-            <div key={`empty-${idx}`} className="aspect-square flex items-center justify-center text-sm font-semibold text-[var(--text-muted)]" />
+            <div key={`empty-${idx}`} className="aspect-square rounded-xl bg-transparent" />
           ))}
 
-          {/* Day numbers */}
           {days.map((day) => {
-            const dayOfWeek = (day + firstDayOfWeek) % 7;
+            const dayOfWeek = (day + firstDayOfWeek - 1) % 7;
             const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-            const isToday = day === 5 && selectedMonth === 'August' && selectedYear === '2026';
-            const isPresent = day === 3 || day === 4 || day === 5;
+            const isToday = day === 1 && selectedMonth === 'September' && selectedYear === '2026';
+            const isHoliday = (day === 14 && selectedMonth === 'September') || (day === 2 && selectedMonth === 'October');
+            const isLeave = day === 18 && selectedMonth === 'September';
+            const isPresent = !isWeekend && !isHoliday && !isLeave && day <= 28;
 
-            let textClass = 'text-[var(--text-secondary)] font-semibold';
-            let borderClass = 'border-transparent';
-            let bgClass = 'bg-transparent';
-
-            if (isWeekend) {
-              textClass = 'text-[var(--text-muted)] font-medium';
-            } else if (isPresent) {
-              textClass = 'text-emerald-600 dark:text-emerald-400 font-bold';
-            }
+            let tileClass = 'bg-slate-900/40 border-slate-800/80 text-slate-300 hover:bg-slate-800/60';
+            let dotColor = '';
 
             if (isToday) {
-              borderClass = 'border-[var(--border-color)]';
-              bgClass = 'bg-[var(--bg-tertiary)]';
-              textClass = 'text-emerald-600 dark:text-emerald-400 font-black';
+              tileClass = 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 text-white font-black shadow-lg shadow-blue-500/20';
+              dotColor = 'bg-blue-400';
+            } else if (isHoliday) {
+              tileClass = 'bg-amber-500/10 border-amber-500/30 text-amber-300 font-bold';
+              dotColor = 'bg-amber-400';
+            } else if (isLeave) {
+              tileClass = 'bg-purple-500/10 border-purple-500/30 text-purple-300 font-bold';
+              dotColor = 'bg-purple-400';
+            } else if (isWeekend) {
+              tileClass = 'bg-slate-950/40 border-slate-800/40 text-slate-600 font-medium';
+            } else if (isPresent) {
+              tileClass = 'bg-slate-900/60 border-slate-800 text-white font-semibold hover:border-emerald-500/40';
+              dotColor = 'bg-emerald-400';
             }
 
             return (
               <div 
                 key={day} 
-                className={`aspect-square flex items-center justify-center text-sm rounded-xl border transition-all hover:scale-105 cursor-pointer ${borderClass} ${bgClass} ${textClass}`}
+                className={`aspect-square flex flex-col items-center justify-center text-xs rounded-xl border transition-all hover:scale-105 cursor-pointer relative p-1 ${tileClass}`}
               >
-                {day}
+                <span>{day}</span>
+                {dotColor && (
+                  <span className={`w-1 h-1 rounded-full ${dotColor} mt-0.5`} />
+                )}
               </div>
             );
           })}
         </div>
+      </div>
+
+      {/* Bottom Status Legend */}
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400 flex-wrap gap-2">
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" /> Present (19d)
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-amber-400" /> Holiday (2d)
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-purple-400" /> Leave (1d)
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-slate-600" /> Weekend (8d)
+        </span>
       </div>
     </div>
   );

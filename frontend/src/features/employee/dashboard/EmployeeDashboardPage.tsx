@@ -710,53 +710,79 @@ export const EmployeeKpiGrid: React.FC<{
 );
 
 // 4. Leave Balance Card
-export const LeaveBalanceCard: React.FC = () => (
-  <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
-    <div className="space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
-        <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-          <Layers size={18} className="text-purple-500" /> Leave Balances & PTO
-        </h3>
-        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">
-          CY 2026
-        </span>
+export const LeaveBalanceCard: React.FC = () => {
+  const balances = [
+    { name: 'Casual Leave (CL)', remaining: 9, total: 12, color: 'blue' },
+    { name: 'Sick Leave (SL)', remaining: 11, total: 12, color: 'emerald' },
+    { name: 'Earned Leave (EL)', remaining: 14, total: 18, color: 'purple' },
+    { name: 'Comp-Off Credits', remaining: 3, total: 3, color: 'amber' }
+  ];
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+      <div className="space-y-3.5">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+          <div>
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <Layers size={18} className="text-purple-400" /> Leave Balances & PTO Quota
+            </h3>
+            <p className="text-[11px] text-slate-400 mt-0.5">Annual paid statutory time-off entitlements</p>
+          </div>
+          <span className="text-[10px] text-purple-400 font-black uppercase tracking-wider bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/30 shrink-0">
+            CY 2026
+          </span>
+        </div>
+
+        <div className="space-y-2.5">
+          {balances.map((b, i) => {
+            const pct = Math.round((b.remaining / b.total) * 100);
+            return (
+              <div key={i} className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1.5 hover:border-slate-700/80 transition-all">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-white">{b.name}</span>
+                  <span className="font-mono text-xs font-black text-slate-200">
+                    <strong className="text-white font-extrabold">{b.remaining}</strong> / {b.total} {b.name.includes('Credits') ? 'Days' : 'Left'}
+                  </span>
+                </div>
+                {/* Progress bar */}
+                <div className="w-full h-1.5 rounded-full bg-slate-950 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${
+                      b.color === 'blue'
+                        ? 'bg-blue-500'
+                        : b.color === 'emerald'
+                        ? 'bg-emerald-500'
+                        : b.color === 'purple'
+                        ? 'bg-purple-500'
+                        : 'bg-amber-500'
+                    }`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="space-y-2 text-xs text-[var(--text-secondary)]">
-        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-slate-900/50 border border-slate-800 hover:bg-slate-800/40 transition-colors">
-          <span className="font-semibold text-slate-300">Casual Leave (CL)</span>
-          <span className="font-mono font-bold text-white bg-slate-950 px-2.5 py-0.5 rounded-lg border border-slate-800">9 / 12 Left</span>
-        </div>
-        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-slate-900/50 border border-slate-800 hover:bg-slate-800/40 transition-colors">
-          <span className="font-semibold text-slate-300">Sick Leave (SL)</span>
-          <span className="font-mono font-bold text-white bg-slate-950 px-2.5 py-0.5 rounded-lg border border-slate-800">11 / 12 Left</span>
-        </div>
-        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-slate-900/50 border border-slate-800 hover:bg-slate-800/40 transition-colors">
-          <span className="font-semibold text-slate-300">Earned Leave (EL)</span>
-          <span className="font-mono font-bold text-white bg-slate-950 px-2.5 py-0.5 rounded-lg border border-slate-800">14 / 18 Left</span>
-        </div>
-        <div className="flex justify-between items-center py-2 px-3 rounded-xl bg-slate-900/50 border border-slate-800 hover:bg-slate-800/40 transition-colors">
-          <span className="font-semibold text-slate-300">Comp-Off Credits</span>
-          <span className="font-mono font-bold text-white bg-slate-950 px-2.5 py-0.5 rounded-lg border border-slate-800">3 Days</span>
-        </div>
+
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+        <p className="text-[11px] text-slate-400">
+          Need time off? Submit your leave request.
+        </p>
+        <Link 
+          to="/employee/leave" 
+          className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
+        >
+          <Plus size={14} /> Apply for Leave
+        </Link>
       </div>
     </div>
-    <div className="mt-auto pt-6 border-t border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <p className="text-xs text-slate-400 font-medium">
-        Need time off? Submit your leave request.
-      </p>
-      <Link 
-        to="/hr/leaves" 
-        className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
-      >
-        <Plus size={14} /> Apply for Leave
-      </Link>
-    </div>
-  </div>
-);
+  );
+};
 
 // 4b. Employee Shift Timings & Schedule Card
 export const EmployeeShiftScheduleCard: React.FC = () => {
-  const [assignedShift, setAssignedShift] = useState(() => {
+  const [assignedShift] = useState(() => {
     try {
       const saved = localStorage.getItem('wfa_employee_assigned_shift');
       if (saved) return JSON.parse(saved);
@@ -803,7 +829,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
             </h3>
             <p className="text-[11px] text-slate-400 mt-0.5">Assigned by HR & Department Manager</p>
           </div>
-          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 shrink-0">
             {assignedShift.code} &bull; {assignedShift.name}
           </span>
         </div>
@@ -814,8 +840,8 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
             ? 'bg-slate-900 border-slate-800 text-slate-400' 
             : 'bg-gradient-to-r from-emerald-950/50 via-slate-900 to-blue-950/40 border-emerald-500/40 text-emerald-300'
         }`}>
-          <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full ${isWeekend ? 'bg-slate-600' : 'bg-emerald-400 animate-pulse'}`}></span>
+          <div className="flex items-center gap-2.5">
+            <span className={`w-2.5 h-2.5 rounded-full ${isWeekend ? 'bg-slate-600' : 'bg-emerald-400 animate-pulse'}`} />
             <div>
               <p className="text-[11px] font-black uppercase tracking-wide">
                 {isWeekend ? 'WEEKEND OFF' : 'SCHEDULED TO WORK TODAY'}
@@ -825,7 +851,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
               </p>
             </div>
           </div>
-          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-950/80 border border-slate-800 text-slate-300">
+          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-slate-950 border border-slate-800 text-slate-300 shrink-0">
             {isWeekend ? 'Off Duty' : 'Active Duty'}
           </span>
         </div>
@@ -838,8 +864,8 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
               {assignedShift.totalHours}h Shift = {assignedShift.workHours}h Work + {assignedShift.breakHours}h Break
             </span>
           </div>
-          <span className="text-[9px] font-bold text-slate-400">
-            60m Lunch Break
+          <span className="text-[10px] font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800 shrink-0">
+            60m Lunch
           </span>
         </div>
 
@@ -871,13 +897,13 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
 
       {/* Shift Swap Modal */}
       {showSwapModal && (
-        <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Timer className="text-blue-400" size={18} /> Request Shift Change / Swap
               </h3>
-              <button onClick={() => setShowSwapModal(false)} className="text-slate-400 hover:text-white">&times;</button>
+              <button onClick={() => setShowSwapModal(false)} className="text-slate-400 hover:text-white text-xl leading-none cursor-pointer">&times;</button>
             </div>
 
             {swapSubmitted ? (
@@ -929,8 +955,8 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
 export const PublicHolidaysCard: React.FC = () => {
   const holidays = [
     { date: 'Oct 02, 2026', name: 'Gandhi Jayanti', type: 'Mandatory', day: 'Friday', badge: 'National Holiday' },
-    { date: 'Oct 20, 2026', name: 'Dussehra / Vijayadashami', type: 'Mandatory', day: 'Tuesday', badge: 'Festival' },
-    { date: 'Nov 08, 2026', name: 'Diwali / Deepavali', type: 'Mandatory', day: 'Sunday', badge: 'Major Festival' },
+    { date: 'Oct 20, 2026', name: 'Ayudha Pooja / Vijaya Dashami', type: 'Mandatory', day: 'Tuesday', badge: 'Festival' },
+    { date: 'Nov 09, 2026', name: 'Deepavali / Festival of Lights', type: 'Mandatory', day: 'Monday', badge: 'Major Festival' },
     { date: 'Dec 25, 2026', name: 'Christmas Day', type: 'Mandatory', day: 'Friday', badge: 'Global Holiday' },
     { date: 'Jan 01, 2027', name: "New Year's Day", type: 'Mandatory', day: 'Friday', badge: 'New Year' }
   ];
@@ -939,24 +965,27 @@ export const PublicHolidaysCard: React.FC = () => {
     <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
-          <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-            <Calendar size={18} className="text-amber-400" /> Public Holidays (CY 2026)
-          </h3>
-          <span className="text-[10px] text-amber-400 font-black uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30">
-            10 Paid Holidays
+          <div>
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <Calendar size={18} className="text-amber-400" /> Public Holidays (CY 2026)
+            </h3>
+            <p className="text-[11px] text-slate-400 mt-0.5">Gazetted non-working days for all corporate hubs</p>
+          </div>
+          <span className="text-[10px] text-amber-400 font-black uppercase tracking-wider bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30 shrink-0">
+            10 Paid Days
           </span>
         </div>
 
         <div className="space-y-2">
           {holidays.map((h, i) => (
             <div key={i} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:bg-slate-800/40 transition-colors">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-center shrink-0 w-11">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 text-center shrink-0 w-11">
                   <p className="text-[9px] font-bold uppercase">{h.day.slice(0, 3)}</p>
-                  <p className="text-xs font-black">{h.date.split(' ')[1].replace(',', '')}</p>
+                  <p className="text-xs font-black leading-tight">{h.date.split(' ')[1].replace(',', '')}</p>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white leading-tight">{h.name}</h4>
+                <div className="min-w-0 truncate">
+                  <h4 className="text-xs font-bold text-white leading-tight truncate">{h.name}</h4>
                   <p className="text-[10px] text-slate-400 mt-0.5">{h.date} &bull; {h.day}</p>
                 </div>
               </div>
@@ -969,8 +998,8 @@ export const PublicHolidaysCard: React.FC = () => {
       </div>
 
       <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-        <span className="text-[11px] text-slate-400">Bengaluru &bull; Salem &bull; Hyderabad</span>
-        <Link to="/employee/holidays" className="text-amber-400 hover:text-amber-300 font-bold text-[11px]">
+        <span className="text-[11px] text-slate-400 truncate">Bengaluru &bull; Salem &bull; Hyderabad</span>
+        <Link to="/employee/holidays" className="text-amber-400 hover:text-amber-300 font-bold text-[11px] shrink-0">
           Full Holiday Calendar &rarr;
         </Link>
       </div>
@@ -1536,16 +1565,20 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* 7. Manager & Team Lead Appreciations & Kudos Showcase */}
         <EmployeeManagerKudosCard />
 
-        {/* 8. Shift Timings, Public Holidays, Calendar & Leave Balances */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+        {/* 8. Shift Timings & Monthly Attendance Calendar */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           <div className="w-full h-full">
             <EmployeeShiftScheduleCard />
           </div>
           <div className="w-full h-full">
-            <PublicHolidaysCard />
-          </div>
-          <div className="w-full h-full">
             <AttendanceCalendarView />
+          </div>
+        </div>
+
+        {/* 9. Public Holidays & Leave Balances */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <div className="w-full h-full">
+            <PublicHolidaysCard />
           </div>
           <div className="w-full h-full">
             <LeaveBalanceCard />
