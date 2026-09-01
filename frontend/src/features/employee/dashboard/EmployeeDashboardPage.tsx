@@ -46,13 +46,20 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase">
             MY WORKSPACE
           </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            ACTIVE SHIFT
+          </span>
         </div>
         <p className="text-xs text-slate-300 mt-1">
           {user?.title || "Senior Software Engineer"} &bull; {user?.department || "Engineering & Technology"} &bull; Shift: <span className="text-emerald-400 font-bold">General Shift (09:00 - 18:00)</span>
         </p>
       </div>
     </div>
-    <div className="flex items-center gap-2 shrink-0">
+    <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+      <a href="#check-in-section" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-600/20 cursor-pointer">
+        <Clock size={14} /> Check - In / Out
+      </a>
       <Link to="/employee/profile" className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all border border-slate-700">
         <Compass size={14} className="text-emerald-400" /> My Profile
       </Link>
@@ -516,7 +523,9 @@ export const EmployeeDashboardPage: React.FC = () => {
         <EmployeeDashboardOverview user={user} />
 
         {/* 2. Live Check-In / Check-Out Widget */}
-        <LiveCheckInWidget />
+        <div id="check-in-section" className="scroll-mt-6">
+          <LiveCheckInWidget />
+        </div>
 
         {/* 3. Dashboard Filters Bar */}
         <EmployeeDashboardFilters
