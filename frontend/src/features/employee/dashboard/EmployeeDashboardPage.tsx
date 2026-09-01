@@ -49,6 +49,85 @@ import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
 import { Button } from '../../../components/ui/button';
 
+// Helper: Step-by-Step Section Header
+export const StepSectionHeader: React.FC<{
+  stepNumber: string;
+  title: string;
+  subtitle: string;
+  tagColor?: string;
+  badge?: string;
+}> = ({ stepNumber, title, subtitle, tagColor = 'blue', badge }) => (
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-4 pb-2 border-b border-[var(--border-color)]/60">
+    <div className="flex items-center gap-3">
+      <span className={`px-2.5 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider ${
+        tagColor === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' :
+        tagColor === 'purple' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30' :
+        tagColor === 'amber' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' :
+        tagColor === 'indigo' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
+        tagColor === 'cyan' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' :
+        tagColor === 'rose' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' :
+        'bg-blue-500/10 text-blue-400 border border-blue-500/30'
+      }`}>
+        {stepNumber}
+      </span>
+      <div>
+        <h2 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">
+          {title}
+        </h2>
+        <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+      </div>
+    </div>
+    {badge && (
+      <span className="text-[11px] font-bold text-slate-300 bg-slate-900 px-3 py-1 rounded-full border border-slate-800 self-start sm:self-auto">
+        {badge}
+      </span>
+    )}
+  </div>
+);
+
+// Helper: Sticky Step-by-Step Navigator
+export const StepNavigatorBar: React.FC = () => {
+  const steps = [
+    { id: 'step-1-punch', label: '1. Check-In', icon: '📍' },
+    { id: 'step-2-kpis', label: '2. Metrics & KPIs', icon: '📊' },
+    { id: 'step-3-schedule', label: '3. Shift & Calendar', icon: '📅' },
+    { id: 'step-4-leaves', label: '4. Holidays & Leaves', icon: '🏖️' },
+    { id: 'step-5-kudos', label: '5. Kudos & Praise', icon: '👏' },
+    { id: 'step-6-analytics', label: '6. Shift Analytics', icon: '📈' },
+    { id: 'step-7-team', label: '7. Team Presence', icon: '👥' },
+    { id: 'step-8-tasks', label: '8. Sprint Tasks', icon: '⚡' },
+    { id: 'step-9-logs', label: '9. Logs & Corrections', icon: '📝' },
+  ];
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  return (
+    <div className="p-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-md sticky top-16 z-30 shadow-xl overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 min-w-max">
+        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 flex items-center gap-1.5 shrink-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          Dashboard Guide:
+        </span>
+        {steps.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => scrollToSection(s.id)}
+            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800/80 hover:border-blue-500/40 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>{s.icon}</span>
+            <span>{s.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // 1f. Manager & Team Lead Appreciations / Kudos Showcase
 export const EmployeeManagerKudosCard: React.FC = () => {
   const [reactions, setReactions] = useState<{ [key: string]: { claps: number; hearts: number; rockets: number } }>({
@@ -1524,118 +1603,190 @@ export const EmployeeDashboardPage: React.FC = () => {
 
   return (
     <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]} requiredPermission={Permission.PROFILE_VIEW}>
-      <div className="space-y-6 animate-fadeIn font-sans pb-10">
+      <div className="space-y-8 animate-fadeIn font-sans pb-12">
         
-        {/* 1. Overview / My Workspace Header */}
-        <EmployeeDashboardOverview user={user} />
+        {/* Step-by-Step Quick Navigator */}
+        <StepNavigatorBar />
 
-        {/* 2. Quick Actions Command Bar */}
-        <EmployeeQuickActionsBar onOpenCorrection={() => handleOpenCorrection()} />
-
-        {/* 3. Live Check-In / Check-Out Widget */}
-        <div id="check-in-section" className="scroll-mt-6">
+        {/* STEP 1: Daily Work Station & Live Check-In */}
+        <section id="step-1-punch" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 01"
+            title="Daily Work Station & Check-In"
+            subtitle="Profile identity, quick actions, and geofenced attendance check-in station"
+            tagColor="blue"
+            badge="Live Sync"
+          />
+          <EmployeeDashboardOverview user={user} />
+          <EmployeeQuickActionsBar onOpenCorrection={() => handleOpenCorrection()} />
           <LiveCheckInWidget />
-        </div>
+        </section>
 
-        {/* 4. Dashboard Filters Bar */}
-        <EmployeeDashboardFilters
-          dateFilter={dateFilter}
-          setDateFilter={setDateFilter}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          onRefresh={loadDashboardData}
-          isLoading={loading}
-        />
-
-        {/* 5. KPI Cards Grid (Work & Attendance Focused) */}
-        <EmployeeKpiGrid
-          hoursToday={hoursToday}
-          hoursThisWeek={hoursThisWeek}
-          attendanceRate={attendanceRate}
-          overtimeHours={overtimeHours}
-          leaveBalance="14 Days"
-          leavesUsed="4 Days"
-          pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
-          timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
-        />
-
-        {/* 6. 7-Day Shift Roster Schedule Preview */}
-        <EmployeeUpcomingRosterCard />
-
-        {/* 7. Manager & Team Lead Appreciations & Kudos Showcase */}
-        <EmployeeManagerKudosCard />
-
-        {/* 8. Shift Timings & Monthly Attendance Calendar */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-          <div className="w-full h-full">
-            <EmployeeShiftScheduleCard />
-          </div>
-          <div className="w-full h-full">
-            <AttendanceCalendarView />
-          </div>
-        </div>
-
-        {/* 9. Public Holidays & Leave Balances */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-          <div className="w-full h-full">
-            <PublicHolidaysCard />
-          </div>
-          <div className="w-full h-full">
-            <LeaveBalanceCard />
-          </div>
-        </div>
-
-        {/* 8. Work & Attendance Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <AnalyticsBarChart
-            title="Weekly Shift Hours & Overtime"
-            subtitle="Daily logged hours against standard 8-hour shift"
-            data={weeklyHoursData}
-            xKey="day"
-            series={[
-              { key: 'regular', name: 'Regular Hours (8h)', color: '#3B82F6' },
-              { key: 'overtime', name: 'Overtime (1.5x)', color: '#10B981' }
-            ]}
+        {/* STEP 2: Productivity & Attendance KPIs */}
+        <section id="step-2-kpis" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 02"
+            title="Productivity & Adherence KPIs"
+            subtitle="Hours logged today, weekly progress, lifetime adherence, and overtime tracking"
+            tagColor="emerald"
+            badge="Target: 40h/wk"
           />
-          <AnalyticsDonutChart
-            title="Monthly Attendance Distribution"
-            subtitle="Adherence, on-time arrivals, and PTO quota breakdown"
-            data={shiftDistributionData}
-            nameKey="name"
-            valueKey="value"
+          <EmployeeDashboardFilters
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            onRefresh={loadDashboardData}
+            isLoading={loading}
           />
-        </div>
+          <EmployeeKpiGrid
+            hoursToday={hoursToday}
+            hoursThisWeek={hoursThisWeek}
+            attendanceRate={attendanceRate}
+            overtimeHours={overtimeHours}
+            leaveBalance="14 Days"
+            leavesUsed="4 Days"
+            pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
+            timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
+          />
+        </section>
 
-        {/* 9. Team Presence, Monthly Timesheets, & Live Activity Timeline */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-          <div className="w-full h-full">
-            <EmployeeTeamLivePresenceCard />
+        {/* STEP 3: Shift Schedule & Monthly Attendance Calendar */}
+        <section id="step-3-schedule" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 03"
+            title="Shift Schedule & Monthly Attendance Calendar"
+            subtitle="Assigned work timings, 7-day upcoming roster, and monthly attendance day heat tiles"
+            tagColor="cyan"
+            badge="Auto-Rotated"
+          />
+          <EmployeeUpcomingRosterCard />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            <div className="w-full h-full">
+              <EmployeeShiftScheduleCard />
+            </div>
+            <div className="w-full h-full">
+              <AttendanceCalendarView />
+            </div>
           </div>
-          <div className="w-full h-full">
-            <EmployeeTimesheetSummaryCard />
+        </section>
+
+        {/* STEP 4: Corporate Public Holidays & Leave Entitlements */}
+        <section id="step-4-leaves" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 04"
+            title="Public Holidays & Leave Entitlements"
+            subtitle="2026 gazetted holidays for Bengaluru, Salem, Hyderabad, and remaining PTO quotas"
+            tagColor="purple"
+            badge="10 Paid Holidays"
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            <div className="w-full h-full">
+              <PublicHolidaysCard />
+            </div>
+            <div className="w-full h-full">
+              <LeaveBalanceCard />
+            </div>
           </div>
-          <div className="w-full h-full">
-            <EmployeeActivityTimelineFeed />
+        </section>
+
+        {/* STEP 5: Leadership Appreciations & Recognition */}
+        <section id="step-5-kudos" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 05"
+            title="Leadership Appreciations & Kudos"
+            subtitle="Direct accolades from your Department Manager and Team Lead with live reactions"
+            tagColor="amber"
+            badge="Recognition Stream"
+          />
+          <EmployeeManagerKudosCard />
+        </section>
+
+        {/* STEP 6: Shift Adherence & Performance Analytics */}
+        <section id="step-6-analytics" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 06"
+            title="Shift Adherence & Performance Analytics"
+            subtitle="Weekly regular vs overtime hours and monthly attendance distribution breakdowns"
+            tagColor="indigo"
+            badge="Visual Intelligence"
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AnalyticsBarChart
+              title="Weekly Shift Hours & Overtime"
+              subtitle="Daily logged hours against standard 8-hour shift"
+              data={weeklyHoursData}
+              xKey="day"
+              series={[
+                { key: 'regular', name: 'Regular Hours (8h)', color: '#3B82F6' },
+                { key: 'overtime', name: 'Overtime (1.5x)', color: '#10B981' }
+              ]}
+            />
+            <AnalyticsDonutChart
+              title="Monthly Attendance Distribution"
+              subtitle="Adherence, on-time arrivals, and PTO quota breakdown"
+              data={shiftDistributionData}
+              nameKey="name"
+              valueKey="value"
+            />
           </div>
-        </div>
+        </section>
 
-        {/* 10. Sprint Work Deliverables Table */}
-        <EmployeeSprintWork
-          tasks={tasks}
-          loading={loading}
-          handleUpdateTaskStatus={handleUpdateTaskStatus}
-        />
+        {/* STEP 7: Team Live Presence & Timesheet Submissions */}
+        <section id="step-7-team" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 07"
+            title="Team Live Presence & Timesheet Lock"
+            subtitle="Colleague status across Bengaluru, Salem, & Hyderabad, plus monthly timesheet lock"
+            tagColor="emerald"
+            badge="Cross-Hub Roster"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+            <div className="w-full h-full">
+              <EmployeeTeamLivePresenceCard />
+            </div>
+            <div className="w-full h-full">
+              <EmployeeTimesheetSummaryCard />
+            </div>
+            <div className="w-full h-full">
+              <EmployeeActivityTimelineFeed />
+            </div>
+          </div>
+        </section>
 
-        {/* 11. Attendance History Logs Table */}
-        <EmployeeAttendanceTable
-          filteredHistory={filteredHistory}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          onOpenCorrectionModal={handleOpenCorrection}
-        />
+        {/* STEP 8: Sprint Deliverables & Task Board */}
+        <section id="step-8-tasks" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 08"
+            title="Sprint Deliverables & Task Board"
+            subtitle="Track assigned deliverables, update task states, and review sprint completion"
+            tagColor="cyan"
+            badge="Sprint 24 Active"
+          />
+          <EmployeeSprintWork
+            tasks={tasks}
+            loading={loading}
+            handleUpdateTaskStatus={handleUpdateTaskStatus}
+          />
+        </section>
 
-        {/* 12. Attendance Correction Requests & Manager/HR Approval Stream */}
-        <EmployeeCorrectionRequestsCard onRequestNew={handleOpenCorrection} />
+        {/* STEP 9: Detailed Attendance Logs & Correction Workflow */}
+        <section id="step-9-logs" className="space-y-5 scroll-mt-24">
+          <StepSectionHeader
+            stepNumber="Step 09"
+            title="Audit Logs & Attendance Corrections"
+            subtitle="Historical check-in records, audit verification, and punch correction requests"
+            tagColor="rose"
+            badge="Audited Records"
+          />
+          <EmployeeAttendanceTable
+            filteredHistory={filteredHistory}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            onOpenCorrectionModal={handleOpenCorrection}
+          />
+          <EmployeeCorrectionRequestsCard onRequestNew={handleOpenCorrection} />
+        </section>
 
         {/* Correction Request Modal */}
         {isCorrectionModalOpen && (
