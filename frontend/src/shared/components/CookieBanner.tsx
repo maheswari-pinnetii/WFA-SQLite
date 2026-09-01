@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Cookie, Settings, Check, X } from 'lucide-react';
+import { Cookie, Settings, Check, X, ShieldCheck } from 'lucide-react';
+import { Button } from '../../components/ui/button';
 
 export const CookieBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
@@ -13,8 +14,7 @@ export const CookieBanner: React.FC = () => {
   useEffect(() => {
     const consent = localStorage.getItem('wfa_cookie_consent');
     if (!consent) {
-      // Delay showing slightly for smooth entrance
-      const timer = setTimeout(() => setVisible(true), 1200);
+      const timer = setTimeout(() => setVisible(true), 1000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -49,44 +49,48 @@ export const CookieBanner: React.FC = () => {
     <div
       role="region"
       aria-label="Cookie consent banner"
-      className="fixed bottom-4 left-4 right-4 sm:left-6 sm:right-auto sm:max-w-md z-[9990] animate-fadeIn"
+      className="fixed bottom-16 md:bottom-6 right-4 md:right-6 max-w-sm sm:max-w-md w-full z-[9990] animate-fadeIn"
     >
-      <div className="glass-panel p-5 rounded-2xl bg-[var(--bg-secondary)]/95 border border-[var(--border-color)] shadow-2xl backdrop-blur-xl space-y-4">
-        <div className="flex items-start gap-3.5">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
-            <Cookie size={20} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-              Privacy & Cookie Preferences
-            </h3>
-            <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-              We use strictly necessary cookies to ensure our workforce management platform functions securely, plus optional analytics to optimize performance.
-            </p>
+      <div className="p-5 rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-2xl backdrop-blur-xl space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+              <Cookie size={18} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                Privacy & Cookies
+              </h3>
+              <p className="text-[11px] text-slate-400">Enterprise Data Compliance</p>
+            </div>
           </div>
           <button
             onClick={handleAcceptEssential}
-            className="p-1 text-slate-400 hover:text-slate-200 rounded-lg transition-colors"
-            aria-label="Close and accept essential only"
+            className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors cursor-pointer"
+            aria-label="Close"
           >
             <X size={16} />
           </button>
         </div>
 
+        <p className="text-xs text-slate-300 leading-relaxed">
+          We use strictly necessary cookies to ensure secure session authentication, role-based access, and system telemetry.
+        </p>
+
         {showPreferences && (
-          <div className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-2.5 text-xs">
+          <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 text-xs">
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-bold text-[var(--text-primary)]">Strictly Essential</span>
-                <p className="text-[11px] text-[var(--text-secondary)]">Required for session security & MFA validation</p>
+                <span className="font-bold text-slate-200">Strictly Necessary</span>
+                <p className="text-[10px] text-slate-400">Session auth & zero-trust tokens</p>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-500/20 text-blue-400">Always Active</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-500/20 text-blue-400">Always On</span>
             </div>
 
-            <div className="flex items-center justify-between pt-1 border-t border-[var(--border-color)]">
+            <div className="flex items-center justify-between pt-2 border-t border-slate-800">
               <div>
-                <span className="font-bold text-[var(--text-primary)]">Performance & Analytics</span>
-                <p className="text-[11px] text-[var(--text-secondary)]">Helps improve dashboard query speeds</p>
+                <span className="font-bold text-slate-200">Analytics & Telemetry</span>
+                <p className="text-[10px] text-slate-400">Helps optimize live shift queries</p>
               </div>
               <input
                 type="checkbox"
@@ -95,52 +99,46 @@ export const CookieBanner: React.FC = () => {
                 className="rounded accent-blue-600 cursor-pointer w-4 h-4"
               />
             </div>
-
-            <div className="flex items-center justify-between pt-1 border-t border-[var(--border-color)]">
-              <div>
-                <span className="font-bold text-[var(--text-primary)]">UI Functional State</span>
-                <p className="text-[11px] text-[var(--text-secondary)]">Saves sidebar layout & theme preferences</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={preferences.functional}
-                onChange={(e) => setPreferences({ ...preferences, functional: e.target.checked })}
-                className="rounded accent-blue-600 cursor-pointer w-4 h-4"
-              />
-            </div>
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 pt-1">
+        <div className="flex items-center gap-2 pt-1">
           {showPreferences ? (
-            <button
+            <Button
+              variant="default"
+              size="sm"
               onClick={handleSavePreferences}
-              className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5"
+              className="flex-1"
             >
-              <Check size={14} /> Save Choices
-            </button>
+              <Check size={14} className="mr-1" /> Save Preferences
+            </Button>
           ) : (
             <>
-              <button
+              <Button
+                variant="default"
+                size="sm"
                 onClick={handleAcceptAll}
-                className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition-all"
+                className="flex-1 font-bold text-xs"
               >
                 Accept All
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleAcceptEssential}
-                className="py-2 px-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-xs font-semibold text-[var(--text-primary)] transition-all"
+                className="font-bold text-xs"
               >
                 Essential Only
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowPreferences(!showPreferences)}
-                className="p-2 rounded-xl border border-[var(--border-color)] text-slate-400 hover:text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-all"
-                aria-label="Customize cookie settings"
+                className="px-2 text-slate-400 hover:text-white"
                 title="Customize preferences"
               >
-                <Settings size={15} />
-              </button>
+                <Settings size={16} />
+              </Button>
             </>
           )}
         </div>

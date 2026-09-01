@@ -7,8 +7,11 @@ export const setAccessToken = (token: string | null) => {
   accessToken = token;
 };
 
+const rawBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();
+const normalizedBaseUrl = rawBaseUrl.replace(/\/v1\/?$/, '').replace(/\/$/, '');
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  baseURL: normalizedBaseUrl,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

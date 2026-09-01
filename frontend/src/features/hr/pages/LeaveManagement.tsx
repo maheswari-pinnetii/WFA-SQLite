@@ -310,8 +310,16 @@ export const LeaveManagement: React.FC = () => {
     }
   };
 
+  const handleRefresh = () => {
+    setIsLoading(true);
+    setError(null);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 600);
+  };
+
   return (
-    <RoleGuard allowedRoles={[Role.HR, Role.ADMIN, Role.MANAGER, Role.TEAM_LEAD]}>
+    <RoleGuard allowedRoles={[Role.HR, Role.ADMIN, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]}>
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -325,6 +333,10 @@ export const LeaveManagement: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2.5">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+              <RefreshCw size={14} className={`mr-1.5 text-slate-400 ${isLoading ? 'animate-spin' : ''}`} />
+              {isLoading ? 'Syncing...' : 'Sync Live Data'}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setIsPolicyModalOpen(true)}>
               <Shield size={14} className="mr-1.5 text-blue-400" /> Leave Policies
             </Button>
@@ -333,6 +345,22 @@ export const LeaveManagement: React.FC = () => {
             </MotionButton>
           </div>
         </div>
+
+        {/* Error / Retry Banner if error occurs */}
+        {error && (
+          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} className="text-rose-400 shrink-0" />
+              <div>
+                <h4 className="text-sm font-bold text-rose-300">Unable to load leave records</h4>
+                <p className="text-xs text-slate-300">{error}</p>
+              </div>
+            </div>
+            <Button variant="destructive" size="sm" onClick={handleRefresh}>
+              Retry Connection
+            </Button>
+          </div>
+        )}
 
         {/* Top KPI Metrics Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

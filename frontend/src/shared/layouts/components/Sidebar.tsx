@@ -45,6 +45,7 @@ import {
   ChevronRight,
   Search,
   X,
+  Palmtree,
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -120,9 +121,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
       {
-        category: 'Attendance',
+        category: 'Attendance & Leaves',
         items: [
           { label: 'Overview', path: '/admin/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
           { label: 'Attendance History', path: '/admin/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
           { label: 'Shifts', path: '/admin/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Corrections', path: '/admin/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
@@ -196,9 +199,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
       {
-        category: 'Attendance',
+        category: 'Attendance & Leaves',
         items: [
           { label: 'Overview', path: '/hr/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
           { label: 'Attendance History', path: '/hr/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
           { label: 'Shifts', path: '/hr/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Corrections', path: '/hr/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
@@ -409,6 +414,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Requests',
         items: [
+          { label: 'Leave & PTO Requests', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Correction Requests', path: '/employee/corrections', icon: <FileText size={18} strokeWidth={2} className="text-blue-400" /> },
         ],
       },
