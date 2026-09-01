@@ -969,8 +969,8 @@ export const PublicHolidaysCard: React.FC = () => {
       </div>
 
       <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-        <span className="text-[11px] text-slate-400">Paid statutory time-off</span>
-        <Link to="/hr/leaves" className="text-amber-400 hover:text-amber-300 font-bold text-[11px]">
+        <span className="text-[11px] text-slate-400">Bengaluru &bull; Salem &bull; Hyderabad</span>
+        <Link to="/employee/holidays" className="text-amber-400 hover:text-amber-300 font-bold text-[11px]">
           Full Holiday Calendar &rarr;
         </Link>
       </div>

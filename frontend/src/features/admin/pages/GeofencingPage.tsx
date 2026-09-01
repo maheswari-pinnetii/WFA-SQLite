@@ -6,9 +6,9 @@ import { MapPin, ShieldCheck, Navigation, Activity } from 'lucide-react';
 
 export const GeofencingPage: React.FC = () => {
   const geofencedLocations = [
-    { name: 'MAHE HQ Office (Bangalore)', latitude: '12.9716', longitude: '77.5946', radius: '200m', compliance: '100% compliant' },
-    { name: 'SF Technology Campus', latitude: '37.7749', longitude: '-122.4194', radius: '150m', compliance: '98.5% compliant' },
-    { name: 'London Finance Hub', latitude: '51.5074', longitude: '-0.1278', radius: '100m', compliance: '100% compliant' }
+    { name: 'Bengaluru Global Tech Campus', latitude: '12.9716', longitude: '77.5946', radius: '200m', compliance: '100% compliant' },
+    { name: 'Salem Operations & Regional Hub', latitude: '11.6643', longitude: '78.1460', radius: '200m', compliance: '99.5% compliant' },
+    { name: 'Hyderabad Innovation Tower', latitude: '17.4435', longitude: '78.3772', radius: '200m', compliance: '100% compliant' }
   ];
 
   return (

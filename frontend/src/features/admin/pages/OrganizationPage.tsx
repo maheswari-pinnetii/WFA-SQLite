@@ -34,7 +34,7 @@ export const OrganizationPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MinimalKpiCard title="Total Headcount" value="301 Employees" icon={<Users size={18} />} iconBgColor="blue" trend="+12% Growth Q2" trendType="positive" />
           <MinimalKpiCard title="Departments" value="6 Active" icon={<Building2 size={18} />} iconBgColor="indigo" trend="Full Structural Coverage" trendType="positive" />
-          <MinimalKpiCard title="Global Locations" value="4 Offices" icon={<MapPin size={18} />} iconBgColor="cyan" trend="SF, NY, London, Tokyo" trendType="positive" />
+          <MinimalKpiCard title="Corporate Hubs" value="3 Locations" icon={<MapPin size={18} />} iconBgColor="cyan" trend="Bengaluru, Salem, Hyderabad" trendType="positive" />
           <MinimalKpiCard title="Reporting Line" value="100% Mapped" icon={<GitBranch size={18} />} iconBgColor="emerald" trend="Zero Unassigned Staff" trendType="positive" />
         </div>
 

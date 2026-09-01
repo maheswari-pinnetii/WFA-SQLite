@@ -53,11 +53,11 @@ export const OrgAdminDashboard: React.FC = () => {
 
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
-            <span>Global Locations</span>
+            <span>Corporate Hubs</span>
             <MapPin size={18} className="text-cyan-400" />
           </div>
-          <p className="text-2xl font-black text-[var(--text-primary)]">4 Offices</p>
-          <p className="text-[11px] text-purple-400 font-bold">SF, NY, London, Tokyo</p>
+          <p className="text-2xl font-black text-[var(--text-primary)]">3 Locations</p>
+          <p className="text-[11px] text-cyan-400 font-bold">Bengaluru, Salem, Hyderabad</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">

@@ -411,7 +411,7 @@ export const Profile: React.FC = () => {
                 <MapPin size={18} className="text-amber-500 shrink-0" />
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Location / Branch</p>
-                  <p className="font-bold text-[var(--text-primary)]">New York HQ - Tech Campus</p>
+                  <p className="font-bold text-[var(--text-primary)]">Bengaluru - Global Tech HQ</p>
                 </div>
               </div>
 

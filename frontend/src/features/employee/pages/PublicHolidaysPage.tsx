@@ -44,128 +44,128 @@ export const PublicHolidaysPage: React.FC = () => {
       quarter: 'Q1',
       type: 'Mandatory',
       isLongWeekend: false,
-      region: 'Global / All Locations',
-      description: 'Official corporate non-working day for global offices celebrating the start of the year.'
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'Official corporate non-working day celebrating the start of the year across all hubs.'
     },
     {
       id: 'hol-2',
-      name: 'Martin Luther King Jr. Day',
-      date: '2026-01-19',
-      formattedDate: 'Jan 19, 2026',
-      day: 'Monday',
+      name: 'Makar Sankranti / Pongal',
+      date: '2026-01-14',
+      formattedDate: 'Jan 14, 2026',
+      day: 'Wednesday',
       quarter: 'Q1',
       type: 'Mandatory',
-      isLongWeekend: true,
-      region: 'US / Global HQ',
-      description: 'Federal holiday honoring civil rights leader Martin Luther King Jr. (3-Day Long Weekend).'
+      isLongWeekend: false,
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'Harvest festival celebrated across Karnataka, Tamil Nadu, and Telangana.'
     },
     {
       id: 'hol-3',
-      name: "Presidents' Day / Washington Birthday",
-      date: '2026-02-16',
-      formattedDate: 'Feb 16, 2026',
+      name: 'Republic Day',
+      date: '2026-01-26',
+      formattedDate: 'Jan 26, 2026',
       day: 'Monday',
       quarter: 'Q1',
       type: 'Mandatory',
       isLongWeekend: true,
-      region: 'US / Global HQ',
-      description: 'Federal holiday honoring US leadership and George Washington (3-Day Long Weekend).'
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'National holiday honoring the Constitution of India (3-Day Long Weekend).'
     },
     {
       id: 'hol-4',
-      name: 'Spring Equinox / Floating Holiday 1',
-      date: '2026-03-20',
-      formattedDate: 'Mar 20, 2026',
-      day: 'Friday',
+      name: 'Ugadi / Telugu & Kannada New Year',
+      date: '2026-03-19',
+      formattedDate: 'Mar 19, 2026',
+      day: 'Thursday',
       quarter: 'Q1',
-      type: 'Floating / Optional',
-      isLongWeekend: true,
-      region: 'Global / All Locations',
-      description: 'Designated optional floating holiday for personal or cultural observances.'
+      type: 'Mandatory',
+      isLongWeekend: false,
+      region: 'Bengaluru, Hyderabad',
+      description: 'New Year celebration for Bengaluru and Hyderabad innovation centers.'
     },
     {
       id: 'hol-5',
-      name: 'Memorial Day',
-      date: '2026-05-25',
-      formattedDate: 'May 25, 2026',
-      day: 'Monday',
+      name: 'Tamil New Year / Puthandu',
+      date: '2026-04-14',
+      formattedDate: 'Apr 14, 2026',
+      day: 'Tuesday',
       quarter: 'Q2',
       type: 'Mandatory',
-      isLongWeekend: true,
-      region: 'Global / All Locations',
-      description: 'National day of remembrance honoring fallen service members (3-Day Long Weekend).'
+      isLongWeekend: false,
+      region: 'Salem Regional Hub',
+      description: 'Traditional celebration for our Salem operations and regional offices.'
     },
     {
       id: 'hol-6',
-      name: 'Juneteenth National Independence Day',
-      date: '2026-06-19',
-      formattedDate: 'Jun 19, 2026',
+      name: 'May Day / Labor Day',
+      date: '2026-05-01',
+      formattedDate: 'May 01, 2026',
       day: 'Friday',
       quarter: 'Q2',
       type: 'Mandatory',
       isLongWeekend: true,
-      region: 'US / Global HQ',
-      description: 'Commemorating the emancipation of enslaved African Americans (3-Day Long Weekend).'
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'International Workers Day honoring the global workforce (3-Day Long Weekend).'
     },
     {
       id: 'hol-7',
-      name: 'Independence Day (Observed)',
-      date: '2026-07-03',
-      formattedDate: 'Jul 03, 2026',
-      day: 'Friday',
+      name: 'Independence Day',
+      date: '2026-08-15',
+      formattedDate: 'Aug 15, 2026',
+      day: 'Saturday',
       quarter: 'Q3',
       type: 'Mandatory',
-      isLongWeekend: true,
-      region: 'Global / All Locations',
-      description: 'Celebrating American Independence with a mandatory office shutdown.'
+      isLongWeekend: false,
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'National holiday marking Independence with corporate celebrations.'
     },
     {
       id: 'hol-8',
-      name: 'Labor Day',
-      date: '2026-09-07',
-      formattedDate: 'Sep 07, 2026',
+      name: 'Ganesh Chaturthi / Vinayaka Chavithi',
+      date: '2026-09-14',
+      formattedDate: 'Sep 14, 2026',
       day: 'Monday',
       quarter: 'Q3',
       type: 'Mandatory',
       isLongWeekend: true,
-      region: 'Global / All Locations',
-      description: 'Honoring the labor movement and American workers (3-Day Long Weekend).'
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'Major cultural celebration across south tech centers (3-Day Long Weekend).'
     },
     {
       id: 'hol-9',
-      name: 'Autumn Harvest / Floating Holiday 2',
-      date: '2026-10-23',
-      formattedDate: 'Oct 23, 2026',
+      name: 'Gandhi Jayanti',
+      date: '2026-10-02',
+      formattedDate: 'Oct 02, 2026',
       day: 'Friday',
       quarter: 'Q4',
-      type: 'Floating / Optional',
+      type: 'Mandatory',
       isLongWeekend: true,
-      region: 'Global / All Locations',
-      description: 'Designated optional floating holiday for personal or cultural observances.'
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'National day honoring Mahatma Gandhi (3-Day Long Weekend).'
     },
     {
       id: 'hol-10',
-      name: 'Thanksgiving Day',
-      date: '2026-11-26',
-      formattedDate: 'Nov 26, 2026',
-      day: 'Thursday',
+      name: 'Ayudha Pooja / Vijaya Dashami',
+      date: '2026-10-20',
+      formattedDate: 'Oct 20, 2026',
+      day: 'Tuesday',
       quarter: 'Q4',
       type: 'Mandatory',
       isLongWeekend: false,
-      region: 'Global / All Locations',
-      description: 'National holiday of gratitude and family celebration.'
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'Dussehra festive holiday celebrating triumph and productivity across all offices.'
     },
     {
       id: 'hol-11',
-      name: 'Day After Thanksgiving (Black Friday)',
-      date: '2026-11-27',
-      formattedDate: 'Nov 27, 2026',
-      day: 'Friday',
+      name: 'Deepavali / Diwali Festival of Lights',
+      date: '2026-11-09',
+      formattedDate: 'Nov 09, 2026',
+      day: 'Monday',
       quarter: 'Q4',
       type: 'Mandatory',
       isLongWeekend: true,
-      region: 'Global / All Locations',
-      description: 'Company-wide holiday creating a 4-Day Thanksgiving Long Weekend!'
+      region: 'Bengaluru, Salem, Hyderabad',
+      description: 'Grand Festival of Lights celebrated with office shutdown (3-Day Long Weekend).'
     },
     {
       id: 'hol-12',
@@ -176,7 +176,7 @@ export const PublicHolidaysPage: React.FC = () => {
       quarter: 'Q4',
       type: 'Mandatory',
       isLongWeekend: true,
-      region: 'Global / All Locations',
+      region: 'Bengaluru, Salem, Hyderabad',
       description: 'Global holiday celebration (3-Day Long Weekend).'
     }
   ];
@@ -328,6 +328,17 @@ export const PublicHolidaysPage: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedRegion}
+            onChange={(e) => setSelectedRegion(e.target.value)}
+            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500"
+          >
+            <option value="All Locations">All Hubs (Bengaluru, Salem, Hyderabad)</option>
+            <option value="Bengaluru">Bengaluru Hub</option>
+            <option value="Salem">Salem Hub</option>
+            <option value="Hyderabad">Hyderabad Hub</option>
+          </select>
+
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
