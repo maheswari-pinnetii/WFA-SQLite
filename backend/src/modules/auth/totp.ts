@@ -71,11 +71,13 @@ export const generateQrCode = async (email: string, secret: string): Promise<{ o
  * Validate standard 6-digit TOTP code
  */
 export const verifyTotpCode = async (code: string, secret: string): Promise<boolean> => {
-  if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
+  if (!code) return false;
+  const cleanedCode = code.toString().trim().replace(/[\s-]+/g, '');
+  if (cleanedCode.length !== 6 || !/^\d+$/.test(cleanedCode)) {
     return false;
   }
   try {
-    const result = await totpInstance.verify(code, { secret, window: 4 } as any);
+    const result = await totpInstance.verify(cleanedCode, { secret, window: 4 } as any);
     return result.valid;
   } catch (err) {
     return false;
@@ -108,8 +110,19 @@ export const generateRecoveryCodes = (): { plaintextCodes: string[]; hashedCodes
  */
 export const verifyRecoveryCode = (userInput: string, storedHashes: string[]): string | null => {
   if (!userInput) return null;
-  const hash = crypto.createHash('sha256').update(userInput.trim()).digest('hex');
-  return storedHashes.includes(hash) ? hash : null;
+  const cleaned = userInput.trim().toUpperCase();
+  const formattedWithDash = cleaned.length === 10 && !cleaned.includes('-')
+    ? `${cleaned.substring(0, 5)}-${cleaned.substring(5)}`
+    : cleaned;
+
+  const rawHash = crypto.createHash('sha256').update(userInput.trim()).digest('hex');
+  const upperHash = crypto.createHash('sha256').update(cleaned).digest('hex');
+  const formattedHash = crypto.createHash('sha256').update(formattedWithDash).digest('hex');
+
+  for (const h of [rawHash, upperHash, formattedHash]) {
+    if (storedHashes.includes(h)) return h;
+  }
+  return null;
 };
 
 export const getTotpCode = async (secret: string): Promise<string> => {

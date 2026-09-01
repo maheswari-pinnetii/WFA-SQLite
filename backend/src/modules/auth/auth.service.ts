@@ -199,7 +199,8 @@ export const generateAndSendOtp = async (user: any, method: string = 'email') =>
   };
 };
 
-export const verifyOtp = async (challengeId: string, code: string) => {
+export const verifyOtp = async (challengeId: string, rawCode: string) => {
+  const code = (rawCode || '').toString().trim().replace(/[\s-]+/g, '');
   const challenge = await userRepository.findMfaChallengeById(challengeId);
   if (!challenge) {
     return { success: false, message: 'MFA session expired or invalid' };
@@ -339,7 +340,8 @@ export const enrollTotp = async (user: any) => {
   };
 };
 
-export const confirmTotpEnroll = async (userId: string, code: string) => {
+export const confirmTotpEnroll = async (userId: string, rawCode: string) => {
+  const code = (rawCode || '').toString().trim().replace(/[\s-]+/g, '');
   const settings = await userRepository.findMfaSettingsByUserId(userId);
   if (!settings) {
     throw new Error('MFA setup settings not found. Start setup first.');
@@ -385,7 +387,8 @@ export const confirmTotpEnroll = async (userId: string, code: string) => {
   };
 };
 
-export const verifyTotpChallenge = async (challengeId: string, code: string) => {
+export const verifyTotpChallenge = async (challengeId: string, rawCode: string) => {
+  const code = (rawCode || '').toString().trim().replace(/\s+/g, '');
   const challenge = await userRepository.findMfaChallengeById(challengeId);
   if (!challenge) {
     return { success: false, message: 'Unable to verify authentication code.' };
