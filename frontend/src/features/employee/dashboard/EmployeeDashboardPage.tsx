@@ -37,11 +37,264 @@ import {
   Activity,
   Send,
   Coffee,
-  Check
+  Check,
+  Sparkles,
+  ThumbsUp,
+  Heart,
+  MessageSquare,
+  Flame,
+  Smile
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
 import { Button } from '../../../components/ui/button';
+
+// 1f. Manager & Team Lead Appreciations / Kudos Showcase
+export const EmployeeManagerKudosCard: React.FC = () => {
+  const [reactions, setReactions] = useState<{ [key: string]: { claps: number; hearts: number; rockets: number } }>({
+    'kudos-1': { claps: 14, hearts: 8, rockets: 19 },
+    'kudos-2': { claps: 22, hearts: 12, rockets: 7 },
+    'kudos-3': { claps: 16, hearts: 15, rockets: 10 }
+  });
+  const [acknowledged, setAcknowledged] = useState<{ [key: string]: boolean }>({});
+  const [thankYouModalKudos, setThankYouModalKudos] = useState<any | null>(null);
+  const [thankYouMsg, setThankYouMsg] = useState('');
+  const [toastMsg, setToastMsg] = useState('');
+
+  const appreciations = [
+    {
+      id: 'kudos-1',
+      author: 'David Sterling',
+      role: 'Engineering Manager',
+      department: 'Platform Infra',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      badge: 'Sprint MVP & Architecture Excellence',
+      badgeColor: 'emerald',
+      date: 'Aug 30, 2026',
+      quote: 'Alex delivered the zero-trust biometric geofence engine 3 days ahead of schedule with 100% test coverage. Exceptional technical leadership and dedication during sprint 24!',
+      points: '+150 Recognition Points'
+    },
+    {
+      id: 'kudos-2',
+      author: 'Marcus Vance',
+      role: 'Team Lead',
+      department: 'Mobile Core',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      badge: 'Shift Reliability & Punctuality Champion',
+      badgeColor: 'teal',
+      date: 'Aug 26, 2026',
+      quote: 'Maintained 99.8% on-time arrival and shift adherence for 3 consecutive months. Always steps in to cover emergency deployments and assists peers across time zones!',
+      points: '+100 Recognition Points'
+    },
+    {
+      id: 'kudos-3',
+      author: 'Elena Rostova',
+      role: 'HR Operations & People Lead',
+      department: 'People Operations',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+      badge: 'Team Culture & Mentorship Hero',
+      badgeColor: 'purple',
+      date: 'Aug 18, 2026',
+      quote: 'Recognized for mentoring 3 newly onboarded developers and leading weekly architecture retrospectives. Thank you for building a positive, high-performing team culture!',
+      points: '+120 Recognition Points'
+    }
+  ];
+
+  const handleReact = (id: string, type: 'claps' | 'hearts' | 'rockets') => {
+    setReactions(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [type]: (prev[id]?.[type] || 0) + 1
+      }
+    }));
+  };
+
+  const handleSendThankYou = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!thankYouModalKudos) return;
+    setToastMsg(`Thank you note sent to ${thankYouModalKudos.author}! 💌`);
+    setAcknowledged(prev => ({ ...prev, [thankYouModalKudos.id]: true }));
+    setThankYouModalKudos(null);
+    setThankYouMsg('');
+    setTimeout(() => setToastMsg(''), 3500);
+  };
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]/60">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sparkles size={20} className="text-amber-400 animate-pulse" />
+            <h3 className="text-base font-extrabold text-[var(--text-primary)]">
+              Manager & Team Lead Appreciations
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30">
+              Kudos & Recognition
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Praise, spot awards, and performance accolades awarded by your leadership team.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <span className="text-xs font-bold text-white block">370 Total Points</span>
+            <span className="text-[10px] text-emerald-400 font-semibold font-mono">Top 5% in Engineering</span>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 font-black text-sm shadow-md">
+            🏆 3
+          </div>
+        </div>
+      </div>
+
+      {toastMsg && (
+        <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+          <CheckCircle2 size={16} /> {toastMsg}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+        {appreciations.map((item) => {
+          const count = reactions[item.id] || { claps: 0, hearts: 0, rockets: 0 };
+          const isAcked = acknowledged[item.id];
+
+          return (
+            <div
+              key={item.id}
+              className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700/80 transition-all flex flex-col justify-between space-y-3 relative overflow-hidden group shadow-lg"
+            >
+              <div className="space-y-3">
+                {/* Author Info */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src={item.avatar}
+                      alt={item.author}
+                      className="w-9 h-9 rounded-xl object-cover border border-slate-700 shrink-0"
+                    />
+                    <div>
+                      <h4 className="text-xs font-bold text-white leading-tight">{item.author}</h4>
+                      <p className="text-[10px] text-slate-400">{item.role}</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">{item.date}</span>
+                </div>
+
+                {/* Badge Banner */}
+                <div className={`p-2 rounded-xl text-xs font-bold flex items-center justify-between ${
+                  item.badgeColor === 'emerald'
+                    ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30'
+                    : item.badgeColor === 'teal'
+                    ? 'bg-teal-950/60 text-teal-300 border border-teal-500/30'
+                    : 'bg-purple-950/60 text-purple-300 border border-purple-500/30'
+                }`}>
+                  <span className="truncate pr-1 text-[11px] font-extrabold flex items-center gap-1.5">
+                    <Award size={13} /> {item.badge}
+                  </span>
+                  <span className="text-[9px] font-mono shrink-0 bg-black/30 px-1.5 py-0.5 rounded">
+                    {item.points}
+                  </span>
+                </div>
+
+                {/* Quote */}
+                <p className="text-xs text-slate-300 italic leading-relaxed bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                  "{item.quote}"
+                </p>
+              </div>
+
+              {/* Reaction Buttons & Action */}
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleReact(item.id, 'claps')}
+                    title="Send Claps"
+                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
+                  >
+                    👏 {count.claps}
+                  </button>
+                  <button
+                    onClick={() => handleReact(item.id, 'hearts')}
+                    title="Send Heart"
+                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-rose-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
+                  >
+                    ❤️ {count.hearts}
+                  </button>
+                  <button
+                    onClick={() => handleReact(item.id, 'rockets')}
+                    title="Send Rocket"
+                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-amber-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
+                  >
+                    🚀 {count.rockets}
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setThankYouModalKudos(item)}
+                  disabled={isAcked}
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
+                    isAcked
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
+                      : 'bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30'
+                  }`}
+                >
+                  {isAcked ? '✓ Replied' : 'Reply 💌'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Thank You Reply Modal */}
+      {thankYouModalKudos && (
+        <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <Sparkles className="text-amber-400" size={18} />
+                <h3 className="text-sm font-bold text-white">
+                  Reply to {thankYouModalKudos.author}
+                </h3>
+              </div>
+              <button
+                onClick={() => setThankYouModalKudos(null)}
+                className="text-slate-400 hover:text-white text-xl leading-none font-bold cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSendThankYou} className="space-y-3 text-xs">
+              <p className="text-slate-300">
+                Send a personalized acknowledgment or thank you note to <strong className="text-white">{thankYouModalKudos.author} ({thankYouModalKudos.role})</strong>:
+              </p>
+
+              <textarea
+                required
+                rows={3}
+                value={thankYouMsg}
+                onChange={(e) => setThankYouMsg(e.target.value)}
+                placeholder="Thank you so much! Really appreciate the recognition and support..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500"
+              />
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <Button variant="outline" size="sm" type="button" onClick={() => setThankYouModalKudos(null)}>
+                  Cancel
+                </Button>
+                <Button size="sm" type="submit">
+                  Send Thank You Note 💌
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // 1a. Employee Quick Actions Command Bar
 export const EmployeeQuickActionsBar: React.FC<{
@@ -1280,7 +1533,10 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* 6. 7-Day Shift Roster Schedule Preview */}
         <EmployeeUpcomingRosterCard />
 
-        {/* 7. Shift Timings, Public Holidays, Calendar & Leave Balances */}
+        {/* 7. Manager & Team Lead Appreciations & Kudos Showcase */}
+        <EmployeeManagerKudosCard />
+
+        {/* 8. Shift Timings, Public Holidays, Calendar & Leave Balances */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
           <div className="w-full h-full">
             <EmployeeShiftScheduleCard />
