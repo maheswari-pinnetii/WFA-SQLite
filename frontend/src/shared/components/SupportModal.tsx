@@ -45,8 +45,16 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="glass-panel w-full max-w-2xl bg-[var(--bg-secondary)] border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="support-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn cursor-pointer"
+    >
+      <div className="glass-panel w-full max-w-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] cursor-default">
         {/* Header */}
         <div className="px-6 py-4 border-b border-[var(--border-color)] flex items-center justify-between bg-blue-600/10">
           <div className="flex items-center gap-3">
@@ -54,15 +62,18 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
               <LifeBuoy size={22} />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-[var(--text-primary)]">Company Support & IT Helpdesk</h2>
+              <h2 id="support-modal-title" className="text-lg font-bold text-[var(--text-primary)]">Company Support & IT Helpdesk</h2>
               <p className="text-xs text-slate-400">Enterprise Support Services & SLA Guarantee</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-[var(--bg-tertiary)] transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-[var(--bg-tertiary)] transition-colors cursor-pointer"
+            aria-label="Close dialog"
+            title="Close (Esc)"
           >
-            <X size={20} />
+            <X size={22} />
           </button>
         </div>
 
