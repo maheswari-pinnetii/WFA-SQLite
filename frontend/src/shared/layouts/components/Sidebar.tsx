@@ -203,6 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Overview', path: '/hr/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-blue-400" /> },
           { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Public Holidays (2026)', path: '/employee/holidays', icon: <Calendar size={18} strokeWidth={2} className="text-amber-400" />, badge: { text: '12 Days', variant: 'amber' } },
           { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
           { label: 'Attendance History', path: '/hr/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
           { label: 'Shift Timings', path: '/hr/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
@@ -406,15 +407,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ],
       },
       {
-        category: 'Attendance & Clock',
+        category: 'Attendance & Leaves',
         items: [
           { label: 'My Attendance Logs', path: '/employee/attendance', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Correction Requests', path: '/employee/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Leave & PTO Requests', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Punch Corrections', path: '/employee/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
+          { label: 'Leave & PTO Requests', path: '/employee/leave', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
-        category: 'Schedules & Shifts',
+        category: 'Schedules & Holidays',
         items: [
           { 
             label: 'Employee Shift Timings', 
@@ -423,10 +424,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             badge: { text: '09:00 - 18:00', variant: 'emerald' }
           },
           { 
-            label: 'Public Holidays (2026)', 
-            path: '/hr/leaves', 
+            label: 'Public Holidays Calendar (2026)', 
+            path: '/employee/holidays', 
             icon: <Calendar size={18} strokeWidth={2} className="text-amber-400" />,
-            badge: { text: '10 Days', variant: 'amber' }
+            badge: { text: '12 Days', variant: 'amber' }
           },
         ],
       },

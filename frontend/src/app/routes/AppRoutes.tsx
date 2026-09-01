@@ -53,6 +53,7 @@ import { MyPerformance } from '../../features/employee/pages/MyPerformance';
 import { EmployeeRequestsPage } from '../../features/employee/pages/EmployeeRequestsPage';
 import { MyGoalsPage } from '../../features/employee/pages/MyGoalsPage';
 import { PayslipsPage } from '../../features/employee/pages/PayslipsPage';
+import { PublicHolidaysPage } from '../../features/employee/pages/PublicHolidaysPage';
 
 // Error Pages
 import { NotFoundPage, AccessDeniedPage, ServerErrorPage } from '../../features/error';
@@ -264,6 +265,9 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/employee/skills-coverage" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><SkillCoveragePage /></RoleGuard>} />
                 <Route path="/employee/skills-gaps" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><SkillGapsPage /></RoleGuard>} />
                 <Route path="/employee/leave" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
+                <Route path="/employee/holidays" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><PublicHolidaysPage /></RoleGuard>} />
+                <Route path="/holidays" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><PublicHolidaysPage /></RoleGuard>} />
+                <Route path="/public-holidays" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><PublicHolidaysPage /></RoleGuard>} />
                 <Route path="/employee/performance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyPerformance /></RoleGuard>} />
                 <Route path="/employee/goals" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyGoalsPage /></RoleGuard>} />
                 <Route path="/employee/payslips" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><PayslipsPage /></RoleGuard>} />
