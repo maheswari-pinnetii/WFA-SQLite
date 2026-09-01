@@ -42,6 +42,7 @@ export const seedSqlite = async () => {
     DELETE FROM skills;
     DELETE FROM performancerecords;
     DELETE FROM tasks;
+    DELETE FROM attendancerecords;
   `);
 
   console.log('[SQLite Seeder] Starting database seeding...');
@@ -317,6 +318,155 @@ export const seedSqlite = async () => {
         );
       });
       console.log('Seeded Sprint Tasks.');
+    }
+
+    // 9. Seed comprehensive attendance history for all 500 employees based on joining date
+    const attendanceCount = db.prepare('SELECT COUNT(*) as count FROM attendancerecords').get().count;
+    if (attendanceCount === 0) {
+      console.log('Seeding attendance history for all 500 employees based on joining date...');
+      const employees = db.prepare('SELECT * FROM employees').all();
+      
+      const insertAttendance = db.prepare(`
+        INSERT INTO attendancerecords (
+          id, employeeId, employeeName, department, date,
+          checkInTime, checkOutTime, breaks, shiftType, workMode,
+          status, latitude, longitude, accuracy, idempotencyKey,
+          team, organizationId, companyId, createdAt, updatedAt
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+
+      const cityCoords = {
+        'Bengaluru': { lat: 12.9716, lng: 77.5946 },
+        'Hyderabad': { lat: 17.3850, lng: 78.4867 },
+        'Salem': { lat: 11.6643, lng: 78.1460 }
+      };
+
+      const now = new Date();
+      // Generate past 60 calendar days of attendance
+      const daysToGenerate = 60;
+      let totalInserted = 0;
+
+      for (const emp of employees) {
+        const joinDateStr = emp.joinDate || '2020-01-01';
+        const joinDate = new Date(joinDateStr);
+        const locCoords = cityCoords[emp.location] || { lat: 12.9716, lng: 77.5946 };
+
+        for (let d = daysToGenerate; d >= 0; d--) {
+          const targetDate = new Date(now);
+          targetDate.setDate(now.getDate() - d);
+          
+          // Skip if target date is before employee joining date
+          if (targetDate < joinDate) continue;
+
+          // Skip weekends (0 = Sunday, 6 = Saturday)
+          const dayOfWeek = targetDate.getDay();
+          if (dayOfWeek === 0 || dayOfWeek === 6) continue;
+
+          const dateStr = targetDate.toISOString().substring(0, 10);
+          const isToday = d === 0;
+
+          // Deterministic hash based on emp.id and dateStr
+          const hash = (emp.id.charCodeAt(emp.id.length - 1) * 31 + targetDate.getDate() * 17) % 100;
+          
+          let status = 'Checked Out';
+          let workMode = emp.status === 'REMOTE' ? 'Remote' : (hash % 10 === 0 ? 'Remote' : 'Office');
+          let shiftType = 'Regular';
+          
+          if (hash < 3) {
+            // On Leave (~3%)
+            status = 'On Leave';
+            insertAttendance.run(
+              `att-${emp.id}-${dateStr}`,
+              emp.id,
+              emp.name,
+              emp.department,
+              dateStr,
+              null,
+              null,
+              '[]',
+              shiftType,
+              workMode,
+              status,
+              locCoords.lat,
+              locCoords.lng,
+              10,
+              `idemp-${emp.id}-${dateStr}`,
+              emp.team,
+              ORGANIZATION_ID,
+              ORGANIZATION_ID,
+              targetDate.toISOString(),
+              targetDate.toISOString()
+            );
+            totalInserted++;
+            continue;
+          }
+
+          // Check in time
+          const checkInMin = (hash % 35) + 40; // between 08:40 and 09:15
+          const checkInHour = checkInMin >= 60 ? 9 : 8;
+          const checkInMinute = checkInMin % 60;
+          const checkInSec = hash % 60;
+
+          const checkInTimeObj = new Date(targetDate);
+          checkInTimeObj.setHours(checkInHour, checkInMinute, checkInSec, 0);
+          const checkInTime = checkInTimeObj.toISOString();
+
+          // If today and not past 6pm, can be active session
+          let checkOutTime = null;
+          if (isToday) {
+            status = 'Checked In';
+          } else {
+            const checkOutHour = 17 + Math.floor((hash % 20) / 10); // 17 or 18
+            const checkOutMinute = (hash * 3) % 60;
+            const checkOutSec = (hash * 7) % 60;
+            const checkOutTimeObj = new Date(targetDate);
+            checkOutTimeObj.setHours(checkOutHour, checkOutMinute, checkOutSec, 0);
+            checkOutTime = checkOutTimeObj.toISOString();
+            status = 'Checked Out';
+          }
+
+          // Break session
+          const breakStartObj = new Date(targetDate);
+          breakStartObj.setHours(13, (hash % 15), 0, 0);
+          const breakEndObj = new Date(targetDate);
+          breakEndObj.setHours(13, (hash % 15) + 40 + (hash % 15), 0, 0);
+          
+          const breaksJson = JSON.stringify([
+            {
+              id: `brk-${emp.id}-${dateStr}-1`,
+              type: 'Lunch',
+              startTime: breakStartObj.toISOString(),
+              endTime: breakEndObj.toISOString(),
+              durationMinutes: 45
+            }
+          ]);
+
+          insertAttendance.run(
+            `att-${emp.id}-${dateStr}`,
+            emp.id,
+            emp.name,
+            emp.department,
+            dateStr,
+            checkInTime,
+            checkOutTime,
+            breaksJson,
+            shiftType,
+            workMode,
+            status,
+            locCoords.lat + ((hash % 5) - 2) * 0.0001,
+            locCoords.lng + ((hash % 5) - 2) * 0.0001,
+            12,
+            `idemp-${emp.id}-${dateStr}`,
+            emp.team,
+            ORGANIZATION_ID,
+            ORGANIZATION_ID,
+            checkInTime,
+            checkOutTime || checkInTime
+          );
+          totalInserted++;
+        }
+      }
+      console.log(`Seeded ${totalInserted} Attendance Records for all 500 Employees.`);
     }
   });
 
