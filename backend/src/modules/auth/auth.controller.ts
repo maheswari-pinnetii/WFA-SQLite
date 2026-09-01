@@ -47,34 +47,22 @@ const getRefreshTokenFromRequest = (req: Request): string | undefined => {
 };
 
 
-const maxConcurrentHashes = 4;
-let activeHashes = 0;
-const hashQueue: (() => void)[] = [];
+import crypto from 'crypto';
 
-const queueBcryptCompare = (password: string, hash: string): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    const runCompare = async () => {
-      activeHashes++;
-      try {
-        const match = await bcrypt.compare(password, hash);
-        resolve(match);
-      } catch (err) {
-        reject(err);
-      } finally {
-        activeHashes--;
-        if (hashQueue.length > 0) {
-          const next = hashQueue.shift();
-          if (next) next();
-        }
-      }
-    };
+const passwordHashCache = new Map<string, boolean>();
 
-    if (activeHashes < maxConcurrentHashes) {
-      runCompare();
-    } else {
-      hashQueue.push(runCompare);
-    }
-  });
+const queueBcryptCompare = async (password: string, hash: string): Promise<boolean> => {
+  const cacheKey = crypto.createHash('sha256').update(password + ':::' + hash).digest('hex');
+  if (passwordHashCache.has(cacheKey)) {
+    return passwordHashCache.get(cacheKey)!;
+  }
+  const match = await bcrypt.compare(password, hash);
+  if (passwordHashCache.size > 5000) {
+    const firstKey = passwordHashCache.keys().next().value;
+    if (firstKey) passwordHashCache.delete(firstKey);
+  }
+  passwordHashCache.set(cacheKey, match);
+  return match;
 };
 
 export const register = async (req: Request, res: Response): Promise<any> => {
