@@ -262,10 +262,10 @@ export const ManagerDashboardPage: React.FC = () => {
               { label: 'Engineering Total', value: employees.filter(e => e.department === departmentName).length }
             ])}
           />
-          <KPICard title="Active Employees" value="18 Online" change={0.0} trend="neutral" subtitle="Clocked in today" icon={<Users size={20} />} accentColor="cyan" />
+          <KPICard title="Active Employees" value="18 Online" change={0.0} trend="neutral" subtitle="Checked in today" icon={<Users size={20} />} accentColor="cyan" />
           <KPICard title="Present Today" value="16 Staff" change={2.0} trend="up" subtitle="Office presence" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
           <KPICard title="Absent Today" value="2 Staff" change={0} trend="neutral" subtitle="Unexcused absence" icon={<XCircle size={20} />} accentColor="rose" />
-          <KPICard title="Late Today" value="3 Staff" change={1.0} trend="up" subtitle="Clocked in after 9:15" icon={<Clock size={20} />} accentColor="amber" />
+          <KPICard title="Late Today" value="3 Staff" change={1.0} trend="up" subtitle="Checked in after 9:15" icon={<Clock size={20} />} accentColor="amber" />
           <KPICard title="On Leave" value="1 Staff" change={-1.0} trend="down" subtitle="Approved PTO today" icon={<AlertTriangle size={20} />} accentColor="blue" />
           <KPICard title="Attendance %" value="98.2%" change={1.2} trend="up" subtitle="Active shift rate" icon={<Star size={20} />} accentColor="cyan" />
           <KPICard title="Pending Approvals" value={`${pendingApprovalsCount} Requests`} change={0.0} trend="neutral" subtitle="Requires manager action" icon={<FileText size={20} />} accentColor="rose" />

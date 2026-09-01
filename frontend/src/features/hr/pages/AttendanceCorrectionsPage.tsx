@@ -47,7 +47,7 @@ export const AttendanceCorrectionsPage: React.FC = () => {
               Attendance Correction Desk
             </h1>
             <p className="text-xs text-slate-400">
-              Audit and process clock-in/out correction requests submitted by employees.
+              Audit and process check-in / check-out correction requests submitted by employees.
             </p>
           </div>
         </div>
@@ -62,7 +62,7 @@ export const AttendanceCorrectionsPage: React.FC = () => {
 
         {/* Corrections Stream */}
         <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-4">
-          <h3 className="text-base font-bold text-[var(--text-primary)]">Clock Correction Streams</h3>
+          <h3 className="text-base font-bold text-[var(--text-primary)]">Attendance Correction Streams</h3>
           
           {loading ? (
             <div className="text-center py-10 text-xs text-slate-400 font-semibold">
@@ -80,7 +80,7 @@ export const AttendanceCorrectionsPage: React.FC = () => {
                     <span className="font-bold text-sm text-[var(--text-primary)]">{req.employeeName}</span>
                     <span className="text-[10px] text-slate-500 font-mono ml-2">ID: {req.employeeId}</span>
                     <p className="text-xs text-slate-300">
-                      Date: <span className="font-mono font-bold text-blue-400">{req.date}</span> — Requested Clock: <span className="font-bold text-emerald-400">{req.requestedCheckIn || '—'} - {req.requestedCheckOut || '—'}</span>
+                      Date: <span className="font-mono font-bold text-blue-400">{req.date}</span> — Requested Time: <span className="font-bold text-emerald-400">{req.requestedCheckIn || '—'} - {req.requestedCheckOut || '—'}</span>
                     </p>
                     <p className="text-xs text-slate-400 italic">"Reason: {req.reason}"</p>
                     {req.managerComment && (

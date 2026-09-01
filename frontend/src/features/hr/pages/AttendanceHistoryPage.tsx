@@ -23,7 +23,7 @@ export const AttendanceHistoryPage: React.FC = () => {
               Attendance History Logs
             </h1>
             <p className="text-xs text-slate-400">
-              Database logs of employee clock-in, clock-out events, geographical accuracy, and shift durations.
+              Database logs of employee check-in, check-out events, geographical accuracy, and shift durations.
             </p>
           </div>
         </div>
