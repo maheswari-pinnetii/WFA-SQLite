@@ -23,32 +23,28 @@ vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
 }));
 
 describe('Modern Authentication Flow Test Suite', () => {
-  describe('1. LoginPage Component', () => {
-    it('should render Stackly branded card with Roles selector, inputs, and Sign In button', () => {
+  describe('1. LoginPage & Dual-Card Layout', () => {
+    it('should render side-by-side cards with EmailLoginCard, PasswordlessLoginCard and Educational specs', () => {
       render(
         <BrowserRouter>
           <LoginPage />
         </BrowserRouter>
       );
 
-      // Verify Stackly Branding & Titles
-      expect(screen.getByText('STACKLY')).toBeInTheDocument();
-      expect(screen.getByText('Welcome Back')).toBeInTheDocument();
-      expect(screen.getByText('Sign in to access your dashboard')).toBeInTheDocument();
+      // Verify page cards and structure
+      expect(screen.getByText(/Enter your password/i)).toBeInTheDocument();
+      expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
 
-      // Verify Form Controls
-      expect(screen.getByLabelText(/Roles/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Email \/ Employee ID/i)).toBeInTheDocument();
-      expect(screen.getByText(/MFA Delivery Channel/i)).toBeInTheDocument();
+      // Verify Card A elements
       expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Remember me/i)).toBeInTheDocument();
-      expect(screen.getByText(/Forgot password\?/i)).toBeInTheDocument();
-
-      // Verify Action button
-      expect(screen.getByRole('button', { name: /^Sign In$/i })).toBeInTheDocument();
+      expect(screen.getByText(/Forgot your password\?/i)).toBeInTheDocument();
+      
+      // Verify both Card A and Card B have Next buttons
+      const nextButtons = screen.getAllByRole('button', { name: /^Next$/i });
+      expect(nextButtons).toHaveLength(2);
 
       // Verify footer link
-      expect(screen.getByRole('link', { name: /Create account/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /Create an account/i })).toBeInTheDocument();
     });
   });
 
@@ -118,21 +114,34 @@ describe('Modern Authentication Flow Test Suite', () => {
   });
 
   describe('4. SignUpPage Component', () => {
-    it('should render Stackly registration form with role selection and inputs', () => {
+    it('should render full name, email and toggle between Password and Passkey registration', () => {
       render(
         <BrowserRouter>
           <SignUpPage />
         </BrowserRouter>
       );
 
-      expect(screen.getByText('STACKLY')).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: /Create Account/i })).toBeInTheDocument();
+      expect(screen.getByText(/Register Your Account/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Email \/ Employee ID/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Role/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Work Email/i)).toBeInTheDocument();
+
+      // Initial tab is "Set a Password"
       expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Create Account/i })).toBeInTheDocument();
+
+      // Toggle to "Setup Passkey"
+      const passkeyTab = screen.getByRole('tab', { name: /Setup Passkey/i });
+      fireEvent.click(passkeyTab);
+
+      // Password fields should be replaced with the passkey promo box
+      expect(screen.queryByLabelText(/^Password$/i)).not.toBeInTheDocument();
+      expect(screen.getByText(/Fast & Phishing-Resistant/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Create Account with Passkey/i })).toBeInTheDocument();
+
+      // Toggle back to "Set a Password"
+      const passwordTab = screen.getByRole('tab', { name: /Set a Password/i });
+      fireEvent.click(passwordTab);
+      expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
     });
   });
 });
