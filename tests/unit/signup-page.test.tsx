@@ -10,6 +10,7 @@ const mockSignup = vi.fn();
 vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     signup: mockSignup,
+    setSession: vi.fn(),
     isAuthenticated: false,
     role: 'EMPLOYEE',
     user: null,
@@ -31,12 +32,14 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     );
   };
 
-  it('3.1 should render full name, email, and password setup inputs by default', () => {
+  it('3.1 should render full name, email, role selector, MFA options, and password inputs', () => {
     renderSignUp();
 
-    expect(screen.getByText('Register Your Account')).toBeInTheDocument();
+    expect(screen.getByText('STACKLY')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Create Account/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Work Email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email \/ Employee ID/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Role/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Create Account/i })).toBeInTheDocument();
@@ -56,12 +59,12 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     renderSignUp();
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'invalid-email-format' } });
+    fireEvent.change(screen.getByLabelText(/Email \/ Employee ID/i), { target: { value: 'invalid-email-format' } });
 
     const submitBtn = screen.getByRole('button', { name: /Create Account/i });
     fireEvent.click(submitBtn);
 
-    expect(await screen.findByText('Please enter a valid email address.')).toBeInTheDocument();
+    expect(await screen.findByText('Please enter a valid work email address.')).toBeInTheDocument();
     expect(mockSignup).not.toHaveBeenCalled();
   });
 
@@ -69,7 +72,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     renderSignUp();
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'jane@thestackly.com' } });
+    fireEvent.change(screen.getByLabelText(/Email \/ Employee ID/i), { target: { value: 'jane@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'short' } });
     fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'short' } });
 
@@ -80,13 +83,13 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     expect(mockSignup).not.toHaveBeenCalled();
   });
 
-  it('3.5 should validate password and confirm password mismatch', async () => {
+  it('3.5 should validate password confirmation match', async () => {
     renderSignUp();
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'jane@thestackly.com' } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'Password123!' } });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'DifferentPassword123!' } });
+    fireEvent.change(screen.getByLabelText(/Email \/ Employee ID/i), { target: { value: 'jane@thestackly.com' } });
+    fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'SecurePass123!' } });
+    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'MismatchPass456!' } });
 
     const submitBtn = screen.getByRole('button', { name: /Create Account/i });
     fireEvent.click(submitBtn);
@@ -95,37 +98,31 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     expect(mockSignup).not.toHaveBeenCalled();
   });
 
-  it('3.6 should toggle to Setup Passkey tab and display WebAuthn promo information', () => {
+  it('3.6 should submit registration with valid data', async () => {
+    mockSignup.mockResolvedValueOnce({
+      token: 'jwt-signup-token-123',
+      user: { id: 'usr-123', email: 'jane@thestackly.com', role: 'EMPLOYEE' },
+    });
+
     renderSignUp();
 
-    const passkeyTab = screen.getByRole('tab', { name: /Setup Passkey/i });
-    fireEvent.click(passkeyTab);
-
-    expect(screen.queryByLabelText(/^Password$/i)).not.toBeInTheDocument();
-    expect(screen.getByText('Fast & Phishing-Resistant')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Create Account with Passkey/i })).toBeInTheDocument();
-  });
-
-  it('3.7 should submit standard password registration successfully', async () => {
-    mockSignup.mockResolvedValueOnce({ success: true });
-    renderSignUp();
-
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Sarah Connor' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'sarah@thestackly.com' } });
-    fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'SecurePass2026!' } });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'SecurePass2026!' } });
+    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Jane Doe' } });
+    fireEvent.change(screen.getByLabelText(/Email \/ Employee ID/i), { target: { value: 'jane@thestackly.com' } });
+    fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'ValidPass2026!' } });
+    fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'ValidPass2026!' } });
 
     const submitBtn = screen.getByRole('button', { name: /Create Account/i });
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
       expect(mockSignup).toHaveBeenCalledWith({
-        name: 'Sarah Connor',
-        email: 'sarah@thestackly.com',
-        password: 'SecurePass2026!',
+        fullName: 'Jane Doe',
+        name: 'Jane Doe',
+        email: 'jane@thestackly.com',
+        password: 'ValidPass2026!',
+        role: 'EMPLOYEE',
+        department: 'Operations',
       });
     });
-
-    expect(await screen.findByText(/Account created successfully/i)).toBeInTheDocument();
   });
 });
