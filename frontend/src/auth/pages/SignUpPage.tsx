@@ -29,15 +29,15 @@ export const SignUpPage: React.FC = () => {
   };
 
   return (
-    <AuthLayout selectedRole={selectedRole}>
+    <AuthLayout selectedRole={selectedRole} isWide={true}>
       <SignupForm
         selectedRole={selectedRole}
         onRoleChange={setSelectedRole}
         onSubmit={handleSignupSubmit}
       />
-      <div className="text-center text-sm font-medium text-[var(--text-secondary)] mt-4">
+      <div className="text-center text-sm font-medium text-slate-400 mt-6">
         Already registered?{' '}
-        <Link to="/login" className="text-[var(--role-primary)] font-semibold hover:underline">
+        <Link to="/login" className="text-blue-400 font-semibold hover:underline">
           Sign in →
         </Link>
       </div>

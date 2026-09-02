@@ -19,7 +19,7 @@ export const LoginPage: React.FC = () => {
   }, [isAuthenticated, role, navigate]);
 
   return (
-    <AuthLayout selectedRole={selectedRole}>
+    <AuthLayout selectedRole={selectedRole} isWide={true}>
       <LoginForm
         selectedRole={selectedRole}
         onRoleChange={setSelectedRole}
@@ -27,9 +27,9 @@ export const LoginPage: React.FC = () => {
           // Success is handled by the isAuthenticated useEffect redirection
         }}
       />
-      <div className="text-center text-sm font-medium text-[var(--text-secondary)] mt-4">
+      <div className="text-center text-sm font-medium text-slate-400 mt-6">
         Don't have an account?{' '}
-        <Link to="/signup" className="text-[var(--role-primary)] font-semibold hover:underline">
+        <Link to="/signup" className="text-blue-400 font-semibold hover:underline">
           Create account
         </Link>
       </div>
