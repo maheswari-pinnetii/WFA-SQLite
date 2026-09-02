@@ -7,26 +7,11 @@ import { PasswordlessLoginCard } from '../components/PasswordlessLoginCard';
 import { EmailLoginPayload, PasswordlessLoginPayload } from '../../types/authFlow.types';
 import '../styles/ModernAuth.css';
 
-interface DemoAccount {
-  label: string;
-  email: string;
-  role: Role;
-  badge: string;
-}
-
-const DEMO_ACCOUNTS: DemoAccount[] = [
-  { label: 'Admin', email: 'admin@thestackly.com', role: Role.ADMIN, badge: 'Full Access' },
-  { label: 'HR Ops', email: 'hr@thestackly.com', role: Role.HR, badge: 'People & Payroll' },
-  { label: 'Manager', email: 'manager@thestackly.com', role: Role.MANAGER, badge: 'Approvals & Analytics' },
-  { label: 'Employee', email: 'employee@thestackly.com', role: Role.EMPLOYEE, badge: 'Self-Service' },
-];
-
 export const LoginPage: React.FC = () => {
   const { login, role, isAuthenticated, setSession } = useAuth();
   const navigate = useNavigate();
 
   const [currentEmail, setCurrentEmail] = useState<string>('employee@thestackly.com');
-  const [prefilledPassword, setPrefilledPassword] = useState<string>('StacklyWFA2026!');
   const [loadingMethod, setLoadingMethod] = useState<'email' | 'passkey' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -160,26 +145,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  /**
-   * Select Demo Account & Prefill Credentials
-   */
-  const selectDemoAccount = (acc: DemoAccount) => {
-    setCurrentEmail(acc.email);
-    setPrefilledPassword('StacklyWFA2026!');
-    setErrorMessage(null);
-  };
-
-  /**
-   * One-Click Instant Sign-In as Demo Account
-   */
-  const quickLoginAs = async (acc: DemoAccount) => {
-    selectDemoAccount(acc);
-    await handleEmailLogin({
-      email: acc.email,
-      password: 'StacklyWFA2026!',
-    });
-  };
-
   return (
     <div className="auth-page-wrapper">
       {/* Top Navbar / Navigation Header */}
@@ -187,49 +152,15 @@ export const LoginPage: React.FC = () => {
         <Link to="/" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500, transition: 'color 0.2s' }}>
           <span>&larr;</span> Back to Home
         </Link>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
-            Create Account &rarr;
-          </Link>
-        </div>
+        <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+          Create Account &rarr;
+        </Link>
       </nav>
 
       {/* Page Header */}
       <header className="page-header">
         <h1 className="main-title">Multiple login methods</h1>
         <p className="subtitle">Select your preferred enterprise authentication method to access your workspace.</p>
-
-        {/* Quick Demo Selector */}
-        <div style={{ marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
-          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Quick Demo:
-          </span>
-          {DEMO_ACCOUNTS.map((acc) => (
-            <button
-              key={acc.email}
-              type="button"
-              onClick={() => quickLoginAs(acc)}
-              style={{
-                backgroundColor: currentEmail === acc.email ? '#1e293b' : '#0f172a',
-                border: currentEmail === acc.email ? '1px solid #3b82f6' : '1px solid #334155',
-                color: currentEmail === acc.email ? '#93c5fd' : '#94a3b8',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                fontWeight: currentEmail === acc.email ? 600 : 500,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.15s ease',
-              }}
-              title={`Click to instantly sign in as ${acc.label} (${acc.email})`}
-            >
-              <span>{acc.label} ({acc.badge})</span>
-              <span style={{ fontSize: '10px', opacity: 0.7 }}>&rarr;</span>
-            </button>
-          ))}
-        </div>
       </header>
 
       {/* Side-by-Side Dual Card Layout (Stacking on mobile) */}
@@ -242,7 +173,6 @@ export const LoginPage: React.FC = () => {
           onClearError={() => setErrorMessage(null)}
           currentEmail={currentEmail}
           onEmailChange={setCurrentEmail}
-          prefilledPassword={prefilledPassword}
         />
 
         {/* Card 2: Passwordless / WebAuthn Passkey Login */}
