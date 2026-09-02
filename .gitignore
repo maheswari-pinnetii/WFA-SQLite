@@ -12,4 +12,6 @@ dist-ssr
 *.sqlite-wal
 *.sqlite-shm
 database/sqlite/*.sqlite*
-database/backups/*.sqlite
+database/backups/*
+!database/backups/.gitkeep
+

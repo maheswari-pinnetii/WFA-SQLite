@@ -64,4 +64,31 @@ The project includes an end-to-end Postman testing suite with automatic JWT toke
 
 ### 8. System & Health Probes
 - `GET /v1/health`: Liveness & health probe (`{"status": "healthy"}`).
+- `GET /v1/health/db`: Database connection health probe.
 - `GET /v1`: Root API welcome.
+
+### 9. Database Backup & Disaster Recovery (Admin Only)
+- `POST /v1/admin/backups`: Trigger online hot backup snapshot (`tag`, `compress: true/false`). Returns SHA-256 checksum and record metrics.
+- `GET /v1/admin/backups`: List all available SQLite backups with file sizes and creation timestamps.
+- `POST /v1/admin/backups/restore`: Restore database from a specific snapshot with automatic pre-restore safety archiving.
+- `GET /v1/admin/backups/:filename/download`: Download backup `.sqlite` or `.sqlite.gz` archive.
+- `DELETE /v1/admin/backups/:filename`: Delete a backup snapshot and sidecar metadata.
+
+---
+
+## 💻 CLI Database Backup & Restore Commands
+
+```bash
+# Trigger immediate hot backup snapshot
+npm run db:backup
+
+# Trigger uncompressed hot backup snapshot
+npx tsx backend/scripts/backup-db.ts my-custom-tag --no-compress
+
+# List available database backups
+npm run db:restore
+
+# Restore database from a specific backup
+npm run db:restore wfa-backup-2026-09-02T06-47-55-316Z-manual-cli.sqlite.gz
+```
+

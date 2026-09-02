@@ -76,6 +76,15 @@ All other requests in the collection automatically inherit `Authorization: Beare
    - Automatically saves `{{correctionId}}`.
 2. **Approve Correction**: Execute `3. Review Correction (Manager / HR Approve)`.
 
+### E. Database Backup & Disaster Recovery (Admin Only)
+1. **Trigger Hot Backup**: Execute `09 Backup & Disaster Recovery > 1. Trigger Database Hot Backup`.
+   - Creates a non-blocking hot backup snapshot with SHA-256 integrity verification.
+   - Automatically saves `{{backupFilename}}` to the environment.
+2. **List Available Backups**: Execute `2. List Available Database Backups`.
+3. **Download Backup**: Execute `4. Download Backup Archive` to export the `.sqlite.gz` archive.
+4. **Restore Database**: Execute `3. Restore Database From Backup` to safely restore state.
+5. **Delete Backup**: Execute `5. Delete Backup Archive`.
+
 ---
 
 ## ⚡ 5. Running with Newman CLI (Automated Terminal Testing)
@@ -91,3 +100,4 @@ To generate an HTML test report:
 ```bash
 npx newman run postman/WFA_Workforce_Analytics.postman_collection.json -e postman/WFA_Local.postman_environment.json -r cli,htmlextra
 ```
+

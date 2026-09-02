@@ -1,63 +1,34 @@
-import { getDb } from '../src/config/db.js';
-import { connectDatabase } from '../src/database/sqlite-cloud.js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { initDb } from '../src/config/db.js';
+import { backupService } from '../src/services/backup.service.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+async function run() {
+  console.log('📦 [SQLite Backup] Initializing database connection...');
+  await initDb();
 
-const BACKUP_DIR = path.resolve(__dirname, '../../database/backups');
-const MAX_BACKUPS = 5;
+  const tag = process.argv[2] || 'manual-cli';
+  const compress = !process.argv.includes('--no-compress');
 
-export const backupDatabase = async () => {
-  try {
-    console.log('[Backup Service] Initializing database backup process...');
-    await connectDatabase();
-    const db = getDb();
+  console.log(`📦 [SQLite Backup] Starting hot online backup (tag: ${tag}, compress: ${compress})...`);
+  const startTime = Date.now();
 
-    if (!fs.existsSync(BACKUP_DIR)) {
-      fs.mkdirSync(BACKUP_DIR, { recursive: true });
-    }
+  const metadata = await backupService.createBackup({ tag, compress });
+  const duration = Date.now() - startTime;
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const backupFile = path.join(BACKUP_DIR, `wfa-backup-${timestamp}.sqlite`);
-
-    console.log(`[Backup Service] Starting live hot backup to: ${backupFile}`);
-    
-    // Utilize better-sqlite3 built-in Online Backup API
-    await db.backup(backupFile);
-    console.log('[Backup Service] Hot backup created successfully.');
-
-    // Verify backup file exists and is readable
-    if (!fs.existsSync(backupFile) || fs.statSync(backupFile).size === 0) {
-      throw new Error('Backup file verification failed: File is missing or empty.');
-    }
-    console.log('[Backup Service] Backup verification: PASS');
-
-    // Clean up older backups (Retention policy of last MAX_BACKUPS)
-    const files = fs.readdirSync(BACKUP_DIR)
-      .filter(file => file.startsWith('wfa-backup-') && file.endsWith('.sqlite'))
-      .map(file => ({
-        name: file,
-        path: path.join(BACKUP_DIR, file),
-        time: fs.statSync(path.join(BACKUP_DIR, file)).mtime.getTime()
-      }))
-      .sort((a, b) => b.time - a.time);
-
-    if (files.length > MAX_BACKUPS) {
-      const filesToDelete = files.slice(MAX_BACKUPS);
-      for (const file of filesToDelete) {
-        fs.unlinkSync(file.path);
-        console.log(`[Backup Service] Cleaned up old backup: ${file.name}`);
-      }
-    }
-  } catch (err: any) {
-    console.error('[Backup Service] ERROR: Backup failed!', err.message);
-    process.exit(1);
-  }
-};
-
-if (process.argv[1] && process.argv[1].endsWith('backup-db.ts')) {
-  backupDatabase();
+  console.log(`✅ [SQLite Backup] Database backup completed successfully in ${duration}ms!`);
+  console.log(`--------------------------------------------------`);
+  console.log(`File Name:    ${metadata.filename}`);
+  console.log(`File Size:    ${metadata.sizeFormatted} (${metadata.sizeBytes} bytes)`);
+  console.log(`SHA-256:      ${metadata.checksumSha256}`);
+  console.log(`Users:        ${metadata.recordCount.users}`);
+  console.log(`Employees:    ${metadata.recordCount.employees}`);
+  console.log(`Attendance:   ${metadata.recordCount.attendance}`);
+  console.log(`Created At:   ${metadata.createdAt}`);
+  console.log(`Path:         ${metadata.filePath}`);
+  console.log(`--------------------------------------------------`);
+  process.exit(0);
 }
+
+run().catch(err => {
+  console.error('❌ [SQLite Backup] Error creating database backup:', err);
+  process.exit(1);
+});

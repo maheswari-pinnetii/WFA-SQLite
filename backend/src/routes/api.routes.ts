@@ -6,6 +6,7 @@ import * as workforceController from '../controllers/workforce.controller.js';
 import * as employeeController from '../controllers/employee.controller.js';
 import * as organizationController from '../controllers/organization.controller.js';
 import * as auditController from '../controllers/audit.controller.js';
+import * as backupController from '../controllers/backup.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { authRateLimiter, refreshRateLimiter } from '../middleware/resilience.js';
 import {
@@ -143,5 +144,12 @@ router.get('/audit/logs/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR'])
 router.get('/users', authenticateToken, authorizeRoles(['ADMIN']), employeeController.getUsers);
 router.put('/users/:userId/role', authenticateToken, authorizeRoles(['ADMIN']), employeeController.updateUserRole);
 router.delete('/users/:userId', authenticateToken, authorizeRoles(['ADMIN']), employeeController.deleteUser);
+
+// Database Backup & Disaster Recovery (Admin Only)
+router.post('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backupController.createBackup);
+router.get('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backupController.listBackups);
+router.post('/admin/backups/restore', authenticateToken, authorizeRoles(['ADMIN']), backupController.restoreBackup);
+router.get('/admin/backups/:filename/download', authenticateToken, authorizeRoles(['ADMIN']), backupController.downloadBackup);
+router.delete('/admin/backups/:filename', authenticateToken, authorizeRoles(['ADMIN']), backupController.deleteBackup);
 
 export default router;

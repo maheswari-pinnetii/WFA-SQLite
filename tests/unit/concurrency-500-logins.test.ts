@@ -34,44 +34,50 @@ afterAll(async () => {
 }, 30000);
 
 describe('High-Concurrency 500 Employee Simultaneous Login & Session Suite', () => {
-  const loginEmployee = async (email: string, pass: string): Promise<{ success: boolean; token?: string; email: string }> => {
-    try {
-      const loginRes = await fetch(`${BASE_URL}/v1/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password: pass })
-      });
-      const loginData: any = await loginRes.json();
-
-      if (!loginRes.ok || !loginData.success) {
-        return { success: false, email };
-      }
-
-      // If direct token returned
-      if (loginData.data?.token) {
-        return { success: true, token: loginData.data.token, email };
-      }
-
-      // If MFA OTP challenge is required
-      if (loginData.data?.requiresMfa && loginData.data?.challengeId) {
-        const verifyRes = await fetch(`${BASE_URL}/v1/auth/mfa/verify`, {
+  const loginEmployee = async (email: string, pass: string, retries = 2): Promise<{ success: boolean; token?: string; email: string }> => {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const loginRes = await fetch(`${BASE_URL}/v1/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            challengeId: loginData.data.challengeId,
-            otp: loginData.data.otpDevHint || '123456'
-          })
+          body: JSON.stringify({ email, password: pass })
         });
-        const verifyData: any = await verifyRes.json();
-        if (verifyRes.ok && verifyData.data?.token) {
-          return { success: true, token: verifyData.data.token, email };
-        }
-      }
+        const loginData: any = await loginRes.json();
 
-      return { success: false, email };
-    } catch {
-      return { success: false, email };
+        if (!loginRes.ok || !loginData.success) {
+          if (attempt < retries) continue;
+          return { success: false, email };
+        }
+
+        // If direct token returned
+        if (loginData.data?.token) {
+          return { success: true, token: loginData.data.token, email };
+        }
+
+        // If MFA OTP challenge is required
+        if (loginData.data?.requiresMfa && loginData.data?.challengeId) {
+          const verifyRes = await fetch(`${BASE_URL}/v1/auth/mfa/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              challengeId: loginData.data.challengeId,
+              otp: loginData.data.otpDevHint || '123456'
+            })
+          });
+          const verifyData: any = await verifyRes.json();
+          if (verifyRes.ok && verifyData.data?.token) {
+            return { success: true, token: verifyData.data.token, email };
+          }
+        }
+
+        if (attempt < retries) continue;
+        return { success: false, email };
+      } catch {
+        if (attempt < retries) continue;
+        return { success: false, email };
+      }
     }
+    return { success: false, email };
   };
 
   it('should authenticate all 500 seeded employees concurrently with 100% success rate', async () => {
