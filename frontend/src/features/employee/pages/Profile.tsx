@@ -957,6 +957,9 @@ export const Profile: React.FC = () => {
                     </button>
                   </div>
                 </div>
+              </div>
+            )}
+
             {/* Trusted Devices & Biometric Locks Management Section */}
             <div className="p-4 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-4">
               <div className="flex items-center justify-between">
