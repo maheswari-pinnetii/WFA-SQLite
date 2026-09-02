@@ -65,9 +65,10 @@ const queueBcryptCompare = async (password: string, hash: string): Promise<boole
 
 export const register = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { fullName, email, department, password } = req.body;
-    const name = fullName;
-    const role: string = 'EMPLOYEE';
+    const { fullName, department, password } = req.body;
+    const name = (fullName || req.body.name || '').trim();
+    const email = (req.body.email || '').trim();
+    const role: string = req.body.role || 'EMPLOYEE';
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Name, email, and password are required' });
     }

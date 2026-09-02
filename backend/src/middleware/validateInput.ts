@@ -54,7 +54,7 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction) =
 // Validate registration / user creation
 export const validateRegistration = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
-  const name = req.body.name || req.body.fullName;
+  const name = req.body.fullName || req.body.name;
   if (!name || typeof name !== 'string' || name.trim().length < 2) {
     return res.status(400).json({ success: false, message: 'Full name is required (at least 2 characters).' });
   }

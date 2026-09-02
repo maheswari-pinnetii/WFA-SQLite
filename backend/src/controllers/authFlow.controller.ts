@@ -57,9 +57,11 @@ function issueJwtToken(user: any): string {
  */
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { fullName, email, password } = req.body;
+    const name = (req.body.fullName || req.body.name || '').trim();
+    const email = (req.body.email || '').trim();
+    const password = req.body.password;
 
-    if (!email || !fullName) {
+    if (!email || !name) {
       res.status(400).json({
         success: false,
         error: 'Full name and email are required fields.',
@@ -91,7 +93,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         title, clearanceLevel, status, permissions, mfa_enabled,
         organizationId, companyId, createdAt, updatedAt
       ) VALUES (?, ?, ?, ?, 'EMPLOYEE', 'Engineering', 'Core Team', 'San Francisco', 'Associate', 1, 'ACTIVE', ?, 0, ?, ?, ?, ?)`,
-      [userId, fullName.trim(), normalizedEmail, passwordHash, defaultPermissions, ORGANIZATION_ID, COMPANY_ID, now, now]
+      [userId, name, normalizedEmail, passwordHash, defaultPermissions, ORGANIZATION_ID, COMPANY_ID, now, now]
     );
 
     // Also persist corresponding record in employees table
@@ -101,7 +103,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           id, name, email, role, department, team, location,
           designation, joinDate, status, organizationId, companyId, createdAt, updatedAt
         ) VALUES (?, ?, ?, 'EMPLOYEE', 'Engineering', 'Core Team', 'San Francisco', 'Associate', ?, 'ACTIVE', ?, ?, ?, ?)`,
-        [userId, fullName.trim(), normalizedEmail, now.split('T')[0], ORGANIZATION_ID, COMPANY_ID, now, now]
+        [userId, name, normalizedEmail, now.split('T')[0], ORGANIZATION_ID, COMPANY_ID, now, now]
       );
     } catch (empErr) {
       console.warn('[Register] Non-fatal: Employee sync notice:', empErr);
@@ -109,9 +111,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     const userPayload: UserProfile = {
       id: userId,
-      name: fullName.trim(),
+      name,
       email: normalizedEmail,
       role: 'EMPLOYEE',
+      department: 'Engineering',
       createdAt: now,
       hasPasskey: false,
     };
@@ -156,7 +159,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!users || users.length === 0) {
       res.status(401).json({
         success: false,
-        error: 'Invalid credentials. User not found.',
+        error: 'Invalid email or password credentials.',
       });
       return;
     }
@@ -176,7 +179,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
-        error: 'Invalid email or password.',
+        error: 'Invalid email or password credentials.',
       });
       return;
     }
