@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { LoginPage } from '../../frontend/src/auth/pages/LoginPage';
@@ -10,41 +10,54 @@ import { EmailLoginCard } from '../../frontend/src/auth/components/EmailLoginCar
 import { PasswordlessLoginCard } from '../../frontend/src/auth/components/PasswordlessLoginCard';
 
 // Mock useAuth hook
+const mockLogin = vi.fn().mockResolvedValue({ payload: { user: { role: 'ADMIN' } } });
+const mockSignup = vi.fn().mockResolvedValue({ success: true });
+const mockSetSession = vi.fn();
+
 vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     isAuthenticated: false,
-    role: 'EMPLOYEE',
+    role: 'ADMIN',
     user: null,
-    login: vi.fn().mockResolvedValue({ data: { user: { role: 'EMPLOYEE' } } }),
-    signup: vi.fn().mockResolvedValue({ success: true }),
+    login: mockLogin,
+    signup: mockSignup,
+    setSession: mockSetSession,
     initializeAuth: vi.fn(),
     isLoading: false,
   }),
 }));
 
 describe('Modern Authentication Flow Test Suite', () => {
-  describe('1. LoginPage & Dual-Card Layout', () => {
-    it('should render side-by-side cards with EmailLoginCard, PasswordlessLoginCard and Educational specs', () => {
+  describe('1. LoginPage Multi-Step Flow (1st: Email Card -> 2nd: Passkey Card -> 3rd: Dashboard)', () => {
+    it('1.1 should render Page 1 (EmailLoginCard) initially and advance to Page 2 (PasswordlessLoginCard) on Next', async () => {
       render(
         <BrowserRouter>
           <LoginPage />
         </BrowserRouter>
       );
 
-      // Verify page cards and structure
-      expect(screen.getByText(/Enter your password/i)).toBeInTheDocument();
-      expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
-
-      // Verify Card A elements
+      // Verify Page 1 (EmailLoginCard) elements
+      expect(screen.getByText('Password-Based')).toBeInTheDocument();
+      expect(screen.getByText('Enter your password')).toBeInTheDocument();
       expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
       expect(screen.getByText(/Forgot your password\?/i)).toBeInTheDocument();
-      
-      // Verify both Card A and Card B have Next buttons
-      const nextButtons = screen.getAllByRole('button', { name: /^Next$/i });
-      expect(nextButtons).toHaveLength(2);
-
-      // Verify footer link
+      expect(screen.getByRole('button', { name: /^Next$/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /Create an account/i })).toBeInTheDocument();
+
+      // Enter password on Page 1
+      const passwordInput = screen.getByLabelText(/^Password$/i);
+      fireEvent.change(passwordInput, { target: { value: 'StacklyWFA2026!' } });
+
+      // Click Next on Page 1
+      const nextBtn = screen.getByRole('button', { name: /^Next$/i });
+      fireEvent.click(nextBtn);
+
+      // Verify it advances to Page 2 (PasswordlessLoginCard)
+      await waitFor(() => {
+        expect(screen.getByText('Passwordless')).toBeInTheDocument();
+        expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Skip for now/i })).toBeInTheDocument();
+      });
     });
   });
 

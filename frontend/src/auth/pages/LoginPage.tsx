@@ -8,23 +8,27 @@ import { EmailLoginPayload, PasswordlessLoginPayload } from '../../types/authFlo
 import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {
-  const { login, role, isAuthenticated, setSession } = useAuth();
+  const { login, role, setSession } = useAuth();
   const navigate = useNavigate();
 
+  // Multi-step state: 1 = Email/Password Login, 2 = Biometric/Passkey Login, 3 = Dashboard
+  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [currentEmail, setCurrentEmail] = useState<string>('employee@thestackly.com');
   const [loadingMethod, setLoadingMethod] = useState<'email' | 'passkey' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // If already authenticated, redirect to appropriate role dashboard
-  React.useEffect(() => {
-    if (isAuthenticated) {
-      const target = ROLE_HOME_PATHS[role] || '/employee/dashboard';
-      navigate(target, { replace: true });
-    }
-  }, [isAuthenticated, role, navigate]);
+  const [authenticatedRole, setAuthenticatedRole] = useState<Role | null>(null);
 
   /**
-   * Handle Standard Email + Password Login
+   * Transition to Dashboard (Page 3)
+   */
+  const proceedToDashboard = (targetRole?: Role) => {
+    const userRole = targetRole || authenticatedRole || role || Role.EMPLOYEE;
+    const target = ROLE_HOME_PATHS[userRole] || '/employee/dashboard';
+    navigate(target, { replace: true });
+  };
+
+  /**
+   * Handle Standard Email + Password Login (Page 1)
    */
   const handleEmailLogin = async (payload: EmailLoginPayload) => {
     setLoadingMethod('email');
@@ -38,8 +42,11 @@ export const LoginPage: React.FC = () => {
       }
 
       const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.EMPLOYEE) as Role;
-      const target = ROLE_HOME_PATHS[userRole] || '/employee/dashboard';
-      navigate(target, { replace: true });
+      setAuthenticatedRole(userRole);
+      setCurrentEmail(payload.email);
+
+      // On successful credentials verification -> Proceed to 2nd Page (Passwordless / Biometric Card)
+      setCurrentStep(2);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
       setErrorMessage(msg);
@@ -49,7 +56,7 @@ export const LoginPage: React.FC = () => {
   };
 
   /**
-   * Handle Passwordless / Passkey Login (WebAuthn + SQLite Backend Verification)
+   * Handle Passwordless / Passkey Login (Page 2)
    */
   const handlePasskeyLogin = async (payload?: PasswordlessLoginPayload) => {
     setLoadingMethod('passkey');
@@ -118,14 +125,13 @@ export const LoginPage: React.FC = () => {
         throw new Error(verifyData.error || 'Passkey verification failed.');
       }
 
-      // Successful passkey authentication
+      // Successful passkey authentication -> Navigate to 3rd: Dashboards
       if (verifyData.token && verifyData.user) {
         setSession({ user: verifyData.user, token: verifyData.token });
-        const userRole = (verifyData.user.role || role || Role.EMPLOYEE) as Role;
-        const target = ROLE_HOME_PATHS[userRole] || '/employee/dashboard';
-        navigate(target, { replace: true });
+        const userRole = (verifyData.user.role || authenticatedRole || role || Role.EMPLOYEE) as Role;
+        proceedToDashboard(userRole);
       } else {
-        navigate('/dashboard', { replace: true });
+        proceedToDashboard();
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Passkey authentication encountered an error.';
@@ -136,48 +142,46 @@ export const LoginPage: React.FC = () => {
   };
 
   /**
-   * Handle Skip action from Biometric card
+   * Handle Skip action on Page 2 -> Proceed directly to Page 3: Dashboard
    */
   const handleSkipPasskey = () => {
-    const passwordInput = document.getElementById('password-input');
-    if (passwordInput) {
-      passwordInput.focus();
-    }
+    proceedToDashboard();
   };
 
   return (
     <div className="auth-page-wrapper">
       {/* Top Navbar / Navigation Header */}
-      <nav style={{ width: '100%', maxWidth: '940px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
+      <nav style={{ width: '100%', maxWidth: '440px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px', padding: '0 4px' }}>
         <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
           Create Account &rarr;
         </Link>
       </nav>
 
-
-      {/* Side-by-Side Dual Card Layout (Stacking on mobile) */}
-      <main className="auth-container" id="auth-dual-cards-container">
-        {/* Card 1: Email / Password Login */}
-        <EmailLoginCard
-          onSubmit={handleEmailLogin}
-          isLoading={loadingMethod === 'email'}
-          errorMessage={loadingMethod === 'email' ? errorMessage : null}
-          onClearError={() => setErrorMessage(null)}
-          currentEmail={currentEmail}
-          onEmailChange={setCurrentEmail}
-        />
-
-        {/* Card 2: Passwordless / WebAuthn Passkey Login */}
-        <PasswordlessLoginCard
-          onPasskeyLogin={handlePasskeyLogin}
-          onSkip={handleSkipPasskey}
-          isLoading={loadingMethod === 'passkey'}
-          errorMessage={loadingMethod === 'passkey' ? errorMessage : null}
-          currentEmail={currentEmail}
-          onEmailChange={setCurrentEmail}
-        />
+      {/* Main Multi-Step Authentication Card */}
+      <main className="auth-single-container" id="auth-flow-main">
+        {currentStep === 1 ? (
+          /* Page 1: Email / Password Login Card */
+          <EmailLoginCard
+            onSubmit={handleEmailLogin}
+            isLoading={loadingMethod === 'email'}
+            errorMessage={loadingMethod === 'email' ? errorMessage : null}
+            onClearError={() => setErrorMessage(null)}
+            currentEmail={currentEmail}
+            onEmailChange={setCurrentEmail}
+          />
+        ) : (
+          /* Page 2: Passwordless / WebAuthn Biometric Passkey Card */
+          <PasswordlessLoginCard
+            onPasskeyLogin={handlePasskeyLogin}
+            onSkip={handleSkipPasskey}
+            onBack={() => { setCurrentStep(1); setErrorMessage(null); }}
+            isLoading={loadingMethod === 'passkey'}
+            errorMessage={loadingMethod === 'passkey' ? errorMessage : null}
+            currentEmail={currentEmail}
+            onEmailChange={setCurrentEmail}
+          />
+        )}
       </main>
-
 
       {/* Bottom Switch Link */}
       <footer className="auth-page-footer">

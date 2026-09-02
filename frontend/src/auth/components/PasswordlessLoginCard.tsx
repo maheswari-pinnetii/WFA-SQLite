@@ -4,6 +4,7 @@ import { PasswordlessLoginPayload } from '../../types/authFlow.types';
 interface PasswordlessLoginCardProps {
   onPasskeyLogin: (payload?: PasswordlessLoginPayload) => Promise<void> | void;
   onSkip?: () => void;
+  onBack?: () => void;
   isLoading?: boolean;
   errorMessage?: string | null;
   currentEmail?: string;
@@ -13,6 +14,7 @@ interface PasswordlessLoginCardProps {
 export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
   onPasskeyLogin,
   onSkip,
+  onBack,
   isLoading = false,
   errorMessage = null,
   currentEmail = 'employee@thestackly.com',
@@ -63,9 +65,24 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         <span>FIDO2 / WebAuthn</span>
       </div>
 
-      {/* Top Nav Row: Empty Spacer + Centered Microsoft Logo to match Card A */}
+      {/* Top Nav Row: Back Arrow + Centered Stackly Logo */}
       <div className="card-top-nav">
-        <div style={{ width: '26px', height: '26px' }} aria-hidden="true" />
+        {onBack ? (
+          <button
+            type="button"
+            className="back-arrow-btn"
+            aria-label="Go back to password login"
+            title="Go back"
+            onClick={onBack}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </button>
+        ) : (
+          <div style={{ width: '26px', height: '26px' }} aria-hidden="true" />
+        )}
 
         <div className="brand-logo-container">
           <img src="/assets/images/logo.png" alt="Stackly" className="auth-brand-logo-img" />
