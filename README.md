@@ -89,7 +89,7 @@ npm run dev
 
 ### Step 6: Verify Production Build & Run Tests
 ```bash
-# Run unit & integration test suite (91 / 91 passing across 10 suites - 100%)
+# Run unit & integration test suite (125 / 125 passing across 15 suites - 100%)
 npm test -- --run
 
 # Build production bundle
@@ -137,13 +137,13 @@ Stackly features a dual-card authentication architecture designed specifically f
 │ 👤 user@thestackly.com Pill Badge      │  │ 👤 user@thestackly.com Pill Badge      │
 │ 🔑 Password Input (Mask & Eye Toggle)  │  │ 👁️ Biometric Scanner HUD (Neon Grid)  │
 │ ❓ Forgot Password Recovery Link       │  │ ⚡ WebAuthn / FIDO2 Passkey Biometrics │
-│ 🚀 "Next" / "Sign In" Primary Button   │  │ 🚀 "Next" (Scan) / "Skip for now"      │
+│ 🚀 "Next" Direct Login to Dashboard    │  │ 🚀 "Next" / "Skip for now" Direct Login │
 └────────────────────────────────────────┘  └────────────────────────────────────────┘
 ```
 
 ### Multi-Modal Sign-In Capabilities:
-1. **Email Login**: Corporate credentials verification (`@thestackly.com`), password masking with eye toggle, and account switcher. Default credentials prefilled: `admin@thestackly.com` / `StacklyWFA2026!`.
-2. **Multi-Step Flow**: Seamless progression from Step 1 (Credentials) ➔ Step 2 (WebAuthn Biometric Passkey / PIN) ➔ Step 3 (Role-Based Dashboard).
+1. **Email Login**: Corporate credentials verification (`@thestackly.com`), password masking with eye toggle, and account switcher. Default credentials prefilled: `admin@thestackly.com` / `StacklyWFA2026!`. Clicking **Next** directly logs in and navigates straight to the dashboard.
+2. **Direct-to-Dashboard Login**: Upon clicking **Next** on either card or **Skip for now**, the system immediately authenticates the session and routes directly to the user's role dashboard (`/admin/dashboard`, `/hr/dashboard`, `/manager/dashboard`, or `/employee/dashboard`).
 3. **Dual-Card Showcase Route**: Dedicated side-by-side showcase available at `/multiple-login-methods`.
 4. **Passwordless Biometric Passkey**: WebAuthn (`navigator.credentials.get` / `navigator.credentials.create`) hardware-backed biometric verification with pulsating radar scanner HUD.
 5. **One-Click Role Demo Presets**:

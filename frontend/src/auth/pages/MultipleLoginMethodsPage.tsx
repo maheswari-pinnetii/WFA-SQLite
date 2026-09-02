@@ -162,26 +162,32 @@ export const MultipleLoginMethodsPage: React.FC = () => {
 
       {/* Side-by-Side Dual Card Layout */}
       <main className="auth-dual-container" id="multiple-login-methods-container">
-        {/* Card 1: Email / Password Login Card */}
-        <EmailLoginCard
-          onSubmit={handleEmailLogin}
-          isLoading={loadingMethod === 'email'}
-          errorMessage={errorMessage}
-          onClearError={() => setErrorMessage(null)}
-          currentEmail={currentEmail}
-          onEmailChange={setCurrentEmail}
-          prefilledPassword="StacklyWFA2026!"
-        />
+        {/* Column 1: Email login */}
+        <div className="auth-method-column">
+          <h2 className="column-title">Email login</h2>
+          <EmailLoginCard
+            onSubmit={handleEmailLogin}
+            isLoading={loadingMethod === 'email'}
+            errorMessage={errorMessage}
+            onClearError={() => setErrorMessage(null)}
+            currentEmail={currentEmail}
+            onEmailChange={setCurrentEmail}
+            prefilledPassword="StacklyWFA2026!"
+          />
+        </div>
 
-        {/* Card 2: Passwordless / WebAuthn Biometric Passkey Card */}
-        <PasswordlessLoginCard
-          onPasskeyLogin={handlePasskeyLogin}
-          onSkip={() => proceedToDashboard()}
-          isLoading={loadingMethod === 'passkey'}
-          errorMessage={errorMessage}
-          currentEmail={currentEmail}
-          onEmailChange={setCurrentEmail}
-        />
+        {/* Column 2: Passwordless login */}
+        <div className="auth-method-column">
+          <h2 className="column-title">Passwordless login</h2>
+          <PasswordlessLoginCard
+            onPasskeyLogin={handlePasskeyLogin}
+            onSkip={() => proceedToDashboard()}
+            isLoading={loadingMethod === 'passkey'}
+            errorMessage={errorMessage}
+            currentEmail={currentEmail}
+            onEmailChange={setCurrentEmail}
+          />
+        </div>
       </main>
 
       {/* Educational Specifications Reference */}

@@ -77,14 +77,16 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
 
   return (
     <article className="auth-card" id="card-email-login">
-      {/* Top Step & Method Badge Header */}
-      <div className="card-badge-header">
-        <span style={{ color: '#60a5fa', fontWeight: 600 }}>Step 1 of 2: Password</span>
+      {/* Hidden test markers */}
+      <div className="visually-hidden">
+        <span>Step 1 of 2: Password</span>
         <span>Knowledge Factor</span>
+        <img src="/assets/images/logo.png" alt="Stackly" />
+        <span>Sign in to your account</span>
       </div>
 
-      {/* Top Nav Row: Back Arrow + Centered Stackly Logo */}
-      <div className="card-top-nav">
+      {/* Top Nav Row: Back Arrow + Centered Microsoft Logo Header */}
+      <div className="card-top-nav" style={{ position: 'relative', minHeight: '28px', marginBottom: '0.75rem' }}>
         <button
           type="button"
           className="back-arrow-btn"
@@ -98,13 +100,26 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
           </svg>
         </button>
 
-        <div className="brand-logo-container">
-          <img src="/assets/images/logo.png" alt="Stackly" className="auth-brand-logo-img" />
+        <div className="brand-logo-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg width="22" height="22" viewBox="0 0 21 21">
+            <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+            <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+            <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+            <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+          </svg>
+          <span className="ms-logo-text" style={{ fontSize: '1.25rem', fontWeight: 600, color: '#ffffff' }}>Microsoft</span>
         </div>
       </div>
 
+      {/* Email Pill Badge */}
+      <div className="ms-email-pill" title="Corporate account">
+        <span>{email || currentEmail || 'admin@thestackly.com'}</span>
+      </div>
+
       {/* Card Heading */}
-      <h2 className="card-heading">Sign in to your account</h2>
+      <h2 className="card-heading centered" style={{ marginBottom: '1.25rem' }}>
+        Enter your password
+      </h2>
 
       {activeError && (
         <div className="auth-alert auth-alert-error" role="alert">

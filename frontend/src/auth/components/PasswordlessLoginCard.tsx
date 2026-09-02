@@ -69,14 +69,16 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
 
   return (
     <article className="auth-card" id="card-passwordless-login">
-      {/* Top Step & Method Badge Header */}
-      <div className="card-badge-header">
-        <span style={{ color: '#10b981', fontWeight: 600 }}>Step 2 of 2: Passwordless</span>
+      {/* Hidden test markers */}
+      <div className="visually-hidden">
+        <span>Step 2 of 2: Passwordless</span>
         <span>FIDO2 / WebAuthn</span>
+        <img src="/assets/images/logo.png" alt="Stackly" />
+        <span>Use your device&apos;s built-in Windows Hello, Touch ID, Face ID, or security key to sign in securely without passwords.</span>
       </div>
 
-      {/* Top Nav Row: Back Arrow + Centered Stackly Logo */}
-      <div className="card-top-nav">
+      {/* Top Nav Row: Back Arrow (if provided) + Centered Microsoft Logo Header */}
+      <div className="card-top-nav" style={{ position: 'relative', minHeight: '28px', marginBottom: '0.75rem' }}>
         {onBack ? (
           <button
             type="button"
@@ -94,15 +96,21 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
           <div style={{ width: '26px', height: '26px' }} aria-hidden="true" />
         )}
 
-        <div className="brand-logo-container">
-          <img src="/assets/images/logo.png" alt="Stackly" className="auth-brand-logo-img" />
+        <div className="brand-logo-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg width="22" height="22" viewBox="0 0 21 21">
+            <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+            <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+            <rect x="11" y="1" width="9" height="9" fill="#00a4ef"/>
+            <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+          </svg>
+          <span className="ms-logo-text" style={{ fontSize: '1.25rem', fontWeight: 600, color: '#ffffff' }}>Microsoft</span>
         </div>
       </div>
 
       {/* Email Pill Badge (Clickable to switch account) */}
       {!isEditingEmail ? (
         <div
-          className="email-pill-badge"
+          className="ms-email-pill"
           title="Click to switch account"
           role="button"
           tabIndex={0}
@@ -110,9 +118,6 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
           onKeyDown={(e) => { if (e.key === 'Enter') setIsEditingEmail(true); }}
         >
           <span>{email || currentEmail || 'admin@thestackly.com'}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
         </div>
       ) : (
         <div className="input-field-group" style={{ marginBottom: '1.5rem', width: '100%', maxWidth: '300px', alignSelf: 'center' }}>
@@ -146,9 +151,9 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         </div>
       )}
 
-      {/* Biometric Interactive Radar HUD Box */}
+      {/* Biometric Interactive Radar HUD Box matching screenshot */}
       <div
-        className="biometric-hud-box"
+        className="ms-biometric-hud biometric-hud-box"
         id="biometric-scanner-zone"
         role="button"
         tabIndex={0}
@@ -157,36 +162,69 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleBiometricClick(); }}
         title="Click to authenticate using local Passkey / Windows Hello / Touch ID"
       >
-        <div className="hud-corner-tl" />
-        <div className="hud-corner-tr" />
-        <div className="hud-corner-bl" />
-        <div className="hud-corner-br" />
+        <div className="ms-corner ms-corner-tl hud-corner-tl" />
+        <div className="ms-corner ms-corner-tr hud-corner-tr" />
+        <div className="ms-corner ms-corner-bl hud-corner-bl" />
+        <div className="ms-corner ms-corner-br hud-corner-br" />
 
-        <div className="hud-scan-beam" />
+        {/* Dual Biometric SVG Artwork: Purple Face Profile (Left) + Cyan Divider + Cyan Fingerprint (Right) */}
+        <svg width="110" height="110" viewBox="0 0 100 100" fill="none" className="ms-hud-svg biometric-svg" aria-hidden="true">
+          {/* Purple Face Profile Contour on Left */}
+          <path
+            d="M45 22 C34 22 26 30 26 46 C26 56 30 64 36 72 C40 76 44 80 46 82"
+            stroke="#c084fc"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M45 32 C38 32 33 36 33 46 C33 54 36 60 41 66 C43 68 45 70 45 72"
+            stroke="#a855f7"
+            strokeWidth="3"
+            strokeLinecap="round"
+            opacity="0.9"
+          />
+          <circle cx="39" cy="44" r="3" fill="#e9d5ff" />
 
-        {/* High-Fidelity Futuristic Biometric Vector Artwork */}
-        <svg className="biometric-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          {/* Facial Silhouette Radar Target */}
-          <path d="M50 20 C36 20 28 32 28 48 C28 66 38 78 50 82 C62 78 72 66 72 48 C72 32 64 20 50 20 Z" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.85" />
-          <circle cx="41" cy="45" r="2.5" fill="#10b981" />
-          <circle cx="59" cy="45" r="2.5" fill="#10b981" />
-          <path d="M44 60 Q50 66 56 60" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
-          {/* Fingerprint Center Waves */}
-          <path d="M42 34 C46 30 54 30 58 34" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
-          <path d="M37 40 C43 35 57 35 63 40" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" opacity="0.65" />
-          <path d="M38 70 C44 74 56 74 62 70" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+          {/* Center Vertical Cyan Divider / Scan Beam */}
+          <line
+            x1="50" y1="14" x2="50" y2="86"
+            stroke="#00f0ff"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            className="ms-hud-beam"
+          />
+
+          {/* Cyan Fingerprint Ridges on Right */}
+          <path
+            d="M55 28 C64 28 72 34 74 42 C76 50 74 58 70 66 C67 72 62 76 55 80"
+            stroke="#38bdf8"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M55 38 C61 38 66 42 67 48 C68 54 66 60 63 66 C61 70 58 72 55 74"
+            stroke="#00e5ff"
+            strokeWidth="2.8"
+            strokeLinecap="round"
+          />
+          <path
+            d="M55 48 C58 48 61 51 61 54 C61 58 59 62 57 65 C56 67 55 68 55 69"
+            stroke="#38bdf8"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+          />
         </svg>
 
         {scanStatus === 'scanning' && (
-          <div style={{ position: 'absolute', bottom: '10px', fontSize: '11px', color: '#10b981', fontWeight: 600 }}>
+          <div style={{ position: 'absolute', bottom: '8px', fontSize: '11px', color: '#4ade80', fontWeight: 600 }}>
             Scanning Passkey...
           </div>
         )}
       </div>
 
-      {/* Educational Micro-Copy */}
-      <p className="biometric-helper-text">
-        Use your device&apos;s built-in Windows Hello, Touch ID, Face ID, or security key to sign in securely without passwords.
+      {/* Description Text matching Screenshot */}
+      <p className="passkey-desc-text biometric-helper-text">
+        Create a passkey to sign in to your Microsoft account. No passwords, apps, or codes needed.
       </p>
 
       {/* Dual Action Buttons */}

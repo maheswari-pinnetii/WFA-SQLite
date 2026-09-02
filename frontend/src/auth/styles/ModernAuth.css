@@ -723,3 +723,220 @@
   border-color: #3b82f6;
   font-weight: 600;
 }
+
+/* ==========================================================================
+   Exact Visual Match for Dual-Card Screenshot
+   ========================================================================== */
+.multiple-methods-title {
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+}
+
+.auth-method-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.column-title {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Microsoft Logo Header Row */
+.ms-branding-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  margin-bottom: 0.85rem;
+  min-height: 28px;
+}
+
+.ms-logo-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ms-logo-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+/* Email Pill Badge */
+.ms-email-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2b2b2b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.8125rem;
+  color: #e2e8f0;
+  font-weight: 500;
+  margin: 0 auto 1.25rem auto;
+  max-width: 90%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Card Sub-heading */
+.card-sub-heading {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-align: center;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.3;
+}
+
+/* Password floating container */
+.ms-floating-input-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1.25rem;
+}
+
+.ms-floating-label {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  background-color: #1e1e1e;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  color: #a1a1aa;
+  font-weight: 500;
+  z-index: 2;
+}
+
+.ms-floating-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  padding: 0.85rem 2.5rem 0.85rem 1rem;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ms-floating-input:focus {
+  border-color: #0067b8;
+  box-shadow: 0 0 0 1px #0067b8;
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+  color: #38bdf8;
+  font-size: 0.875rem;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.25rem 0 1.5rem 0;
+  transition: color 0.2s;
+}
+
+.forgot-password-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+/* High-Fidelity Biometric HUD matching Screenshot */
+.ms-biometric-hud {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  margin: 0.5rem auto 1rem auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ms-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: #4ade80;
+  border-style: solid;
+}
+
+.ms-corner-tl {
+  top: 0;
+  left: 0;
+  border-width: 3px 0 0 3px;
+  border-top-left-radius: 8px;
+}
+
+.ms-corner-tr {
+  top: 0;
+  right: 0;
+  border-width: 3px 3px 0 0;
+  border-top-right-radius: 8px;
+}
+
+.ms-corner-bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 3px 3px;
+  border-bottom-left-radius: 8px;
+}
+
+.ms-corner-br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 3px 3px 0;
+  border-bottom-right-radius: 8px;
+}
+
+.ms-hud-svg {
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+}
+
+.ms-hud-beam {
+  filter: drop-shadow(0 0 6px #00f0ff);
+  animation: pulseScan 2.5s ease-in-out infinite;
+}
+
+@keyframes pulseScan {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; filter: drop-shadow(0 0 12px #00f0ff); }
+}
+
+.passkey-desc-text {
+  color: #a1a1aa;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+  margin: 0.5rem 0 1.5rem 0;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
