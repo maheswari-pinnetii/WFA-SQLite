@@ -9,6 +9,7 @@ interface EmailLoginCardProps {
   onClearError?: () => void;
   currentEmail?: string;
   onEmailChange?: (newEmail: string) => void;
+  prefilledPassword?: string;
 }
 
 export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
@@ -18,11 +19,12 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
   onClearError,
   currentEmail = 'employee@thestackly.com',
   onEmailChange,
+  prefilledPassword,
 }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>(currentEmail);
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
-  const [password, setPassword] = useState<string>('');
+  const [password, setPassword] = useState<string>(prefilledPassword || '');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -32,11 +34,19 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
     setIsEditingEmail(false);
   }, [currentEmail]);
 
+  // Sync with parent prefilledPassword
+  useEffect(() => {
+    if (prefilledPassword !== undefined) {
+      setPassword(prefilledPassword);
+    }
+  }, [prefilledPassword]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
 
-    if (!email.trim()) {
+    const targetEmail = email || currentEmail;
+    if (!targetEmail.trim()) {
       setLocalError('Please enter your corporate email address.');
       return;
     }
@@ -46,7 +56,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
     }
 
     try {
-      await onSubmit({ email: email.trim(), password });
+      await onSubmit({ email: targetEmail.trim(), password });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Login failed. Please verify credentials.';
       setLocalError(msg);

@@ -10,15 +10,15 @@ import '../styles/ModernAuth.css';
 interface DemoAccount {
   label: string;
   email: string;
-  role: string;
+  role: Role;
   badge: string;
 }
 
 const DEMO_ACCOUNTS: DemoAccount[] = [
-  { label: 'Admin', email: 'admin@thestackly.com', role: 'System Admin', badge: 'Full Access' },
-  { label: 'HR Ops', email: 'hr@thestackly.com', role: 'HR Manager', badge: 'People & Payroll' },
-  { label: 'Manager', email: 'manager@thestackly.com', role: 'Team Manager', badge: 'Approvals & Analytics' },
-  { label: 'Employee', email: 'employee@thestackly.com', role: 'Staff Member', badge: 'Self-Service' },
+  { label: 'Admin', email: 'admin@thestackly.com', role: Role.ADMIN, badge: 'Full Access' },
+  { label: 'HR Ops', email: 'hr@thestackly.com', role: Role.HR, badge: 'People & Payroll' },
+  { label: 'Manager', email: 'manager@thestackly.com', role: Role.MANAGER, badge: 'Approvals & Analytics' },
+  { label: 'Employee', email: 'employee@thestackly.com', role: Role.EMPLOYEE, badge: 'Self-Service' },
 ];
 
 export const LoginPage: React.FC = () => {
@@ -26,6 +26,7 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [currentEmail, setCurrentEmail] = useState<string>('employee@thestackly.com');
+  const [prefilledPassword, setPrefilledPassword] = useState<string>('StacklyWFA2026!');
   const [loadingMethod, setLoadingMethod] = useState<'email' | 'passkey' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -51,7 +52,7 @@ export const LoginPage: React.FC = () => {
         throw new Error(res.payload || res.error.message || 'Invalid email or password credentials.');
       }
 
-      const userRole = (res?.payload?.user?.role || role || Role.EMPLOYEE) as Role;
+      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.EMPLOYEE) as Role;
       const target = ROLE_HOME_PATHS[userRole] || '/employee/dashboard';
       navigate(target, { replace: true });
     } catch (err: unknown) {
@@ -160,30 +161,37 @@ export const LoginPage: React.FC = () => {
   };
 
   /**
-   * Quick Autofill Demo Account
+   * Select Demo Account & Prefill Credentials
    */
-  const selectDemoAccount = (demoEmail: string) => {
-    setCurrentEmail(demoEmail);
+  const selectDemoAccount = (acc: DemoAccount) => {
+    setCurrentEmail(acc.email);
+    setPrefilledPassword('StacklyWFA2026!');
     setErrorMessage(null);
-    const passwordInput = document.getElementById('password-input') as HTMLInputElement | null;
-    if (passwordInput) {
-      passwordInput.value = 'StacklyWFA2026!';
-      // Trigger native input event
-      passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
-      passwordInput.focus();
-    }
+  };
+
+  /**
+   * One-Click Instant Sign-In as Demo Account
+   */
+  const quickLoginAs = async (acc: DemoAccount) => {
+    selectDemoAccount(acc);
+    await handleEmailLogin({
+      email: acc.email,
+      password: 'StacklyWFA2026!',
+    });
   };
 
   return (
     <div className="auth-page-wrapper">
       {/* Top Navbar / Navigation Header */}
-      <nav style={{ width: '100%', maxWidth: '1040px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
+      <nav style={{ width: '100%', maxWidth: '940px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
         <Link to="/" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500, transition: 'color 0.2s' }}>
           <span>&larr;</span> Back to Home
         </Link>
-        <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
-          Create Account &rarr;
-        </Link>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+            Create Account &rarr;
+          </Link>
+        </div>
       </nav>
 
       {/* Page Header */}
@@ -200,21 +208,25 @@ export const LoginPage: React.FC = () => {
             <button
               key={acc.email}
               type="button"
-              onClick={() => selectDemoAccount(acc.email)}
+              onClick={() => quickLoginAs(acc)}
               style={{
                 backgroundColor: currentEmail === acc.email ? '#1e293b' : '#0f172a',
                 border: currentEmail === acc.email ? '1px solid #3b82f6' : '1px solid #334155',
                 color: currentEmail === acc.email ? '#93c5fd' : '#94a3b8',
-                padding: '4px 10px',
+                padding: '5px 12px',
                 borderRadius: '6px',
                 fontSize: '12px',
                 cursor: 'pointer',
-                fontWeight: currentEmail === acc.email ? 600 : 400,
+                fontWeight: currentEmail === acc.email ? 600 : 500,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
                 transition: 'all 0.15s ease',
               }}
-              title={`Role: ${acc.role} | Password: StacklyWFA2026!`}
+              title={`Click to instantly sign in as ${acc.label} (${acc.email})`}
             >
-              {acc.label} ({acc.badge})
+              <span>{acc.label} ({acc.badge})</span>
+              <span style={{ fontSize: '10px', opacity: 0.7 }}>&rarr;</span>
             </button>
           ))}
         </div>
@@ -230,6 +242,7 @@ export const LoginPage: React.FC = () => {
           onClearError={() => setErrorMessage(null)}
           currentEmail={currentEmail}
           onEmailChange={setCurrentEmail}
+          prefilledPassword={prefilledPassword}
         />
 
         {/* Card 2: Passwordless / WebAuthn Passkey Login */}
