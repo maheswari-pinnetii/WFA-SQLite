@@ -24,7 +24,8 @@ import {
   Layers,
   ChevronDown,
   Sparkles,
-  Award
+  Award,
+  Palmtree
 } from 'lucide-react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
@@ -400,6 +401,10 @@ export const PayrollReports: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => window.location.assign('/hr/leave')}>
+              <Palmtree size={14} className="mr-1.5 text-blue-400" /> Leave Hub
+            </Button>
+
             {/* Payroll Period Picker */}
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800">
               <Calendar size={14} className="text-slate-400 ml-2" />

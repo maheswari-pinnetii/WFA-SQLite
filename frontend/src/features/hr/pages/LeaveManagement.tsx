@@ -25,7 +25,8 @@ import {
   Award,
   Baby,
   CalendarCheck,
-  CalendarX
+  CalendarX,
+  DollarSign
 } from 'lucide-react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
@@ -332,7 +333,10 @@ export const LeaveManagement: React.FC = () => {
               Configure enterprise leave policies, track live PTO balances, coordinate team coverage, and manage approval queues.
             </p>
           </div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => window.location.assign('/hr/payroll-reports')}>
+              <DollarSign size={14} className="mr-1.5 text-emerald-400" /> Payroll Hub
+            </Button>
             <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
               <RefreshCw size={14} className={`mr-1.5 text-slate-400 ${isLoading ? 'animate-spin' : ''}`} />
               {isLoading ? 'Syncing...' : 'Sync Live Data'}
