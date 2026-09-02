@@ -242,7 +242,7 @@ export const SignUpPage: React.FC = () => {
                   id="signup-email-input"
                   type="email"
                   className="auth-text-input"
-                  placeholder="alex@company.com"
+                  placeholder="Enter your work email (e.g. name@thestackly.com)"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}

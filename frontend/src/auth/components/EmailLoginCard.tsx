@@ -23,15 +23,15 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>(currentEmail);
-  const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
   const [password, setPassword] = useState<string>(prefilledPassword || '');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Sync with parent currentEmail
   useEffect(() => {
-    setEmail(currentEmail);
-    setIsEditingEmail(false);
+    if (currentEmail) {
+      setEmail(currentEmail);
+    }
   }, [currentEmail]);
 
   // Sync with parent prefilledPassword
@@ -46,7 +46,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
     setLocalError(null);
 
     const targetEmail = email || currentEmail;
-    if (!targetEmail.trim()) {
+    if (!targetEmail || !targetEmail.trim()) {
       setLocalError('Please enter your corporate email address.');
       return;
     }
@@ -63,12 +63,6 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
     }
   };
 
-  const handleEmailSave = (newVal: string) => {
-    setEmail(newVal);
-    if (onEmailChange) onEmailChange(newVal);
-    setIsEditingEmail(false);
-  };
-
   const activeError = localError || errorMessage;
 
   return (
@@ -79,7 +73,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
         <span>Knowledge Factor</span>
       </div>
 
-      {/* Top Nav Row: Back Arrow + Centered Logo */}
+      {/* Top Nav Row: Back Arrow + Centered Stackly Logo */}
       <div className="card-top-nav">
         <button
           type="button"
@@ -99,39 +93,8 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
         </div>
       </div>
 
-      {/* Email Pill Badge (Clickable to switch/edit account) */}
-      {!isEditingEmail ? (
-        <div
-          className="email-pill-badge"
-          title="Click to switch account"
-          role="button"
-          tabIndex={0}
-          onClick={() => setIsEditingEmail(true)}
-          onKeyDown={(e) => { if (e.key === 'Enter') setIsEditingEmail(true); }}
-        >
-          <span>{email || currentEmail || 'employee@thestackly.com'}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </div>
-      ) : (
-        <div className="input-field-group" style={{ marginBottom: '1.5rem', width: '100%', maxWidth: '300px', alignSelf: 'center' }}>
-          <label htmlFor="edit-email-input" className="overlaid-label">Switch Email</label>
-          <input
-            id="edit-email-input"
-            type="email"
-            className="auth-text-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onBlur={() => handleEmailSave(email)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleEmailSave(email); }}
-            autoFocus
-          />
-        </div>
-      )}
-
       {/* Card Heading */}
-      <h2 className="card-heading">Enter your password</h2>
+      <h2 className="card-heading">Sign in to your account</h2>
 
       {activeError && (
         <div className="auth-alert auth-alert-error" role="alert">
@@ -144,20 +107,34 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
         </div>
       )}
 
-      {/* Form: Password Input with Overlaid Label & Eye Toggle */}
+      {/* Form: Email & Password Inputs */}
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-        {/* Hidden/accessible Email input for autofill & tests */}
-        <div style={{ display: 'none' }}>
-          <label htmlFor="login-email-input">Email address</label>
-          <input
-            id="login-email-input"
-            type="email"
-            value={email}
-            onChange={(e) => { setEmail(e.target.value); if (onEmailChange) onEmailChange(e.target.value); }}
-            autoComplete="username"
-          />
+        {/* Email Address Input */}
+        <div className="input-field-group">
+          <label htmlFor="login-email-input" className="overlaid-label">
+            Email address
+          </label>
+          <div className="auth-input-wrapper">
+            <input
+              id="login-email-input"
+              type="email"
+              className="auth-text-input"
+              placeholder="Enter email address"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (onEmailChange) onEmailChange(e.target.value);
+                if (localError) setLocalError(null);
+                if (errorMessage && onClearError) onClearError();
+              }}
+              disabled={isLoading}
+              autoComplete="username"
+              required
+            />
+          </div>
         </div>
 
+        {/* Password Input */}
         <div className="input-field-group">
           <label htmlFor="password-input" className="overlaid-label">
             Password

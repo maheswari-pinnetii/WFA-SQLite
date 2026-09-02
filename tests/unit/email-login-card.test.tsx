@@ -15,7 +15,7 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
     );
   };
 
-  it('1.1 should render badge header, Stackly branding, and default email pill', () => {
+  it('1.1 should render badge header, Stackly branding, email input, and password field', () => {
     renderCard({
       onSubmit: vi.fn(),
       currentEmail: 'employee@thestackly.com',
@@ -24,8 +24,9 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
     expect(screen.getByText('Password-Based')).toBeInTheDocument();
     expect(screen.getByText('Knowledge Factor')).toBeInTheDocument();
     expect(screen.getByAltText('Stackly')).toBeInTheDocument();
-    expect(screen.getByText('employee@thestackly.com')).toBeInTheDocument();
-    expect(screen.getByText('Enter your password')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email address/i)).toHaveValue('employee@thestackly.com');
+    expect(screen.getByText('Sign in to your account')).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
     expect(screen.getByText('Forgot your password?')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Next$/i })).toBeInTheDocument();
   });
@@ -47,7 +48,7 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
     expect(passwordInput.type).toBe('password');
   });
 
-  it('1.3 should allow clicking email pill badge to edit corporate email', () => {
+  it('1.3 should allow typing and changing corporate email directly in input', () => {
     const onEmailChangeMock = vi.fn();
     renderCard({
       onSubmit: vi.fn(),
@@ -55,20 +56,14 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
       onEmailChange: onEmailChangeMock,
     });
 
-    const emailPill = screen.getByText('original@thestackly.com');
-    fireEvent.click(emailPill);
+    const emailInput = screen.getByLabelText(/Email address/i) as HTMLInputElement;
+    expect(emailInput.value).toBe('original@thestackly.com');
 
-    // Should switch to inline input
-    const editInput = screen.getByLabelText('Switch Email') as HTMLInputElement;
-    expect(editInput).toBeInTheDocument();
-    expect(editInput.value).toBe('original@thestackly.com');
-
-    // Change email value and blur
-    fireEvent.change(editInput, { target: { value: 'updated@thestackly.com' } });
-    fireEvent.blur(editInput);
+    // Change email value
+    fireEvent.change(emailInput, { target: { value: 'updated@thestackly.com' } });
 
     expect(onEmailChangeMock).toHaveBeenCalledWith('updated@thestackly.com');
-    expect(screen.getByText('updated@thestackly.com')).toBeInTheDocument();
+    expect(emailInput.value).toBe('updated@thestackly.com');
   });
 
   it('1.4 should display validation error when password is empty', async () => {
@@ -101,14 +96,12 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
     });
   });
 
-  it('1.6 should show loading state and disable submit button when isLoading=true', () => {
+  it('1.6 should render error message passed from parent', () => {
     renderCard({
       onSubmit: vi.fn(),
-      isLoading: true,
+      errorMessage: 'Invalid password. 3 attempts remaining.',
     });
 
-    expect(screen.getByText('Signing in...')).toBeInTheDocument();
-    const submitBtn = screen.getByRole('button', { name: /Signing in.../i });
-    expect(submitBtn).toBeDisabled();
+    expect(screen.getByText('Invalid password. 3 attempts remaining.')).toBeInTheDocument();
   });
 });

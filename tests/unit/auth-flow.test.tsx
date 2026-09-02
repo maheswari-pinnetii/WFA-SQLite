@@ -38,7 +38,8 @@ describe('Modern Authentication Flow Test Suite', () => {
 
       // Verify Page 1 (EmailLoginCard) elements
       expect(screen.getByText('Password-Based')).toBeInTheDocument();
-      expect(screen.getByText('Enter your password')).toBeInTheDocument();
+      expect(screen.getByText('Sign in to your account')).toBeInTheDocument();
+      expect(screen.getByLabelText(/Email address/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
       expect(screen.getByText(/Forgot your password\?/i)).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /^Next$/i })).toBeInTheDocument();
