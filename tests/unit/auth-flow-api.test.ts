@@ -115,6 +115,27 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
       expect(res.data.success).toBe(false);
       expect(res.data.error).toContain('Invalid email or password');
     });
+
+    it('GET /api/auth/me - should return authenticated user profile with permissions', async () => {
+      const res = await client.get('/api/auth/me', {
+        headers: { Authorization: `Bearer ${issuedToken}` },
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.data.success).toBe(true);
+      expect(res.data.user.email).toBe(testUser.email.toLowerCase());
+      expect(res.data.user.name).toBe(testUser.fullName);
+      expect(Array.isArray(res.data.user.permissions)).toBe(true);
+      expect(res.data.user.status).toBe('ACTIVE');
+    });
+
+    it('GET /api/auth/me - should reject request without authorization header with 401', async () => {
+      const res = await client.get('/api/auth/me');
+
+      expect(res.status).toBe(401);
+      expect(res.data.success).toBe(false);
+      expect(res.data.error).toContain('Authorization header is required');
+    });
   });
 
   // --------------------------------------------------------------------

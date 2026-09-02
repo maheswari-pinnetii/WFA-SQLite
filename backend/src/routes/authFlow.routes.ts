@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   register,
   login,
+  getCurrentUser,
   generatePasskeyRegisterOptions,
   verifyPasskeyRegister,
   generatePasskeyLoginOptions,
@@ -27,6 +28,13 @@ router.post('/register', register);
  * @access  Public
  */
 router.post('/login', login);
+
+/**
+ * @route   GET /api/auth/me
+ * @desc    Get current authenticated user profile
+ * @access  Private (Bearer Token)
+ */
+router.get('/me', getCurrentUser);
 
 // ======================================================================
 // 2. Passkey / WebAuthn FIDO2 Passwordless Routes

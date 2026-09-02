@@ -10,6 +10,11 @@ export interface UserProfile {
   name: string;
   email: string;
   role?: string;
+  department?: string;
+  team?: string;
+  title?: string;
+  status?: string;
+  permissions?: string[];
   avatar?: string;
   createdAt?: string;
   hasPasskey?: boolean;

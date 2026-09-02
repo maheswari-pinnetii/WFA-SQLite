@@ -13,7 +13,7 @@ import {
 const JWT_SECRET = env.JWT_SECRET || 'wfa_platform_secret_jwt_key_2026';
 const JWT_EXPIRES_IN = '24h';
 const ORGANIZATION_ID = 'org-stackly';
-const COMPANY_ID = 'company-main';
+const COMPANY_ID = 'org-stackly';
 
 /**
  * Utility: Generate cryptographic Base64URL string
@@ -23,12 +23,45 @@ function generateChallenge(): string {
 }
 
 /**
+ * Utility: Safely parse permissions from database representation
+ */
+function parsePermissions(raw: any): string[] {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+/**
+ * Utility: Format standardized user profile payload
+ */
+function formatUserProfile(user: any, hasPasskey: boolean = false): UserProfile {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role || 'EMPLOYEE',
+    department: user.department || 'Engineering',
+    team: user.team || 'Core Team',
+    title: user.title || user.designation || 'Associate',
+    status: user.status || 'ACTIVE',
+    permissions: parsePermissions(user.permissions),
+    createdAt: user.createdAt || new Date().toISOString(),
+    hasPasskey,
+  };
+}
+
+/**
  * Utility: Issue JWT Token for authenticated user
  */
 function issueJwtToken(user: any): string {
-  const permissions = typeof user.permissions === 'string'
-    ? JSON.parse(user.permissions || '[]')
-    : (user.permissions || []);
+  const permissions = parsePermissions(user.permissions);
 
   return jwt.sign(
     {
@@ -38,6 +71,8 @@ function issueJwtToken(user: any): string {
       name: user.name,
       role: user.role || 'EMPLOYEE',
       department: user.department || 'Engineering',
+      team: user.team || 'Core Team',
+      title: user.title || user.designation || 'Associate',
       organizationId: user.organizationId || ORGANIZATION_ID,
       companyId: user.companyId || COMPANY_ID,
       permissions,
@@ -60,6 +95,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const name = (req.body.fullName || req.body.name || '').trim();
     const email = (req.body.email || '').trim();
     const password = req.body.password;
+    const requestedRole = (req.body.role || 'EMPLOYEE').toUpperCase();
+    const department = req.body.department || 'Engineering';
+    const team = req.body.team || 'Core Team';
+    const location = req.body.location || 'San Francisco';
+    const title = req.body.title || 'Associate';
 
     if (!email || !name) {
       res.status(400).json({
@@ -82,9 +122,15 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const userId = `usr_${crypto.randomUUID()}`;
+    const employeeCode = `EMP-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const passwordHash = password ? await bcrypt.hash(password, 10) : '';
     const now = new Date().toISOString();
-    const defaultPermissions = JSON.stringify(['VIEW_DASHBOARD', 'SUBMIT_ATTENDANCE', 'VIEW_PROFILE']);
+
+    // Default permissions based on role
+    const permissionsList = requestedRole === 'ADMIN'
+      ? ['USER_CREATE', 'USER_UPDATE', 'USER_DELETE', 'USER_MANAGE', 'ROLE_MANAGE', 'EMPLOYEE_VIEW_ALL', 'REPORT_VIEW_ALL', 'SYSTEM_CONFIG', 'AUDIT_LOG_VIEW']
+      : ['PROFILE_VIEW', 'PROFILE_UPDATE', 'ATTENDANCE_VIEW_SELF', 'LEAVE_REQUEST', 'VIEW_DASHBOARD'];
+    const defaultPermissions = JSON.stringify(permissionsList);
 
     // Persist into SQLite users table
     await execute(
@@ -92,32 +138,35 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         id, name, email, password_hash, role, department, team, location,
         title, clearanceLevel, status, permissions, mfa_enabled,
         organizationId, companyId, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, 'EMPLOYEE', 'Engineering', 'Core Team', 'San Francisco', 'Associate', 1, 'ACTIVE', ?, 0, ?, ?, ?, ?)`,
-      [userId, name, normalizedEmail, passwordHash, defaultPermissions, ORGANIZATION_ID, COMPANY_ID, now, now]
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 'ACTIVE', ?, 0, ?, ?, ?, ?)`,
+      [userId, name, normalizedEmail, passwordHash, requestedRole, department, team, location, title, defaultPermissions, ORGANIZATION_ID, COMPANY_ID, now, now]
     );
 
     // Also persist corresponding record in employees table
     try {
       await execute(
         `INSERT OR IGNORE INTO employees (
-          id, name, email, role, department, team, location,
+          id, employeeCode, name, email, role, department, team, location,
           designation, joinDate, status, organizationId, companyId, createdAt, updatedAt
-        ) VALUES (?, ?, ?, 'EMPLOYEE', 'Engineering', 'Core Team', 'San Francisco', 'Associate', ?, 'ACTIVE', ?, ?, ?, ?)`,
-        [userId, name, normalizedEmail, now.split('T')[0], ORGANIZATION_ID, COMPANY_ID, now, now]
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE', ?, ?, ?, ?)`,
+        [userId, employeeCode, name, normalizedEmail, requestedRole, department, team, location, title, now.split('T')[0], ORGANIZATION_ID, COMPANY_ID, now, now]
       );
     } catch (empErr) {
       console.warn('[Register] Non-fatal: Employee sync notice:', empErr);
     }
 
-    const userPayload: UserProfile = {
+    const userPayload = formatUserProfile({
       id: userId,
       name,
       email: normalizedEmail,
-      role: 'EMPLOYEE',
-      department: 'Engineering',
+      role: requestedRole,
+      department,
+      team,
+      title,
+      status: 'ACTIVE',
+      permissions: permissionsList,
       createdAt: now,
-      hasPasskey: false,
-    };
+    }, false);
 
     const token = issueJwtToken(userPayload);
 
@@ -166,11 +215,24 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const user = users[0];
 
+    // Check account status
+    if (user.status && user.status !== 'ACTIVE') {
+      res.status(403).json({
+        success: false,
+        error: 'Your account is deactivated. Please contact an administrator.',
+      });
+      return;
+    }
+
     // Verify bcrypt password hash (with backward compatibility)
     let isPasswordValid = false;
     if (user.password_hash) {
       if (user.password_hash.startsWith('$2a$') || user.password_hash.startsWith('$2b$')) {
-        isPasswordValid = await bcrypt.compare(password, user.password_hash);
+        try {
+          isPasswordValid = await bcrypt.compare(password, user.password_hash);
+        } catch {
+          isPasswordValid = false;
+        }
       } else {
         isPasswordValid = user.password_hash === password || user.password_hash === `hash_${password}`;
       }
@@ -189,22 +251,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       'SELECT id FROM passkey_credentials WHERE user_id = ? LIMIT 1',
       [user.id]
     );
-    const hasPasskey = passkeyRows && passkeyRows.length > 0;
+    const hasPasskey = Boolean(passkeyRows && passkeyRows.length > 0);
 
     const token = issueJwtToken(user);
+    const userPayload = formatUserProfile(user, hasPasskey);
 
     res.status(200).json({
       success: true,
       message: 'Authentication successful.',
       token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        department: user.department,
-        hasPasskey,
-      },
+      user: userPayload,
     });
   } catch (error: any) {
     console.error('[Login Error]', error);
@@ -236,6 +292,13 @@ export const generatePasskeyRegisterOptions = async (req: Request, res: Response
     const challenge = generateChallenge();
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString(); // 5 min TTL
+
+    // Clean up stale expired challenges
+    try {
+      await execute("DELETE FROM passkey_challenges WHERE expires_at < datetime('now')");
+    } catch {
+      // Non-fatal
+    }
 
     // Find existing user or generate deterministic/transient ID
     const users = await query<any>('SELECT id, name FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
@@ -309,6 +372,7 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
     if (!users || users.length === 0) {
       const newUserId = `usr_${crypto.randomUUID()}`;
       const defaultPermissions = JSON.stringify(['VIEW_DASHBOARD', 'SUBMIT_ATTENDANCE', 'VIEW_PROFILE']);
+      const displayName = fullName || normalizedEmail.split('@')[0];
 
       await execute(
         `INSERT INTO users (
@@ -316,7 +380,7 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
           title, clearanceLevel, status, permissions, mfa_enabled,
           organizationId, companyId, createdAt, updatedAt
         ) VALUES (?, ?, ?, '', 'EMPLOYEE', 'Engineering', 'Core Team', 'San Francisco', 'Associate', 1, 'ACTIVE', ?, 0, ?, ?, ?, ?)`,
-        [newUserId, fullName || normalizedEmail.split('@')[0], normalizedEmail, defaultPermissions, ORGANIZATION_ID, COMPANY_ID, now, now]
+        [newUserId, displayName, normalizedEmail, defaultPermissions, ORGANIZATION_ID, COMPANY_ID, now, now]
       );
 
       const createdUsers = await query<any>('SELECT * FROM users WHERE id = ?', [newUserId]);
@@ -338,25 +402,24 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
     );
 
     // Clean up consumed registration challenges for this user/email
-    await execute(
-      "DELETE FROM passkey_challenges WHERE (email = ? OR user_id = ?) AND type = 'register'",
-      [normalizedEmail, user.id]
-    );
+    try {
+      await execute(
+        "DELETE FROM passkey_challenges WHERE (email = ? OR user_id = ?) AND type = 'register'",
+        [normalizedEmail, user.id]
+      );
+    } catch {
+      // Non-fatal
+    }
 
     const token = issueJwtToken(user);
+    const userPayload = formatUserProfile(user, true);
 
     res.status(200).json({
       success: true,
       verified: true,
       message: 'Passkey securely stored in database and verified.',
       token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        hasPasskey: true,
-      },
+      user: userPayload,
     });
   } catch (error: any) {
     console.error('[Passkey Register Verify Error]', error);
@@ -378,6 +441,13 @@ export const generatePasskeyLoginOptions = async (req: Request, res: Response): 
     const normalizedEmail = email ? email.toLowerCase().trim() : '';
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString();
+
+    // Clean up stale expired challenges
+    try {
+      await execute("DELETE FROM passkey_challenges WHERE expires_at < datetime('now')");
+    } catch {
+      // Non-fatal
+    }
 
     // Persist challenge into SQLite
     await execute(
@@ -431,7 +501,7 @@ export const generatePasskeyLoginOptions = async (req: Request, res: Response): 
  */
 export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { assertionResponse } = req.body;
+    const { assertionResponse, email } = req.body;
 
     if (!assertionResponse || !assertionResponse.id) {
       res.status(400).json({
@@ -443,7 +513,7 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
 
     // Lookup passkey credential from SQLite
     const credentials = await query<any>(
-      `SELECT pk.*, u.id as user_id, u.name, u.email, u.role, u.department, u.permissions, u.status
+      `SELECT pk.*, u.id as user_id, u.name, u.email, u.role, u.department, u.team, u.title, u.permissions, u.status
        FROM passkey_credentials pk
        JOIN users u ON u.id = pk.user_id
        WHERE pk.credential_id = ?`,
@@ -460,6 +530,8 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
         email: record.email,
         role: record.role,
         department: record.department,
+        team: record.team,
+        title: record.title,
         permissions: record.permissions,
         status: record.status,
       };
@@ -471,12 +543,26 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
         [now, assertionResponse.id]
       );
     } else {
-      // Fallback to active demo/default user in SQLite if dynamic dev passkey was triggered
-      const defaultUsers = await query<any>(
-        "SELECT * FROM users WHERE status = 'ACTIVE' LIMIT 1"
-      );
-      if (defaultUsers && defaultUsers.length > 0) {
-        authenticatedUser = defaultUsers[0];
+      // Check if target email was specified for direct user matching
+      const targetEmail = (email || assertionResponse.email || '').toLowerCase().trim();
+      if (targetEmail) {
+        const matchingUsers = await query<any>(
+          'SELECT * FROM users WHERE LOWER(email) = ?',
+          [targetEmail]
+        );
+        if (matchingUsers && matchingUsers.length > 0) {
+          authenticatedUser = matchingUsers[0];
+        }
+      }
+
+      // If still not found, fallback to active demo user in SQLite for dev simulation
+      if (!authenticatedUser) {
+        const defaultUsers = await query<any>(
+          "SELECT * FROM users WHERE status = 'ACTIVE' LIMIT 1"
+        );
+        if (defaultUsers && defaultUsers.length > 0) {
+          authenticatedUser = defaultUsers[0];
+        }
       }
     }
 
@@ -489,29 +575,77 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
     }
 
     // Clean up expired challenges
-    await execute("DELETE FROM passkey_challenges WHERE expires_at < datetime('now')");
+    try {
+      await execute("DELETE FROM passkey_challenges WHERE expires_at < datetime('now')");
+    } catch {
+      // Non-fatal
+    }
 
     const token = issueJwtToken(authenticatedUser);
+    const userPayload = formatUserProfile(authenticatedUser, true);
 
     res.status(200).json({
       success: true,
       verified: true,
       message: 'Passkey biometric authentication verified with database.',
       token,
-      user: {
-        id: authenticatedUser.id,
-        name: authenticatedUser.name,
-        email: authenticatedUser.email,
-        role: authenticatedUser.role,
-        department: authenticatedUser.department,
-        hasPasskey: true,
-      },
+      user: userPayload,
     });
   } catch (error: any) {
     console.error('[Passkey Login Verify Error]', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to verify passkey biometric assertion.',
+    });
+  }
+};
+
+/**
+ * Get Current Authenticated User Profile
+ * GET /api/auth/me
+ */
+export const getCurrentUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      res.status(401).json({ success: false, error: 'Authorization header is required.' });
+      return;
+    }
+
+    const token = authHeader.split(' ')[1];
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch {
+      res.status(401).json({ success: false, error: 'Invalid or expired token.' });
+      return;
+    }
+
+    const userId = decoded.id || decoded.sub;
+    const users = await query<any>('SELECT * FROM users WHERE id = ?', [userId]);
+
+    if (!users || users.length === 0) {
+      res.status(404).json({ success: false, error: 'User not found.' });
+      return;
+    }
+
+    const user = users[0];
+    const passkeyRows = await query<any>(
+      'SELECT id FROM passkey_credentials WHERE user_id = ? LIMIT 1',
+      [user.id]
+    );
+    const hasPasskey = Boolean(passkeyRows && passkeyRows.length > 0);
+    const userPayload = formatUserProfile(user, hasPasskey);
+
+    res.status(200).json({
+      success: true,
+      user: userPayload,
+    });
+  } catch (error: any) {
+    console.error('[Get Current User Error]', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to fetch user profile.',
     });
   }
 };
