@@ -1,6 +1,6 @@
 # Testing Strategy & Quality Assurance
 
-This document details the quality assurance procedures, the test runner, and the exact specifications of the 30 unit and integration tests written for the **Workforce Analytics Platform**.
+This document details the quality assurance procedures, the test runner, and the exact specifications of the 125 unit and integration tests across 15 test suites written for the **Workforce Analytics Platform**.
 
 ---
 
@@ -8,7 +8,7 @@ This document details the quality assurance procedures, the test runner, and the
 
 ### 1. Unit & Integration Testing (Vitest)
 We use **Vitest** as our core test runner. It allows fast, parallelized execution of ES module tests with built-in mock environments.
-To execute all tests:
+To execute all tests (15 test files, 125 tests — 100% passing):
 ```bash
 npm run test
 ```
@@ -27,9 +27,9 @@ npm run build
 
 ---
 
-## 📋 Comprehensive List of the 30 Tests
+## 📋 Comprehensive List of Test Suites (15 Files, 125 Tests)
 
-The test suite is structured inside the [tests/unit/](file:///c:/Users/91970/Documents/MAHE/OneDrive/Desktop/WFA-Rolebased-Architecture-main/tests/unit) directory:
+The test suite is structured inside the `tests/unit/` directory:
 
 ### A. RBAC & Roles Specifications (`tests/unit/auth.test.ts`)
 Verifies role definitions, access paths, and permission structures.

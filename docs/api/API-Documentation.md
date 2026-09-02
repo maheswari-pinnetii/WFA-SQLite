@@ -17,6 +17,16 @@ The project includes an end-to-end Postman testing suite with automatic JWT toke
 ## 🌐 Endpoints Directory
 
 ### 1. Authentication & MFA
+#### Modern & Standard Auth (`/api/auth`)
+- `POST /api/auth/register`: Register user with SQLite persistence.
+- `POST /api/auth/login`: Authenticate with corporate email/password, returns JWT. (Default: `admin@thestackly.com` / `StacklyWFA2026!`).
+- `GET /api/auth/me`: Get current authenticated user profile and permissions.
+- `POST /api/auth/passkey/register-options`: Generate WebAuthn creation challenge.
+- `POST /api/auth/passkey/register-verify`: Verify and store passkey credential.
+- `POST /api/auth/passkey/login-options`: Generate assertion challenge for passkey sign-in.
+- `POST /api/auth/passkey/login-verify`: Verify assertion signature and issue session token.
+
+#### Enterprise Versioned Auth (`/v1/auth`)
 - `POST /v1/auth/login`: Authenticate with email/password, returns token or MFA challenge.
 - `POST /v1/auth/mfa/verify`: Verify 6-digit email or TOTP OTP code.
 - `GET /v1/auth/me`: Get profile of authenticated user.

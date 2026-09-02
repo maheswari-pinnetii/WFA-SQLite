@@ -142,17 +142,19 @@ Stackly features a dual-card authentication architecture designed specifically f
 ```
 
 ### Multi-Modal Sign-In Capabilities:
-1. **Email Login**: Corporate credentials verification (`@thestackly.com`), password masking with eye toggle, and account switcher.
-2. **Passwordless Biometric Passkey**: WebAuthn (`navigator.credentials.get` / `navigator.credentials.create`) hardware-backed biometric verification with pulsating radar scanner HUD.
-3. **One-Click Role Demo Presets**:
+1. **Email Login**: Corporate credentials verification (`@thestackly.com`), password masking with eye toggle, and account switcher. Default credentials prefilled: `admin@thestackly.com` / `StacklyWFA2026!`.
+2. **Multi-Step Flow**: Seamless progression from Step 1 (Credentials) ➔ Step 2 (WebAuthn Biometric Passkey / PIN) ➔ Step 3 (Role-Based Dashboard).
+3. **Dual-Card Showcase Route**: Dedicated side-by-side showcase available at `/multiple-login-methods`.
+4. **Passwordless Biometric Passkey**: WebAuthn (`navigator.credentials.get` / `navigator.credentials.create`) hardware-backed biometric verification with pulsating radar scanner HUD.
+5. **One-Click Role Demo Presets**:
    - `admin@thestackly.com` (Sarah Connor — System Administrator)
    - `hr@thestackly.com` (Elena Rostova — HR Operations Manager)
    - `manager@thestackly.com` (David Sterling — Department Manager)
    - `lead@thestackly.com` (Marcus Vance — Engineering Team Lead)
    - `employee@thestackly.com` (Alex Carter — Software Engineer)
-4. **Enterprise SSO**: Google Workspace & Microsoft Entra ID single sign-on buttons.
-5. **Two-Factor Authentication (MFA)**: TOTP Authenticator QR setup, 10 one-time recovery codes, and SMS/Email OTP fallbacks.
-6. **Dual-Token Cookie Session Lifecycle**: 15-minute sliding JWT access token paired with 7-day `HttpOnly`, `SameSite: Lax` refresh cookies to eliminate XSS and CSRF token vulnerabilities.
+6. **Enterprise SSO**: Google Workspace & Microsoft Entra ID single sign-on buttons.
+7. **Two-Factor Authentication (MFA)**: TOTP Authenticator QR setup, 10 one-time recovery codes, and SMS/Email OTP fallbacks.
+8. **Dual-Token Cookie Session Lifecycle**: 15-minute sliding JWT access token paired with 7-day `HttpOnly`, `SameSite: Lax` refresh cookies to eliminate XSS and CSRF token vulnerabilities.
 
 ---
 
@@ -343,8 +345,8 @@ Payroll & Compensation API
 
 ### Automated Testing Suite
 ```bash
-# Run all unit, integration, and E2E test suites (73 / 73 passing - 100%)
-npm test -- --run
+# Run all unit, integration, and E2E test suites (15 test files, 125 tests passing - 100%)
+npm test
 ```
 
 ### Postman API Testing Suite & Newman Runner

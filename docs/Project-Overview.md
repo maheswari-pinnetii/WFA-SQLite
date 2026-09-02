@@ -34,7 +34,9 @@ The **Stackly Workforce Analytics Platform** is a enterprise SaaS web applicatio
    - Instant search across 10,000 employees with instant pagination controls (`10`, `25`, `50`, `100` rows per page).
 
 7. **Multiple Login & Sign Up Methods**:
-   - Side-by-side Email Login and Passwordless Biometric Passkey Login (Face recognition, Fingerprint sensor, Windows Hello PIN).
+   - Multi-step login flow: Step 1 (Company Email & Password) -> Step 2 (WebAuthn Passkey / Biometrics) -> Step 3 (Role Dashboard).
+   - Dedicated side-by-side showcase at `/multiple-login-methods` (Email Login + Passwordless Biometric Passkey).
+   - Default prefilled credentials: `admin@thestackly.com` / `StacklyWFA2026!` with instant role selector chips (Admin, HR, Manager, Employee).
    - Strict `@thestackly.com` enterprise domain verification.
    - Enterprise SSO (Google Workspace, Microsoft Entra ID) and TOTP Authenticator 2FA.
 

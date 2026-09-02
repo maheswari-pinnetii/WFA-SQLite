@@ -53,7 +53,7 @@ All other requests in the collection automatically inherit `Authorization: Beare
 
 ### A. Authentication Flow
 1. **Login**: Execute `01 Auth & MFA > 1. Login (Email + Password)`.
-   - Default Body: `{"email": "employee@thestackly.com", "password": "password123"}`
+   - Default Body: `{"email": "admin@thestackly.com", "password": "StacklyWFA2026!"}` (or `employee@thestackly.com`)
 2. **MFA Verification** *(if MFA enabled)*: Execute `2. Verify MFA Code`.
 3. **Check Profile**: Execute `3. Get Current User Profile (Me)`.
 
