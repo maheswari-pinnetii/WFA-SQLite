@@ -53,10 +53,13 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction) =
 
 // Validate registration / user creation
 export const validateRegistration = (req: Request, res: Response, next: NextFunction) => {
-  const { email, password, name } = req.body;
+  const { email, password } = req.body;
+  const name = req.body.name || req.body.fullName;
   if (!name || typeof name !== 'string' || name.trim().length < 2) {
     return res.status(400).json({ success: false, message: 'Full name is required (at least 2 characters).' });
   }
+  req.body.name = name.trim();
+  req.body.fullName = name.trim();
   if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
     return res.status(400).json({ success: false, message: 'Valid corporate email address is required.' });
   }

@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import apiRouter from './routes/api.routes.js';
+import authFlowRouter from './routes/authFlow.routes.js';
 import { initDb, healthCheck } from './config/db.js';
 import { configureResilience, globalRateLimiter } from './middleware/resilience.js';
 import { inputSanitizer } from './middleware/validateInput.js';
@@ -70,6 +71,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 // Register routers
+app.use('/api/auth', authFlowRouter);
 app.use('/v1', apiRouter);
 app.use('/api', apiRouter);
 
