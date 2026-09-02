@@ -1,0 +1,741 @@
+{
+  "info": {
+    "_postman_id": "c9837920-f1c1-4d1a-8532-a5a41bf8f921",
+    "name": "WFA Workforce Analytics & Attendance API Suite",
+    "description": "Production-ready Postman collection for testing the WFA Workforce Analytics and Geofenced Attendance Engine.\n\n### Quick Instructions:\n1. Select the **WFA Local Environment** in the environment dropdown.\n2. Execute **01 Auth & MFA > 1. Login (Email + Password)** or **2. Verify MFA Code**.\n3. The test script automatically stores the JWT token in `{{bearerToken}}`.\n4. Execute any protected endpoints (Attendance, Leaves, Corrections, Shifts, Analytics).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "01 Auth & MFA",
+      "item": [
+        {
+          "name": "1. Login (Email + Password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test(\"Response has success true\", function () {",
+                  "    pm.expect(res.success).to.eql(true);",
+                  "});",
+                  "if (res.data && res.data.token) {",
+                  "    pm.environment.set(\"bearerToken\", res.data.token);",
+                  "    console.log(\"Saved bearerToken to environment:\", res.data.token);",
+                  "} else if (res.data && res.data.challengeId) {",
+                  "    pm.environment.set(\"challengeId\", res.data.challengeId);",
+                  "    console.log(\"MFA required. challengeId saved:\", res.data.challengeId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{employeeEmail}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "login"]
+            },
+            "description": "Authenticate user with email and password. Returns JWT token directly or challengeId if MFA is required."
+          }
+        },
+        {
+          "name": "2. Verify MFA Code (Email / TOTP OTP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test(\"Token received and saved\", function () {",
+                  "    pm.expect(res.success).to.eql(true);",
+                  "    pm.expect(res.data.token).to.be.a(\"string\");",
+                  "    pm.environment.set(\"bearerToken\", res.data.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{employeeEmail}}\",\n  \"challengeId\": \"{{challengeId}}\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/mfa/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "mfa", "verify"]
+            },
+            "description": "Verify the 6-digit MFA OTP code."
+          }
+        },
+        {
+          "name": "3. Get Current User Profile (Me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test(\"User profile returned\", function () {",
+                  "    pm.expect(res.success).to.eql(true);",
+                  "    pm.expect(res.data.user.email).to.be.a(\"string\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "me"]
+            },
+            "description": "Returns details of the currently authenticated session user."
+          }
+        },
+        {
+          "name": "4. Refresh Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.token) {",
+                  "    pm.environment.set(\"bearerToken\", res.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "refresh"]
+            },
+            "description": "Exchange refresh cookie for a newly rotated access token."
+          }
+        },
+        {
+          "name": "5. TOTP MFA Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/mfa/totp/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "mfa", "totp", "status"]
+            },
+            "description": "Returns whether Google Authenticator TOTP is enabled."
+          }
+        },
+        {
+          "name": "6. Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "logout"]
+            },
+            "description": "Revokes the active refresh token and destroys the server session."
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Attendance & Geofencing",
+      "item": [
+        {
+          "name": "1. Get Today Attendance Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/today",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "today"]
+            },
+            "description": "Fetches current day punch session for the authenticated employee."
+          }
+        },
+        {
+          "name": "2. Live Check-In (Within Bengaluru Geofence)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 409 (duplicate)\", function () {",
+                  "    pm.expect([200, 409]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"employeeName\": \"Alex Mercer\",\n  \"department\": \"Engineering\",\n  \"shiftType\": \"Regular\",\n  \"workMode\": \"Office\",\n  \"latitude\": 12.9716,\n  \"longitude\": 77.5946,\n  \"accuracy\": 5,\n  \"idempotencyKey\": \"chk-in-{{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/check-in",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "check-in"]
+            },
+            "description": "Registers morning check-in using office geofence coordinates (Bengaluru: 12.9716, 77.5946)."
+          }
+        },
+        {
+          "name": "3. Take Lunch / Coffee Break",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Lunch\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/break",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "break"]
+            },
+            "description": "Logs the start of an active break session."
+          }
+        },
+        {
+          "name": "4. Resume Work from Break",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/resume",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "resume"]
+            },
+            "description": "Ends active break and resumes working time counter."
+          }
+        },
+        {
+          "name": "5. Check-Out",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 400\", function () {",
+                  "    pm.expect([200, 400]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 12.9716,\n  \"longitude\": 77.5946,\n  \"idempotencyKey\": \"chk-out-{{$timestamp}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/check-out",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "check-out"]
+            },
+            "description": "Closes active shift session, calculates net working hours and overtime."
+          }
+        },
+        {
+          "name": "6. Get Attendance History Records",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/records",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "records"]
+            },
+            "description": "Returns chronological attendance logs with join-date filtering and role enforcement."
+          }
+        },
+        {
+          "name": "7. Get Standard Shift Rosters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/shifts",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "shifts"]
+            },
+            "description": "Returns standard shifts: General Day Shift (09:00 - 18:00), Flexible, Overnight."
+          }
+        },
+        {
+          "name": "8. Get 2026 Public Holidays",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/holidays",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "holidays"]
+            },
+            "description": "Returns 2026 gazetted corporate public holidays for Bengaluru, Salem, and Hyderabad."
+          }
+        },
+        {
+          "name": "9. Get Attendance Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/audit-logs",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "audit-logs"]
+            },
+            "description": "Returns immutable telemetry audit logs of punch events, breaks, and geofence validations."
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Attendance Corrections",
+      "item": [
+        {
+          "name": "1. Submit Punch Correction Request",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.environment.set(\"correctionId\", res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-09-01\",\n  \"requestedCheckIn\": \"09:00 AM\",\n  \"requestedCheckOut\": \"06:00 PM\",\n  \"reason\": \"Badge scanner offline during morning entry.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/corrections",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "corrections"]
+            },
+            "description": "Employee submits a correction request for a missed punch."
+          }
+        },
+        {
+          "name": "2. Get Correction Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/corrections",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "corrections"]
+            },
+            "description": "List correction requests scoped by role (Employee gets own, Manager gets department)."
+          }
+        },
+        {
+          "name": "3. Review Correction (Manager / HR Approve)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"Approved\",\n  \"managerComment\": \"Verified badge logs with on-site security.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/attendance/corrections/{{correctionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "attendance", "corrections", "{{correctionId}}"]
+            },
+            "description": "Approve or reject an attendance correction request."
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Leave & Absence Management",
+      "item": [
+        {
+          "name": "1. Get Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/leave-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "leave-requests"]
+            },
+            "description": "Fetch all submitted leave applications."
+          }
+        },
+        {
+          "name": "2. Submit Leave Application (PTO)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 201\", function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) {",
+                  "    pm.environment.set(\"leaveRequestId\", res.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Casual Leave\",\n  \"startDate\": \"2026-09-15\",\n  \"endDate\": \"2026-09-16\",\n  \"reason\": \"Family personal event.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/leave-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "leave-requests"]
+            },
+            "description": "Apply for statutory Casual Leave (CL), Sick Leave (SL), or Earned Leave (EL)."
+          }
+        },
+        {
+          "name": "3. Review Leave Request (Manager / HR)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"comment\": \"Approved by Engineering Lead.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/leave-requests/{{leaveRequestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "leave-requests", "{{leaveRequestId}}"]
+            },
+            "description": "Manager or HR approves / rejects leave request."
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Tasks & Sprint Work",
+      "item": [
+        {
+          "name": "1. Get Sprint Tasks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tasks",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tasks"]
+            },
+            "description": "List sprint tasks assigned to current user or team."
+          }
+        },
+        {
+          "name": "2. Update Task Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/tasks/TSK-101",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tasks", "TSK-101"]
+            },
+            "description": "Update status of a sprint deliverable (TODO, IN_PROGRESS, BLOCKED, COMPLETED)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Employee Directory & Organization",
+      "item": [
+        {
+          "name": "1. Get Employees Directory (Filtered & Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/employees?page=1&pageSize=20&status=ACTIVE&department=Engineering",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "employees"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "20" },
+                { "key": "status", "value": "ACTIVE" },
+                { "key": "department", "value": "Engineering" }
+              ]
+            },
+            "description": "Fetch paginated 500-employee corporate directory with filters."
+          }
+        },
+        {
+          "name": "2. Get Employee By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/employees/usr-emp-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "employees", "usr-emp-01"]
+            },
+            "description": "Fetch detailed profile of specific employee."
+          }
+        },
+        {
+          "name": "3. Get Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/departments",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "departments"]
+            },
+            "description": "List all corporate departments."
+          }
+        },
+        {
+          "name": "4. Get Teams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/teams",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "teams"]
+            },
+            "description": "List all engineering and operations teams."
+          }
+        },
+        {
+          "name": "5. Get Office Locations (Geofenced Hubs)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/locations",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "locations"]
+            },
+            "description": "Returns coordinates and radius for Bengaluru, Salem, and Hyderabad offices."
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 Analytics & Dashboard",
+      "item": [
+        {
+          "name": "1. Get Full Analytics Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/analytics",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "analytics"]
+            },
+            "description": "Returns organization-wide KPIs, hiring trends, attendance distributions, and skill matrices."
+          }
+        },
+        {
+          "name": "2. Get Headcount Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/dashboard/headcount",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "dashboard", "headcount"]
+            },
+            "description": "Headcount distribution across departments and work modes."
+          }
+        },
+        {
+          "name": "3. Get Retention Risk Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/dashboard/risk",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "dashboard", "risk"]
+            },
+            "description": "Flight risk scores and predictive retention indicators."
+          }
+        },
+        {
+          "name": "4. Get Attendance Trend",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/analytics/attendance-trend",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "analytics", "attendance-trend"]
+            },
+            "description": "Historical attendance and on-time compliance rates."
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 System & Health",
+      "item": [
+        {
+          "name": "1. Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Health status is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "pm.test(\"Service is healthy\", function () {",
+                  "    pm.expect(res.status).to.eql(\"healthy\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "health"]
+            },
+            "description": "Health probe for load balancers and container orchestrators."
+          }
+        },
+        {
+          "name": "2. Root API Welcome",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1"]
+            },
+            "description": "Root endpoint confirming API version and server status."
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -332,6 +332,17 @@ Payroll & Compensation API
 npm test -- --run
 ```
 
+### Postman API Testing Suite & Newman Runner
+Import the pre-configured Postman collection and environment to test all 28+ API endpoints:
+- 📦 **Postman Collection**: [`postman/WFA_Workforce_Analytics.postman_collection.json`](file:///c:/Users/91970/Downloads/WFA-SQLite/postman/WFA_Workforce_Analytics.postman_collection.json)
+- ⚙️ **Postman Environment**: [`postman/WFA_Local.postman_environment.json`](file:///c:/Users/91970/Downloads/WFA-SQLite/postman/WFA_Local.postman_environment.json)
+- 📖 **Postman Testing Guide**: [`docs/api/POSTMAN_TESTING_GUIDE.md`](file:///c:/Users/91970/Downloads/WFA-SQLite/docs/api/POSTMAN_TESTING_GUIDE.md)
+
+```bash
+# Run Postman collection via Newman CLI in terminal
+npx newman run postman/WFA_Workforce_Analytics.postman_collection.json -e postman/WFA_Local.postman_environment.json
+```
+
 ### Production Build & Typecheck
 ```bash
 # Verify TypeScript typing and Vite production bundling
@@ -349,4 +360,5 @@ The project maintains 4 active branches synchronized with GitHub origin:
 
 ## 📄 License
 MIT License. © 2026 Stackly Workforce Analytics Platform.
+
 
