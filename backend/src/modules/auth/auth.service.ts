@@ -110,7 +110,23 @@ export const rotateRefreshToken = async (oldRefreshToken: string, ipAddress: str
   const userId = session.userId;
 
   if (revokedAt || sessionRevokedAt || now > expiresAt) {
-    if (revokedAt) {
+    if (revokedAt && !sessionRevokedAt) {
+      const revokedTime = new Date(revokedAt).getTime();
+      const currentTime = new Date(now).getTime();
+      if (currentTime - revokedTime < 15000) {
+        const childToken = await userRepository.findRefreshTokenByParentHash(oldHash);
+        if (childToken && !childToken.revokedAt && new Date(childToken.expiresAt) > new Date()) {
+          const user = await userRepository.findById(userId);
+          if (user && user.status === 'ACTIVE') {
+            const accessToken = signAccessToken(user);
+            return {
+              accessToken,
+              refreshToken: oldRefreshToken
+            };
+          }
+        }
+      }
+
       console.warn(`[SECURITY WARNING] Refresh token reuse detected! Revoking family: ${tokenFamily}`);
       await userRepository.revokeTokenFamily(tokenFamily, now);
       await userRepository.updateSession(sessionId, { revokedAt: now });

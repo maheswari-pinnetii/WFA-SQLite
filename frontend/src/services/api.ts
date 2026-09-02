@@ -1,10 +1,25 @@
 import axios from 'axios';
 import { STORAGE_KEYS } from '../shared/constants/constants';
 
-let accessToken: string | null = null;
+let accessToken: string | null = (
+  typeof window !== 'undefined' ? (
+    sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || 
+    localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || 
+    null
+  ) : null
+);
 
 export const setAccessToken = (token: string | null) => {
   accessToken = token;
+  if (typeof window !== 'undefined') {
+    if (token) {
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+    } else {
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    }
+  }
 };
 
 const rawBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();

@@ -13,7 +13,7 @@ export const authenticateToken = (req, res, next) => {
   if (!token) return res.status(401).json({ success: false, message: 'Unauthorized access token missing' });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+    if (err) return res.status(401).json({ success: false, message: 'Invalid or expired token' });
     const orgId = user.organizationId || user.companyId || ORGANIZATION_ID;
     req.user = { ...user, organizationId: orgId, companyId: orgId };
     req.companyId = orgId;

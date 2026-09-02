@@ -564,7 +564,13 @@ export class AttendanceService {
   }
 
   async getShifts(orgId: string): Promise<any> {
-    return Shift.find({ companyId: orgId });
+    const shifts = await Shift.find({ companyId: orgId });
+    if (shifts && shifts.length > 0) return shifts;
+    return [
+      { name: 'Regular', startTime: '09:00', endTime: '18:00', totalHours: 9, workHours: 8, breakHours: 1 },
+      { name: 'Flexible', startTime: '10:00', endTime: '19:00', totalHours: 9, workHours: 8, breakHours: 1 },
+      { name: 'Overnight', startTime: '21:00', endTime: '06:00', totalHours: 9, workHours: 8, breakHours: 1 }
+    ];
   }
 
   async getAuditLogs(reqUser: any): Promise<any> {

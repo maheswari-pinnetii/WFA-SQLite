@@ -206,6 +206,11 @@ export class UserRepository {
     return rows && rows.length > 0 ? rows[0] : null;
   }
 
+  async findRefreshTokenByParentHash(parentHash: string): Promise<any> {
+    const rows = await query('SELECT * FROM refreshtokens WHERE parentHash = ? ORDER BY id DESC LIMIT 1', [parentHash]);
+    return rows && rows.length > 0 ? rows[0] : null;
+  }
+
   async updateRefreshToken(tokenHash: string, update: any): Promise<any> {
     let updates = update;
     if (update.$set) {
