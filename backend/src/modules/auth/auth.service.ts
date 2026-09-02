@@ -176,10 +176,32 @@ export const revokeRefreshToken = async (refreshToken: string) => {
   }
 };
 
+const hashOtp = (code: string): string => {
+  const secret = env.JWT_SECRET || 'stackly-wfa-secure-salt-2026';
+  return crypto.createHmac('sha256', secret).update(code).digest('hex');
+};
+
+const compareOtp = (code: string, storedHash: string): boolean => {
+  if (storedHash.startsWith('$2a$') || storedHash.startsWith('$2b$')) {
+    try {
+      return bcrypt.compareSync(code, storedHash);
+    } catch {
+      return false;
+    }
+  }
+  try {
+    const secret = env.JWT_SECRET || 'stackly-wfa-secure-salt-2026';
+    const computed = crypto.createHmac('sha256', secret).update(code).digest('hex');
+    if (computed.length !== storedHash.length) return false;
+    return crypto.timingSafeEqual(Buffer.from(computed, 'utf-8'), Buffer.from(storedHash, 'utf-8'));
+  } catch {
+    return false;
+  }
+};
+
 export const generateAndSendOtp = async (user: any, method: string = 'email') => {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const salt = bcrypt.genSaltSync(10);
-  const otpHash = bcrypt.hashSync(code, salt);
+  const otpHash = hashOtp(code);
   
   const challengeId = crypto.randomUUID();
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000).toISOString();
@@ -235,7 +257,7 @@ export const verifyOtp = async (challengeId: string, rawCode: string) => {
     return { success: false, message: 'OTP expired. Please request a new OTP.' };
   }
 
-  const match = bcrypt.compareSync(code, challenge.otp_hash);
+  const match = compareOtp(code, challenge.otp_hash);
 
   if (match) {
     const consumedAt = new Date().toISOString();
@@ -270,8 +292,7 @@ export const resendOtp = async (challengeId: string, method: string = 'email') =
   }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const salt = bcrypt.genSaltSync(10);
-  const otpHash = bcrypt.hashSync(code, salt);
+  const otpHash = hashOtp(code);
   
   const newExpiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000).toISOString();
   const nextResendCount = challenge.resend_count + 1;
