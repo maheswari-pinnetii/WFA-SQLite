@@ -11,22 +11,28 @@ export const LoginPage: React.FC = () => {
   const { login, role, setSession } = useAuth();
   const navigate = useNavigate();
 
+  // Multi-step authentication flow:
+  // Step 1 = Email + Password Login Card
+  // Step 2 = Biometric / Passkey Verification Card
+  // Step 3 = Dashboard Navigation
+  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [currentEmail, setCurrentEmail] = useState<string>('admin@thestackly.com');
   const [loadingMethod, setLoadingMethod] = useState<'email' | 'passkey' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [authenticatedRole, setAuthenticatedRole] = useState<Role | null>(null);
 
   /**
-   * Transition directly to Dashboard
+   * Transition to Dashboard based on authenticated role
    */
   const proceedToDashboard = (targetRole?: Role) => {
-    const userRole = targetRole || role || Role.ADMIN;
+    const userRole = targetRole || authenticatedRole || role || Role.ADMIN;
     const target = ROLE_HOME_PATHS[userRole] || '/admin/dashboard';
     navigate(target, { replace: true });
   };
 
   /**
-   * Handle Standard Email + Password Login (Left Card: Email login)
-   * MUST AND SHOULD LOG IN DIRECTLY TO DASHBOARD!
+   * Handle Standard Email + Password Login (Step 1)
+   * Validates credentials with backend, then proceeds to Step 2 Verification
    */
   const handleEmailLogin = async (payload: EmailLoginPayload) => {
     setLoadingMethod('email');
@@ -35,6 +41,38 @@ export const LoginPage: React.FC = () => {
     try {
       const res: any = await login(payload.email, payload.password);
 
+      if (res && (res.error || res.meta?.requestStatus === 'rejected')) {
+        const errMsg = typeof res.payload === 'string'
+          ? res.payload
+          : (res.error?.message || 'Invalid email or password credentials.');
+        setErrorMessage(errMsg);
+        return;
+      }
+
+      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
+      setAuthenticatedRole(userRole);
+      setCurrentEmail(payload.email);
+      setErrorMessage(null);
+
+      // On successful credentials verification -> Advance to Step 2 Verification
+      setCurrentStep(2);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
+      setErrorMessage(msg);
+    } finally {
+      setLoadingMethod(null);
+    }
+  };
+
+  /**
+   * Optional Direct Login bypassing Step 2 if user chooses "Sign in directly"
+   */
+  const handleDirectLogin = async (payload: EmailLoginPayload) => {
+    setLoadingMethod('email');
+    setErrorMessage(null);
+
+    try {
+      const res: any = await login(payload.email, payload.password);
       if (res && (res.error || res.meta?.requestStatus === 'rejected')) {
         const errMsg = typeof res.payload === 'string'
           ? res.payload
@@ -54,8 +92,7 @@ export const LoginPage: React.FC = () => {
   };
 
   /**
-   * Handle Passwordless / Passkey Login (Right Card: Passwordless login)
-   * MUST AND SHOULD LOG IN DIRECTLY TO DASHBOARD!
+   * Handle Passwordless / Passkey Login (Step 2 Verification)
    */
   const handlePasskeyLogin = async (payload?: PasswordlessLoginPayload) => {
     setLoadingMethod('passkey');
@@ -64,7 +101,7 @@ export const LoginPage: React.FC = () => {
     try {
       const targetEmail = payload?.email || currentEmail || 'admin@thestackly.com';
 
-      // Attempt passkey options from backend
+      // 1. Fetch challenge/options from SQLite backend
       const optionsRes = await fetch('/api/auth/passkey/login-options', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,22 +109,18 @@ export const LoginPage: React.FC = () => {
       });
 
       if (!optionsRes.ok) {
-        // Fallback directly to login and dashboard
-        const res: any = await login(targetEmail, 'StacklyWFA2026!');
-        const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-        proceedToDashboard(userRole);
+        proceedToDashboard();
         return;
       }
 
       const { options } = await optionsRes.json();
 
       if (!options?.challenge || !window.PublicKeyCredential) {
-        const res: any = await login(targetEmail, 'StacklyWFA2026!');
-        const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-        proceedToDashboard(userRole);
+        proceedToDashboard();
         return;
       }
 
+      // Safe base64url decoding
       const base64 = options.challenge.replace(/-/g, '+').replace(/_/g, '/');
       const pad = base64.length % 4;
       const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
@@ -102,12 +135,11 @@ export const LoginPage: React.FC = () => {
       })) as PublicKeyCredential | null;
 
       if (!credential) {
-        const res: any = await login(targetEmail, 'StacklyWFA2026!');
-        const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-        proceedToDashboard(userRole);
+        proceedToDashboard();
         return;
       }
 
+      // 2. Send assertion to SQLite backend verification endpoint
       const assertionResponse = {
         id: credential.id,
         rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
@@ -134,50 +166,45 @@ export const LoginPage: React.FC = () => {
       const verifyData = await verifyRes.json();
       if (verifyData.success && verifyData.token && verifyData.user) {
         setSession({ user: verifyData.user, token: verifyData.token });
-        const userRole = (verifyData.user.role || role || Role.ADMIN) as Role;
+        const userRole = (verifyData.user.role || authenticatedRole || role || Role.ADMIN) as Role;
         proceedToDashboard(userRole);
       } else {
-        const res: any = await login(targetEmail, 'StacklyWFA2026!');
-        const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-        proceedToDashboard(userRole);
+        proceedToDashboard();
       }
     } catch {
-      // Graceful fallback to guaranteed login
-      const res: any = await login(currentEmail, 'StacklyWFA2026!');
-      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-      proceedToDashboard(userRole);
+      // Graceful fallback to guaranteed authenticated dashboard
+      proceedToDashboard();
     } finally {
       setLoadingMethod(null);
     }
   };
 
   /**
-   * Handle "Skip for now" on Passkey Card
+   * Handle Skip action on Step 2 -> Proceed directly to Dashboard
    */
-  const handleSkip = async () => {
-    try {
-      const res: any = await login(currentEmail, 'StacklyWFA2026!');
-      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-      proceedToDashboard(userRole);
-    } catch {
-      proceedToDashboard(Role.ADMIN);
-    }
+  const handleSkipPasskey = () => {
+    proceedToDashboard();
   };
 
   return (
     <div className="auth-page-wrapper">
-      {/* Top Main Heading matching Screenshot */}
-      <header className="page-header" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <h1 className="multiple-methods-title">Multiple login methods</h1>
-      </header>
+      {/* Top Navbar / Navigation Header */}
+      <nav style={{ width: '100%', maxWidth: '440px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 4px' }}>
+        <Link to="/multiple-login-methods" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span>Multiple methods</span> &rarr;
+        </Link>
+        <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+          Create Account &rarr;
+        </Link>
+      </nav>
 
-      {/* Dual Column Layout matching Screenshot */}
-      <main className="auth-dual-container">
-        {/* Left Column: Email login */}
-        <div className="auth-method-column">
-          <h2 className="column-title">Email login</h2>
+      {/* Main Multi-Step Authentication Container */}
+      <main className="auth-single-container" id="auth-flow-main">
+        {currentStep === 1 ? (
+          /* Step 1: Email / Password Login Card */
           <EmailLoginCard
             onSubmit={handleEmailLogin}
+            onDirectLogin={handleDirectLogin}
             isLoading={loadingMethod === 'email'}
             errorMessage={errorMessage}
             onClearError={() => setErrorMessage(null)}
@@ -185,27 +212,25 @@ export const LoginPage: React.FC = () => {
             onEmailChange={setCurrentEmail}
             prefilledPassword="StacklyWFA2026!"
           />
-        </div>
-
-        {/* Right Column: Passwordless login */}
-        <div className="auth-method-column">
-          <h2 className="column-title">Passwordless login</h2>
+        ) : (
+          /* Step 2: Passwordless / WebAuthn Biometric Passkey Card */
           <PasswordlessLoginCard
             onPasskeyLogin={handlePasskeyLogin}
-            onSkip={handleSkip}
+            onSkip={handleSkipPasskey}
+            onBack={() => { setCurrentStep(1); setErrorMessage(null); }}
             isLoading={loadingMethod === 'passkey'}
             errorMessage={errorMessage}
             currentEmail={currentEmail}
             onEmailChange={setCurrentEmail}
           />
-        </div>
+        )}
       </main>
 
-      {/* Footer link to sign up */}
-      <footer style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+      {/* Bottom Switch Link */}
+      <footer className="auth-page-footer" style={{ marginTop: '2rem', textAlign: 'center' }}>
         <p style={{ color: '#94a3b8', fontSize: '14px' }}>
           Don&apos;t have an enterprise account?{' '}
-          <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
+          <Link to="/signup" id="create-account-link" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
             Create an account
           </Link>
         </p>

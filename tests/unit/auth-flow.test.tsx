@@ -29,41 +29,39 @@ vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
 }));
 
 describe('Modern Authentication Flow Test Suite', () => {
-  describe('1. LoginPage Multiple Login Methods (Email Login & Passwordless Login)', () => {
-    it('1.1 should render both EmailLoginCard and PasswordlessLoginCard side-by-side and allow direct login', async () => {
+  describe('1. LoginPage Multi-Step Flow (1st: Email Card -> 2nd: Passkey Card -> 3rd: Dashboard)', () => {
+    it('1.1 should render Page 1 (EmailLoginCard) initially and advance to Page 2 (PasswordlessLoginCard) on Next', async () => {
       render(
         <BrowserRouter>
           <LoginPage />
         </BrowserRouter>
       );
 
-      // Verify Main Header and Column Headings
-      expect(screen.getByText('Multiple login methods')).toBeInTheDocument();
-      expect(screen.getByText('Email login')).toBeInTheDocument();
-      expect(screen.getByText('Passwordless login')).toBeInTheDocument();
-
-      // Verify Email Card elements
+      // Verify Page 1 (EmailLoginCard) elements
       expect(screen.getByText('Step 1 of 2: Password')).toBeInTheDocument();
       expect(screen.getByText('Sign in to your account')).toBeInTheDocument();
       expect(screen.getByText('Enter your password')).toBeInTheDocument();
       expect(screen.getByLabelText(/Email address/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
       expect(screen.getByText(/Forgot your password\?/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /^Next$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Sign in directly to Dashboard/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /Create an account/i })).toBeInTheDocument();
 
-      // Verify Passwordless Card elements
-      expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
-      expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Skip for now/i })).toBeInTheDocument();
-
-      // Verify Next buttons exist on both cards
-      const nextButtons = screen.getAllByRole('button', { name: /^Next$/i });
-      expect(nextButtons.length).toBe(2);
-
-      // Enter password on Email Card and click Next
+      // Enter password on Page 1
       const passwordInput = screen.getByLabelText(/^Password$/i);
       fireEvent.change(passwordInput, { target: { value: 'StacklyWFA2026!' } });
-      fireEvent.click(nextButtons[0]);
+
+      // Click Next on Page 1
+      const nextBtn = screen.getByRole('button', { name: /^Next$/i });
+      fireEvent.click(nextBtn);
+
+      // Verify it advances to Page 2 (PasswordlessLoginCard)
+      await waitFor(() => {
+        expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
+        expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Skip for now/i })).toBeInTheDocument();
+      });
     });
   });
 

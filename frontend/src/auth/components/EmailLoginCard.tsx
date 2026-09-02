@@ -246,7 +246,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
         </div>
 
         {/* Action Button */}
-        <div className="card-actions" style={{ marginTop: 'auto' }}>
+        <div className="card-actions" style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             type="submit"
             className="btn-solid-blue"
@@ -262,6 +262,26 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
               <span>Next</span>
             )}
           </button>
+
+          {onDirectLogin && (
+            <button
+              type="button"
+              className="btn-outline-gray"
+              id="email-login-direct-btn"
+              disabled={isLoading}
+              onClick={() => {
+                const targetEmail = email || currentEmail || 'admin@thestackly.com';
+                if (!password) {
+                  setLocalError('Please enter your password.');
+                  return;
+                }
+                onDirectLogin({ email: targetEmail.trim(), password });
+              }}
+              style={{ fontSize: '13px', padding: '9px 16px', color: '#94a3b8' }}
+            >
+              Sign in directly to Dashboard &rarr;
+            </button>
+          )}
         </div>
       </form>
     </article>
