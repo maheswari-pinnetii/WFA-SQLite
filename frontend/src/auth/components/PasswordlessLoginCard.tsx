@@ -68,13 +68,7 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         <div style={{ width: '26px', height: '26px' }} aria-hidden="true" />
 
         <div className="brand-logo-container">
-          <div className="ms-logo-grid" aria-hidden="true">
-            <div className="ms-square-red" />
-            <div className="ms-square-green" />
-            <div className="ms-square-blue" />
-            <div className="ms-square-yellow" />
-          </div>
-          <span className="brand-wordmark">Microsoft</span>
+          <img src="/assets/images/logo.png" alt="Stackly" className="auth-brand-logo-img" />
         </div>
       </div>
 

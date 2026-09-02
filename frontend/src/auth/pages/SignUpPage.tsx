@@ -183,14 +183,8 @@ export const SignUpPage: React.FC = () => {
             </span>
           </div>
 
-          <div className="brand-logo-container">
-            <div className="brand-logo-grid" aria-hidden="true">
-              <div className="logo-sq-red"></div>
-              <div className="logo-sq-green"></div>
-              <div className="logo-sq-blue"></div>
-              <div className="logo-sq-yellow"></div>
-            </div>
-            <span className="brand-wordmark">Stackly Workforce Identity</span>
+          <div className="brand-logo-container" style={{ margin: '0.75rem 0' }}>
+            <img src="/assets/images/logo.png" alt="Stackly" className="auth-brand-logo-img" />
           </div>
 
           <h2 className="auth-card-heading">Register Your Account</h2>

@@ -179,6 +179,14 @@
   gap: 0.625rem;
 }
 
+/* Stackly Official Brand Logo Image */
+.auth-brand-logo-img {
+  height: 28px;
+  max-width: 140px;
+  object-fit: contain;
+  display: block;
+}
+
 /* 4-Color Squares Grid Logo */
 .brand-logo-grid, .ms-logo-grid {
   display: grid;

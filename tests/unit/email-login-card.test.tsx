@@ -15,7 +15,7 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
     );
   };
 
-  it('1.1 should render badge header, Microsoft branding, and default email pill', () => {
+  it('1.1 should render badge header, Stackly branding, and default email pill', () => {
     renderCard({
       onSubmit: vi.fn(),
       currentEmail: 'employee@thestackly.com',
@@ -23,7 +23,7 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
 
     expect(screen.getByText('Password-Based')).toBeInTheDocument();
     expect(screen.getByText('Knowledge Factor')).toBeInTheDocument();
-    expect(screen.getByText('Microsoft')).toBeInTheDocument();
+    expect(screen.getByAltText('Stackly')).toBeInTheDocument();
     expect(screen.getByText('employee@thestackly.com')).toBeInTheDocument();
     expect(screen.getByText('Enter your password')).toBeInTheDocument();
     expect(screen.getByText('Forgot your password?')).toBeInTheDocument();
