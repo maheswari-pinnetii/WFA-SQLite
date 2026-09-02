@@ -9,9 +9,10 @@ import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api
 import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
-import { Clock, Calendar, FileText, Compass, CheckCircle2, AlertCircle, Plus, Layers, ClipboardList, Briefcase, Award, Filter, HeartHandshake } from 'lucide-react';
+import { Clock, Calendar, FileText, Compass, CheckCircle2, AlertCircle, Plus, Layers, ClipboardList, Briefcase, Award, Filter, HeartHandshake, Palmtree, Sparkles, LayoutDashboard, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
+import { AbsenceManagementPage } from '../pages/AbsenceManagementPage';
 
 // 1. Employee Dashboard Overview component
 export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => (
@@ -293,6 +294,7 @@ export const EmployeeSprintWork: React.FC<{
 export const EmployeeDashboardPage: React.FC = () => {
   const { user } = useAuth();
   const analytics = useAnalyticsData();
+  const [dashboardTab, setDashboardTab] = useState<'attendance' | 'absence' | 'performance'>('attendance');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>([]);
   const [corrections, setCorrections] = useState<CorrectionRequest[]>([]);
@@ -367,7 +369,6 @@ export const EmployeeDashboardPage: React.FC = () => {
           ? 'Leave' 
           : (record.checkInTime ? (record.checkOutTime ? 'Present' : 'Checked In') : 'Absent'));
 
-    // Remarks construction
     let remarks = '—';
     if (isWeekend) {
       remarks = 'Weekend';
@@ -437,32 +438,107 @@ export const EmployeeDashboardPage: React.FC = () => {
     <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]} requiredPermission={Permission.PROFILE_VIEW}>
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         
-        {/* Top Section - Attendance Actions (Left) and Leave Balance Card (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <LiveCheckInWidget />
-          </div>
-          <div>
-            <LeaveBalanceCard />
-          </div>
+        {/* Workspace Quick-Nav Tabs */}
+        <div className="flex flex-wrap items-center gap-3 border-b border-[var(--border-color)] pb-4">
+          <button
+            onClick={() => setDashboardTab('attendance')}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              dashboardTab === 'attendance'
+                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
+            }`}
+          >
+            <Clock size={16} className={dashboardTab === 'attendance' ? 'text-white' : 'text-blue-400'} />
+            Time Clock & Attendance
+          </button>
+
+          <button
+            onClick={() => setDashboardTab('absence')}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              dashboardTab === 'absence'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
+            }`}
+          >
+            <Palmtree size={16} className={dashboardTab === 'absence' ? 'text-white' : 'text-emerald-400'} />
+            Absence & Leave Suite
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
+              Full Suite
+            </span>
+          </button>
+
+          <button
+            onClick={() => setDashboardTab('performance')}
+            className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+              dashboardTab === 'performance'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
+            }`}
+          >
+            <Target size={16} className={dashboardTab === 'performance' ? 'text-white' : 'text-indigo-400'} />
+            Sprint Tasks & Deliverables
+          </button>
         </div>
 
-        {/* Middle Section - Attendance Calendar (Left) and Leave Actions Card (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <AttendanceCalendarView />
+        {/* Tab 1: Absence & Leave Suite */}
+        {dashboardTab === 'absence' && (
+          <div className="animate-fadeIn">
+            <AbsenceManagementPage />
           </div>
-          <div>
-            <LeaveActionsCard />
-          </div>
-        </div>
+        )}
 
-        {/* Bottom Section - Attendance History Table */}
-        <EmployeeAttendanceTable
-          filteredHistory={filteredHistory}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-        />
+        {/* Tab 2: Sprint Work & Deliverables */}
+        {dashboardTab === 'performance' && (
+          <div className="space-y-6 animate-fadeIn">
+            <EmployeeKpiGrid
+              hoursToday={hoursToday}
+              hoursThisWeek={hoursThisWeek}
+              attendanceRate={attendanceRate}
+              leaveBalance={leaveBalance}
+              leavesUsed={leavesUsed}
+              pendingTasksCount={pendingTasksCount}
+              goalProgress={goalProgress}
+              timesheetStatus={timesheetStatus}
+            />
+            <EmployeeSprintWork
+              tasks={tasks}
+              loading={loading}
+              handleUpdateTaskStatus={handleUpdateTaskStatus}
+            />
+          </div>
+        )}
+
+        {/* Tab 3: Attendance, Live Punch, and Calendar Heatmap */}
+        {dashboardTab === 'attendance' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Top Section - Attendance Actions (Left) and Leave Balance Card (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <LiveCheckInWidget />
+              </div>
+              <div>
+                <LeaveBalanceCard />
+              </div>
+            </div>
+
+            {/* Middle Section - Attendance Calendar (Left) and Leave Actions Card (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <AttendanceCalendarView />
+              </div>
+              <div>
+                <LeaveActionsCard />
+              </div>
+            </div>
+
+            {/* Bottom Section - Attendance History Table */}
+            <EmployeeAttendanceTable
+              filteredHistory={filteredHistory}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+            />
+          </div>
+        )}
       </div>
     </RoleGuard>
   );
