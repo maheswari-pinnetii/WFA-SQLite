@@ -10,7 +10,12 @@ export const useAuth = () => {
 
   const initializeAuth = () => dispatch(initializeAuthThunk());
 
-  const login = (email: string, password?: string) => dispatch(loginUserThunk({ email, password }));
+  const login = (emailOrPayload: string | { email: string; password?: string }, password?: string) => {
+    if (typeof emailOrPayload === 'object' && emailOrPayload !== null) {
+      return dispatch(loginUserThunk({ email: emailOrPayload.email, password: emailOrPayload.password }));
+    }
+    return dispatch(loginUserThunk({ email: emailOrPayload, password }));
+  };
 
   const signup = async (signupData: any) => {
     return await authService.signup(signupData);

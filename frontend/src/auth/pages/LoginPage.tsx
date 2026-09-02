@@ -31,16 +31,15 @@ export const LoginPage: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const res = await login({
-        email: payload.email,
-        password: payload.password,
-      });
+      const res: any = await login(payload.email, payload.password);
 
-      if (res && res.data) {
-        const userRole = (res.data.user?.role || role || Role.EMPLOYEE) as Role;
-        const target = ROLE_HOME_PATHS[userRole] || '/employee/dashboard';
-        navigate(target, { replace: true });
+      if (res && res.error) {
+        throw new Error(res.payload || res.error.message || 'Invalid email or password credentials.');
       }
+
+      const userRole = (res?.payload?.user?.role || role || Role.EMPLOYEE) as Role;
+      const target = ROLE_HOME_PATHS[userRole] || '/employee/dashboard';
+      navigate(target, { replace: true });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
       setErrorMessage(msg);
