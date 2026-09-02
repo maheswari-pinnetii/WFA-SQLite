@@ -7,8 +7,22 @@ import { PasswordlessLoginCard } from '../components/PasswordlessLoginCard';
 import { EmailLoginPayload, PasswordlessLoginPayload } from '../../types/authFlow.types';
 import '../styles/ModernAuth.css';
 
+interface DemoAccount {
+  label: string;
+  email: string;
+  role: string;
+  badge: string;
+}
+
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  { label: 'Admin', email: 'admin@thestackly.com', role: 'System Admin', badge: 'Full Access' },
+  { label: 'HR Ops', email: 'hr@thestackly.com', role: 'HR Manager', badge: 'People & Payroll' },
+  { label: 'Manager', email: 'manager@thestackly.com', role: 'Team Manager', badge: 'Approvals & Analytics' },
+  { label: 'Employee', email: 'employee@thestackly.com', role: 'Staff Member', badge: 'Self-Service' },
+];
+
 export const LoginPage: React.FC = () => {
-  const { login, role, isAuthenticated } = useAuth();
+  const { login, role, isAuthenticated, setSession } = useAuth();
   const navigate = useNavigate();
 
   const [currentEmail, setCurrentEmail] = useState<string>('employee@thestackly.com');
@@ -71,8 +85,11 @@ export const LoginPage: React.FC = () => {
 
       const { options } = await optionsRes.json();
 
-      // Convert challenge base64 to Uint8Array for navigator.credentials.get
-      const challengeBuffer = Uint8Array.from(atob(options.challenge), (c) => c.charCodeAt(0));
+      // Safe base64url decoding
+      const base64 = options.challenge.replace(/-/g, '+').replace(/_/g, '/');
+      const pad = base64.length % 4;
+      const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+      const challengeBuffer = Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
 
       const credential = (await navigator.credentials.get({
         publicKey: {
@@ -116,10 +133,14 @@ export const LoginPage: React.FC = () => {
       }
 
       // Successful passkey authentication
-      if (verifyData.token) {
-        localStorage.setItem('auth_token', verifyData.token);
+      if (verifyData.token && verifyData.user) {
+        setSession({ user: verifyData.user, token: verifyData.token });
+        const userRole = (verifyData.user.role || role || Role.EMPLOYEE) as Role;
+        const target = ROLE_HOME_PATHS[userRole] || '/employee/dashboard';
+        navigate(target, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
       }
-      navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Passkey authentication encountered an error.';
       setErrorMessage(msg);
@@ -138,12 +159,65 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  /**
+   * Quick Autofill Demo Account
+   */
+  const selectDemoAccount = (demoEmail: string) => {
+    setCurrentEmail(demoEmail);
+    setErrorMessage(null);
+    const passwordInput = document.getElementById('password-input') as HTMLInputElement | null;
+    if (passwordInput) {
+      passwordInput.value = 'StacklyWFA2026!';
+      // Trigger native input event
+      passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+      passwordInput.focus();
+    }
+  };
+
   return (
     <div className="auth-page-wrapper">
+      {/* Top Navbar / Navigation Header */}
+      <nav style={{ width: '100%', maxWidth: '1040px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
+        <Link to="/" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500, transition: 'color 0.2s' }}>
+          <span>&larr;</span> Back to Home
+        </Link>
+        <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+          Create Account &rarr;
+        </Link>
+      </nav>
+
       {/* Page Header */}
       <header className="page-header">
         <h1 className="main-title">Multiple login methods</h1>
         <p className="subtitle">Select your preferred enterprise authentication method to access your workspace.</p>
+
+        {/* Quick Demo Selector */}
+        <div style={{ marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Quick Demo:
+          </span>
+          {DEMO_ACCOUNTS.map((acc) => (
+            <button
+              key={acc.email}
+              type="button"
+              onClick={() => selectDemoAccount(acc.email)}
+              style={{
+                backgroundColor: currentEmail === acc.email ? '#1e293b' : '#0f172a',
+                border: currentEmail === acc.email ? '1px solid #3b82f6' : '1px solid #334155',
+                color: currentEmail === acc.email ? '#93c5fd' : '#94a3b8',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                fontSize: '12px',
+                cursor: 'pointer',
+                fontWeight: currentEmail === acc.email ? 600 : 400,
+                transition: 'all 0.15s ease',
+              }}
+              title={`Role: ${acc.role} | Password: StacklyWFA2026!`}
+            >
+              {acc.label} ({acc.badge})
+            </button>
+          ))}
+        </div>
       </header>
 
       {/* Side-by-Side Dual Card Layout (Stacking on mobile) */}

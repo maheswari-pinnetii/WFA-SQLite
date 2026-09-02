@@ -5,11 +5,7 @@ import { initDb, query, execute, getDb } from '../../backend/src/database/connec
 import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
 
 let server: any;
-const PORT = 5097;
-const client = axios.create({
-  baseURL: `http://localhost:${PORT}`,
-  validateStatus: () => true,
-});
+let client: any;
 
 const testUser = {
   fullName: 'Passkey Test Pilot',
@@ -21,7 +17,13 @@ beforeAll(async () => {
   await seedSqlite();
   await initDb();
   return new Promise<void>((resolve) => {
-    server = app.listen(PORT, () => {
+    server = app.listen(0, () => {
+      const address = server.address();
+      const port = typeof address === 'string' ? 5088 : address.port;
+      client = axios.create({
+        baseURL: `http://localhost:${port}`,
+        validateStatus: () => true,
+      });
       resolve();
     });
   });
