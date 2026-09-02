@@ -17,7 +17,7 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
   onBack,
   isLoading = false,
   errorMessage = null,
-  currentEmail = 'employee@thestackly.com',
+  currentEmail = 'admin@thestackly.com',
   onEmailChange,
 }) => {
   const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'success' | 'failed'>('idle');
@@ -27,7 +27,9 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
 
   // Sync with parent currentEmail
   useEffect(() => {
-    setEmail(currentEmail);
+    if (currentEmail) {
+      setEmail(currentEmail);
+    }
     setIsEditingEmail(false);
   }, [currentEmail]);
 
@@ -36,7 +38,7 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
     setScanStatus('scanning');
 
     try {
-      if (!window.PublicKeyCredential) {
+      if (typeof window === 'undefined' || !window.PublicKeyCredential) {
         throw new Error('Biometric / Passkey authentication is not supported by your current browser.');
       }
 
@@ -99,7 +101,7 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
           onClick={() => setIsEditingEmail(true)}
           onKeyDown={(e) => { if (e.key === 'Enter') setIsEditingEmail(true); }}
         >
-          <span>{email || currentEmail || 'employee@thestackly.com'}</span>
+          <span>{email || currentEmail || 'admin@thestackly.com'}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 12 15 18 9" />
           </svg>
