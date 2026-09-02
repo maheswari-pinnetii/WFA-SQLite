@@ -34,7 +34,6 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
   it('3.1 should render full name, email, and password setup inputs by default', () => {
     renderSignUp();
 
-    expect(screen.getByText('Get started with Stackly')).toBeInTheDocument();
     expect(screen.getByText('Register Your Account')).toBeInTheDocument();
     expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Work Email/i)).toBeInTheDocument();

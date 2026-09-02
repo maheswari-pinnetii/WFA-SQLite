@@ -154,11 +154,6 @@ export const LoginPage: React.FC = () => {
         </Link>
       </nav>
 
-      {/* Page Header */}
-      <header className="page-header">
-        <h1 className="main-title">Multiple login methods</h1>
-        <p className="subtitle">Select your preferred enterprise authentication method to access your workspace.</p>
-      </header>
 
       {/* Side-by-Side Dual Card Layout (Stacking on mobile) */}
       <main className="auth-container" id="auth-dual-cards-container">

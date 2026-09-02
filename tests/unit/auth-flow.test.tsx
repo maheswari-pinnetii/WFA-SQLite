@@ -31,8 +31,7 @@ describe('Modern Authentication Flow Test Suite', () => {
         </BrowserRouter>
       );
 
-      // Verify page titles and structure
-      expect(screen.getByText(/Multiple login methods/i)).toBeInTheDocument();
+      // Verify page cards and structure
       expect(screen.getByText(/Enter your password/i)).toBeInTheDocument();
       expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
 

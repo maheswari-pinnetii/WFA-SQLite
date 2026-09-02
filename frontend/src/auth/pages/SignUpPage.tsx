@@ -172,14 +172,6 @@ export const SignUpPage: React.FC = () => {
         </Link>
       </nav>
 
-      {/* Brand Header */}
-      <header className="auth-page-header">
-        <div className="auth-brand-badge">Create Account</div>
-        <h1 className="auth-main-title">Get started with Stackly</h1>
-        <p className="auth-main-subtitle">
-          Join our enterprise workspace. Choose how you want to secure your account.
-        </p>
-      </header>
 
       {/* Unified Registration Card */}
       <main className="auth-single-container">
