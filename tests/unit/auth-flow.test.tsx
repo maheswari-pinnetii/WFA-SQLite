@@ -63,6 +63,78 @@ describe('Modern Authentication Flow Test Suite', () => {
         expect(screen.getByRole('button', { name: /Skip for now/i })).toBeInTheDocument();
       });
     });
+
+    it('1.2 should switch demo roles and update prefilled emails', () => {
+      render(
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      );
+
+      const emailInput = screen.getByLabelText(/Email address/i) as HTMLInputElement;
+      expect(emailInput.value).toBe('admin@thestackly.com');
+
+      // Click HR demo chip
+      const hrChip = screen.getByRole('button', { name: /^HR$/i });
+      fireEvent.click(hrChip);
+      expect(emailInput.value).toBe('hr@thestackly.com');
+
+      // Click Manager demo chip
+      const managerChip = screen.getByRole('button', { name: /^Manager$/i });
+      fireEvent.click(managerChip);
+      expect(emailInput.value).toBe('manager@thestackly.com');
+
+      // Click Employee demo chip
+      const empChip = screen.getByRole('button', { name: /^Employee$/i });
+      fireEvent.click(empChip);
+      expect(emailInput.value).toBe('employee@thestackly.com');
+
+      // Switch back to Admin
+      const adminChip = screen.getByRole('button', { name: /^Admin$/i });
+      fireEvent.click(adminChip);
+      expect(emailInput.value).toBe('admin@thestackly.com');
+    });
+
+    it('1.3 should allow returning from Step 2 back to Step 1 using back arrow button', async () => {
+      render(
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      );
+
+      // Advance to Step 2
+      const nextBtn = screen.getByRole('button', { name: /^Next$/i });
+      fireEvent.click(nextBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
+      });
+
+      // Click Back Arrow button
+      const backBtn = screen.getByRole('button', { name: /Go back to password login/i });
+      fireEvent.click(backBtn);
+
+      // Verify returned to Step 1
+      await waitFor(() => {
+        expect(screen.getByText('Step 1 of 2: Password')).toBeInTheDocument();
+        expect(screen.getByLabelText(/Email address/i)).toBeInTheDocument();
+      });
+    });
+
+    it('1.4 should handle direct dashboard login bypass when clicking secondary action', async () => {
+      render(
+        <BrowserRouter>
+          <LoginPage />
+        </BrowserRouter>
+      );
+
+      const directBtn = screen.getByRole('button', { name: /Sign in directly to Dashboard/i });
+      fireEvent.click(directBtn);
+
+      await waitFor(() => {
+        expect(mockLogin).toHaveBeenCalledWith('admin@thestackly.com', 'StacklyWFA2026!');
+      });
+    });
   });
 
   describe('2. EmailLoginCard Component', () => {
