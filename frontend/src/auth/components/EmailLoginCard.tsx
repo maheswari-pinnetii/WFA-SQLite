@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { EmailLoginPayload } from '../../types/authFlow.types';
 
@@ -25,6 +25,12 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // Sync with parent currentEmail
+  useEffect(() => {
+    setEmail(currentEmail);
+    setIsEditingEmail(false);
+  }, [currentEmail]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,13 +105,13 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
           onClick={() => setIsEditingEmail(true)}
           onKeyDown={(e) => { if (e.key === 'Enter') setIsEditingEmail(true); }}
         >
-          <span>{email || 'employee@thestackly.com'}</span>
+          <span>{email || currentEmail || 'employee@thestackly.com'}</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 12 15 18 9" />
           </svg>
         </div>
       ) : (
-        <div className="input-field-group" style={{ marginBottom: '1.25rem' }}>
+        <div className="input-field-group" style={{ marginBottom: '1.5rem', width: '100%', maxWidth: '300px', alignSelf: 'center' }}>
           <label htmlFor="edit-email-input" className="overlaid-label">Switch Email</label>
           <input
             id="edit-email-input"
@@ -135,7 +141,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
       )}
 
       {/* Form: Password Input with Overlaid Label & Eye Toggle */}
-      <form onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
         {/* Hidden/accessible Email input for autofill & tests */}
         <div style={{ display: 'none' }}>
           <label htmlFor="login-email-input">Email address</label>
@@ -193,21 +199,24 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
           </div>
         </div>
 
-        <Link to="/forgot-password" className="forgot-password-link">
-          Forgot your password?
-        </Link>
+        {/* Forgot Password Link */}
+        <div style={{ marginBottom: '1.5rem' }}>
+          <Link to="/forgot-password" className="forgot-password-link">
+            Forgot your password?
+          </Link>
+        </div>
 
         {/* Action Button */}
-        <div className="card-actions">
+        <div className="card-actions" style={{ marginTop: 'auto' }}>
           <button
             type="submit"
             className="btn-solid-blue"
-            id="btn-email-next"
+            id="email-login-submit-btn"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
-                <span className="auth-spinner" aria-hidden="true" />
+                <span className="auth-spinner" />
                 <span>Signing in...</span>
               </>
             ) : (

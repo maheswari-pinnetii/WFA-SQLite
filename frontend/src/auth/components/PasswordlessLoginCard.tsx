@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PasswordlessLoginPayload } from '../../types/authFlow.types';
 
 interface PasswordlessLoginCardProps {
@@ -22,6 +22,12 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
   const [localError, setLocalError] = useState<string | null>(null);
   const [isEditingEmail, setIsEditingEmail] = useState<boolean>(false);
   const [email, setEmail] = useState<string>(currentEmail);
+
+  // Sync with parent currentEmail
+  useEffect(() => {
+    setEmail(currentEmail);
+    setIsEditingEmail(false);
+  }, [currentEmail]);
 
   const handleBiometricClick = async () => {
     setLocalError(null);
@@ -57,8 +63,10 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         <span>FIDO2 / WebAuthn</span>
       </div>
 
-      {/* Top Nav Row: Centered Microsoft Logo */}
+      {/* Top Nav Row: Empty Spacer + Centered Microsoft Logo to match Card A */}
       <div className="card-top-nav">
+        <div style={{ width: '26px', height: '26px' }} aria-hidden="true" />
+
         <div className="brand-logo-container">
           <div className="ms-logo-grid" aria-hidden="true">
             <div className="ms-square-red" />
@@ -86,7 +94,7 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
           </svg>
         </div>
       ) : (
-        <div className="input-field-group" style={{ marginBottom: '1.25rem' }}>
+        <div className="input-field-group" style={{ marginBottom: '1.5rem', width: '100%', maxWidth: '300px', alignSelf: 'center' }}>
           <label htmlFor="edit-passkey-email" className="overlaid-label">Switch Email</label>
           <input
             id="edit-passkey-email"
@@ -117,69 +125,62 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         </div>
       )}
 
-      {/* Centered Biometric Scan Illustration & HUD Frame */}
+      {/* Biometric Interactive Radar HUD Box */}
       <div
-        className="biometric-scan-container"
-        onClick={!isLoading ? handleBiometricClick : undefined}
+        className="biometric-hud-box"
+        id="biometric-scanner-zone"
         role="button"
         tabIndex={0}
-        title="Click to scan biometrics"
-        aria-label="Trigger Biometric Authentication Scan"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleBiometricClick();
-          }
-        }}
+        aria-label="Trigger Biometric Verification"
+        onClick={handleBiometricClick}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleBiometricClick(); }}
+        title="Click to authenticate using local Passkey / Windows Hello / Touch ID"
       >
-        <div className="biometric-hud-frame">
-          {/* Neon Corner Brackets */}
-          <div className="hud-corner hud-top-left" />
-          <div className="hud-corner hud-top-right" />
-          <div className="hud-corner hud-bottom-left" />
-          <div className="hud-corner hud-bottom-right" />
+        <div className="hud-corner-tl" />
+        <div className="hud-corner-tr" />
+        <div className="hud-corner-bl" />
+        <div className="hud-corner-br" />
 
-          {/* Animated Scanning Radar Beam */}
-          <div className="hud-scan-beam" />
+        <div className="hud-scan-beam" />
 
-          {/* Abstract Face & Fingerprint Vector Art */}
-          <svg className="biometric-art-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            {/* Abstract Facial Wireframe */}
-            <ellipse cx="50" cy="46" rx="28" ry="34" stroke="#8b5cf6" strokeWidth="2" strokeDasharray="4 3" opacity="0.8" />
-            <path d="M40 40C42 38 46 38 48 40" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
-            <path d="M52 40C54 38 58 38 60 40" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
-            <circle cx="44" cy="45" r="3" fill="#60a5fa" />
-            <circle cx="56" cy="45" r="3" fill="#60a5fa" />
-            <path d="M50 48V56L46 58" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" />
-            <path d="M42 66C46 69 54 69 58 66" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
+        {/* High-Fidelity Futuristic Biometric Vector Artwork */}
+        <svg className="biometric-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          {/* Facial Silhouette Radar Target */}
+          <path d="M50 20 C36 20 28 32 28 48 C28 66 38 78 50 82 C62 78 72 66 72 48 C72 32 64 20 50 20 Z" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.85" />
+          <circle cx="41" cy="45" r="2.5" fill="#10b981" />
+          <circle cx="59" cy="45" r="2.5" fill="#10b981" />
+          <path d="M44 60 Q50 66 56 60" stroke="#10b981" strokeWidth="2" strokeLinecap="round" />
+          {/* Fingerprint Center Waves */}
+          <path d="M42 34 C46 30 54 30 58 34" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
+          <path d="M37 40 C43 35 57 35 63 40" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" opacity="0.65" />
+          <path d="M38 70 C44 74 56 74 62 70" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" opacity="0.8" />
+        </svg>
 
-            {/* Biometric Sensor Fingerprint Arcs */}
-            <path d="M50 20C32 20 22 34 22 50" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-            <path d="M50 26C36 26 28 38 28 50" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" opacity="0.8" />
-            <path d="M50 78C64 78 74 66 74 50" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-          </svg>
-        </div>
-
-        <p className="helper-text">
-          {scanStatus === 'scanning'
-            ? 'Touch your security key or look into your camera...'
-            : "Use your device's built-in Windows Hello, Touch ID, Face ID, or security key to sign in securely without passwords."}
-        </p>
+        {scanStatus === 'scanning' && (
+          <div style={{ position: 'absolute', bottom: '10px', fontSize: '11px', color: '#10b981', fontWeight: 600 }}>
+            Scanning Passkey...
+          </div>
+        )}
       </div>
 
-      {/* Dual Stacked Buttons */}
-      <div className="card-actions">
+      {/* Educational Micro-Copy */}
+      <p className="biometric-helper-text">
+        Use your device&apos;s built-in Windows Hello, Touch ID, Face ID, or security key to sign in securely without passwords.
+      </p>
+
+      {/* Dual Action Buttons */}
+      <div className="card-actions" style={{ marginTop: 'auto' }}>
         <button
           type="button"
           className="btn-solid-blue"
-          id="btn-passwordless-next"
+          id="passkey-login-submit-btn"
           onClick={handleBiometricClick}
           disabled={isLoading || scanStatus === 'scanning'}
         >
           {isLoading || scanStatus === 'scanning' ? (
             <>
-              <span className="auth-spinner" aria-hidden="true" />
-              <span>Scanning Biometrics...</span>
+              <span className="auth-spinner" />
+              <span>Verifying Passkey...</span>
             </>
           ) : (
             <span>Next</span>
@@ -189,9 +190,8 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         <button
           type="button"
           className="btn-outline-gray"
-          id="btn-skip-for-now"
+          id="passkey-skip-btn"
           onClick={onSkip}
-          disabled={isLoading}
         >
           Skip for now
         </button>
