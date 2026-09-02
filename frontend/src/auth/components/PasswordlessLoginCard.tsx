@@ -61,9 +61,9 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
 
   return (
     <article className="auth-card" id="card-passwordless-login">
-      {/* Top Badge Header */}
+      {/* Top Step & Method Badge Header */}
       <div className="card-badge-header">
-        <span style={{ color: '#10b981' }}>Passwordless</span>
+        <span style={{ color: '#10b981', fontWeight: 600 }}>Step 2 of 2: Passwordless</span>
         <span>FIDO2 / WebAuthn</span>
       </div>
 

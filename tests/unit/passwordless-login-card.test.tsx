@@ -25,7 +25,7 @@ describe('Step 2: PasswordlessLoginCard Component Unit Tests', () => {
       currentEmail: 'employee@thestackly.com',
     });
 
-    expect(screen.getByText('Passwordless')).toBeInTheDocument();
+    expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
     expect(screen.getByText('FIDO2 / WebAuthn')).toBeInTheDocument();
     expect(screen.getByAltText('Stackly')).toBeInTheDocument();
     expect(screen.getByText('employee@thestackly.com')).toBeInTheDocument();

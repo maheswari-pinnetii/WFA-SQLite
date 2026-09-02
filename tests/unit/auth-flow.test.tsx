@@ -37,7 +37,7 @@ describe('Modern Authentication Flow Test Suite', () => {
       );
 
       // Verify Page 1 (EmailLoginCard) elements
-      expect(screen.getByText('Password-Based')).toBeInTheDocument();
+      expect(screen.getByText('Step 1 of 2: Password')).toBeInTheDocument();
       expect(screen.getByText('Sign in to your account')).toBeInTheDocument();
       expect(screen.getByLabelText(/Email address/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('Modern Authentication Flow Test Suite', () => {
 
       // Verify it advances to Page 2 (PasswordlessLoginCard)
       await waitFor(() => {
-        expect(screen.getByText('Passwordless')).toBeInTheDocument();
+        expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
         expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /Skip for now/i })).toBeInTheDocument();
       });

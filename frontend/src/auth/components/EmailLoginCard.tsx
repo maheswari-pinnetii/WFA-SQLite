@@ -4,6 +4,7 @@ import { EmailLoginPayload } from '../../types/authFlow.types';
 
 interface EmailLoginCardProps {
   onSubmit: (payload: EmailLoginPayload) => Promise<void> | void;
+  onDirectLogin?: (payload: EmailLoginPayload) => Promise<void> | void;
   isLoading?: boolean;
   errorMessage?: string | null;
   onClearError?: () => void;
@@ -14,15 +15,16 @@ interface EmailLoginCardProps {
 
 export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
   onSubmit,
+  onDirectLogin,
   isLoading = false,
   errorMessage = null,
   onClearError,
-  currentEmail = 'employee@thestackly.com',
+  currentEmail = 'admin@thestackly.com',
   onEmailChange,
   prefilledPassword,
 }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState<string>(currentEmail);
+  const [email, setEmail] = useState<string>(currentEmail || 'admin@thestackly.com');
   const [password, setPassword] = useState<string>(prefilledPassword || '');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -45,7 +47,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
     e.preventDefault();
     setLocalError(null);
 
-    const targetEmail = email || currentEmail;
+    const targetEmail = email || currentEmail || 'admin@thestackly.com';
     if (!targetEmail || !targetEmail.trim()) {
       setLocalError('Please enter your corporate email address.');
       return;
@@ -67,9 +69,9 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
 
   return (
     <article className="auth-card" id="card-email-login">
-      {/* Top Badge Header */}
+      {/* Top Step & Method Badge Header */}
       <div className="card-badge-header">
-        <span>Password-Based</span>
+        <span style={{ color: '#60a5fa', fontWeight: 600 }}>Step 1 of 2: Password</span>
         <span>Knowledge Factor</span>
       </div>
 
@@ -163,7 +165,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
               onClick={() => setShowPassword(!showPassword)}
               tabIndex={-1}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 {showPassword ? (
                   <>
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
@@ -181,7 +183,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
         </div>
 
         {/* Forgot Password Link */}
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Link to="/forgot-password" className="forgot-password-link">
             Forgot your password?
           </Link>
@@ -198,7 +200,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
             {isLoading ? (
               <>
                 <span className="auth-spinner" />
-                <span>Signing in...</span>
+                <span>Verifying credentials...</span>
               </>
             ) : (
               <span>Next</span>

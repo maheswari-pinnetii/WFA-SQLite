@@ -21,7 +21,7 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
       currentEmail: 'employee@thestackly.com',
     });
 
-    expect(screen.getByText('Password-Based')).toBeInTheDocument();
+    expect(screen.getByText('Step 1 of 2: Password')).toBeInTheDocument();
     expect(screen.getByText('Knowledge Factor')).toBeInTheDocument();
     expect(screen.getByAltText('Stackly')).toBeInTheDocument();
     expect(screen.getByLabelText(/Email address/i)).toHaveValue('employee@thestackly.com');
