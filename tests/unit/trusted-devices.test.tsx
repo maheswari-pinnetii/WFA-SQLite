@@ -9,6 +9,9 @@ import { app } from '../../backend/src/app.js';
 import { initDb } from '../../backend/src/database/connection.js';
 import { PasswordlessLoginCard } from '../../frontend/src/auth/components/PasswordlessLoginCard';
 import { LoginPage } from '../../frontend/src/auth/pages/LoginPage';
+import { RealTimeDevicePinLock } from '../../frontend/src/auth/components/RealTimeDevicePinLock';
+import { RealTimePatternLock } from '../../frontend/src/auth/components/RealTimePatternLock';
+import { RealTimeScreenLock } from '../../frontend/src/auth/components/RealTimeScreenLock';
 
 // Mock useAuth hook for frontend tests
 vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
@@ -88,7 +91,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     it('1.3 should save a trusted device with Homescreen Lock / PIN (screen_lock)', async () => {
       const res = await client.post('/api/auth/trusted-devices', {
         email: testEmail,
-        deviceName: 'Mobile Phone (Screen Lock / PIN)',
+        deviceName: 'Mobile Phone (Screen Lock)',
         authMethod: 'screen_lock',
         deviceFingerprint: `fp_pin_${Date.now()}`,
         deviceType: 'mobile',
@@ -99,7 +102,35 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
       expect(res.data.trustedDevice.authMethod).toBe('screen_lock');
     });
 
-    it('1.4 should list all active trusted devices for user', async () => {
+    it('1.4 should save a trusted device with Device PIN (device_pin)', async () => {
+      const res = await client.post('/api/auth/trusted-devices', {
+        email: testEmail,
+        deviceName: 'Office Tablet (Device PIN)',
+        authMethod: 'device_pin',
+        deviceFingerprint: `fp_devpin_${Date.now()}`,
+        deviceType: 'tablet',
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.data.success).toBe(true);
+      expect(res.data.trustedDevice.authMethod).toBe('device_pin');
+    });
+
+    it('1.5 should save a trusted device with Pattern Lock (pattern)', async () => {
+      const res = await client.post('/api/auth/trusted-devices', {
+        email: testEmail,
+        deviceName: 'Field Android (Pattern Lock)',
+        authMethod: 'pattern',
+        deviceFingerprint: `fp_pat_${Date.now()}`,
+        deviceType: 'mobile',
+      });
+
+      expect(res.status).toBe(201);
+      expect(res.data.success).toBe(true);
+      expect(res.data.trustedDevice.authMethod).toBe('pattern');
+    });
+
+    it('1.6 should list all active trusted devices for user', async () => {
       const res = await client.get(`/api/auth/trusted-devices?email=${encodeURIComponent(testEmail)}`);
 
       expect(res.status).toBe(200);
@@ -111,7 +142,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
       expect(faceDevice).toBeDefined();
     });
 
-    it('1.5 should verify active trusted device by device fingerprint', async () => {
+    it('1.7 should verify active trusted device by device fingerprint', async () => {
       const res = await client.post('/api/auth/trusted-devices/verify', {
         email: testEmail,
         deviceFingerprint: testFingerprint,
@@ -123,7 +154,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
       expect(res.data.device.authMethod).toBe('face');
     });
 
-    it('1.6 should revoke a trusted device by ID', async () => {
+    it('1.8 should revoke a trusted device by ID', async () => {
       const res = await client.delete(`/api/auth/trusted-devices/${createdDeviceId}`);
 
       expect(res.status).toBe(200);
@@ -140,13 +171,13 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
   });
 
-  describe('2. Frontend UI: Lock Selection & Save Trusted Device', () => {
+  describe('2. Frontend UI: Real-Time Lock Mechanisms & Save Trusted Device', () => {
     beforeEach(() => {
       localStorage.clear();
       vi.clearAllMocks();
     });
 
-    it('2.1 should render Face ID, Fingerprint, and Homescreen Lock selector chips', () => {
+    it('2.1 should render Face ID, Fingerprint, Device PIN, Pattern, and Homescreen Lock selector chips', () => {
       render(
         <BrowserRouter>
           <PasswordlessLoginCard onPasskeyLogin={vi.fn()} />
@@ -155,6 +186,8 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
 
       expect(screen.getByRole('button', { name: /Face ID \/ Windows Hello/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Fingerprint \/ Touch ID/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Device PIN/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Pattern Lock/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /Homescreen Lock \/ PIN/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/Save as trusted device/i)).toBeInTheDocument();
     });
@@ -168,19 +201,29 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
 
       const faceBtn = screen.getByRole('button', { name: /Face ID \/ Windows Hello/i });
       const bioBtn = screen.getByRole('button', { name: /Fingerprint \/ Touch ID/i });
+      const pinBtn = screen.getByRole('button', { name: /Device PIN/i });
+      const patternBtn = screen.getByRole('button', { name: /Pattern Lock/i });
       const screenLockBtn = screen.getByRole('button', { name: /Homescreen Lock \/ PIN/i });
 
-      // Click Fingerprint
-      fireEvent.click(bioBtn);
-      expect(screen.getByText(/Use your fingerprint reader or Touch ID sensor/i)).toBeInTheDocument();
+      // Click Device PIN
+      fireEvent.click(pinBtn);
+      expect(screen.getAllByText(/Enter your 4-digit device PIN/i).length).toBeGreaterThanOrEqual(1);
+
+      // Click Pattern Lock
+      fireEvent.click(patternBtn);
+      expect(screen.getAllByText(/Draw your unlock pattern/i).length).toBeGreaterThanOrEqual(1);
 
       // Click Homescreen Lock
       fireEvent.click(screenLockBtn);
-      expect(screen.getByText(/Use your device homescreen lock, system PIN/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Swipe or Click to Unlock/i).length).toBeGreaterThanOrEqual(1);
+
+      // Click Fingerprint
+      fireEvent.click(bioBtn);
+      expect(screen.getAllByText(/Touch ID \/ Fingerprint/i).length).toBeGreaterThanOrEqual(1);
 
       // Click Face ID
       fireEvent.click(faceBtn);
-      expect(screen.getByText(/Authenticate using Windows Hello Face or Apple Face ID/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Face ID \/ Windows Hello/i).length).toBeGreaterThanOrEqual(1);
     });
 
     it('2.3 should toggle Save as trusted device checkbox and custom device name field', () => {
@@ -236,6 +279,56 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
       await waitFor(() => {
         expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
       });
+    });
+
+    it('2.5 should unlock when 4-digit PIN is entered in RealTimeDevicePinLock', async () => {
+      const onSuccessMock = vi.fn();
+      render(<RealTimeDevicePinLock onSuccess={onSuccessMock} />);
+
+      expect(screen.getByText(/Enter your 4-digit device PIN/i)).toBeInTheDocument();
+
+      // Enter 1 2 3 4
+      fireEvent.click(screen.getByRole('button', { name: '1' }));
+      fireEvent.click(screen.getByRole('button', { name: '2' }));
+      fireEvent.click(screen.getByRole('button', { name: '3' }));
+      fireEvent.click(screen.getByRole('button', { name: '4' }));
+
+      await waitFor(
+        () => {
+          expect(onSuccessMock).toHaveBeenCalled();
+        },
+        { timeout: 2000 }
+      );
+    });
+
+    it('2.6 should unlock when demo pattern is triggered in RealTimePatternLock', async () => {
+      const onSuccessMock = vi.fn();
+      render(<RealTimePatternLock onSuccess={onSuccessMock} />);
+
+      const demoBtn = screen.getByRole('button', { name: /Demo Pattern/i });
+      fireEvent.click(demoBtn);
+
+      await waitFor(
+        () => {
+          expect(onSuccessMock).toHaveBeenCalled();
+        },
+        { timeout: 2000 }
+      );
+    });
+
+    it('2.7 should unlock when slide/click is clicked in RealTimeScreenLock', async () => {
+      const onSuccessMock = vi.fn();
+      render(<RealTimeScreenLock onSuccess={onSuccessMock} />);
+
+      const unlockBtn = screen.getByRole('button', { name: /Swipe or Click to Unlock/i });
+      fireEvent.click(unlockBtn);
+
+      await waitFor(
+        () => {
+          expect(onSuccessMock).toHaveBeenCalled();
+        },
+        { timeout: 2000 }
+      );
     });
   });
 });

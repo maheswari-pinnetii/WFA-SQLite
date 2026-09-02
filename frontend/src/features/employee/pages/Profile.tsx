@@ -989,14 +989,14 @@ export const Profile: React.FC = () => {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-sm">
-                          {device.auth_method === 'face' ? '👤' : device.auth_method === 'screen_lock' ? '📱' : '👆'}
+                          {device.auth_method === 'face' ? '👤' : device.auth_method === 'screen_lock' ? '📱' : device.auth_method === 'device_pin' ? '🔢' : device.auth_method === 'pattern' ? '🔮' : '👆'}
                         </div>
                         <div>
                           <p className="text-xs font-bold text-[var(--text-primary)]">
                             {device.device_name || 'Personal Device'}
                           </p>
                           <p className="text-[10px] text-slate-400">
-                            {device.auth_method === 'face' ? 'Face ID / Windows Hello' : device.auth_method === 'screen_lock' ? 'Homescreen Lock / PIN' : 'Fingerprint / Touch ID'} • Trusted for 30 days
+                            {device.auth_method === 'face' ? 'Face ID / Windows Hello' : device.auth_method === 'screen_lock' ? 'Homescreen Lock / PIN' : device.auth_method === 'device_pin' ? 'Device PIN' : device.auth_method === 'pattern' ? 'Pattern Lock' : 'Fingerprint / Touch ID'} • Trusted for 30 days
                           </p>
                         </div>
                       </div>

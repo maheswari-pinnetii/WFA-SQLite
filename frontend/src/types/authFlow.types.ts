@@ -4,7 +4,7 @@
  */
 
 export type AuthMethod = 'password' | 'passkey';
-export type BiometricLockMethod = 'face' | 'biometric' | 'screen_lock';
+export type BiometricLockMethod = 'face' | 'biometric' | 'screen_lock' | 'device_pin' | 'pattern';
 
 export interface TrustedDevice {
   id: string;

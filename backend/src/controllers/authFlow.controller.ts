@@ -686,7 +686,7 @@ export const saveTrustedDevice = async (req: Request, res: Response): Promise<vo
 
     const deviceId = `td_${crypto.randomUUID()}`;
     const cleanDeviceName = deviceName ? String(deviceName).trim() : 'Personal Workstation';
-    const cleanAuthMethod = (['face', 'biometric', 'screen_lock'].includes(authMethod)) ? authMethod : 'biometric';
+    const cleanAuthMethod = (['face', 'biometric', 'screen_lock', 'device_pin', 'pattern'].includes(authMethod)) ? authMethod : 'biometric';
     const cleanFingerprint = deviceFingerprint || `fp_${crypto.randomBytes(16).toString('hex')}`;
     const cleanDeviceType = deviceType || 'desktop';
     const ipAddress = (req.ip || req.socket.remoteAddress || '127.0.0.1').toString();

@@ -25,7 +25,7 @@ export const LoginPage: React.FC = () => {
   const [trustedDevice, setTrustedDevice] = useState<{
     email: string;
     deviceName: string;
-    authMethod: 'face' | 'biometric' | 'screen_lock';
+    authMethod: 'face' | 'biometric' | 'screen_lock' | 'device_pin' | 'pattern';
     savedAt: string;
   } | null>(() => {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -252,7 +252,7 @@ export const LoginPage: React.FC = () => {
               <span>Trusted Device: {trustedDevice.deviceName}</span>
             </div>
             <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
-              Saved with {trustedDevice.authMethod === 'face' ? 'Face Recognition (Face ID / Windows Hello)' : trustedDevice.authMethod === 'biometric' ? 'Biometrics (Fingerprint / Touch ID)' : 'Homescreen Lock / PIN'} ({trustedDevice.email})
+              Saved with {trustedDevice.authMethod === 'face' ? 'Face Recognition (Face ID / Windows Hello)' : trustedDevice.authMethod === 'biometric' ? 'Biometrics (Fingerprint / Touch ID)' : trustedDevice.authMethod === 'device_pin' ? 'Device PIN' : trustedDevice.authMethod === 'pattern' ? 'Pattern Lock' : 'Homescreen Lock / PIN'} ({trustedDevice.email})
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
