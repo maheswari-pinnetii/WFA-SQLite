@@ -9,12 +9,12 @@ import { RoleType } from '../../theme/roles';
 export const LoginPage: React.FC = () => {
   const { isAuthenticated, role } = useAuth();
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<RoleType>('ADMIN');
+  const [selectedRole, setSelectedRole] = useState<RoleType>('EMPLOYEE');
 
   useEffect(() => {
     if (isAuthenticated) {
-      const homePath = ROLE_HOME_PATHS[role] || '/admin/dashboard';
-      navigate(homePath);
+      const homePath = ROLE_HOME_PATHS[role] || '/employee/dashboard';
+      navigate(homePath, { replace: true });
     }
   }, [isAuthenticated, role, navigate]);
 
@@ -24,7 +24,8 @@ export const LoginPage: React.FC = () => {
         selectedRole={selectedRole}
         onRoleChange={setSelectedRole}
         onSuccess={() => {
-          // Success is handled by the isAuthenticated useEffect redirection
+          const target = ROLE_HOME_PATHS[role] || (selectedRole === 'ADMIN' ? '/admin/dashboard' : selectedRole === 'HR' ? '/hr/dashboard' : selectedRole === 'MANAGER' ? '/manager/dashboard' : selectedRole === 'TEAM_LEAD' ? '/team-lead/dashboard' : '/employee/dashboard');
+          navigate(target, { replace: true });
         }}
       />
       <div className="text-center text-sm font-medium text-slate-400 mt-6">

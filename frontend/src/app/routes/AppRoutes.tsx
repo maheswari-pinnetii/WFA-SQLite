@@ -289,6 +289,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/unauthorized" element={<Unauthorized />} />
 
                 {/* Legacy Root Paths Redirects */}
+                <Route path="/dashboard" element={<DefaultHomeRedirect />} />
                 <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/hr" element={<Navigate to="/hr/dashboard" replace />} />
                 <Route path="/manager" element={<Navigate to="/manager/dashboard" replace />} />
