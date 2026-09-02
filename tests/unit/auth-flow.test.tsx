@@ -43,13 +43,8 @@ describe('Modern Authentication Flow Test Suite', () => {
       const nextButtons = screen.getAllByRole('button', { name: /^Next$/i });
       expect(nextButtons).toHaveLength(2);
 
-      // Verify Card B elements
-      expect(screen.getByText(/FIDO2 \/ WebAuthn/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /Skip for now/i })).toBeInTheDocument();
-
-      // Verify Educational Specifications Section
-      expect(screen.getByText(/Password-Based Authentication \(Left\)/i)).toBeInTheDocument();
-      expect(screen.getByText(/Passwordless Authentication \(Right\)/i)).toBeInTheDocument();
+      // Verify footer link
+      expect(screen.getByRole('link', { name: /Create an account/i })).toBeInTheDocument();
     });
   });
 

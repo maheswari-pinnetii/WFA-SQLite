@@ -178,32 +178,6 @@ export const LoginPage: React.FC = () => {
         />
       </main>
 
-      {/* Educational Authentication Specifications Section */}
-      <section className="auth-specs-section">
-        <div>
-          <div className="spec-card-title" style={{ color: '#60a5fa' }}>
-            <span>🔑</span>
-            <span>Password-Based Authentication (Left)</span>
-          </div>
-          <div className="spec-card-desc">
-            The traditional enterprise method relying on a <strong>knowledge factor</strong>—a confidential secret that only the authorized user knows (the corporate password), paired with optional 2FA verification.
-          </div>
-        </div>
-
-        <div>
-          <div className="spec-card-title" style={{ color: '#34d399' }}>
-            <span>⚡</span>
-            <span>Passwordless Authentication (Right)</span>
-          </div>
-          <div className="spec-card-desc">
-            A state-of-the-art approach that eliminates traditional passwords:
-            <ul>
-              <li><strong>Biometric Authentication:</strong> Facial recognition or fingerprint hardware.</li>
-              <li><strong>Passkey Authentication:</strong> Cryptographic FIDO2/WebAuthn standard tied securely to your local device.</li>
-            </ul>
-          </div>
-        </div>
-      </section>
 
       {/* Bottom Switch Link */}
       <footer className="auth-page-footer">
