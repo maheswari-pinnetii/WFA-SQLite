@@ -68,7 +68,10 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
 
   it('1.4 should display validation error when password is empty', async () => {
     const onSubmitMock = vi.fn();
-    renderCard({ onSubmit: onSubmitMock });
+    renderCard({ onSubmit: onSubmitMock, prefilledPassword: '' });
+
+    const passwordInput = screen.getByLabelText(/^Password$/i);
+    fireEvent.change(passwordInput, { target: { value: '' } });
 
     const submitBtn = screen.getByRole('button', { name: /^Next$/i });
     fireEvent.click(submitBtn);

@@ -186,6 +186,7 @@ export const LoginPage: React.FC = () => {
             onClearError={() => setErrorMessage(null)}
             currentEmail={currentEmail}
             onEmailChange={setCurrentEmail}
+            prefilledPassword="StacklyWFA2026!"
           />
         ) : (
           /* Page 2: Passwordless / WebAuthn Biometric Passkey Card */

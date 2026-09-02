@@ -21,11 +21,11 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
   onClearError,
   currentEmail = 'admin@thestackly.com',
   onEmailChange,
-  prefilledPassword,
+  prefilledPassword = 'StacklyWFA2026!',
 }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>(currentEmail || 'admin@thestackly.com');
-  const [password, setPassword] = useState<string>(prefilledPassword || '');
+  const [password, setPassword] = useState<string>(prefilledPassword !== undefined ? prefilledPassword : 'StacklyWFA2026!');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -42,6 +42,14 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
       setPassword(prefilledPassword);
     }
   }, [prefilledPassword]);
+
+  const handleSelectRole = (roleEmail: string) => {
+    setEmail(roleEmail);
+    setPassword('StacklyWFA2026!');
+    if (onEmailChange) onEmailChange(roleEmail);
+    if (localError) setLocalError(null);
+    if (errorMessage && onClearError) onClearError();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +119,39 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
 
       {/* Form: Email & Password Inputs */}
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+        {/* Quick Demo Role Selector */}
+        <div className="quick-role-selector">
+          <span className="quick-role-label">Demo:</span>
+          <button
+            type="button"
+            className={`quick-role-chip ${email === 'admin@thestackly.com' ? 'active' : ''}`}
+            onClick={() => handleSelectRole('admin@thestackly.com')}
+          >
+            Admin
+          </button>
+          <button
+            type="button"
+            className={`quick-role-chip ${email === 'hr@thestackly.com' ? 'active' : ''}`}
+            onClick={() => handleSelectRole('hr@thestackly.com')}
+          >
+            HR
+          </button>
+          <button
+            type="button"
+            className={`quick-role-chip ${email === 'manager@thestackly.com' ? 'active' : ''}`}
+            onClick={() => handleSelectRole('manager@thestackly.com')}
+          >
+            Manager
+          </button>
+          <button
+            type="button"
+            className={`quick-role-chip ${email === 'employee@thestackly.com' ? 'active' : ''}`}
+            onClick={() => handleSelectRole('employee@thestackly.com')}
+          >
+            Employee
+          </button>
+        </div>
+
         {/* Email Address Input */}
         <div className="input-field-group">
           <label htmlFor="login-email-input" className="overlaid-label">
