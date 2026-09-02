@@ -85,8 +85,37 @@ export const initDb = async (): Promise<void> => {
           )
         `);
 
+        await execute(`
+          CREATE TABLE IF NOT EXISTS passkey_credentials (
+            id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            credential_id TEXT UNIQUE NOT NULL,
+            public_key TEXT NOT NULL,
+            counter INTEGER DEFAULT 0,
+            device_label TEXT,
+            transports TEXT,
+            created_at TEXT NOT NULL,
+            last_used_at TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS passkey_challenges (
+            challenge TEXT PRIMARY KEY,
+            user_id TEXT,
+            email TEXT,
+            type TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )
+        `);
+
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_settings_user ON mfa_settings(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_recovery_user ON mfa_recovery_codes(user_id)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_passkey_user_id ON passkey_credentials(user_id)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_passkey_cred_id ON passkey_credentials(credential_id)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_passkey_challenge_expires ON passkey_challenges(expires_at)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_date ON attendancerecords(employeeId, date)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_status ON attendancerecords(employeeId, status)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_date ON attendancerecords(date)`);

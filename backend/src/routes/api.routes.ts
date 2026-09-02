@@ -1,5 +1,6 @@
 import express from 'express';
 import * as authController from '../modules/auth/auth.controller.js';
+import * as authFlowController from '../controllers/authFlow.controller.js';
 import * as attendanceController from '../controllers/attendance.controller.js';
 import * as analyticsController from '../controllers/analytics.controller.js';
 import * as workforceController from '../controllers/workforce.controller.js';
@@ -46,6 +47,12 @@ router.post('/auth/mfa/totp/enroll', authenticateToken, authController.enrollTot
 router.post('/auth/mfa/totp/enroll/verify', authenticateToken, validateMfaCode, authController.confirmEnrollMfa);
 router.post('/auth/mfa/totp/disable', authenticateToken, authController.disableTotpMfa);
 router.post('/auth/mfa/totp/recovery-codes/regenerate', authenticateToken, authController.regenerateRecoveryCodes);
+
+// Passkey / WebAuthn Routes
+router.post('/auth/passkey/register-options', authFlowController.generatePasskeyRegisterOptions);
+router.post('/auth/passkey/register-verify', authFlowController.verifyPasskeyRegister);
+router.post('/auth/passkey/login-options', authFlowController.generatePasskeyLoginOptions);
+router.post('/auth/passkey/login-verify', authFlowController.verifyPasskeyLogin);
 
 // Admin MFA Management
 router.get('/admin/mfa/users', authenticateToken, authorizeRoles(['ADMIN']), authController.adminGetMfaUsers);
