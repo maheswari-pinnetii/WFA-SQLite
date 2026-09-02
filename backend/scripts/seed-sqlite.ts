@@ -146,10 +146,10 @@ export const seedSqlite = async () => {
       `);
 
       const coreUsers = [
-        ['usr-admin-01', 'Sarah Connor', 'admin@thestackly.com', passHash, 'ADMIN', null, null, null, null, 5, 'ACTIVE', JSON.stringify(['USER_CREATE', 'USER_UPDATE', 'USER_DELETE', 'USER_MANAGE', 'ROLE_CREATE', 'ROLE_UPDATE', 'ROLE_DELETE', 'ROLE_MANAGE', 'PERMISSION_ASSIGN', 'EMPLOYEE_VIEW_ALL', 'EMPLOYEE_CREATE', 'EMPLOYEE_UPDATE', 'EMPLOYEE_DELETE', 'REPORT_VIEW_ALL', 'REPORT_EXPORT', 'SYSTEM_SETTINGS_MANAGE', 'SYSTEM_CONFIG', 'AUDIT_LOG_VIEW', 'VIEW_ALL_DATA']), 1, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()],
-        ['usr-hr-01', 'Elena Rostova', 'hr@thestackly.com', passHash, 'HR', null, null, null, null, 4, 'ACTIVE', JSON.stringify(['EMPLOYEE_VIEW', 'EMPLOYEE_CREATE', 'EMPLOYEE_UPDATE', 'EMPLOYEE_PROFILE_MANAGE', 'ATTENDANCE_VIEW_ALL', 'ATTENDANCE_MANAGE', 'LEAVE_APPROVE', 'PERFORMANCE_MANAGE', 'RECRUITMENT_MANAGE', 'REPORT_GENERATE', 'EMPLOYEE_MANAGE', 'REPORT_VIEW', 'TEAM_ANALYTICS_VIEW']), 1, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()],
-        ['usr-mgr-01', 'David Sterling', 'manager@thestackly.com', passHash, 'MANAGER', 'Engineering', null, null, null, 3, 'ACTIVE', JSON.stringify(['TEAM_VIEW', 'TEAM_ANALYTICS_VIEW', 'EMPLOYEE_VIEW_TEAM', 'ATTENDANCE_VIEW_TEAM', 'LEAVE_APPROVE', 'PERFORMANCE_REVIEW', 'TASK_ASSIGN', 'REPORT_VIEW_TEAM']), 1, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()],
-        ['usr-lead-01', 'Marcus Vance', 'lead@thestackly.com', passHash, 'TEAM_LEAD', 'Engineering', 'Frontend Team', null, null, 2, 'ACTIVE', JSON.stringify(['TEAM_MEMBER_VIEW', 'TEAM_VIEW', 'TASK_ASSIGN', 'TASK_TRACK', 'ATTENDANCE_VIEW_TEAM', 'PRODUCTIVITY_VIEW', 'FEEDBACK_CREATE', 'PERFORMANCE_FEEDBACK']), 1, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()]
+        ['usr-admin-01', 'Sarah Connor', 'admin@thestackly.com', passHash, 'ADMIN', null, null, null, null, 5, 'ACTIVE', JSON.stringify(['USER_CREATE', 'USER_UPDATE', 'USER_DELETE', 'USER_MANAGE', 'ROLE_CREATE', 'ROLE_UPDATE', 'ROLE_DELETE', 'ROLE_MANAGE', 'PERMISSION_ASSIGN', 'EMPLOYEE_VIEW_ALL', 'EMPLOYEE_CREATE', 'EMPLOYEE_UPDATE', 'EMPLOYEE_DELETE', 'REPORT_VIEW_ALL', 'REPORT_EXPORT', 'SYSTEM_SETTINGS_MANAGE', 'SYSTEM_CONFIG', 'AUDIT_LOG_VIEW', 'VIEW_ALL_DATA']), 0, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()],
+        ['usr-hr-01', 'Elena Rostova', 'hr@thestackly.com', passHash, 'HR', null, null, null, null, 4, 'ACTIVE', JSON.stringify(['EMPLOYEE_VIEW', 'EMPLOYEE_CREATE', 'EMPLOYEE_UPDATE', 'EMPLOYEE_PROFILE_MANAGE', 'ATTENDANCE_VIEW_ALL', 'ATTENDANCE_MANAGE', 'LEAVE_APPROVE', 'PERFORMANCE_MANAGE', 'RECRUITMENT_MANAGE', 'REPORT_GENERATE', 'EMPLOYEE_MANAGE', 'REPORT_VIEW', 'TEAM_ANALYTICS_VIEW']), 0, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()],
+        ['usr-mgr-01', 'David Sterling', 'manager@thestackly.com', passHash, 'MANAGER', 'Engineering', null, null, null, 3, 'ACTIVE', JSON.stringify(['TEAM_VIEW', 'TEAM_ANALYTICS_VIEW', 'EMPLOYEE_VIEW_TEAM', 'ATTENDANCE_VIEW_TEAM', 'LEAVE_APPROVE', 'PERFORMANCE_REVIEW', 'TASK_ASSIGN', 'REPORT_VIEW_TEAM']), 0, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()],
+        ['usr-lead-01', 'Marcus Vance', 'lead@thestackly.com', passHash, 'TEAM_LEAD', 'Engineering', 'Frontend Team', null, null, 2, 'ACTIVE', JSON.stringify(['TEAM_MEMBER_VIEW', 'TEAM_VIEW', 'TASK_ASSIGN', 'TASK_TRACK', 'ATTENDANCE_VIEW_TEAM', 'PRODUCTIVITY_VIEW', 'FEEDBACK_CREATE', 'PERFORMANCE_FEEDBACK']), 0, ORGANIZATION_ID, ORGANIZATION_ID, new Date().toISOString(), new Date().toISOString()]
       ];
 
       for (const u of coreUsers) {
@@ -224,7 +224,7 @@ export const seedSqlite = async () => {
         const perms = ['PROFILE_VIEW', 'PROFILE_UPDATE', 'ATTENDANCE_VIEW_SELF', 'LEAVE_REQUEST', 'PERFORMANCE_VIEW_SELF', 'GOAL_UPDATE', 'DOCUMENT_UPLOAD'];
         insertUser.run(
           id, name, email, passHash, role, dept, team, location, design,
-          1, 'ACTIVE', JSON.stringify(perms), 1, ORGANIZATION_ID, ORGANIZATION_ID,
+          1, 'ACTIVE', JSON.stringify(perms), 0, ORGANIZATION_ID, ORGANIZATION_ID,
           new Date().toISOString(), new Date().toISOString()
         );
       }

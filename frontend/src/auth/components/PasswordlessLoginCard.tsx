@@ -39,6 +39,10 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
 
     try {
       if (typeof window === 'undefined' || !window.PublicKeyCredential) {
+        if (onSkip) {
+          onSkip();
+          return;
+        }
         throw new Error('Biometric / Passkey authentication is not supported by your current browser.');
       }
 
@@ -46,8 +50,12 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
       setScanStatus('success');
     } catch (err: unknown) {
       setScanStatus('failed');
-      const msg = err instanceof Error ? err.message : 'Biometric verification cancelled or failed.';
-      setLocalError(msg);
+      if (onSkip) {
+        onSkip();
+      } else {
+        const msg = err instanceof Error ? err.message : 'Biometric verification cancelled or failed.';
+        setLocalError(msg);
+      }
     }
   };
 
