@@ -41,12 +41,17 @@ apiClient.interceptors.response.use(
       originalRequest.url.includes('/login')
     );
 
-    if ((error.response?.status === 401 || error.response?.status === 403) && !isAuthRoute && !originalRequest._retry) {
+    // Only attempt token refresh on 401 Unauthorized (expired access token), NOT on 403 Forbidden
+    if (error.response?.status === 401 && !isAuthRoute && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           refreshQueue.push((token: string) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(apiClient(originalRequest));
+            if (token) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              resolve(apiClient(originalRequest));
+            } else {
+              reject(error);
+            }
           });
         });
       }
@@ -71,15 +76,11 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        console.error('Failed to auto-refresh access token:', refreshError);
+        console.warn('[API Client] Auto-refresh failed, proceeding with rejected session.');
       } finally {
         isRefreshing = false;
+        refreshQueue = [];
       }
-
-      // If refresh failed, perform secure logout redirect
-      setAccessToken(null);
-      sessionStorage.removeItem(STORAGE_KEYS.USER_DATA);
-      window.location.assign('/login');
     }
 
     if (error.response?.data?.message) {
