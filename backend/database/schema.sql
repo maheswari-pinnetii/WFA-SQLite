@@ -363,4 +363,25 @@ CREATE TABLE IF NOT EXISTS oauth_states (
   expires_at TEXT NOT NULL
 );
 
+-- Trusted Devices Table (Face, Biometric, Homescreen Lock)
+CREATE TABLE IF NOT EXISTS trusted_devices (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  device_name TEXT NOT NULL,
+  device_type TEXT DEFAULT 'desktop',
+  auth_method TEXT NOT NULL, /* 'face' | 'biometric' | 'screen_lock' */
+  device_fingerprint TEXT NOT NULL,
+  ip_address TEXT,
+  user_agent TEXT,
+  trusted_until TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  last_used_at TEXT NOT NULL,
+  status TEXT DEFAULT 'ACTIVE',
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id);
+CREATE INDEX IF NOT EXISTS idx_trusted_devices_fingerprint ON trusted_devices(device_fingerprint);
+
+
 

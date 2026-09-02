@@ -52,6 +52,52 @@ export const Profile: React.FC = () => {
   const [showRegenPassword, setShowRegenPassword] = useState(false);
   const [showDisablePassword, setShowDisablePassword] = useState(false);
 
+  // Trusted Devices States
+  const [trustedDevices, setTrustedDevices] = useState<any[]>([]);
+  const [loadingDevices, setLoadingDevices] = useState(false);
+
+  const fetchTrustedDevices = async () => {
+    try {
+      setLoadingDevices(true);
+      const res = await fetch(`/api/auth/trusted-devices?userId=${user?.id || ''}&email=${encodeURIComponent(user?.email || '')}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.devices) {
+          setTrustedDevices(data.devices);
+          return;
+        }
+      }
+      // Fallback to local storage if API didn't return devices
+      const local = localStorage.getItem('wfa_trusted_device');
+      if (local) {
+        const parsed = JSON.parse(local);
+        setTrustedDevices([{ id: 'local_device', device_name: parsed.deviceName, auth_method: parsed.authMethod, trusted_until: '30 days', last_used_at: parsed.savedAt }]);
+      }
+    } catch {
+      try {
+        const local = localStorage.getItem('wfa_trusted_device');
+        if (local) {
+          const parsed = JSON.parse(local);
+          setTrustedDevices([{ id: 'local_device', device_name: parsed.deviceName, auth_method: parsed.authMethod, trusted_until: '30 days', last_used_at: parsed.savedAt }]);
+        }
+      } catch {}
+    } finally {
+      setLoadingDevices(false);
+    }
+  };
+
+  const handleRevokeDevice = async (id: string) => {
+    try {
+      if (id !== 'local_device') {
+        await fetch(`/api/auth/trusted-devices/${id}`, { method: 'DELETE' });
+      }
+      setTrustedDevices((prev) => prev.filter((d) => d.id !== id));
+      localStorage.removeItem('wfa_trusted_device');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchMfaStatus = async () => {
     try {
       const res = await apiClient.get('/v1/auth/mfa/totp/status');
@@ -66,6 +112,7 @@ export const Profile: React.FC = () => {
   useEffect(() => {
     if (activeTab === 'security') {
       fetchMfaStatus();
+      fetchTrustedDevices();
       setSetupData(null);
       setIsSetupMode(false);
       setIsDisableMode(false);
@@ -910,8 +957,61 @@ export const Profile: React.FC = () => {
                     </button>
                   </div>
                 </div>
+            {/* Trusted Devices & Biometric Locks Management Section */}
+            <div className="p-4 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>🛡️</span>
+                    <span>Trusted Devices & Biometric Locks</span>
+                  </h4>
+                  <p className="text-[10px] text-slate-400">
+                    Devices authorized for instant sign-in using Face Recognition, Biometrics, or Homescreen Lock.
+                  </p>
+                </div>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  {trustedDevices.length} Active {trustedDevices.length === 1 ? 'Device' : 'Devices'}
+                </span>
               </div>
-            )}
+
+              {loadingDevices ? (
+                <div className="text-[11px] text-slate-400 py-3 text-center">Loading trusted devices...</div>
+              ) : trustedDevices.length === 0 ? (
+                <div className="text-[11px] text-slate-400 py-4 text-center bg-black/20 rounded-xl border border-dashed border-[var(--border-color)]">
+                  No trusted devices registered yet. When signing in, check <strong>&quot;Save as trusted device&quot;</strong> to enable fast 1-click biometric sign-in.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {trustedDevices.map((device) => (
+                    <div
+                      key={device.id}
+                      className="p-3 rounded-xl bg-black/25 border border-[var(--border-color)] flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-sm">
+                          {device.auth_method === 'face' ? '👤' : device.auth_method === 'screen_lock' ? '📱' : '👆'}
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-[var(--text-primary)]">
+                            {device.device_name || 'Personal Device'}
+                          </p>
+                          <p className="text-[10px] text-slate-400">
+                            {device.auth_method === 'face' ? 'Face ID / Windows Hello' : device.auth_method === 'screen_lock' ? 'Homescreen Lock / PIN' : 'Fingerprint / Touch ID'} • Trusted for 30 days
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRevokeDevice(device.id)}
+                        className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-[10px] font-bold transition-colors cursor-pointer"
+                      >
+                        Revoke
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

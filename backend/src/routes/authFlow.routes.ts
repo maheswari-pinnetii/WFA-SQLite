@@ -7,6 +7,10 @@ import {
   verifyPasskeyRegister,
   generatePasskeyLoginOptions,
   verifyPasskeyLogin,
+  saveTrustedDevice,
+  getTrustedDevices,
+  verifyTrustedDevice,
+  revokeTrustedDevice,
 } from '../controllers/authFlow.controller.js';
 
 const router = Router();
@@ -67,5 +71,37 @@ router.post('/passkey/login-options', generatePasskeyLoginOptions);
  * @access  Public
  */
 router.post('/passkey/login-verify', verifyPasskeyLogin);
+
+// ======================================================================
+// 3. Trusted Devices & Biometric / Homescreen Lock Routes
+// ======================================================================
+
+/**
+ * @route   POST /api/auth/trusted-devices
+ * @desc    Save/register a trusted device (Face, Biometric, or Homescreen Lock)
+ * @access  Public (or with Token)
+ */
+router.post('/trusted-devices', saveTrustedDevice);
+
+/**
+ * @route   GET /api/auth/trusted-devices
+ * @desc    List all trusted devices for a user
+ * @access  Public (or with Token)
+ */
+router.get('/trusted-devices', getTrustedDevices);
+
+/**
+ * @route   POST /api/auth/trusted-devices/verify
+ * @desc    Verify if a device fingerprint is an active trusted device
+ * @access  Public
+ */
+router.post('/trusted-devices/verify', verifyTrustedDevice);
+
+/**
+ * @route   DELETE /api/auth/trusted-devices/:id
+ * @desc    Revoke a saved trusted device
+ * @access  Public (or with Token)
+ */
+router.delete('/trusted-devices/:id', revokeTrustedDevice);
 
 export default router;

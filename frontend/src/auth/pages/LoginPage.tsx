@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
@@ -13,13 +13,41 @@ export const LoginPage: React.FC = () => {
 
   // Multi-step authentication flow:
   // Step 1 = Email + Password Login Card
-  // Step 2 = Biometric / Passkey Verification Card
+  // Step 2 = Biometric / Passkey Verification Card (Face / Biometric / Homescreen Lock)
   // Step 3 = Dashboard Navigation
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [currentEmail, setCurrentEmail] = useState<string>('admin@thestackly.com');
   const [loadingMethod, setLoadingMethod] = useState<'email' | 'passkey' | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [authenticatedRole, setAuthenticatedRole] = useState<Role | null>(null);
+
+  // Saved Trusted Device State (Lazy initialized from localStorage)
+  const [trustedDevice, setTrustedDevice] = useState<{
+    email: string;
+    deviceName: string;
+    authMethod: 'face' | 'biometric' | 'screen_lock';
+    savedAt: string;
+  } | null>(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const stored = window.localStorage.getItem('wfa_trusted_device');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.email) return parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return null;
+  });
+
+  const handleForgetTrustedDevice = () => {
+    try {
+      localStorage.removeItem('wfa_trusted_device');
+      setTrustedDevice(null);
+    } catch {}
+  };
 
   /**
    * Transition to Dashboard based on authenticated role
@@ -93,6 +121,7 @@ export const LoginPage: React.FC = () => {
 
   /**
    * Handle Passwordless / Passkey Login (Step 2 Verification)
+   * Supports Face Recognition, Biometric Fingerprint, and Homescreen Lock
    */
   const handlePasskeyLogin = async (payload?: PasswordlessLoginPayload) => {
     setLoadingMethod('passkey');
@@ -197,6 +226,59 @@ export const LoginPage: React.FC = () => {
           Create Account &rarr;
         </Link>
       </nav>
+
+      {/* Trusted Device Quick Unlock Banner */}
+      {trustedDevice && currentStep === 1 && (
+        <aside
+          aria-label="Trusted device detection"
+          style={{
+            width: '100%',
+            maxWidth: '440px',
+            marginBottom: '16px',
+            padding: '12px 16px',
+            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 95, 70, 0.2))',
+            border: '1px solid rgba(16, 185, 129, 0.35)',
+            borderRadius: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            boxSizing: 'border-box'
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#34d399' }}>
+              <span>🛡️</span>
+              <span>Trusted Device: {trustedDevice.deviceName}</span>
+            </div>
+            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
+              Saved with {trustedDevice.authMethod === 'face' ? 'Face Recognition (Face ID / Windows Hello)' : trustedDevice.authMethod === 'biometric' ? 'Biometrics (Fingerprint / Touch ID)' : 'Homescreen Lock / PIN'} ({trustedDevice.email})
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              type="button"
+              className="btn-solid-blue"
+              onClick={() => {
+                setCurrentEmail(trustedDevice.email);
+                setCurrentStep(2);
+              }}
+              style={{ fontSize: '12px', padding: '6px 12px', whiteSpace: 'nowrap' }}
+            >
+              Quick Unlock &rarr;
+            </button>
+            <button
+              type="button"
+              onClick={handleForgetTrustedDevice}
+              title="Forget trusted device"
+              aria-label="Forget trusted device"
+              style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}
+            >
+              &times;
+            </button>
+          </div>
+        </aside>
+      )}
 
       {/* Main Multi-Step Authentication Container */}
       <main className="auth-single-container" id="auth-flow-main">

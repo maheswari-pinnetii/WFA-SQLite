@@ -4,6 +4,29 @@
  */
 
 export type AuthMethod = 'password' | 'passkey';
+export type BiometricLockMethod = 'face' | 'biometric' | 'screen_lock';
+
+export interface TrustedDevice {
+  id: string;
+  userId: string;
+  deviceName: string;
+  deviceType?: string;
+  authMethod: BiometricLockMethod;
+  deviceFingerprint: string;
+  trustedUntil: string;
+  createdAt?: string;
+  lastUsedAt?: string;
+  status: 'ACTIVE' | 'REVOKED';
+}
+
+export interface SaveTrustedDevicePayload {
+  email: string;
+  userId?: string;
+  deviceName: string;
+  authMethod: BiometricLockMethod;
+  deviceFingerprint?: string;
+  deviceType?: string;
+}
 
 export interface UserProfile {
   id: string;
@@ -34,6 +57,9 @@ export interface PasswordlessLoginPayload {
   email?: string;
   credentialId?: string;
   assertionResponse?: AuthenticationResponseJSON;
+  saveTrustedDevice?: boolean;
+  trustedDeviceName?: string;
+  biometricLockMethod?: BiometricLockMethod;
 }
 
 export interface SignUpFormValues {

@@ -649,3 +649,244 @@ export const getCurrentUser = async (req: Request, res: Response): Promise<void>
     });
   }
 };
+
+/**
+ * Save / Register a Trusted Device (Face, Biometric, or Homescreen Lock)
+ * POST /api/auth/trusted-devices
+ */
+export const saveTrustedDevice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, userId, deviceName, authMethod, deviceFingerprint, deviceType } = req.body;
+    let targetUserId = userId;
+
+    if (!targetUserId && email) {
+      const users = await query<any>('SELECT id FROM users WHERE LOWER(email) = ?', [email.toLowerCase().trim()]);
+      if (users && users.length > 0) {
+        targetUserId = users[0].id;
+      }
+    }
+
+    if (!targetUserId) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        try {
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          targetUserId = decoded.id || decoded.userId;
+        } catch {
+          // Ignore
+        }
+      }
+    }
+
+    if (!targetUserId) {
+      res.status(400).json({ success: false, error: 'User identifier (userId or valid email) is required.' });
+      return;
+    }
+
+    const deviceId = `td_${crypto.randomUUID()}`;
+    const cleanDeviceName = deviceName ? String(deviceName).trim() : 'Personal Workstation';
+    const cleanAuthMethod = (['face', 'biometric', 'screen_lock'].includes(authMethod)) ? authMethod : 'biometric';
+    const cleanFingerprint = deviceFingerprint || `fp_${crypto.randomBytes(16).toString('hex')}`;
+    const cleanDeviceType = deviceType || 'desktop';
+    const ipAddress = (req.ip || req.socket.remoteAddress || '127.0.0.1').toString();
+    const userAgent = (req.headers['user-agent'] || 'Unknown Browser').toString();
+
+    const now = new Date();
+    const trustedUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days
+    const nowIso = now.toISOString();
+
+    // Check if device already registered with this fingerprint for this user
+    const existing = await query<any>(
+      'SELECT id FROM trusted_devices WHERE user_id = ? AND device_fingerprint = ?',
+      [targetUserId, cleanFingerprint]
+    );
+
+    if (existing && existing.length > 0) {
+      await execute(
+        `UPDATE trusted_devices 
+         SET device_name = ?, auth_method = ?, trusted_until = ?, last_used_at = ?, status = 'ACTIVE'
+         WHERE id = ?`,
+        [cleanDeviceName, cleanAuthMethod, trustedUntil, nowIso, existing[0].id]
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Trusted device refreshed successfully for 30 days.',
+        trustedDevice: {
+          id: existing[0].id,
+          userId: targetUserId,
+          deviceName: cleanDeviceName,
+          authMethod: cleanAuthMethod,
+          deviceFingerprint: cleanFingerprint,
+          trustedUntil,
+          status: 'ACTIVE',
+        },
+      });
+      return;
+    }
+
+    await execute(
+      `INSERT INTO trusted_devices (
+        id, user_id, device_name, device_type, auth_method, device_fingerprint,
+        ip_address, user_agent, trusted_until, created_at, last_used_at, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')`,
+      [
+        deviceId, targetUserId, cleanDeviceName, cleanDeviceType, cleanAuthMethod, cleanFingerprint,
+        ipAddress, userAgent, trustedUntil, nowIso, nowIso
+      ]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Trusted device saved successfully for 30 days.',
+      trustedDevice: {
+        id: deviceId,
+        userId: targetUserId,
+        deviceName: cleanDeviceName,
+        deviceType: cleanDeviceType,
+        authMethod: cleanAuthMethod,
+        deviceFingerprint: cleanFingerprint,
+        trustedUntil,
+        status: 'ACTIVE',
+      },
+    });
+  } catch (error: any) {
+    console.error('[Save Trusted Device Error]', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to save trusted device.' });
+  }
+};
+
+/**
+ * Retrieve User's Trusted Devices
+ * GET /api/auth/trusted-devices
+ */
+export const getTrustedDevices = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { userId, email } = req.query;
+    let targetUserId = userId as string;
+
+    if (!targetUserId && email) {
+      const users = await query<any>('SELECT id FROM users WHERE LOWER(email) = ?', [String(email).toLowerCase().trim()]);
+      if (users && users.length > 0) targetUserId = users[0].id;
+    }
+
+    if (!targetUserId) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        try {
+          const decoded = jwt.verify(token, JWT_SECRET) as any;
+          targetUserId = decoded.id || decoded.userId;
+        } catch {}
+      }
+    }
+
+    if (!targetUserId) {
+      res.status(400).json({ success: false, error: 'User identifier is required to fetch trusted devices.' });
+      return;
+    }
+
+    const devices = await query<any>(
+      `SELECT id, user_id, device_name, device_type, auth_method, device_fingerprint, trusted_until, created_at, last_used_at, status
+       FROM trusted_devices
+       WHERE user_id = ? AND status = 'ACTIVE'
+       ORDER BY last_used_at DESC`,
+      [targetUserId]
+    );
+
+    res.status(200).json({
+      success: true,
+      devices: devices || [],
+    });
+  } catch (error: any) {
+    console.error('[Get Trusted Devices Error]', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to retrieve trusted devices.' });
+  }
+};
+
+/**
+ * Verify if client device fingerprint is currently a trusted device
+ * POST /api/auth/trusted-devices/verify
+ */
+export const verifyTrustedDevice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { deviceFingerprint, email } = req.body;
+
+    if (!deviceFingerprint) {
+      res.status(400).json({ success: false, error: 'deviceFingerprint is required.' });
+      return;
+    }
+
+    let queryStr = `
+      SELECT td.*, u.email, u.name, u.role
+      FROM trusted_devices td
+      JOIN users u ON u.id = td.user_id
+      WHERE td.device_fingerprint = ? AND td.status = 'ACTIVE' AND td.trusted_until > datetime('now')
+    `;
+    const params: any[] = [deviceFingerprint];
+
+    if (email) {
+      queryStr += ' AND LOWER(u.email) = ?';
+      params.push(email.toLowerCase().trim());
+    }
+
+    const records = await query<any>(queryStr, params);
+
+    if (records && records.length > 0) {
+      const device = records[0];
+      await execute("UPDATE trusted_devices SET last_used_at = datetime('now') WHERE id = ?", [device.id]);
+
+      res.status(200).json({
+        success: true,
+        isTrusted: true,
+        device: {
+          id: device.id,
+          deviceName: device.device_name,
+          authMethod: device.auth_method,
+          deviceType: device.device_type,
+          trustedUntil: device.trusted_until,
+          email: device.email,
+          name: device.name,
+          role: device.role,
+        },
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        isTrusted: false,
+      });
+    }
+  } catch (error: any) {
+    console.error('[Verify Trusted Device Error]', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to verify trusted device.' });
+  }
+};
+
+/**
+ * Revoke a Trusted Device
+ * DELETE /api/auth/trusted-devices/:id
+ */
+export const revokeTrustedDevice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({ success: false, error: 'Device ID is required.' });
+      return;
+    }
+
+    await execute(
+      "UPDATE trusted_devices SET status = 'REVOKED' WHERE id = ?",
+      [id]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Trusted device successfully revoked.',
+    });
+  } catch (error: any) {
+    console.error('[Revoke Trusted Device Error]', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to revoke trusted device.' });
+  }
+};

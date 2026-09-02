@@ -69,7 +69,9 @@ describe('Step 2: PasswordlessLoginCard Component Unit Tests', () => {
     fireEvent.click(nextBtn);
 
     await waitFor(() => {
-      expect(onPasskeyLoginMock).toHaveBeenCalledWith({ email: 'biometric.user@thestackly.com' });
+      expect(onPasskeyLoginMock).toHaveBeenCalledWith(
+        expect.objectContaining({ email: 'biometric.user@thestackly.com' })
+      );
     });
   });
 
