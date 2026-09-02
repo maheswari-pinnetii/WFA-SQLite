@@ -78,8 +78,32 @@ sequenceDiagram
 
 ---
 
-## 4. Developer & Maintenance Guidelines
+## 4. HR Payroll & Attendance Integration Engine
+
+The Payroll Hub (`/hr/payroll-reports`) calculates monthly compensation by integrating live punch events, shifts, and leave records.
+
+### 4.1 Payroll Mathematical Model
+$$\mathbf{\text{Gross Pay}} = \mathbf{\text{Base Salary}} + \mathbf{\text{Overtime Pay}} + \mathbf{\text{Night Shift Allowance}} + \mathbf{\text{Spot Bonus}} - \mathbf{\text{Unpaid LWP Deductions}} - \mathbf{\text{Late Deductions}} - \mathbf{\text{Custom Deductions}}$$
+
+$$\mathbf{\text{Net Payout}} = \mathbf{\text{Gross Pay}} - \mathbf{\text{Estimated Tax Withheld (20\%)}}$$
+
+### 4.2 Calculation Components
+1. **Payable Days**: Total active work days + statutory holidays + approved paid leaves.
+2. **Overtime Pay**: Hours worked beyond standard 8h/day (or 160h/month) compensated at `1.5x` hourly rate:
+   $$\text{Hourly Rate} = \frac{\text{Base Salary}}{160\text{ Hours}}, \quad \text{Overtime Pay} = \text{OT Hours} \times (\text{Hourly Rate} \times 1.5)$$
+3. **Night Shift Allowance**: An automatic `+$50` per nocturnal shift allowance for workers on the US / Night Shift (`NS`).
+4. **Late Penalties & Deductions**: If an employee accumulates more than 3 late punches past the 15-minute grace window in a single cycle, a flat penalty deduction is applied per breach.
+5. **Unpaid Leave Deduction (LWP)**:
+   $$\text{LWP Deduction} = \frac{\text{Base Salary}}{30} \times \text{Unpaid Days}$$
+6. **Manual Adjustments**: HR/Managers can assign spot bonuses or custom asset/tax deductions with required audit justifications.
+7. **Review & Lock**: Locks the period ledger against any further changes, signs the run, and records it into the integration run history.
+8. **Export Handlers**: Exports full spreadsheets (.csv) and structured JSON payloads (.json).
+
+---
+
+## 5. Developer & Maintenance Guidelines
 
 - **Types & Constants**: All shift interfaces and default constant collections must reside in `frontend/src/shared/types/shifts.types.ts` to maintain Vite Fast Refresh consistency.
 - **Component Separation**: React page components must avoid non-component top-level exports.
-- **Verification**: Run `npm test` and `npm run build` after altering schedule or holiday models.
+- **Verification**: Run `npm test -- --run` and `npm run build` after altering schedule or holiday models.
+

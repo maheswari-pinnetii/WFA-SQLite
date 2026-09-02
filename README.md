@@ -99,6 +99,100 @@ $$\mathbf{9\text{ Hours Shift}} = \mathbf{8\text{ Hours Net Work}} + \mathbf{1\t
 
 ---
 
+## 🔐 Enterprise Authentication & Multiple Login Methods
+
+Stackly provides a multi-modal enterprise sign-in and sign-up experience tailored for `@thestackly.com` corporate accounts:
+
+```
+┌────────────────────────────────────────┐  ┌────────────────────────────────────────┐
+│             Email Login                │  │          Passwordless Login            │
+│ ────────────────────────────────────── │  │ ────────────────────────────────────── │
+│ 🏢 Microsoft / Stackly Brand Header    │  │ 🏢 Microsoft / Stackly Brand Header    │
+│ 👤 user@thestackly.com Pill Badge      │  │ 👤 user@thestackly.com Pill Badge      │
+│ 🔑 Password Input (Mask & Eye Toggle)  │  │ 👁️ Biometric Scanner HUD (Neon Grid)  │
+│ ❓ Forgot Password Recovery Link       │  │ ⚡ WebAuthn / FIDO2 Passkey Biometrics │
+│ 🚀 "Next" / "Sign In" Primary Button   │  │ 🚀 "Next" (Scan) / "Skip for now"      │
+└────────────────────────────────────────┘  └────────────────────────────────────────┘
+```
+
+### Key Authentication Features:
+1. **Email & Password Login**: Direct enterprise credentials with real-time domain verification (`@thestackly.com`), show/hide password visibility toggles, and account switcher.
+2. **Passwordless Biometric Passkey Login**: WebAuthn (`navigator.credentials.get` / `create`) FIDO2 biometric authentication (Face ID, Fingerprint, Windows Hello PIN) with animated biometric HUD scanning radar.
+3. **Role Quick-Switcher**: One-click demo credential switching for testing all 5 RBAC roles (`admin@thestackly.com`, `hr@thestackly.com`, `manager@thestackly.com`, `lead@thestackly.com`, `employee@thestackly.com`).
+4. **Enterprise Single Sign-On (SSO)**: Google Workspace and Microsoft Entra ID integration.
+5. **Two-Factor Authentication (MFA / 2FA)**: TOTP Authenticator app QR pairing (Google/Microsoft Authenticator), 10 one-time recovery codes, and SMS/Email OTP fallbacks.
+
+---
+
+## 💰 HR Payroll & Attendance Integration Hub
+
+Located at `/hr/payroll-reports` (with `/hr/payroll` and `/admin/payroll` aliases), the Payroll Hub bridges live attendance punch data, shifts, and leave records directly into payroll ledgers:
+
+```
+                      ┌────────────────────────────────────────┐
+                      │    Payroll Period (e.g., Sept 2026)    │
+                      └──────────────────┬─────────────────────┘
+                                         │
+                 ┌───────────────────────┴───────────────────────┐
+                 ▼                                               ▼
+   ┌───────────────────────────┐                   ┌───────────────────────────┐
+   │    Attendance Logs & OT   │                   │    Approved Leave Quotas  │
+   │ ───────────────────────── │                   │ ───────────────────────── │
+   │ • Regular Shift Hours     │                   │ • Paid Leaves (CL, SL, EL)│
+   │ • Overtime Hours (1.5x)   │                   │ • Unpaid LWP Deductions   │
+   │ • Night Shift Differentials│                  │ • Grace Period Late Counts│
+   └─────────────┬─────────────┘                   └─────────────┬─────────────┘
+                 │                                               │
+                 └───────────────────────┬───────────────────────┘
+                                         ▼
+                         ┌───────────────────────────────┐
+                         │   "Calculate Payroll" Engine  │
+                         │ ───────────────────────────── │
+                         │ • Base Salary + Overtime Pay  │
+                         │ • (+) Night Shift Allowance   │
+                         │ • (+) Spot Bonuses            │
+                         │ • (-) Unpaid Leave Deductions │
+                         │ • (-) Late Penalty Reductions │
+                         │ • (-) Estimated Tax Withheld  │
+                         └───────────────┬───────────────┘
+                                         ▼
+                 ┌───────────────────────────────────────────────┐
+                 │          "Review & Lock" Vault & Exports      │
+                 │ ───────────────────────────────────────────── │
+                 │ • Immutable Ledger Tamper-Freeze Lock         │
+                 │ • CSV & JSON Export Handlers                  │
+                 │ • Historical Integration Run Ledger           │
+                 └───────────────────────────────────────────────┘
+```
+
+### 12 Core Payroll Capabilities:
+1. **Payroll-Period Selection**: Dynamic selector (`September 2026`, `August 2026`, `July 2026`, etc.).
+2. **Calculate Payroll Engine**: Step-by-step calculation progress animation with automatic tax withholding and net payout computation.
+3. **Employee Payroll-Attendance Summary**: Real-time KPI aggregate cards + granular individual employee ledgers.
+4. **Payable Days**: Accurate calculation of `payableDays` against month `totalDays`.
+5. **Regular and Overtime Hours**: 160h standard threshold tracking with 1.5x overtime multiplier calculations.
+6. **Paid and Unpaid Leave Deductions**: Automatic salary deductions for unexcused absences and LWP days.
+7. **Late Deductions & Penalties**: Penalty calculations for punctuality violations exceeding the 15-minute grace window.
+8. **Night-Shift Allowance**: +$50/shift premium allowance for graveyard and nocturnal operational shifts.
+9. **Manual Compensation Adjustments**: Spot bonus, incentive, and custom penalty adjustment modal with audit reason logs.
+10. **Review and Lock Payroll**: Digital freeze mechanism that seals the pay period and archives the ledger into the audit history.
+11. **CSV and JSON Export**: Instant generation and download of complete payroll audit spreadsheets and JSON data.
+12. **Integration-Run History**: Immutable audit log of historical runs (`PR-2026-08`, `PR-2026-07`, etc.) with authorized signatories and headcounts.
+
+---
+
+## 🌴 Absence & Leave Management Suite
+
+Located at `/hr/leave` (accessible to all roles with role-scoped permissions):
+- **Requests Inbox**: Manage pending employee leave applications with instant Approve, Reject (with required justification notes), and Cancel actions.
+- **Employee Balances Matrix**: Real-time breakdown of Casual, Sick, Earned, Comp-Off, and LWP quotas.
+- **Team Coverage Calendar**: Visual timeline showing departmental coverage and scheduled absences.
+- **Holiday Calendar & Exports**: Gazetted corporate holidays with iCal calendar syncing.
+- **Policy Configuration**: Annual allocation limits, carryover caps, and medical proof requirements.
+- **Direct Cross-Hub Linking**: Seamless navigation between the Leave Hub and the Payroll Compensation Hub.
+
+---
+
 ## 🍪 Cookie & Session Lifecycle Architecture
 
 Stackly employs a dual-token zero-trust session model designed to eliminate XSS token theft and protect against CSRF exploits:
@@ -131,8 +225,8 @@ Stackly employs a dual-token zero-trust session model designed to eliminate XSS 
 ## 🧪 Verification & Testing
 
 ```bash
-# Run unit & integration test suite (73 / 73 passing)
-npm test
+# Run unit & integration test suite (73 / 73 passing - 100%)
+npm test -- --run
 
 # Build production bundle
 npm run build

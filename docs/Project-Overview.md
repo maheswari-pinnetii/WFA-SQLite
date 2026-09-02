@@ -32,3 +32,21 @@ The **Stackly Workforce Analytics Platform** is a enterprise SaaS web applicatio
 
 6. **10,000 Record Directory Table**:
    - Instant search across 10,000 employees with instant pagination controls (`10`, `25`, `50`, `100` rows per page).
+
+7. **Multiple Login & Sign Up Methods**:
+   - Side-by-side Email Login and Passwordless Biometric Passkey Login (Face recognition, Fingerprint sensor, Windows Hello PIN).
+   - Strict `@thestackly.com` enterprise domain verification.
+   - Enterprise SSO (Google Workspace, Microsoft Entra ID) and TOTP Authenticator 2FA.
+
+8. **HR Payroll & Attendance Integration Hub (`/hr/payroll-reports`)**:
+   - Dynamic payroll period selection (`September 2026`, etc.).
+   - Interactive payroll calculation engine with animated computation progress.
+   - Payable days, 160h regular vs 1.5x overtime hours, night shift differential allowance (+$50/shift), late penalty deductions, and unpaid LWP deductions.
+   - Manual bonus & deduction adjustment modal with audit justification notes.
+   - Sealed "Review & Lock" freeze mechanism and one-click CSV / JSON exports.
+   - Historical integration run ledger with batch IDs and authorized signatories.
+
+9. **Absence & Leave Management Hub (`/hr/leave`)**:
+   - Multi-tab management: Requests Inbox, Employee Balances, Team Coverage Calendar, Holiday Calendar, and Policy Configurations.
+   - Direct cross-linking between Leave Hub and Payroll Compensation Hub.
+
