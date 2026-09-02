@@ -148,10 +148,7 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="auth-page-wrapper">
       {/* Top Navbar / Navigation Header */}
-      <nav style={{ width: '100%', maxWidth: '940px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
-        <Link to="/" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500, transition: 'color 0.2s' }}>
-          <span>&larr;</span> Back to Home
-        </Link>
+      <nav style={{ width: '100%', maxWidth: '940px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
         <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
           Create Account &rarr;
         </Link>

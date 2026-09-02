@@ -106,9 +106,9 @@ export const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
-      {/* Marketing / Landing Page */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/landing" element={<LandingPage />} />
+      {/* Default Root & Dashboard Redirects */}
+      <Route path="/" element={<DefaultHomeRedirect />} />
+      <Route path="/landing" element={<DefaultHomeRedirect />} />
       <Route path="/dashboard" element={<DefaultHomeRedirect />} />
 
       {/* Public Auth Routes */}
