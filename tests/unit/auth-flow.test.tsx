@@ -5,6 +5,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { LoginPage } from '../../frontend/src/auth/pages/LoginPage';
+import { MultipleLoginMethodsPage } from '../../frontend/src/auth/pages/MultipleLoginMethodsPage';
 import { SignUpPage } from '../../frontend/src/auth/pages/SignUpPage';
 import { EmailLoginCard } from '../../frontend/src/auth/components/EmailLoginCard';
 import { PasswordlessLoginCard } from '../../frontend/src/auth/components/PasswordlessLoginCard';
@@ -158,4 +159,33 @@ describe('Modern Authentication Flow Test Suite', () => {
       expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
     });
   });
+
+  describe('5. MultipleLoginMethodsPage (Dual Card Showcase)', () => {
+    it('should render both EmailLoginCard and PasswordlessLoginCard side-by-side with specs section', () => {
+      render(
+        <BrowserRouter>
+          <MultipleLoginMethodsPage />
+        </BrowserRouter>
+      );
+
+      // Verify Header & Badge
+      expect(screen.getByText('Enterprise Authentication')).toBeInTheDocument();
+      expect(screen.getByText('Multiple login methods')).toBeInTheDocument();
+      expect(screen.getByText(/Select your preferred enterprise authentication method/i)).toBeInTheDocument();
+
+      // Verify Left Card (Email Login)
+      expect(screen.getByText('Step 1 of 2: Password')).toBeInTheDocument();
+      expect(screen.getByLabelText(/Email address/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
+
+      // Verify Right Card (Passwordless Login)
+      expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
+      expect(screen.getByText(/Sign in faster with your face, fingerprint, or PIN/i)).toBeInTheDocument();
+
+      // Verify Bottom Educational Specifications Reference
+      expect(screen.getByText(/Password-Based Authentication \(Left\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Passwordless Authentication \(Right\)/i)).toBeInTheDocument();
+    });
+  });
 });
+

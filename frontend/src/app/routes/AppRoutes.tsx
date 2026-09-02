@@ -4,6 +4,7 @@ import { ProtectedRoute } from '../../security/guards/ProtectedRoute';
 import { RoleGuard } from '../../security/guards/RoleGuard';
 import { MainLayout } from '../../shared/layouts/MainLayout';
 import { LoginPage } from '../../auth/pages/LoginPage';
+import { MultipleLoginMethodsPage } from '../../auth/pages/MultipleLoginMethodsPage';
 import { SignUpPage } from '../../auth/pages/SignUpPage';
 import { LogoutPage } from '../../auth/pages/LogoutPage';
 import { SsoCallbackPage } from '../../auth/pages/SsoCallbackPage';
@@ -113,6 +114,7 @@ export const AppRoutes: React.FC = () => {
 
       {/* Public Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/multiple-login-methods" element={<MultipleLoginMethodsPage />} />
       <Route path="/sso-callback" element={<SsoCallbackPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/logout" element={<LogoutPage />} />
