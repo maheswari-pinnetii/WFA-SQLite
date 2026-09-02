@@ -28,10 +28,16 @@ export const LoginPage: React.FC = () => {
           navigate(target, { replace: true });
         }}
       />
-      <div className="text-center text-sm font-medium text-slate-400 mt-6">
-        Don't have an account?{' '}
-        <Link to="/signup" className="text-blue-400 font-semibold hover:underline">
-          Create account
+      <div className="text-center text-sm font-medium text-slate-400 mt-6 flex items-center justify-center gap-4">
+        <span>
+          Don't have an account?{' '}
+          <Link to="/signup" className="text-emerald-400 font-semibold hover:underline">
+            Create account
+          </Link>
+        </span>
+        <span className="text-slate-600">•</span>
+        <Link to="/" className="text-slate-400 hover:text-emerald-400 text-xs transition-colors">
+          ← Back to Home
         </Link>
       </div>
     </AuthLayout>

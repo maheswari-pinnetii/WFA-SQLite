@@ -77,6 +77,7 @@ import { AttendanceCorrectionsPage } from '../../features/hr/pages/AttendanceCor
 import { SkillOverviewPage } from '../../features/analytics/pages/SkillOverviewPage';
 import { SkillGapsPage } from '../../features/analytics/pages/SkillGapsPage';
 import { SkillCoveragePage } from '../../features/analytics/pages/SkillCoveragePage';
+import { LandingPage } from '../../pages/LandingPage';
 
 const DefaultHomeRedirect: React.FC = () => {
   const { role, isAuthenticated } = useAuth();
@@ -105,7 +106,11 @@ export const AppRoutes: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/" element={<DefaultHomeRedirect />} />
+      {/* Marketing / Landing Page */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/landing" element={<LandingPage />} />
+      <Route path="/dashboard" element={<DefaultHomeRedirect />} />
+
       {/* Public Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/sso-callback" element={<SsoCallbackPage />} />
