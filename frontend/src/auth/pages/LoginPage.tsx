@@ -5,10 +5,13 @@ import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
 import { EmailLoginCard } from '../components/EmailLoginCard';
 import { EmailLoginPayload } from '../../types/authFlow.types';
 import { authService } from '../services/auth.service';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from '../../theme/ThemeProvider';
 import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {
   const { login, role, setSession } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   // Authenticate with email and password, then route to the user's dashboard.
@@ -101,6 +104,9 @@ export const LoginPage: React.FC = () => {
     <div className="auth-page-wrapper">
       {/* Top Navbar / Navigation Header */}
       <nav style={{ width: '100%', maxWidth: '440px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 4px' }}>
+        <button type="button" className="auth-theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
         <Link to="/multiple-login-methods" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
           <span>Multiple methods</span> &rarr;
         </Link>

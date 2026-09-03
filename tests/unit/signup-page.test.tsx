@@ -31,12 +31,16 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     );
   };
 
-  it('3.1 should render full name, email, and password setup inputs by default', () => {
+  it('3.1 should render employee fields and password setup inputs by default', () => {
     renderSignUp();
 
     expect(screen.getByText('Register Your Account')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Work Email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/First Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Last Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Employee ID/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Company Email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Department/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Role/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Confirm Password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Create Account/i })).toBeInTheDocument();
@@ -48,15 +52,17 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     const submitBtn = screen.getByRole('button', { name: /Create Account/i });
     fireEvent.click(submitBtn);
 
-    expect(await screen.findByText('Please enter your full name.')).toBeInTheDocument();
+    expect(await screen.findByText('Please enter your first and last name.')).toBeInTheDocument();
     expect(mockSignup).not.toHaveBeenCalled();
   });
 
   it('3.3 should validate email format', async () => {
     renderSignUp();
 
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'invalid-email-format' } });
+    fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Jane' } });
+    fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Doe' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'invalid-email-format' } });
 
     const submitBtn = screen.getByRole('button', { name: /Create Account/i });
     fireEvent.click(submitBtn);
@@ -68,8 +74,10 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
   it('3.4 should validate password length under 8 characters', async () => {
     renderSignUp();
 
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'jane@thestackly.com' } });
+    fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Jane' } });
+    fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Doe' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'jane@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'short' } });
     fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'short' } });
 
@@ -83,8 +91,10 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
   it('3.5 should validate password and confirm password mismatch', async () => {
     renderSignUp();
 
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'jane@thestackly.com' } });
+    fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Jane' } });
+    fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Doe' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'jane@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'Password123!' } });
     fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'DifferentPassword123!' } });
 
@@ -110,8 +120,10 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     mockSignup.mockResolvedValueOnce({ success: true });
     renderSignUp();
 
-    fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Sarah Connor' } });
-    fireEvent.change(screen.getByLabelText(/Work Email/i), { target: { value: 'sarah@thestackly.com' } });
+    fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Sarah' } });
+    fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Connor' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'sarah@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'SecurePass2026!' } });
     fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'SecurePass2026!' } });
 
@@ -122,6 +134,9 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
       expect(mockSignup).toHaveBeenCalledWith({
         name: 'Sarah Connor',
         email: 'sarah@thestackly.com',
+        employeeId: 'EMP-1001',
+        department: 'Human Resources',
+        role: 'HR',
         password: 'SecurePass2026!',
       });
     });

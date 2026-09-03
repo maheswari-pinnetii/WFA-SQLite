@@ -22,6 +22,97 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.auth-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.auth-theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.light .auth-page-wrapper {
+  background-color: #f4f7fb;
+  color: #172033;
+}
+
+.light .auth-theme-toggle {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.light .auth-theme-toggle:hover {
+  background: #eaf2ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.light .auth-card {
+  background-color: #ffffff;
+  border-color: #d9e2ec;
+  box-shadow: 0 10px 30px rgba(30, 64, 90, 0.12);
+}
+
+.light .auth-card:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 14px 40px rgba(30, 64, 90, 0.16);
+}
+
+.light .auth-card-heading,
+.light .card-heading {
+  color: #172033;
+}
+
+.light .overlaid-label {
+  background-color: #ffffff;
+  color: #0369a1;
+}
+
+.light .auth-text-input,
+.light .password-input,
+.light .auth-page-wrapper input[type="text"],
+.light .auth-page-wrapper input[type="password"],
+.light .auth-page-wrapper input[type="email"] {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #172033 !important;
+}
+
+.light .auth-text-input:focus,
+.light .password-input:focus,
+.light .auth-page-wrapper input:focus {
+  background-color: #ffffff !important;
+}
+
+.light .auth-text-input::placeholder,
+.light .password-input::placeholder,
+.light .auth-page-wrapper input::placeholder {
+  color: #64748b !important;
+}
+
+.light .auth-page-wrapper input:-webkit-autofill,
+.light .auth-page-wrapper input:-webkit-autofill:hover,
+.light .auth-page-wrapper input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #172033 !important;
+  -webkit-box-shadow: 0 0 0 1000px #f8fafc inset !important;
+  box-shadow: 0 0 0 1000px #f8fafc inset !important;
+}
+
+.light .ms-logo-text {
+  color: #172033 !important;
+}
+
 /* Background Ambient Glows */
 .auth-page-wrapper::before {
   content: '';

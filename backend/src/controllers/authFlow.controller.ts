@@ -475,6 +475,10 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
     });
   } catch (error: any) {
     console.error('[Passkey Register Verify Error]', error);
+    if (String(error?.message || '').toLowerCase().includes('credential') || String(error?.message || '').toLowerCase().includes('attestation')) {
+      res.status(400).json({ success: false, error: 'Passkey attestation could not be verified.' });
+      return;
+    }
     res.status(500).json({
       success: false,
       error: error.message || 'Passkey registration verification failed.',
@@ -489,7 +493,6 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
 export const generatePasskeyLoginOptions = async (req: Request, res: Response): Promise<void> => {
   try {
     const { email } = req.body;
-    const challenge = generateChallenge();
     const normalizedEmail = email ? email.toLowerCase().trim() : '';
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString();
@@ -501,17 +504,9 @@ export const generatePasskeyLoginOptions = async (req: Request, res: Response): 
       // Non-fatal
     }
 
-    // Persist challenge into SQLite
-    await execute(
-      `INSERT OR REPLACE INTO passkey_challenges (challenge, email, type, expires_at, created_at)
-       VALUES (?, ?, 'login', ?, ?)`,
-      [challenge, normalizedEmail, expiresAt, now.toISOString()]
-    );
-
     const { rpID } = getPasskeyConfig(req);
     const options = await generateAuthenticationOptions({
       rpID,
-      challenge,
       timeout: 60000,
       userVerification: 'preferred',
     });
@@ -537,9 +532,19 @@ export const generatePasskeyLoginOptions = async (req: Request, res: Response): 
       }
     }
 
+    await execute(
+      "DELETE FROM passkey_challenges WHERE email = ? AND type = 'login'",
+      [normalizedEmail]
+    );
+    await execute(
+      `INSERT INTO passkey_challenges (challenge, email, type, expires_at, created_at)
+       VALUES (?, ?, 'login', ?, ?)`,
+      [options.challenge, normalizedEmail, expiresAt, now.toISOString()]
+    );
+
     res.status(200).json({
       success: true,
-      challenge,
+      challenge: options.challenge,
       options,
     });
   } catch (error: any) {

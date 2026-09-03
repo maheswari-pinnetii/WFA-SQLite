@@ -9,6 +9,9 @@ let client: any;
 
 const testUser = {
   fullName: 'Passkey Test Pilot',
+  employeeId: `EMP-TEST-${Date.now()}`,
+  department: 'Engineering',
+  role: 'EMPLOYEE',
   email: `pilot_${Date.now()}@thestackly.com`,
   password: 'EnterprisePilot2026!',
 };
@@ -60,8 +63,11 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
   // --------------------------------------------------------------------
   describe('4.1 Standard Auth Endpoints', () => {
     it('POST /api/auth/register - should create user in SQLite database and issue JWT', async () => {
-      const res = await client.post('/api/auth/register', {
+      const res = await client.post('/api/v1/auth/register', {
         fullName: testUser.fullName,
+        employeeId: testUser.employeeId,
+        department: testUser.department,
+        role: testUser.role,
         email: testUser.email,
         password: testUser.password,
       });
@@ -79,10 +85,14 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
       const dbRows = await query<any>('SELECT * FROM users WHERE id = ?', [createdUserId]);
       expect(dbRows).toHaveLength(1);
       expect(dbRows[0].email).toBe(testUser.email.toLowerCase());
+      const employeeRows = await query<any>('SELECT * FROM employees WHERE id = ?', [createdUserId]);
+      expect(employeeRows).toHaveLength(1);
+      expect(employeeRows[0].employeeCode).toBe(testUser.employeeId);
+      expect(employeeRows[0].role).toBe(testUser.role);
     });
 
     it('POST /api/auth/register - should reject duplicate email registration with 409', async () => {
-      const res = await client.post('/api/auth/register', {
+      const res = await client.post('/api/v1/auth/register', {
         fullName: 'Duplicate Tester',
         email: testUser.email,
         password: 'AnotherPassword123!',
@@ -94,7 +104,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
     });
 
     it('POST /api/auth/login - should authenticate valid credentials from SQLite and return JWT', async () => {
-      const res = await client.post('/api/auth/login', {
+      const res = await client.post('/api/v1/auth/login', {
         email: testUser.email,
         password: testUser.password,
       });
@@ -106,7 +116,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
     });
 
     it('POST /api/auth/login - should reject invalid password with 401', async () => {
-      const res = await client.post('/api/auth/login', {
+      const res = await client.post('/api/v1/auth/login', {
         email: testUser.email,
         password: 'WrongPassword999!',
       });
@@ -117,7 +127,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
     });
 
     it('GET /api/auth/me - should return authenticated user profile with permissions', async () => {
-      const res = await client.get('/api/auth/me', {
+      const res = await client.get('/api/v1/auth/me', {
         headers: { Authorization: `Bearer ${issuedToken}` },
       });
 
@@ -130,7 +140,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
     });
 
     it('GET /api/auth/me - should reject request without authorization header with 401', async () => {
-      const res = await client.get('/api/auth/me');
+      const res = await client.get('/api/v1/auth/me');
 
       expect(res.status).toBe(401);
       expect(res.data.success).toBe(false);
@@ -168,7 +178,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
       expect(challengeRows[0].type).toBe('register');
     });
 
-    it('POST /api/auth/passkey/register-verify - should store passkey credential in SQLite passkey_credentials', async () => {
+    it('POST /api/auth/passkey/register-verify - should reject fabricated attestation data', async () => {
       const mockAttestation = {
         id: mockCredentialId,
         rawId: Buffer.from(mockCredentialId).toString('base64'),
@@ -186,34 +196,28 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
         attestationResponse: mockAttestation,
       });
 
-      expect(res.status).toBe(200);
-      expect(res.data.success).toBe(true);
-      expect(res.data.verified).toBe(true);
-      expect(res.data.token).toBeDefined();
+      expect(res.status).toBe(400);
+      expect(res.data.success).toBe(false);
 
       // Verify credential record in SQLite database
       const credRows = await query<any>(
         'SELECT * FROM passkey_credentials WHERE credential_id = ?',
         [mockCredentialId]
       );
-      expect(credRows).toHaveLength(1);
-      expect(credRows[0].credential_id).toBe(mockCredentialId);
-      expect(credRows[0].counter).toBe(0);
+      expect(credRows).toHaveLength(0);
     });
 
-    it('POST /api/auth/passkey/login-options - should retrieve registered credential IDs from SQLite', async () => {
+    it('POST /api/auth/passkey/login-options - should reject accounts without a registered passkey', async () => {
       const res = await client.post('/api/auth/passkey/login-options', {
         email: testUser.email,
       });
 
-      expect(res.status).toBe(200);
-      expect(res.data.success).toBe(true);
-      expect(res.data.challenge).toBeDefined();
-      expect(res.data.options.allowCredentials).toBeDefined();
-      expect(res.data.options.allowCredentials.some((c: any) => c.id === mockCredentialId)).toBe(true);
+      expect(res.status).toBe(404);
+      expect(res.data.success).toBe(false);
+      expect(res.data.error).toContain('No passkey');
     });
 
-    it('POST /api/auth/passkey/login-verify - should verify assertion, increment counter, and return JWT', async () => {
+    it('POST /api/auth/passkey/login-verify - should reject an unknown credential', async () => {
       const mockAssertion = {
         id: mockCredentialId,
         rawId: Buffer.from(mockCredentialId).toString('base64'),
@@ -229,19 +233,8 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
         assertionResponse: mockAssertion,
       });
 
-      expect(res.status).toBe(200);
-      expect(res.data.success).toBe(true);
-      expect(res.data.verified).toBe(true);
-      expect(res.data.token).toBeDefined();
-      expect(res.data.user.email).toBe(testUser.email.toLowerCase());
-
-      // Verify counter was incremented in SQLite database
-      const updatedCredRows = await query<any>(
-        'SELECT * FROM passkey_credentials WHERE credential_id = ?',
-        [mockCredentialId]
-      );
-      expect(updatedCredRows[0].counter).toBeGreaterThan(0);
-      expect(updatedCredRows[0].last_used_at).toBeDefined();
+      expect(res.status).toBe(401);
+      expect(res.data.success).toBe(false);
     });
   });
 });

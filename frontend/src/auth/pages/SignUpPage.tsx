@@ -3,11 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { AuthMethod, SignUpFormValues } from '../../types/authFlow.types';
 import { authService } from '../services/auth.service';
+import { Moon, Sun } from 'lucide-react';
+import { useTheme } from '../../theme/ThemeProvider';
 import '../styles/ModernAuth.css';
 
 export const SignUpPage: React.FC = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   // Form State
   const [firstName, setFirstName] = useState<string>('');
@@ -118,7 +121,10 @@ export const SignUpPage: React.FC = () => {
   return (
     <div className="auth-page-wrapper">
       {/* Top Navbar / Navigation Header */}
-      <nav style={{ width: '100%', maxWidth: '520px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
+      <nav style={{ width: '100%', maxWidth: '520px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
+        <button type="button" className="auth-theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
         <Link to="/login" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
           &larr; Already have an account? Sign In
         </Link>
