@@ -1,288 +1,227 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
+import { KeyRound, Mail, ShieldCheck } from 'lucide-react';
+import { ROLE_HOME_PATHS } from '../../security/roles/roles';
 import { useAuth } from '../hooks/useAuth';
-import { authService } from '../services/auth.service';
-import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
-import { EmailLoginCard } from '../components/EmailLoginCard';
-import { PasswordlessLoginCard } from '../components/PasswordlessLoginCard';
-import { EmailLoginPayload, PasswordlessLoginPayload } from '../../types/authFlow.types';
-import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {
-  const { login, role, setSession } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loadingMethod, setLoadingMethod] = useState<'password' | 'passkey' | 'google' | 'microsoft' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
   const navigate = useNavigate();
+  const { role } = useAuth(); // for fallback navigation if needed
 
-  // Multi-step authentication flow:
-  // Step 1 = Email + Password Login Card
-  // Step 2 = Biometric / Passkey Verification Card (Face / Biometric / Homescreen Lock)
-  // Step 3 = Dashboard Navigation
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
-  const [currentEmail, setCurrentEmail] = useState<string>('admin@thestackly.com');
-  const [loadingMethod, setLoadingMethod] = useState<'email' | 'passkey' | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [authenticatedRole, setAuthenticatedRole] = useState<Role | null>(null);
-
-  // Saved Trusted Device State (Lazy initialized from localStorage)
-  const [trustedDevice, setTrustedDevice] = useState<{
-    email: string;
-    deviceName: string;
-    authMethod: 'face' | 'biometric' | 'screen_lock' | 'device_pin' | 'pattern';
-    savedAt: string;
-  } | null>(() => {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      try {
-        const stored = window.localStorage.getItem('wfa_trusted_device');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed && parsed.email) return parsed;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return null;
-  });
-
-  const handleForgetTrustedDevice = () => {
-    try {
-      localStorage.removeItem('wfa_trusted_device');
-      setTrustedDevice(null);
-    } catch {}
-  };
-
-  /**
-   * Transition to Dashboard based on authenticated role
-   */
-  const proceedToDashboard = (targetRole?: Role) => {
-    const userRole = targetRole || authenticatedRole || role || Role.ADMIN;
-    const target = ROLE_HOME_PATHS[userRole] || '/admin/dashboard';
-    navigate(target, { replace: true });
-  };
-
-  /**
-   * Handle Standard Email + Password Login (Step 1)
-   * Validates credentials with backend, then proceeds to Step 2 Verification
-   */
-  const handleEmailLogin = async (payload: EmailLoginPayload) => {
-    setLoadingMethod('email');
-    setErrorMessage(null);
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoadingMethod('password');
+    setError(null);
 
     try {
-      const res: any = await login(payload.email, payload.password);
-
-      if (res && (res.error || res.meta?.requestStatus === 'rejected')) {
-        const errMsg = typeof res.payload === 'string'
-          ? res.payload
-          : (res.error?.message || 'Invalid email or password credentials.');
-        setErrorMessage(errMsg);
-        return;
-      }
-
-      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-      setAuthenticatedRole(userRole);
-      setCurrentEmail(payload.email);
-      setErrorMessage(null);
-
-      // On successful credentials verification -> Advance to Step 2 Verification
-      setCurrentStep(2);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
-      setErrorMessage(msg);
-    } finally {
-      setLoadingMethod(null);
-    }
-  };
-
-  /**
-   * Optional Direct Login bypassing Step 2 if user chooses "Sign in directly"
-   */
-  const handleDirectLogin = async (payload: EmailLoginPayload) => {
-    setLoadingMethod('email');
-    setErrorMessage(null);
-
-    try {
-      const res: any = await login(payload.email, payload.password);
-      if (res && (res.error || res.meta?.requestStatus === 'rejected')) {
-        const errMsg = typeof res.payload === 'string'
-          ? res.payload
-          : (res.error?.message || 'Invalid email or password credentials.');
-        setErrorMessage(errMsg);
-        return;
-      }
-
-      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-      proceedToDashboard(userRole);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
-      setErrorMessage(msg);
-    } finally {
-      setLoadingMethod(null);
-    }
-  };
-
-  /**
-   * Handle Passwordless / Passkey Login (Step 2 Verification)
-   * Supports Face Recognition, Biometric Fingerprint, and Homescreen Lock
-   */
-  const handlePasskeyLogin = async (payload?: PasswordlessLoginPayload) => {
-    setLoadingMethod('passkey');
-    setErrorMessage(null);
-
-    try {
-      const targetEmail = payload?.email || currentEmail || 'admin@thestackly.com';
-      const lockMethod = payload?.biometricLockMethod || 'face';
-
-      // 1. Authenticate with real-time SQLite backend API
-      const res = await authService.biometricLockLogin({
-        email: targetEmail,
-        authMethod: lockMethod,
-        pin: payload?.pin,
-        pattern: payload?.pattern,
-        deviceName: payload?.trustedDeviceName,
-        saveTrustedDevice: payload?.saveTrustedDevice,
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (res && res.token && res.user) {
-        setSession({ user: res.user, token: res.token });
-        const userRole = (res.user.role || authenticatedRole || role || Role.ADMIN) as Role;
-        proceedToDashboard(userRole);
-        return;
-      }
-
-      // 2. If WebAuthn FIDO2 passkey was specifically used with hardware assertion
-      if (window.PublicKeyCredential && payload?.assertionResponse) {
-        const verifyRes = await fetch('/api/auth/passkey/login-verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ assertionResponse: payload.assertionResponse, email: targetEmail }),
-        });
-        const verifyData = await verifyRes.json();
-        if (verifyData.success && verifyData.token && verifyData.user) {
-          setSession({ user: verifyData.user, token: verifyData.token });
-          const userRole = (verifyData.user.role || authenticatedRole || role || Role.ADMIN) as Role;
-          proceedToDashboard(userRole);
-          return;
-        }
-      }
-
-      proceedToDashboard();
-    } catch {
-      // Graceful fallback to guaranteed authenticated dashboard
-      proceedToDashboard();
+      if (signInError) throw signInError;
+      
+      // Supabase onAuthStateChange in AuthProvider will handle the session
+      // and redirect once the role is fetched. 
+      // For now, we can just navigate to a safe fallback or let a ProtectedRoute handle it.
+      navigate('/admin/dashboard', { replace: true });
+    } catch (err: any) {
+      setError('Email or password is incorrect.');
     } finally {
       setLoadingMethod(null);
     }
   };
 
-  /**
-   * Handle Skip action on Step 2 -> Proceed directly to Dashboard
-   */
-  const handleSkipPasskey = () => {
-    proceedToDashboard();
+  const handlePasskeyLogin = async () => {
+    setLoadingMethod('passkey');
+    setError(null);
+    
+    try {
+      const { error: passkeyError } = await supabase.auth.signInWithPasskey();
+      if (passkeyError) throw passkeyError;
+      navigate('/admin/dashboard', { replace: true });
+    } catch (err: any) {
+      if (err.message?.includes('cancel')) {
+        setError('Passkey sign-in was cancelled.');
+      } else {
+        setError("Passkey sign-in isn't available on this device or browser.");
+      }
+    } finally {
+      setLoadingMethod(null);
+    }
+  };
+
+  const handleOAuthLogin = async (provider: 'google' | 'azure') => {
+    setLoadingMethod(provider === 'google' ? 'google' : 'microsoft');
+    setError(null);
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider,
+      });
+      if (oauthError) throw oauthError;
+    } catch (err: any) {
+      setError('Unable to complete sign-in. Please try again.');
+    } finally {
+      setLoadingMethod(null);
+    }
   };
 
   return (
-    <div className="auth-page-wrapper">
-      {/* Top Navbar / Navigation Header */}
-      <nav style={{ width: '100%', maxWidth: '440px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', padding: '0 4px' }}>
-        <Link to="/multiple-login-methods" style={{ color: '#94a3b8', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span>Multiple methods</span> &rarr;
-        </Link>
-        <Link to="/signup" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
-          Create Account &rarr;
-        </Link>
-      </nav>
-
-      {/* Trusted Device Quick Unlock Banner */}
-      {trustedDevice && currentStep === 1 && (
-        <aside
-          aria-label="Trusted device detection"
-          style={{
-            width: '100%',
-            maxWidth: '440px',
-            marginBottom: '16px',
-            padding: '12px 16px',
-            background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 95, 70, 0.2))',
-            border: '1px solid rgba(16, 185, 129, 0.35)',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '12px',
-            boxSizing: 'border-box'
-          }}
-        >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#34d399' }}>
-              <span>🛡️</span>
-              <span>Trusted Device: {trustedDevice.deviceName}</span>
-            </div>
-            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>
-              Saved with {trustedDevice.authMethod === 'face' ? 'Face Recognition (Face ID / Windows Hello)' : trustedDevice.authMethod === 'biometric' ? 'Biometrics (Fingerprint / Touch ID)' : trustedDevice.authMethod === 'device_pin' ? 'Device PIN' : trustedDevice.authMethod === 'pattern' ? 'Pattern Lock' : 'Homescreen Lock / PIN'} ({trustedDevice.email})
-            </div>
+    <div className="flex min-h-screen bg-[var(--bg-primary)] font-sans">
+      
+      {/* LEFT: Brand / Product Identity */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 bg-slate-900 text-white relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-16">
+            <ShieldCheck size={28} className="text-blue-500" />
+            <span className="text-2xl font-bold tracking-tight">Stackly WFA</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          
+          <h1 className="text-5xl font-black tracking-tight mb-6 leading-tight">
+            WORKFORCE <br/><span className="text-blue-500">ANALYTICS</span>
+          </h1>
+          <p className="text-xl text-slate-400 font-medium max-w-md">
+            Secure access to your workforce operations.
+          </p>
+        </div>
+        
+        <div className="relative z-10 text-sm text-slate-500 font-medium">
+          &copy; {new Date().getFullYear()} Stackly Global Enterprise Inc.
+        </div>
+        
+        {/* Subtle visual */}
+        <div className="absolute -bottom-[20%] -right-[10%] w-[80%] h-[80%] bg-blue-600/10 rounded-full blur-[120px]" />
+      </div>
+
+      {/* RIGHT: Authentication Card */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-md space-y-8">
+          
+          <div className="text-center lg:text-left space-y-2">
+            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Welcome back</h2>
+            <p className="text-slate-500 text-sm font-medium">
+              Sign in to your workforce workspace.
+            </p>
+          </div>
+
+          {error && (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium flex items-start gap-3">
+              <span className="mt-0.5">⚠️</span>
+              {error}
+            </div>
+          )}
+
+          {/* Primary Authentication Method: Passkeys */}
+          <div className="space-y-4">
             <button
-              type="button"
-              className="btn-solid-blue"
-              onClick={() => {
-                setCurrentEmail(trustedDevice.email);
-                setCurrentStep(2);
-              }}
-              style={{ fontSize: '12px', padding: '6px 12px', whiteSpace: 'nowrap' }}
+              onClick={handlePasskeyLogin}
+              disabled={loadingMethod !== null}
+              className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Quick Unlock &rarr;
+              {loadingMethod === 'passkey' ? (
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <KeyRound size={20} />
+              )}
+              {loadingMethod === 'passkey' ? 'Authenticating with passkey...' : 'Sign in with a passkey'}
             </button>
+            <p className="text-xs text-center text-slate-500 px-4">
+              Use your fingerprint, Face ID, Windows Hello, device PIN, or security key.
+            </p>
+          </div>
+
+          <div className="relative flex items-center py-4">
+            <div className="flex-grow border-t border-[var(--border-color)]"></div>
+            <span className="flex-shrink-0 mx-4 text-xs font-bold uppercase text-slate-400">or</span>
+            <div className="flex-grow border-t border-[var(--border-color)]"></div>
+          </div>
+
+          {/* Secondary Method: Password */}
+          <form onSubmit={handlePasswordLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-sm font-bold text-[var(--text-secondary)]">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 text-slate-400" size={18} />
+                <input 
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@company.com"
+                  required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-bold text-[var(--text-secondary)]">Password</label>
+                <a href="/forgot-password" className="text-xs font-bold text-blue-500 hover:text-blue-600">
+                  Forgot password?
+                </a>
+              </div>
+              <input 
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
+              />
+            </div>
+
             <button
-              type="button"
-              onClick={handleForgetTrustedDevice}
-              title="Forget trusted device"
-              aria-label="Forget trusted device"
-              style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}
+              type="submit"
+              disabled={loadingMethod !== null}
+              className="w-full flex items-center justify-center gap-2 bg-slate-800 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 p-3 rounded-xl font-bold transition-opacity disabled:opacity-50"
             >
-              &times;
+              {loadingMethod === 'password' ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+
+          <div className="relative flex items-center py-4">
+            <div className="flex-grow border-t border-[var(--border-color)]"></div>
+            <span className="flex-shrink-0 mx-4 text-xs font-bold uppercase text-slate-400">or</span>
+            <div className="flex-grow border-t border-[var(--border-color)]"></div>
+          </div>
+
+          {/* OAuth Providers */}
+          <div className="grid grid-cols-2 gap-3">
+            <button 
+              type="button"
+              onClick={() => handleOAuthLogin('google')}
+              disabled={loadingMethod !== null}
+              className="flex items-center justify-center gap-2 p-2.5 border border-[var(--border-color)] rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors text-sm font-bold text-[var(--text-primary)]"
+            >
+              Google
+            </button>
+            <button 
+              type="button"
+              onClick={() => handleOAuthLogin('azure')}
+              disabled={loadingMethod !== null}
+              className="flex items-center justify-center gap-2 p-2.5 border border-[var(--border-color)] rounded-xl hover:bg-[var(--bg-tertiary)] transition-colors text-sm font-bold text-[var(--text-primary)]"
+            >
+              Microsoft
             </button>
           </div>
-        </aside>
-      )}
 
-      {/* Main Multi-Step Authentication Container */}
-      <main className="auth-single-container" id="auth-flow-main">
-        {currentStep === 1 ? (
-          /* Step 1: Email / Password Login Card */
-          <EmailLoginCard
-            onSubmit={handleEmailLogin}
-            onDirectLogin={handleDirectLogin}
-            isLoading={loadingMethod === 'email'}
-            errorMessage={errorMessage}
-            onClearError={() => setErrorMessage(null)}
-            currentEmail={currentEmail}
-            onEmailChange={setCurrentEmail}
-            prefilledPassword="StacklyWFA2026!"
-          />
-        ) : (
-          /* Step 2: Passwordless / WebAuthn Biometric Passkey Card */
-          <PasswordlessLoginCard
-            onPasskeyLogin={handlePasskeyLogin}
-            onSkip={handleSkipPasskey}
-            onBack={() => { setCurrentStep(1); setErrorMessage(null); }}
-            isLoading={loadingMethod === 'passkey'}
-            errorMessage={errorMessage}
-            currentEmail={currentEmail}
-            onEmailChange={setCurrentEmail}
-          />
-        )}
-      </main>
+          <p className="text-center text-sm font-medium text-slate-500 pt-4">
+            Don't have an account? <a href="/signup" className="text-blue-500 font-bold hover:underline">Create account</a>
+          </p>
 
-      {/* Bottom Switch Link */}
-      <footer className="auth-page-footer" style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-          Don&apos;t have an enterprise account?{' '}
-          <Link to="/signup" id="create-account-link" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
-            Create an account
-          </Link>
-        </p>
-      </footer>
+          <div className="mt-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+            <p className="text-xs text-slate-500 leading-relaxed">
+              <strong>Security:</strong> Your authentication credentials and device biometrics remain protected by your authentication provider and device.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

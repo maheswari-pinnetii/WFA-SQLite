@@ -8,6 +8,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../../api/client';
 
 import { ToastProvider } from '../../shared/context/ToastContext';
+import { AuthProvider } from '../../auth/AuthProvider';
 
 // Initialize Axios Interceptors
 setupAuthInterceptors();
@@ -18,9 +19,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <ToastProvider>
-            <BrowserRouter>
-              {children}
-            </BrowserRouter>
+            <AuthProvider>
+              <BrowserRouter>
+                {children}
+              </BrowserRouter>
+            </AuthProvider>
           </ToastProvider>
         </ThemeProvider>
       </QueryClientProvider>
