@@ -52,6 +52,10 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
       setLocalError('Please enter your corporate email address.');
       return;
     }
+    if (!/^[^\s@]+@thestackly\.com$/i.test(targetEmail.trim())) {
+      setLocalError('Use your company email ending with @thestackly.com.');
+      return;
+    }
     if (!password) {
       setLocalError('Please enter your password.');
       return;
@@ -137,6 +141,8 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
               type="email"
               className="auth-text-input"
               placeholder="Enter email address"
+              pattern="[^\\s@]+@thestackly\\.com"
+              title="Use your company email ending with @thestackly.com."
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
@@ -10,7 +10,7 @@ import { useTheme } from '../../theme/ThemeProvider';
 import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {
-  const { login, role, setSession } = useAuth();
+  const { login, role, setSession, isAuthenticated, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -27,6 +27,13 @@ export const LoginPage: React.FC = () => {
     const target = ROLE_HOME_PATHS[userRole] || '/admin/dashboard';
     navigate(target, { replace: true });
   };
+
+  // A restored session should never leave the user on the login screen.
+  useEffect(() => {
+    if (isAuthenticated && user?.role) {
+      proceedToDashboard(user.role as Role);
+    }
+  }, [isAuthenticated, user?.role]);
 
   /**
    * Handle Standard Email + Password Login (Step 1)

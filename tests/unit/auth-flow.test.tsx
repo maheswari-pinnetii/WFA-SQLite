@@ -38,7 +38,7 @@ describe('Authentication pages', () => {
     vi.clearAllMocks();
     mockLogin.mockResolvedValue({
       token: 'test-token',
-      user: { role: 'EMPLOYEE', email: 'employee@example.com' },
+      user: { role: 'EMPLOYEE', email: 'employee@thestackly.com' },
     });
     mockSignup.mockResolvedValue({ success: true });
   });
@@ -56,11 +56,11 @@ describe('Authentication pages', () => {
   it('logs in with email and password', async () => {
     renderPage(<LoginPage />);
 
-    fireEvent.change(screen.getByLabelText(/Email address/i), { target: { value: 'employee@example.com' } });
+    fireEvent.change(screen.getByLabelText(/Email address/i), { target: { value: 'employee@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'SecurePass2026!' } });
     fireEvent.click(screen.getByRole('button', { name: /^Next$/i }));
 
-    await waitFor(() => expect(mockLogin).toHaveBeenCalledWith('employee@example.com', 'SecurePass2026!'));
+    await waitFor(() => expect(mockLogin).toHaveBeenCalledWith('employee@thestackly.com', 'SecurePass2026!'));
   });
 
   it('renders all requested signup fields', () => {
