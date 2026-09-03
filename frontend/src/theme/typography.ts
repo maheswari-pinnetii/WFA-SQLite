@@ -1,5 +1,5 @@
 export const typography = {
-  fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
   fontSize: {
     xs: '0.75rem',
     sm: '0.875rem',
