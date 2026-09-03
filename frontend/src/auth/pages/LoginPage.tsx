@@ -8,6 +8,8 @@ import { authService } from '../services/auth.service';
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  const [authenticatedRole, setAuthenticatedRole] = useState<string | null>(null);
   const [loadingMethod, setLoadingMethod] = useState<'password' | 'passkey' | 'google' | 'microsoft' | null>(null);
   const [error, setError] = useState<string | null>(null);
   
@@ -21,7 +23,8 @@ export const LoginPage: React.FC = () => {
 
     try {
       const result = await login(email, password);
-      navigate(ROLE_HOME_PATHS[result.user.role as keyof typeof ROLE_HOME_PATHS] || '/employee/dashboard', { replace: true });
+      setAuthenticatedRole(result.user.role);
+      setCurrentStep(2);
     } catch (err: any) {
       setError('Email or password is incorrect.');
     } finally {
@@ -96,7 +99,7 @@ export const LoginPage: React.FC = () => {
           <div className="text-center lg:text-left space-y-2">
             <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Welcome back</h2>
             <p className="text-slate-500 text-sm font-medium">
-              Sign in to your workforce workspace.
+              Step {currentStep} of 2: {currentStep === 1 ? 'Password' : 'Passwordless'}
             </p>
           </div>
 
@@ -107,8 +110,8 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
-          {/* Primary Authentication Method: Passkeys */}
-          <div className="space-y-4">
+          {currentStep === 2 && <div className="space-y-4">
+            <h3 className="text-xl font-bold text-[var(--text-primary)]">Secure your sign-in</h3>
             <button
               onClick={handlePasskeyLogin}
               disabled={loadingMethod !== null}
@@ -124,16 +127,26 @@ export const LoginPage: React.FC = () => {
             <p className="text-xs text-center text-slate-500 px-4">
               Use your fingerprint, Face ID, Windows Hello, device PIN, or security key.
             </p>
-          </div>
+            <button type="button" onClick={() => setCurrentStep(1)} className="w-full text-sm font-semibold text-blue-500 hover:underline">
+              Use password instead
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate(ROLE_HOME_PATHS[authenticatedRole as keyof typeof ROLE_HOME_PATHS] || '/employee/dashboard', { replace: true })}
+              className="w-full text-sm font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            >
+              Continue with password only
+            </button>
+          </div>}
 
-          <div className="relative flex items-center py-4">
+          {currentStep === 1 && <div className="relative flex items-center py-4">
             <div className="flex-grow border-t border-[var(--border-color)]"></div>
             <span className="flex-shrink-0 mx-4 text-xs font-bold uppercase text-slate-400">or</span>
             <div className="flex-grow border-t border-[var(--border-color)]"></div>
-          </div>
+          </div>}
 
           {/* Secondary Method: Password */}
-          <form onSubmit={handlePasswordLogin} className="space-y-4">
+          {currentStep === 1 && <form onSubmit={handlePasswordLogin} className="space-y-4">
             <div className="space-y-1">
               <label className="text-sm font-bold text-[var(--text-secondary)]">Email</label>
               <div className="relative">
@@ -171,18 +184,18 @@ export const LoginPage: React.FC = () => {
               disabled={loadingMethod !== null}
               className="w-full flex items-center justify-center gap-2 bg-slate-800 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 p-3 rounded-xl font-bold transition-opacity disabled:opacity-50"
             >
-              {loadingMethod === 'password' ? 'Signing in...' : 'Sign in'}
+              {loadingMethod === 'password' ? 'Checking credentials...' : 'Continue'}
             </button>
-          </form>
+          </form>}
 
-          <div className="relative flex items-center py-4">
+          {currentStep === 1 && <div className="relative flex items-center py-4">
             <div className="flex-grow border-t border-[var(--border-color)]"></div>
             <span className="flex-shrink-0 mx-4 text-xs font-bold uppercase text-slate-400">or</span>
             <div className="flex-grow border-t border-[var(--border-color)]"></div>
-          </div>
+          </div>}
 
           {/* OAuth Providers */}
-          <div className="grid grid-cols-2 gap-3">
+          {currentStep === 1 && <div className="grid grid-cols-2 gap-3">
             <button 
               type="button"
               onClick={() => handleOAuthLogin('google')}
@@ -199,7 +212,7 @@ export const LoginPage: React.FC = () => {
             >
               Microsoft
             </button>
-          </div>
+          </div>}
 
           <p className="text-center text-sm font-medium text-slate-500 pt-4">
             Don't have an account? <a href="/signup" className="text-blue-500 font-bold hover:underline">Create account</a>
