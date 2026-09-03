@@ -278,20 +278,6 @@
   display: block;
 }
 
-/* 4-Color Squares Grid Logo */
-.brand-logo-grid, .ms-logo-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 8px);
-  gap: 2px;
-  width: 18px;
-  height: 18px;
-}
-
-.logo-sq-red,    .ms-square-red    { background-color: #f25022; }
-.logo-sq-green,  .ms-square-green  { background-color: #7fba00; }
-.logo-sq-blue,   .ms-square-blue   { background-color: #00a4ef; }
-.logo-sq-yellow, .ms-square-yellow { background-color: #ffb900; }
-
 .brand-wordmark {
   font-size: 1.125rem;
   font-weight: 600;
