@@ -9,10 +9,10 @@ This guide describes the SQLite-based architecture of the Workforce Analytics Pl
 The platform utilizes a dynamic, serverless SQLite architecture built on top of `better-sqlite3`.
 
 ### SQLite Connection & Configuration
-* **Connection Lifecycle:** Handled inside [connection.ts](file:///c:/Users/91970/Documents/WFA-SQLITE-Frontend-project/backend/src/database/connection.ts).
+* **Connection Lifecycle:** Handled inside [connection.ts](../backend/src/database/connection.ts).
 * **WAL Mode (Write-Ahead Logging):** Enabled to allow concurrent read operations to execute while a write operation is active.
 * **Foreign Keys:** Enabled explicitly (`PRAGMA foreign_keys = ON`) on database connection initialization.
-* **Busy Timeout:** Configured to `5000ms` (`PRAGMA busy_timeout = 5000`) to queue read/write threads and prevent connection lockouts (`SQLITE_BUSY`).
+* **Busy Timeout:** The local `better-sqlite3` connection uses a `10000ms` timeout to wait through transient lock contention and reduce `SQLITE_BUSY` failures.
 
 ---
 

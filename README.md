@@ -315,6 +315,42 @@ The platform leverages SQLite with Write-Ahead Logging (WAL) for maximum concurr
 
 ---
 
+## 🏛️ System Design & Database Design Patterns (18 Total + BaaS APIs)
+
+The platform features a complete, fully tested system design and database pattern engine ([docs/architecture/DATABASE-DESIGN-PATTERNS.md](file:///c:/Users/91970/Downloads/WFA-SQLite/docs/architecture/DATABASE-DESIGN-PATTERNS.md)):
+
+1. **Sharding**: Key-range virtual hashing sharder routing queries across shard nodes.
+2. **Replication**: WAL leader-follower sync manager with replication lag tracking.
+3. **CQRS**: Command mutations (`PUNCH_ATTENDANCE`) vs Query read models (`GET_DASHBOARD_SUMMARY`).
+4. **Event Sourcing**: Immutable append-only event store (`attendance_events`) with aggregate state rebuilder.
+5. **Database per Service**: Isolated database schemas for Auth, Employee, Attendance, and Payroll microservices.
+6. **Saga Pattern**: Orchestrated Saga coordinator managing multi-step workflows with compensating rollbacks.
+7. **Materialized View**: `dashboard_summary_mv` maintained by database triggers and snapshot refresh handlers.
+8. **Read Replica**: Query router splitting `SELECT` queries to replicas and write queries to primary master.
+9. **Write-Ahead Log (WAL)**: High-throughput `journal_mode = WAL` with 10,000ms busy timeout and checkpointing.
+10. **Indexing**: Covered, compound, and partial B-Tree indexes with runtime Index Advisor.
+11. **Denormalization**: Pre-calculated display fields retained in log records for O(1) single-table reads.
+12. **Partitioning**: Date-range table partition manager (`attendance_2026_08`, `attendance_2026_09`).
+13. **Cache-Aside**: Application-level cache-aside manager with TTL expiry and hit/miss metrics.
+14. **Star Schema**: Dimensional OLAP warehouse model (`fact_attendance_daily`, `dim_*`).
+15. **Polyglot Persistence**: Multi-model store combining Relational SQL, In-Memory KV Cache, and Event Streams.
+16. **Bloom Filter**: Probabilistic bitset filter returning 100% negative confidence for employee lookups.
+17. **Consistent Hashing**: Hash ring distributor with virtual nodes for dynamic node routing.
+18. **Two-Phase Commit (2PC)**: Distributed Transaction Coordinator with Prepare & Commit/Abort phase protocol.
+
+### Modern BaaS API Architecture Mapping
+- **Clerk**: Replaces custom auth, passkeys, TOTP 2FA, session cookies, and RBAC middleware.
+- **Uploadthing**: Replaces custom Multer upload endpoints, S3 bucket storage, and presigned URL servers.
+- **Resend**: Replaces custom SMTP servers, Nodemailer logic, and email queue management with serverless React Email.
+- **Supabase**: Replaces custom DB server setups, manual REST CRUD endpoints, and WebSocket servers with Postgres + RLS.
+- **Trigger.dev**: Replaces custom background worker queues, Redis/BullMQ clusters, and node-cron for asynchronous payroll tasks.
+
+### 🎨 UI Design System Components (10 Total)
+Includes standardized UI component primitives ([UIComponentShowcase.tsx](file:///c:/Users/91970/Downloads/WFA-SQLite/frontend/src/components/ui/UIComponentShowcase.tsx)):
+`Cards`, `Sidebar`, `Widgets`, `Popover`, `ToggleSwitch`, `Text Fields`, `Modal`, `Accordion`, `Badge`, and `Progress Bar`.
+
+---
+
 ## 🌐 REST API Endpoint Directory
 
 ```

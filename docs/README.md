@@ -1,5 +1,9 @@
 # Stackly Workforce Analytics Platform Documentation
 
+## Architecture
+
+- [Database Design Pattern Inventory](architecture/DATABASE-DESIGN-PATTERNS.md)
+
 Welcome to the official technical documentation suite for the **Stackly Workforce Analytics Platform**.
 
 ---

@@ -25,6 +25,11 @@ const userCacheById = new Map<string, { user: UserRow; timestamp: number }>();
 const CACHE_TTL_MS = 120000; // 2 minutes
 
 export class UserRepository {
+  clearCache(): void {
+    userCacheByEmail.clear();
+    userCacheById.clear();
+  }
+
   async findByEmail(email: string): Promise<UserRow | null> {
     const cached = userCacheByEmail.get(email);
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {

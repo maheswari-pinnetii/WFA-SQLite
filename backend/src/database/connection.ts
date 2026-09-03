@@ -216,6 +216,15 @@ export const initDb = async (): Promise<void> => {
           END;
         `);
 
+        // Rebuild the read model so existing rows are reflected on startup.
+        await execute(`DELETE FROM dashboard_summary_mv`);
+        await execute(`
+          INSERT INTO dashboard_summary_mv (organizationId, totalEmployees, lastCalculatedAt)
+          SELECT organizationId, COUNT(*), datetime('now')
+          FROM employees
+          GROUP BY organizationId
+        `);
+
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_settings_user ON mfa_settings(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_recovery_user ON mfa_recovery_codes(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_passkey_user_id ON passkey_credentials(user_id)`);

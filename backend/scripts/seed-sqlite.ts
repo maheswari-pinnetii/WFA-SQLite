@@ -477,6 +477,10 @@ export const seedSqlite = async () => {
   });
 
   transaction();
+  try {
+    const { userRepository } = await import('../modules/auth/auth.repository.js');
+    userRepository.clearCache();
+  } catch (_) {}
   console.log('[SQLite Seeder] Database seeded successfully.');
 };
 
