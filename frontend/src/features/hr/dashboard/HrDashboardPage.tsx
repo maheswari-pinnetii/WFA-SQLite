@@ -8,7 +8,7 @@ import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillD
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
-import { AIWorkforceInsightsCard } from '../../../components/cards/AIWorkforceInsightsCard';
+
 import { useRealtimeDashboard } from '../../../hooks/useRealtimeDashboard';
 import { useRealtimeAttendance } from '../../../hooks/useRealtimeAttendance';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
@@ -231,8 +231,7 @@ export const HrDashboardPage: React.FC = () => {
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         <HrDashboardOverview getGreeting={getGreeting} firstName={firstName} />
 
-        {/* Real-time AI Workforce Insights Card */}
-        <AIWorkforceInsightsCard />
+
 
         <HrDashboardFilters
           dateFilter={dateFilter}

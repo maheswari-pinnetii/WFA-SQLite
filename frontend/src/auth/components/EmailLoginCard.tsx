@@ -85,29 +85,9 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
         <span>Sign in to your account</span>
       </div>
 
-      {/* Top Nav Row: Back Arrow + Centered Microsoft Logo Header */}
       <div className="card-top-nav" style={{ position: 'relative', minHeight: '28px', marginBottom: '0.75rem' }}>
-        <button
-          type="button"
-          className="back-arrow-btn"
-          aria-label="Go back"
-          title="Go back"
-          onClick={() => navigate(-1)}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </button>
-
         <div className="brand-logo-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="22" height="22" viewBox="0 0 21 21">
-            <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-            <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-            <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
-            <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-          </svg>
-          <span className="ms-logo-text" style={{ fontSize: '1.25rem', fontWeight: 600, color: '#ffffff' }}>Microsoft</span>
+          <span className="text-xl font-bold text-blue-600">Stackly WFA</span>
         </div>
       </div>
 
@@ -134,38 +114,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
 
       {/* Form: Email & Password Inputs */}
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-        {/* Quick Demo Role Selector */}
-        <div className="quick-role-selector">
-          <span className="quick-role-label">Demo:</span>
-          <button
-            type="button"
-            className={`quick-role-chip ${email === 'admin@thestackly.com' ? 'active' : ''}`}
-            onClick={() => handleSelectRole('admin@thestackly.com')}
-          >
-            Admin
-          </button>
-          <button
-            type="button"
-            className={`quick-role-chip ${email === 'hr@thestackly.com' ? 'active' : ''}`}
-            onClick={() => handleSelectRole('hr@thestackly.com')}
-          >
-            HR
-          </button>
-          <button
-            type="button"
-            className={`quick-role-chip ${email === 'manager@thestackly.com' ? 'active' : ''}`}
-            onClick={() => handleSelectRole('manager@thestackly.com')}
-          >
-            Manager
-          </button>
-          <button
-            type="button"
-            className={`quick-role-chip ${email === 'employee@thestackly.com' ? 'active' : ''}`}
-            onClick={() => handleSelectRole('employee@thestackly.com')}
-          >
-            Employee
-          </button>
-        </div>
+
 
         {/* Email Address Input */}
         <div className="input-field-group">

@@ -1,5 +1,6 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Minus, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import clsx from 'clsx';
 
 export interface KPICardProps {
   title: string;
@@ -23,45 +24,53 @@ export const KPICard: React.FC<KPICardProps> = ({
   onClick
 }) => {
   const accentClasses = {
-    blue: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    emerald: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    cyan: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-    amber: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-    purple: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-    rose: 'bg-rose-500/15 text-rose-400 border-rose-500/30',
-    red: 'bg-red-500/15 text-red-400 border-red-500/30',
+    blue: 'bg-blue-50 text-blue-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
+    cyan: 'bg-cyan-50 text-cyan-600',
+    amber: 'bg-amber-50 text-amber-600',
+    purple: 'bg-purple-50 text-purple-600',
+    rose: 'bg-rose-50 text-rose-600',
+    red: 'bg-red-50 text-red-600',
   };
 
   return (
     <div
       onClick={onClick}
-      className={`glass-panel p-5 flex flex-col justify-between transition-all border-slate-800/80 group ${
-        onClick ? 'cursor-pointer hover:scale-[1.02] hover:border-blue-500/60 hover:shadow-lg' : ''
-      }`}
+      className={clsx(
+        "rounded-xl border border-slate-200 bg-white p-5 flex flex-col justify-between transition-shadow",
+        onClick && "cursor-pointer hover:shadow-md hover:border-blue-200"
+      )}
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 group-hover:text-blue-400 transition-colors flex items-center gap-1">
-          {title} {onClick && <ChevronRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-400" />}
-        </span>
-        <div className={`p-2.5 rounded-xl border ${accentClasses[accentColor]} flex items-center justify-center shrink-0`}>
-          {icon}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={clsx("p-2.5 rounded-lg flex items-center justify-center shrink-0", accentClasses[accentColor])}>
+            {icon}
+          </div>
+          <span className="text-[14px] font-semibold text-slate-700">
+            {title}
+          </span>
         </div>
       </div>
 
-      <div>
-        <div className="text-2xl font-black tracking-tight text-slate-100">{value}</div>
+      <div className="text-[28px] font-bold tracking-tight text-slate-900 mb-2 leading-none">
+        {value}
+      </div>
 
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-800/80 text-xs font-medium">
-          {subtitle && <span className="text-slate-400 truncate max-w-[150px]">{subtitle}</span>}
-          {change !== undefined && (
-            <span className={`inline-flex items-center gap-1 font-bold ${trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-rose-400' : 'text-slate-400'}`}>
-              {trend === 'up' && <TrendingUp size={14} />}
-              {trend === 'down' && <TrendingDown size={14} />}
-              {trend === 'neutral' && <Minus size={14} />}
-              {change > 0 ? `+${change}%` : `${change}%`}
-            </span>
-          )}
-        </div>
+      <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-100">
+        {change !== undefined && (
+          <div className={clsx(
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[12px] font-semibold",
+            trend === 'up' ? "bg-emerald-50 text-emerald-700" :
+            trend === 'down' ? "bg-red-50 text-red-700" :
+            "bg-slate-50 text-slate-700"
+          )}>
+            {trend === 'up' && <TrendingUp size={14} />}
+            {trend === 'down' && <TrendingDown size={14} />}
+            {trend === 'neutral' && <Minus size={14} />}
+            {change > 0 ? `+${change}%` : `${change}%`}
+          </div>
+        )}
+        {subtitle && <span className="text-[12px] font-medium text-slate-500 truncate max-w-[150px]">{subtitle}</span>}
       </div>
     </div>
   );

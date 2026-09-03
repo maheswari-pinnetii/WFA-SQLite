@@ -1,7 +1,7 @@
 import React from 'react';
 import { Building2, BarChart3, TrendingUp, Users, Download } from 'lucide-react';
 import { AnalyticsOverview } from '../../../components/dashboard/AnalyticsOverview';
-import { AIWorkforceInsightsCard } from '../../../components/cards/AIWorkforceInsightsCard';
+
 
 export const DeptHeadDashboard: React.FC = () => {
   return (
@@ -24,8 +24,7 @@ export const DeptHeadDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Real-time AI Workforce Insights Card */}
-      <AIWorkforceInsightsCard />
+
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
