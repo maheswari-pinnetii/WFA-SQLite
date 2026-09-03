@@ -5,7 +5,7 @@ export * from './events';
 
 const SOCKET_URL =
   typeof window !== 'undefined'
-    ? `${window.location.protocol}//${window.location.hostname}:5001`
+    ? window.location.origin
     : 'http://localhost:5001';
 
 export const socket: Socket = io(SOCKET_URL, {

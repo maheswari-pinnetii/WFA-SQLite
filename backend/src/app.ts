@@ -10,6 +10,14 @@ import logger from './config/logger.js';
 
 const app = express();
 
+// Security: Hide backend server identity and technology disclosure
+app.disable('x-powered-by');
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.removeHeader('X-Powered-By');
+  res.removeHeader('Server');
+  next();
+});
+
 const allowedOrigins: string[] = [
   'http://localhost:3000',
   'http://localhost:3001',
@@ -122,7 +130,7 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-// Global Error Handler
+// Global Error Handler - Never expose backend internals or database details
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   logger.error('http.error', err.message || 'Internal Server Error', {
     requestId: (req as any).requestId || 'unknown',
@@ -131,9 +139,15 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
   
+  // Never expose internal database errors or sensitive file paths
+  const isSqlError = err.message && (err.message.includes('SQLITE_') || err.message.includes('SqliteError'));
+  const safeMessage = (isSqlError || process.env.NODE_ENV === 'production')
+    ? 'An unexpected error occurred. Please try again later.'
+    : err.message;
+
   res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message
+    message: safeMessage
   });
 });
 
