@@ -3,30 +3,23 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
 import { EmailLoginCard } from '../components/EmailLoginCard';
-import { PasswordlessLoginCard } from '../components/PasswordlessLoginCard';
-import { EmailLoginPayload, PasswordlessLoginPayload } from '../../types/authFlow.types';
-import { authService } from '../services/auth.service';
+import { EmailLoginPayload } from '../../types/authFlow.types';
 import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {
-  const { login, role, setSession } = useAuth();
+  const { login, role } = useAuth();
   const navigate = useNavigate();
 
-  // Multi-step authentication flow:
-  // Step 1 = Email + Password Login Card
-  // Step 2 = Biometric / Passkey Verification Card
-  // Step 3 = Dashboard Navigation
-  const [currentStep, setCurrentStep] = useState<1 | 2>(1);
+  // Authenticate with email and password, then route to the user's dashboard.
   const [currentEmail, setCurrentEmail] = useState<string>('admin@thestackly.com');
-  const [loadingMethod, setLoadingMethod] = useState<'email' | 'passkey' | null>(null);
+  const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [authenticatedRole, setAuthenticatedRole] = useState<Role | null>(null);
 
   /**
    * Transition to Dashboard based on authenticated role
    */
   const proceedToDashboard = (targetRole?: Role) => {
-    const userRole = targetRole || authenticatedRole || role || Role.ADMIN;
+    const userRole = targetRole || role || Role.ADMIN;
     const target = ROLE_HOME_PATHS[userRole] || '/admin/dashboard';
     navigate(target, { replace: true });
   };
@@ -36,7 +29,7 @@ export const LoginPage: React.FC = () => {
    * Validates credentials with backend, then proceeds to Step 2 Verification
    */
   const handleEmailLogin = async (payload: EmailLoginPayload) => {
-    setLoadingMethod('email');
+    setLoading(true);
     setErrorMessage(null);
 
     try {
@@ -51,17 +44,14 @@ export const LoginPage: React.FC = () => {
       }
 
       const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-      setAuthenticatedRole(userRole);
       setCurrentEmail(payload.email);
       setErrorMessage(null);
-
-      // On successful credentials verification -> Advance to Step 2 Verification
-      setCurrentStep(2);
+      proceedToDashboard(userRole);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
       setErrorMessage(msg);
     } finally {
-      setLoadingMethod(null);
+      setLoading(false);
     }
   };
 
@@ -69,7 +59,7 @@ export const LoginPage: React.FC = () => {
    * Optional Direct Login bypassing Step 2 if user chooses "Sign in directly"
    */
   const handleDirectLogin = async (payload: EmailLoginPayload) => {
-    setLoadingMethod('email');
+    setLoading(true);
     setErrorMessage(null);
 
     try {
@@ -88,38 +78,8 @@ export const LoginPage: React.FC = () => {
       const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
       setErrorMessage(msg);
     } finally {
-      setLoadingMethod(null);
+      setLoading(false);
     }
-  };
-
-  /**
-   * Handle Passwordless / Passkey Login (Step 2 Verification)
-   */
-  const handlePasskeyLogin = async (payload?: PasswordlessLoginPayload) => {
-    setLoadingMethod('passkey');
-    setErrorMessage(null);
-
-    try {
-      const targetEmail = payload?.email || currentEmail || 'admin@thestackly.com';
-      const result = await authService.passkeyLogin(targetEmail);
-      setSession({ user: result.user, token: result.token });
-      const userRole = (result.user.role || authenticatedRole || role || Role.ADMIN) as Role;
-      proceedToDashboard(userRole);
-    } catch (err: unknown) {
-      const isNotAllowed = err instanceof DOMException && err.name === 'NotAllowedError';
-      setErrorMessage(isNotAllowed
-        ? 'No matching passkey was found, or the passkey prompt was cancelled. Register a passkey first or choose Skip for now.'
-        : err instanceof Error ? err.message : 'Passkey sign-in failed.');
-    } finally {
-      setLoadingMethod(null);
-    }
-  };
-
-  /**
-   * Handle Skip action on Step 2 -> Proceed directly to Dashboard
-   */
-  const handleSkipPasskey = () => {
-    proceedToDashboard();
   };
 
   return (
@@ -136,30 +96,16 @@ export const LoginPage: React.FC = () => {
 
       {/* Main Multi-Step Authentication Container */}
       <main className="auth-single-container" id="auth-flow-main">
-        {currentStep === 1 ? (
-          /* Step 1: Email / Password Login Card */
-          <EmailLoginCard
-            onSubmit={handleEmailLogin}
-            onDirectLogin={handleDirectLogin}
-            isLoading={loadingMethod === 'email'}
-            errorMessage={errorMessage}
-            onClearError={() => setErrorMessage(null)}
-            currentEmail={currentEmail}
-            onEmailChange={setCurrentEmail}
-            prefilledPassword="StacklyWFA2026!"
-          />
-        ) : (
-          /* Step 2: Passwordless / WebAuthn Biometric Passkey Card */
-          <PasswordlessLoginCard
-            onPasskeyLogin={handlePasskeyLogin}
-            onSkip={handleSkipPasskey}
-            onBack={() => { setCurrentStep(1); setErrorMessage(null); }}
-            isLoading={loadingMethod === 'passkey'}
-            errorMessage={errorMessage}
-            currentEmail={currentEmail}
-            onEmailChange={setCurrentEmail}
-          />
-        )}
+        <EmailLoginCard
+          onSubmit={handleEmailLogin}
+          onDirectLogin={handleDirectLogin}
+          isLoading={loading}
+          errorMessage={errorMessage}
+          onClearError={() => setErrorMessage(null)}
+          currentEmail={currentEmail}
+          onEmailChange={setCurrentEmail}
+          prefilledPassword="StacklyWFA2026!"
+        />
       </main>
 
       {/* Bottom Switch Link */}

@@ -1,195 +1,340 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Mail, Lock, User as UserIcon } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { AuthMethod, SignUpFormValues } from '../../types/authFlow.types';
 import { authService } from '../services/auth.service';
+import '../styles/ModernAuth.css';
 
 export const SignUpPage: React.FC = () => {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [usePasskey, setUsePasskey] = useState(false);
-  
+  const { signup } = useAuth();
   const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+  // Form State
+  const [fullName, setFullName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('password');
+  const [password, setPassword] = useState<string>('');
+  const [confirmPassword, setConfirmPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
-    if (!usePasskey && password !== confirmPassword) {
-      setError('Passwords do not match.');
-      setLoading(false);
-      return;
+  // UI State
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  /**
+   * Validate Form Fields
+   */
+  const validateForm = (): boolean => {
+    if (!fullName.trim()) {
+      setErrorMessage('Please enter your full name.');
+      return false;
     }
-    
-    if (!usePasskey && password.length < 8) {
-      setError('Password must be at least 8 characters long.');
-      setLoading(false);
-      return;
+    if (!email.trim() || !email.includes('@')) {
+      setErrorMessage('Please enter a valid email address.');
+      return false;
     }
+
+    if (authMethod === 'password') {
+      if (!password || password.length < 8) {
+        setErrorMessage('Password must be at least 8 characters long.');
+        return false;
+      }
+      if (password !== confirmPassword) {
+        setErrorMessage('Passwords do not match.');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  /**
+   * Handle Passkey Creation via WebAuthn API
+   */
+  const handlePasskeyRegistration = async (userEmail: string, userName: string) => {
+    return authService.registerPasskey(userEmail, userName);
+  };
+
+  /**
+   * Main Form Submission Handler
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    if (!validateForm()) return;
+
+    setIsLoading(true);
 
     try {
-      await authService.signup({ fullName, email, password: usePasskey ? undefined : password });
-      if (usePasskey) {
-        await authService.registerPasskey(email, fullName);
-        setSuccess('Account created and passkey registered.');
-        navigate('/employee/dashboard', { replace: true });
+      if (authMethod === 'password') {
+        // Standard Registration
+        await signup({
+          name: fullName.trim(),
+          email: email.trim(),
+          password,
+        });
+
+        setSuccessMessage('Account created successfully! Redirecting to login...');
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
       } else {
-        setSuccess('Account created successfully. You can now sign in.');
-        setTimeout(() => navigate('/login', { replace: true }), 1200);
+        // Passwordless Passkey Registration
+        await handlePasskeyRegistration(email.trim(), fullName.trim());
+        setSuccessMessage('Passkey registered successfully! Redirecting to login...');
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
       }
-    } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      setErrorMessage(msg);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg-primary)] font-sans">
-      
-      {/* LEFT: Brand / Product Identity */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 bg-slate-900 text-white relative overflow-hidden">
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-16">
-            <ShieldCheck size={28} className="text-blue-500" />
-            <span className="text-2xl font-bold tracking-tight">Stackly WFA</span>
-          </div>
-          
-          <h1 className="text-5xl font-black tracking-tight mb-6 leading-tight">
-            JOIN THE <br/><span className="text-blue-500">WORKFORCE</span>
-          </h1>
-          <p className="text-xl text-slate-400 font-medium max-w-md">
-            Secure access to your enterprise operations.
-          </p>
-        </div>
-        
-        <div className="relative z-10 text-sm text-slate-500 font-medium">
-          &copy; {new Date().getFullYear()} Stackly Global Enterprise Inc.
-        </div>
-        
-        {/* Subtle visual */}
-        <div className="absolute -bottom-[20%] -left-[10%] w-[80%] h-[80%] bg-blue-600/10 rounded-full blur-[120px]" />
-      </div>
+    <div className="auth-page-wrapper">
+      {/* Top Navbar / Navigation Header */}
+      <nav style={{ width: '100%', maxWidth: '520px', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px', padding: '0 8px' }}>
+        <Link to="/login" style={{ color: '#60a5fa', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
+          &larr; Already have an account? Sign In
+        </Link>
+      </nav>
 
-      {/* RIGHT: Authentication Card */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md space-y-8">
-          
-          <div className="text-center lg:text-left space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)]">Create an account</h2>
-            <p className="text-slate-500 text-sm font-medium">
-              Register for your enterprise workspace.
-            </p>
+
+      {/* Unified Registration Card */}
+      <main className="auth-single-container">
+        <div className="auth-card" id="signup-main-card">
+          <div className="auth-card-header">
+            <span>New Registration</span>
+            <span style={{ color: authMethod === 'passkey' ? '#10b981' : '#00a4ef' }}>
+              {authMethod === 'passkey' ? 'Passwordless' : 'Password'}
+            </span>
           </div>
 
-          {error && (
-            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium flex items-start gap-3">
-              <span className="mt-0.5">⚠️</span>
-              {error}
+          <div className="brand-logo-container" style={{ margin: '0.75rem 0' }}>
+            <img src="/assets/images/logo.png" alt="Stackly" className="auth-brand-logo-img" />
+          </div>
+
+          <h2 className="auth-card-heading">Register Your Account</h2>
+
+          {/* Feedback Alerts */}
+          {errorMessage && (
+            <div className="auth-alert auth-alert-error" role="alert">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{errorMessage}</span>
             </div>
           )}
 
-          {success && (
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium flex items-start gap-3">
-              <span className="mt-0.5">✓</span>
-              {success}
+          {successMessage && (
+            <div className="auth-alert auth-alert-success" role="alert">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+              <span>{successMessage}</span>
             </div>
           )}
 
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-[var(--text-secondary)]">Full Name</label>
-              <div className="relative">
-                <UserIcon className="absolute left-3 top-3 text-slate-400" size={18} />
-                <input 
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Full Name */}
+            <div className="input-field-group">
+              <label htmlFor="signup-name-input" className="overlaid-label">
+                Full Name
+              </label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="signup-name-input"
                   type="text"
+                  className="auth-text-input"
+                  placeholder="e.g. Alex Morgan"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Alex Morgan"
+                  disabled={isLoading}
+                  autoComplete="name"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
                 />
               </div>
             </div>
 
-            <label className="flex items-start gap-3 rounded-xl border border-[var(--border-color)] p-3 text-sm text-[var(--text-secondary)]">
-              <input type="checkbox" checked={usePasskey} onChange={(e) => setUsePasskey(e.target.checked)} className="mt-1 accent-blue-600" />
-              <span><strong className="text-[var(--text-primary)]">Use a passkey on this device</strong><br />Fingerprint, Face ID, Windows Hello, or a security key.</span>
-            </label>
-
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-[var(--text-secondary)]">Work Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 text-slate-400" size={18} />
-                <input 
+            {/* Email Address */}
+            <div className="input-field-group">
+              <label htmlFor="signup-email-input" className="overlaid-label">
+                Work Email
+              </label>
+              <div className="auth-input-wrapper">
+                <input
+                  id="signup-email-input"
                   type="email"
+                  className="auth-text-input"
+                  placeholder="Enter your work email (e.g. name@thestackly.com)"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com"
+                  disabled={isLoading}
+                  autoComplete="email"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-[var(--text-secondary)]">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 text-slate-400" size={18} />
-                <input 
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Minimum 8 characters"
-                  required={!usePasskey}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-1">
-              <label className="text-sm font-bold text-[var(--text-secondary)]">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 text-slate-400" size={18} />
-                <input 
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter password"
-                  required={!usePasskey}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
-                />
-              </div>
+            {/* Authentication Method Toggle Tabs */}
+            <div className="method-toggle-container" role="tablist" aria-label="Security Method Selection">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={authMethod === 'password'}
+                className={`method-toggle-btn ${authMethod === 'password' ? 'active' : ''}`}
+                onClick={() => {
+                  setAuthMethod('password');
+                  setErrorMessage(null);
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>Set a Password</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={authMethod === 'passkey'}
+                className={`method-toggle-btn ${authMethod === 'passkey' ? 'active' : ''}`}
+                onClick={() => {
+                  setAuthMethod('passkey');
+                  setErrorMessage(null);
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2a10 10 0 0 0-7.07 17.07l2.83-2.83a6 6 0 1 1 8.48 0l2.83 2.83A10 10 0 0 0 12 2z" />
+                  <circle cx="12" cy="12" r="2" />
+                </svg>
+                <span>Setup Passkey</span>
+              </button>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold transition-colors disabled:opacity-50 mt-4"
-            >
-              {loading ? (
-                <>
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Creating account...</span>
-                </>
-              ) : (
-                'Create Account'
-              )}
-            </button>
+            {/* Method Option A: Password Fields */}
+            {authMethod === 'password' && (
+              <div id="password-setup-section">
+                {/* Password Input */}
+                <div className="input-field-group">
+                  <label htmlFor="signup-password-input" className="overlaid-label">
+                    Password
+                  </label>
+                  <div className="auth-input-wrapper">
+                    <input
+                      id="signup-password-input"
+                      type={showPassword ? 'text' : 'password'}
+                      className="auth-text-input with-toggle"
+                      placeholder="Minimum 8 characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={isLoading}
+                      autoComplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle-btn"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                          <line x1="1" y1="1" x2="23" y2="23" />
+                        </svg>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Confirm Password */}
+                <div className="input-field-group">
+                  <label htmlFor="signup-confirm-password" className="overlaid-label">
+                    Confirm Password
+                  </label>
+                  <div className="auth-input-wrapper">
+                    <input
+                      id="signup-confirm-password"
+                      type={showPassword ? 'text' : 'password'}
+                      className="auth-text-input"
+                      placeholder="Re-enter your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      disabled={isLoading}
+                      autoComplete="new-password"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Method Option B: Passkey Highlight Box */}
+            {authMethod === 'passkey' && (
+              <div className="passkey-promo-box" id="passkey-setup-section">
+                <div className="passkey-promo-title">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  <span>Fast & Phishing-Resistant</span>
+                </div>
+                <p className="passkey-promo-desc">
+                  When you click &ldquo;Create Account with Passkey&rdquo;, your browser will prompt you to create a secure credential using Touch ID, Face ID, Windows Hello, or a security key. No password required.
+                </p>
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="auth-card-actions">
+              <button
+                type="submit"
+                id="signup-submit-btn"
+                className="btn-primary-blue"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="auth-spinner" aria-hidden="true" />
+                    <span>Processing Registration...</span>
+                  </>
+                ) : (
+                  <span>
+                    {authMethod === 'passkey' ? 'Create Account with Passkey' : 'Create Account'}
+                  </span>
+                )}
+              </button>
+            </div>
           </form>
-
-          <p className="text-center text-sm font-medium text-slate-500 pt-4">
-            Already have an account? <a href="/login" className="text-blue-500 font-bold hover:underline">Sign in</a>
-          </p>
-
         </div>
-      </div>
+      </main>
+
+      {/* Footer link to Login */}
+      <footer className="auth-page-footer">
+        <div>
+          Already have an account?{' '}
+          <Link to="/login" id="back-to-login-link">
+            Sign in
+          </Link>
+        </div>
+      </footer>
     </div>
   );
 };
