@@ -86,8 +86,16 @@ function issueJwtToken(user: any): string {
   );
 }
 
-const passkeyRpId = 'localhost';
-const passkeyOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
+function getPasskeyConfig(req: Request): { rpID: string; origin: string } {
+  const configuredOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const requestOrigin = req.get('origin');
+  const origin = requestOrigin && (
+    requestOrigin === configuredOrigin ||
+    requestOrigin === 'http://localhost:3000' ||
+    requestOrigin === 'http://127.0.0.1:3000'
+  ) ? requestOrigin : configuredOrigin;
+  return { origin, rpID: new URL(origin).hostname };
+}
 
 // ======================================================================
 // 1. Standard Authentication (Email/Password) Handlers
@@ -319,9 +327,10 @@ export const generatePasskeyRegisterOptions = async (req: Request, res: Response
       [challenge, userId, normalizedEmail, expiresAt, now.toISOString()]
     );
 
+    const { rpID } = getPasskeyConfig(req);
     const options = await generateRegistrationOptions({
       rpName: 'Stackly Workforce Identity',
-      rpID: passkeyRpId,
+      rpID,
       userName: normalizedEmail,
       userDisplayName: displayName,
       userID: userId,
@@ -396,11 +405,12 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
       res.status(401).json({ success: false, error: 'Passkey registration challenge expired or missing.' });
       return;
     }
+    const { rpID, origin } = getPasskeyConfig(req);
     const verification = await verifyRegistrationResponse({
       response: attestationResponse,
       expectedChallenge: challengeRows[0].challenge,
-      expectedOrigin: passkeyOrigin,
-      expectedRPID: passkeyRpId,
+      expectedOrigin: origin,
+      expectedRPID: rpID,
     });
     if (!verification.verified || !verification.registrationInfo) {
       res.status(400).json({ success: false, error: 'Passkey attestation could not be verified.' });
@@ -473,8 +483,9 @@ export const generatePasskeyLoginOptions = async (req: Request, res: Response): 
       [challenge, normalizedEmail, expiresAt, now.toISOString()]
     );
 
+    const { rpID } = getPasskeyConfig(req);
     const options = await generateAuthenticationOptions({
-      rpID: passkeyRpId,
+      rpID,
       challenge,
       timeout: 60000,
       userVerification: 'preferred',
@@ -495,6 +506,9 @@ export const generatePasskeyLoginOptions = async (req: Request, res: Response): 
           id: c.credential_id,
           type: 'public-key' as const,
         }));
+      } else {
+        res.status(404).json({ success: false, error: 'No passkey is registered for this account.' });
+        return;
       }
     }
 
@@ -549,11 +563,12 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
         res.status(401).json({ success: false, error: 'Passkey login challenge expired or missing.' });
         return;
       }
+      const { rpID, origin } = getPasskeyConfig(req);
       const verification = await verifyAuthenticationResponse({
         response: assertionResponse,
         expectedChallenge: challengeRows[0].challenge,
-        expectedOrigin: passkeyOrigin,
-        expectedRPID: passkeyRpId,
+        expectedOrigin: origin,
+        expectedRPID: rpID,
         credential: {
           id: record.credential_id,
           publicKey: Buffer.from(record.public_key, 'base64url'),

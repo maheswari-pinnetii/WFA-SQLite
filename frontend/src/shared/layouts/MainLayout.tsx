@@ -4,7 +4,6 @@ import { EnterpriseHeader } from './components/EnterpriseHeader';
 import { Sidebar } from './components/Sidebar';
 import { SupportModal } from '../components/SupportModal';
 import { ShortcutsModal } from '../components/ShortcutsModal';
-import { CookieBanner } from '../components/CookieBanner';
 import { OnboardingTourModal } from '../components/OnboardingTourModal';
 import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
 import { BetaFeedbackModal } from '../components/BetaFeedbackModal';
@@ -173,9 +172,6 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
       {/* Real-time Network Connectivity Status */}
       <NetworkStatusBanner />
-
-      {/* Cookie Consent Banner */}
-      <CookieBanner />
 
       {/* Onboarding Interactive Product Tour */}
       <OnboardingTourModal

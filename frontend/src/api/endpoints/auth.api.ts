@@ -1,7 +1,7 @@
 import { apiClient } from '../../services/api';
 
 const handleApiError = (error: any, fallbackMessage: string): never => {
-  const message = error.response?.data?.message || error.message || fallbackMessage;
+  const message = error.response?.data?.error || error.response?.data?.message || error.message || fallbackMessage;
   throw new Error(message);
 };
 
@@ -98,27 +98,43 @@ export const authApi = {
   },
 
   passkeyRegisterOptions: async (email: string, fullName: string): Promise<any> => {
-    const response = await apiClient.post('/api/auth/passkey/register-options', { email, fullName });
-    if (!response.data?.success) throw new Error(response.data?.error || 'Unable to start passkey registration.');
-    return response.data;
+    try {
+      const response = await apiClient.post('/auth/passkey/register-options', { email, fullName });
+      if (!response.data?.success) throw new Error(response.data?.error || 'Unable to start passkey registration.');
+      return response.data;
+    } catch (error: any) {
+      return handleApiError(error, 'Unable to start passkey registration.');
+    }
   },
 
   passkeyRegisterVerify: async (email: string, fullName: string, attestationResponse: any): Promise<any> => {
-    const response = await apiClient.post('/api/auth/passkey/register-verify', { email, fullName, attestationResponse });
-    if (!response.data?.success) throw new Error(response.data?.error || 'Passkey registration failed.');
-    return response.data;
+    try {
+      const response = await apiClient.post('/auth/passkey/register-verify', { email, fullName, attestationResponse });
+      if (!response.data?.success) throw new Error(response.data?.error || 'Passkey registration failed.');
+      return response.data;
+    } catch (error: any) {
+      return handleApiError(error, 'Passkey registration failed.');
+    }
   },
 
   passkeyLoginOptions: async (email?: string): Promise<any> => {
-    const response = await apiClient.post('/api/auth/passkey/login-options', { email });
-    if (!response.data?.success) throw new Error(response.data?.error || 'Unable to start passkey sign-in.');
-    return response.data;
+    try {
+      const response = await apiClient.post('/auth/passkey/login-options', { email });
+      if (!response.data?.success) throw new Error(response.data?.error || 'Unable to start passkey sign-in.');
+      return response.data;
+    } catch (error: any) {
+      return handleApiError(error, 'Unable to start passkey sign-in.');
+    }
   },
 
   passkeyLoginVerify: async (email: string, assertionResponse: any): Promise<any> => {
-    const response = await apiClient.post('/api/auth/passkey/login-verify', { email, assertionResponse });
-    if (!response.data?.success) throw new Error(response.data?.error || 'Passkey sign-in failed.');
-    return response.data;
+    try {
+      const response = await apiClient.post('/auth/passkey/login-verify', { email, assertionResponse });
+      if (!response.data?.success) throw new Error(response.data?.error || 'Passkey sign-in failed.');
+      return response.data;
+    } catch (error: any) {
+      return handleApiError(error, 'Passkey sign-in failed.');
+    }
   },
 
   ssoCallback: async (code: string, state: string, provider: string): Promise<any> => {
@@ -143,7 +159,7 @@ export const authApi = {
     saveTrustedDevice?: boolean;
   }): Promise<any> => {
     try {
-      const response = await apiClient.post('/api/auth/biometric/login', payload);
+      const response = await apiClient.post('/auth/biometric/login', payload);
       if (response.data && response.data.success) {
         return response.data;
       }

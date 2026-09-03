@@ -25,9 +25,10 @@ export const setAccessToken = (token: string | null) => {
 
 const rawBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();
 const normalizedBaseUrl = rawBaseUrl.replace(/\/v1\/?$/, '').replace(/\/$/, '');
+const apiBaseUrl = normalizedBaseUrl.endsWith('/api') ? normalizedBaseUrl : `${normalizedBaseUrl}/api`;
 
 export const apiClient = axios.create({
-  baseURL: normalizedBaseUrl,
+  baseURL: apiBaseUrl,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

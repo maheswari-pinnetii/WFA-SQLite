@@ -5,6 +5,7 @@ import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
 import { EmailLoginCard } from '../components/EmailLoginCard';
 import { PasswordlessLoginCard } from '../components/PasswordlessLoginCard';
 import { EmailLoginPayload, PasswordlessLoginPayload } from '../../types/authFlow.types';
+import { authService } from '../services/auth.service';
 import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {
@@ -100,80 +101,15 @@ export const LoginPage: React.FC = () => {
 
     try {
       const targetEmail = payload?.email || currentEmail || 'admin@thestackly.com';
-
-      // 1. Fetch challenge/options from SQLite backend
-      const optionsRes = await fetch('/api/auth/passkey/login-options', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: targetEmail }),
-      });
-
-      if (!optionsRes.ok) {
-        proceedToDashboard();
-        return;
-      }
-
-      const { options } = await optionsRes.json();
-
-      if (!options?.challenge || !window.PublicKeyCredential) {
-        proceedToDashboard();
-        return;
-      }
-
-      // Safe base64url decoding
-      const base64 = options.challenge.replace(/-/g, '+').replace(/_/g, '/');
-      const pad = base64.length % 4;
-      const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
-      const challengeBuffer = Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
-
-      const credential = (await navigator.credentials.get({
-        publicKey: {
-          challenge: challengeBuffer,
-          timeout: options.timeout || 60000,
-          userVerification: options.userVerification || 'preferred',
-        },
-      })) as PublicKeyCredential | null;
-
-      if (!credential) {
-        proceedToDashboard();
-        return;
-      }
-
-      // 2. Send assertion to SQLite backend verification endpoint
-      const assertionResponse = {
-        id: credential.id,
-        rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
-        type: credential.type,
-        response: {
-          clientDataJSON: btoa(
-            String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAssertionResponse).clientDataJSON))
-          ),
-          authenticatorData: btoa(
-            String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAssertionResponse).authenticatorData))
-          ),
-          signature: btoa(
-            String.fromCharCode(...new Uint8Array((credential.response as AuthenticatorAssertionResponse).signature))
-          ),
-        },
-      };
-
-      const verifyRes = await fetch('/api/auth/passkey/login-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assertionResponse, email: targetEmail }),
-      });
-
-      const verifyData = await verifyRes.json();
-      if (verifyData.success && verifyData.token && verifyData.user) {
-        setSession({ user: verifyData.user, token: verifyData.token });
-        const userRole = (verifyData.user.role || authenticatedRole || role || Role.ADMIN) as Role;
-        proceedToDashboard(userRole);
-      } else {
-        proceedToDashboard();
-      }
-    } catch {
-      // Graceful fallback to guaranteed authenticated dashboard
-      proceedToDashboard();
+      const result = await authService.passkeyLogin(targetEmail);
+      setSession({ user: result.user, token: result.token });
+      const userRole = (result.user.role || authenticatedRole || role || Role.ADMIN) as Role;
+      proceedToDashboard(userRole);
+    } catch (err: unknown) {
+      const isNotAllowed = err instanceof DOMException && err.name === 'NotAllowedError';
+      setErrorMessage(isNotAllowed
+        ? 'No matching passkey was found, or the passkey prompt was cancelled. Register a passkey first or choose Skip for now.'
+        : err instanceof Error ? err.message : 'Passkey sign-in failed.');
     } finally {
       setLoadingMethod(null);
     }
