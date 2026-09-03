@@ -67,7 +67,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
     const submitBtn = screen.getByRole('button', { name: /Create Account/i });
     fireEvent.click(submitBtn);
 
-    expect(await screen.findByText('Please enter a valid email address.')).toBeInTheDocument();
+    expect(await screen.findByText('Use your company email ending with @thestackly.com.')).toBeInTheDocument();
     expect(mockSignup).not.toHaveBeenCalled();
   });
 
@@ -76,7 +76,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
 
     fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Jane' } });
     fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Doe' } });
-    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'STK-2026-1001' } });
     fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'jane@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'short' } });
     fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'short' } });
@@ -93,7 +93,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
 
     fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Jane' } });
     fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Doe' } });
-    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'STK-2026-1001' } });
     fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'jane@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'Password123!' } });
     fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'DifferentPassword123!' } });
@@ -122,7 +122,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
 
     fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Sarah' } });
     fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Connor' } });
-    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'STK-2026-1001' } });
     fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'sarah@thestackly.com' } });
     fireEvent.change(screen.getByLabelText(/^Password$/i), { target: { value: 'SecurePass2026!' } });
     fireEvent.change(screen.getByLabelText(/Confirm Password/i), { target: { value: 'SecurePass2026!' } });
@@ -134,7 +134,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
       expect(mockSignup).toHaveBeenCalledWith({
         name: 'Sarah Connor',
         email: 'sarah@thestackly.com',
-        employeeId: 'EMP-1001',
+        employeeId: 'STK-2026-1001',
         department: 'Human Resources',
         role: 'HR',
         password: 'SecurePass2026!',

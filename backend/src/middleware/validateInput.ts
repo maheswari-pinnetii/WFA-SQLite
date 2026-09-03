@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 
 // Email validation regex (RFC 5322 compliant subset)
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+const COMPANY_EMAIL_REGEX = /^[^\s@]+@thestackly\.com$/i;
+const EMPLOYEE_ID_REGEX = /^STK-\d{4}-\d+$/i;
 
 // Sanitize string to prevent basic XSS and injection
 export const sanitizeString = (str: string): string => {
@@ -60,9 +62,14 @@ export const validateRegistration = (req: Request, res: Response, next: NextFunc
   }
   req.body.name = name.trim();
   req.body.fullName = name.trim();
-  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
-    return res.status(400).json({ success: false, message: 'Valid corporate email address is required.' });
+  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim()) || !COMPANY_EMAIL_REGEX.test(email.trim())) {
+    return res.status(400).json({ success: false, message: 'Use a valid company email ending with @thestackly.com.' });
   }
+  const employeeId = typeof req.body.employeeId === 'string' ? req.body.employeeId.trim() : '';
+  if (!EMPLOYEE_ID_REGEX.test(employeeId)) {
+    return res.status(400).json({ success: false, message: 'Employee ID must use the format STK-YYYY-RollNumber.' });
+  }
+  req.body.employeeId = employeeId.toUpperCase();
   if (password !== undefined) {
     if (typeof password !== 'string' || password.length < 8) {
       return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long.' });

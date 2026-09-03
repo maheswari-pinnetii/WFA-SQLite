@@ -37,12 +37,12 @@ export const SignUpPage: React.FC = () => {
       setErrorMessage('Please enter your first and last name.');
       return false;
     }
-    if (!employeeId.trim()) {
-      setErrorMessage('Please enter your employee ID.');
+    if (!/^STK-\d{4}-\d+$/.test(employeeId.trim().toUpperCase())) {
+      setErrorMessage('Employee ID must use the format STK-YYYY-RollNumber.');
       return false;
     }
-    if (!email.trim() || !email.includes('@')) {
-      setErrorMessage('Please enter a valid email address.');
+    if (!/^[^\s@]+@thestackly\.com$/i.test(email.trim())) {
+      setErrorMessage('Use your company email ending with @thestackly.com.');
       return false;
     }
 
@@ -85,7 +85,7 @@ export const SignUpPage: React.FC = () => {
         await signup({
           name: `${firstName.trim()} ${lastName.trim()}`,
           email: email.trim(),
-          employeeId: employeeId.trim(),
+          employeeId: employeeId.trim().toUpperCase(),
           department,
           role,
           password,
@@ -100,7 +100,7 @@ export const SignUpPage: React.FC = () => {
         await signup({
           name: `${firstName.trim()} ${lastName.trim()}`,
           email: email.trim(),
-          employeeId: employeeId.trim(),
+          employeeId: employeeId.trim().toUpperCase(),
           department,
           role,
         });
@@ -187,7 +187,7 @@ export const SignUpPage: React.FC = () => {
             <div className="input-field-group">
               <label htmlFor="signup-employee-id" className="overlaid-label">Employee ID</label>
               <div className="auth-input-wrapper">
-                <input id="signup-employee-id" type="text" className="auth-text-input" placeholder="EMP-1002" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} disabled={isLoading} required />
+                <input id="signup-employee-id" type="text" className="auth-text-input" placeholder="STK-2026-1002" pattern="STK-[0-9]{4}-[0-9]+" title="Use STK-YearOfJoining-RollNumber (for example, STK-2026-1002)." value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} disabled={isLoading} required />
               </div>
             </div>
 

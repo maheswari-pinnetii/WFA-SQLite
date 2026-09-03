@@ -10,6 +10,8 @@ import { decryptSecret, verifyTotpCode, verifyRecoveryCode } from './totp.js';
 import { env } from '../../config/env.js';
 
 const ORGANIZATION_ID = 'org-stackly';
+const COMPANY_EMAIL_REGEX = /^[^\s@]+@thestackly\.com$/i;
+const EMPLOYEE_ID_REGEX = /^STK-\d{4}-\d+$/i;
 
 const toUser = (user: any) => ({
   id: user.id,
@@ -68,19 +70,21 @@ export const register = async (req: Request, res: Response): Promise<any> => {
     const { fullName, department, password } = req.body;
     const name = (fullName || req.body.name || '').trim();
     const email = (req.body.email || '').trim();
+    const employeeId = typeof req.body.employeeId === 'string' ? req.body.employeeId.trim().toUpperCase() : '';
     const role: string = req.body.role || 'EMPLOYEE';
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Name, email, and password are required' });
     }
 
     const emailLower = email.trim().toLowerCase();
-    if (!emailLower.endsWith('@thestackly.com') && !emailLower.endsWith('@company.com')) {
-      return res.status(403).json({ success: false, message: 'Domain access denied. Only corporate email domains permitted.' });
+    if (!COMPANY_EMAIL_REGEX.test(emailLower)) {
+      return res.status(400).json({ success: false, message: 'Use a valid company email ending with @thestackly.com.' });
+    }
+    if (!EMPLOYEE_ID_REGEX.test(employeeId)) {
+      return res.status(400).json({ success: false, message: 'Employee ID must use the format STK-YYYY-RollNumber.' });
     }
 
-    const lookupEmail = emailLower.endsWith('@company.com')
-      ? emailLower.replace('@company.com', '@thestackly.com')
-      : emailLower;
+    const lookupEmail = emailLower;
 
     const existingUser = await userRepository.findByEmail(lookupEmail);
     if (existingUser) {

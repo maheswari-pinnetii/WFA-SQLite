@@ -9,7 +9,7 @@ let client: any;
 
 const testUser = {
   fullName: 'Passkey Test Pilot',
-  employeeId: `EMP-TEST-${Date.now()}`,
+  employeeId: `STK-2026-${Date.now() % 100000}`,
   department: 'Engineering',
   role: 'EMPLOYEE',
   email: `pilot_${Date.now()}@thestackly.com`,
@@ -94,6 +94,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
     it('POST /api/auth/register - should reject duplicate email registration with 409', async () => {
       const res = await client.post('/api/v1/auth/register', {
         fullName: 'Duplicate Tester',
+        employeeId: `STK-2026-${(Date.now() + 1) % 100000}`,
         email: testUser.email,
         password: 'AnotherPassword123!',
       });

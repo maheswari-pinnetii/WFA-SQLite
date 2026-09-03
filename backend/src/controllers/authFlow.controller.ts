@@ -131,16 +131,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ success: false, error: 'Invalid account role.' });
       return;
     }
-    const requestedEmployeeId = (req.body.employeeId || '').trim();
+    const requestedEmployeeId = (req.body.employeeId || '').trim().toUpperCase();
     const department = req.body.department || 'Engineering';
     const team = req.body.team || 'Core Team';
     const location = req.body.location || 'San Francisco';
     const title = req.body.title || 'Associate';
 
-    if (!email || !name) {
+    if (!email || !name || !/^[^\s@]+@thestackly\.com$/i.test(email) || !/^STK-\d{4}-\d+$/.test(requestedEmployeeId)) {
       res.status(400).json({
         success: false,
-        error: 'Full name and email are required fields.',
+        error: 'Company email and Employee ID must be valid. Use @thestackly.com and STK-YYYY-RollNumber.',
       });
       return;
     }
@@ -158,7 +158,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const userId = `usr_${crypto.randomUUID()}`;
-    const employeeCode = requestedEmployeeId || `EMP-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const employeeCode = requestedEmployeeId;
     const passwordHash = password ? await bcrypt.hash(password, 10) : '';
     const now = new Date().toISOString();
 
