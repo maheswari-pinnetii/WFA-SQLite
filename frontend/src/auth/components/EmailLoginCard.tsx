@@ -96,9 +96,8 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
           </svg>
         </button>
 
-        <div className="brand-logo-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/assets/images/logo.png" alt="Stackly" width="24" height="24" />
-          <span className="brand-logo-text">Stackly</span>
+        <div className="brand-logo-container auth-login-logo-container">
+          <img src="/assets/images/logo.png" alt="Stackly" className="auth-login-logo" />
         </div>
       </div>
 

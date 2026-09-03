@@ -278,6 +278,21 @@
   display: block;
 }
 
+/* Full Stackly wordmark used in password and passkey login headers. */
+.auth-login-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-login-logo {
+  display: block;
+  width: min(150px, 44vw);
+  height: auto;
+  max-height: 42px;
+  object-fit: contain;
+}
+
 .brand-wordmark {
   font-size: 1.125rem;
   font-weight: 600;

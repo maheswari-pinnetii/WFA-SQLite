@@ -88,9 +88,8 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
           <div style={{ width: '26px', height: '26px' }} aria-hidden="true" />
         )}
 
-        <div className="brand-logo-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src="/assets/images/logo.png" alt="Stackly" width="24" height="24" />
-          <span className="brand-logo-text">Stackly</span>
+        <div className="brand-logo-container auth-login-logo-container">
+          <img src="/assets/images/logo.png" alt="Stackly" className="auth-login-logo" />
         </div>
       </div>
 

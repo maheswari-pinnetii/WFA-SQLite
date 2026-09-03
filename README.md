@@ -133,7 +133,7 @@ Stackly features a dual-card authentication architecture designed specifically f
 ┌────────────────────────────────────────┐  ┌────────────────────────────────────────┐
 │             Email Login                │  │          Passwordless Login            │
 │ ────────────────────────────────────── │  │ ────────────────────────────────────── │
-│ 🏢 Microsoft / Stackly Brand Header    │  │ 🏢 Microsoft / Stackly Brand Header    │
+│ 🏢 Stackly Brand Header                │  │ 🏢 Stackly Brand Header                │
 │ 👤 user@thestackly.com Pill Badge      │  │ 👤 user@thestackly.com Pill Badge      │
 │ 🔑 Password Input (Mask & Eye Toggle)  │  │ 👁️ Biometric Scanner HUD (Neon Grid)  │
 │ ❓ Forgot Password Recovery Link       │  │ ⚡ WebAuthn / FIDO2 Passkey Biometrics │
@@ -155,6 +155,14 @@ Stackly features a dual-card authentication architecture designed specifically f
 6. **Enterprise SSO**: Google Workspace & Microsoft Entra ID single sign-on buttons.
 7. **Two-Factor Authentication (MFA)**: TOTP Authenticator QR setup, 10 one-time recovery codes, and SMS/Email OTP fallbacks.
 8. **Dual-Token Cookie Session Lifecycle**: 15-minute sliding JWT access token paired with 7-day `HttpOnly`, `SameSite: Lax` refresh cookies to eliminate XSS and CSRF token vulnerabilities.
+
+### Registration and Dashboard Routing
+
+- **Company email only**: Registration and email login accept only valid `@thestackly.com` addresses.
+- **Employee ID format**: Every new account must provide `STK-YearOfJoining-RollNumber`, such as `STK-2026-1002`. The value is normalized to uppercase.
+- **SQLite persistence**: The frontend registration endpoint (`/api/v1/auth/register`) creates a `users` row and a corresponding `employees` row. The validated employee ID is stored in `employees.employeeCode`.
+- **Role-aware dashboard**: After successful authentication, the application routes users to the dashboard for their role: Admin (`/admin/dashboard`), HR (`/hr/dashboard`), Manager (`/manager/dashboard`), Team Lead (`/team-lead/dashboard`), or Employee (`/employee/dashboard`). Restored sessions are redirected there automatically.
+- **Stackly branding**: Password and passkey login pages use the Stackly logo and name; no Microsoft-style logo is used.
 
 ---
 
