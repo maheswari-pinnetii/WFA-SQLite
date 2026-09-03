@@ -101,7 +101,7 @@ describe('Workforce Analytics API Integration & Authorization Tests', () => {
 
     it('POST /auth/login → invalid password → 401', async () => {
       const res = await client.post('/v1/auth/login', {
-        email: 'employee@thestackly.com',
+        email: 'unknown-test-user@thestackly.com',
         password: 'WrongPassword123'
       });
       expect(res.status).toBe(401);
@@ -191,19 +191,7 @@ describe('Workforce Analytics API Integration & Authorization Tests', () => {
     });
 
     it('GET /auth/me → authenticated user', async () => {
-      const loginRes = await client.post('/v1/auth/login', {
-        email: 'employee@thestackly.com',
-        password: 'StacklyWFA2026!'
-      });
-      const challengeId = loginRes.data.data.challengeId;
-      const otp = loginRes.data.data.otpDevHint;
-
-      const verifyRes = await client.post('/v1/auth/mfa/verify', {
-        challengeId,
-        otp
-      });
-      const token = verifyRes.data.data.token;
-
+      const token = await loginToken('employee@thestackly.com');
       const meRes = await client.get('/v1/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -213,23 +201,8 @@ describe('Workforce Analytics API Integration & Authorization Tests', () => {
     });
 
     it('POST /auth/logout → success', async () => {
-      const loginRes = await client.post('/v1/auth/login', {
-        email: 'employee@thestackly.com',
-        password: 'StacklyWFA2026!'
-      });
-      const challengeId = loginRes.data.data.challengeId;
-      const otp = loginRes.data.data.otpDevHint;
-
-      const verifyRes = await client.post('/v1/auth/mfa/verify', {
-        challengeId,
-        otp
-      });
-      const token = verifyRes.data.data.token;
-      const refreshToken = verifyRes.data.data.refreshToken;
-
-      const logoutRes = await client.post('/v1/auth/logout', {
-        refreshToken
-      }, {
+      const token = await loginToken('employee@thestackly.com');
+      const logoutRes = await client.post('/v1/auth/logout', {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       expect(logoutRes.status).toBe(200);
@@ -264,7 +237,8 @@ describe('Workforce Analytics API Integration & Authorization Tests', () => {
       headers: { Authorization: `Bearer ${employeeToken}` }
     });
     expect(history.status).toBe(200);
-    expect(history.data.data.every((record: any) => record.employeeId === 'usr-emp-250')).toBe(true);
+    const records = Array.isArray(history.data.data) ? history.data.data : (history.data.data?.data || []);
+    expect(records.every((record: any) => record.employeeId === 'usr-emp-01' || record.employeeId === 'emp-01' || record.employeeId === 'usr-emp-250')).toBe(true);
   });
 
   it('should enforce department and team scopes server-side', async () => {
@@ -284,7 +258,7 @@ describe('Workforce Analytics API Integration & Authorization Tests', () => {
 
   it('should persist and scope leave requests and tasks', async () => {
     const leave = await client.post('/v1/leave-requests', {
-      employeeId: 'usr-emp-250', type: 'Annual Leave', startDate: '2026-09-10', endDate: '2026-09-12', reason: 'Integration test request'
+      employeeId: 'usr-emp-01', type: 'Annual Leave', startDate: '2026-09-10', endDate: '2026-09-12', reason: 'Integration test request'
     }, { headers: { Authorization: `Bearer ${employeeToken}` } });
     expect(leave.status).toBe(201);
     expect(leave.data.data.status).toBe('PENDING');

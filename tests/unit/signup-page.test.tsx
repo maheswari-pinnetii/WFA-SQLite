@@ -61,7 +61,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
 
     fireEvent.change(screen.getByLabelText(/First Name/i), { target: { value: 'Jane' } });
     fireEvent.change(screen.getByLabelText(/Last Name/i), { target: { value: 'Doe' } });
-    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'EMP-1001' } });
+    fireEvent.change(screen.getByLabelText(/Employee ID/i), { target: { value: 'STK-2026-1001' } });
     fireEvent.change(screen.getByLabelText(/Company Email/i), { target: { value: 'invalid-email-format' } });
 
     const submitBtn = screen.getByRole('button', { name: /Create Account/i });

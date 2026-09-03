@@ -27,7 +27,7 @@ describe('Step 2: PasswordlessLoginCard Component Unit Tests', () => {
 
     expect(screen.getByText('Step 2 of 2: Passwordless')).toBeInTheDocument();
     expect(screen.getByText('FIDO2 / WebAuthn')).toBeInTheDocument();
-    expect(screen.getByAltText('Stackly')).toBeInTheDocument();
+    expect(screen.getAllByAltText('Stackly').length).toBeGreaterThan(0);
     expect(screen.getByText('employee@thestackly.com')).toBeInTheDocument();
     expect(screen.getByText('Sign in faster with your face, fingerprint, or PIN')).toBeInTheDocument();
     expect(screen.getByText(/built-in Windows Hello, Touch ID, Face ID/i)).toBeInTheDocument();

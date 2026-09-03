@@ -17,20 +17,21 @@ export const authenticateToken = async (req, res, next) => {
     // Note: Ensure env.JWT_SECRET matches your Supabase Project JWT Secret
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     
-    // Supabase sets the user ID in the 'sub' claim and email in 'email' claim
-    const supabaseId = decoded.sub;
+    const userId = decoded.id || decoded.sub;
     const email = decoded.email;
 
-    // 2. Lookup the corresponding application user in SQLite
-    let appUser = await User.findOne({ supabase_auth_id: supabaseId });
-    
+    let appUser = null;
+    if (userId) {
+      appUser = await User.findOne({ id: userId });
+    }
     if (!appUser && email) {
-      // Fallback: If they haven't been mapped yet, find by email and link them
       appUser = await User.findOne({ email });
-      if (appUser) {
-        appUser.supabase_auth_id = supabaseId;
-        await appUser.save();
-      }
+    }
+    if (!appUser && decoded.sub) {
+      appUser = await User.findOne({ supabase_auth_id: decoded.sub });
+    }
+    if (!appUser && decoded.role) {
+      appUser = decoded;
     }
 
     if (!appUser) {

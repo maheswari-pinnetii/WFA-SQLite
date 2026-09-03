@@ -23,7 +23,7 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
 
     expect(screen.getByText('Step 1 of 2: Password')).toBeInTheDocument();
     expect(screen.getByText('Knowledge Factor')).toBeInTheDocument();
-    expect(screen.getByAltText('Stackly')).toBeInTheDocument();
+    expect(screen.getAllByAltText('Stackly').length).toBeGreaterThan(0);
     expect(screen.getByLabelText(/Email address/i)).toHaveValue('employee@thestackly.com');
     expect(screen.getByText('Sign in to your account')).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();

@@ -11,6 +11,14 @@ const findIdentity = async (employeeId, orgId) => {
   if (!identity) {
     identity = await User.findOne({ id: employeeId, organizationId: orgId });
   }
+  if (!identity && typeof employeeId === 'string' && employeeId.startsWith('usr-emp-')) {
+    const altId = employeeId.replace('usr-emp-', 'emp-');
+    identity = await Employee.findOne({ id: altId, organizationId: orgId });
+  }
+  if (!identity && typeof employeeId === 'string' && employeeId.startsWith('emp-')) {
+    const altId = employeeId.replace('emp-', 'usr-emp-');
+    identity = await Employee.findOne({ id: altId, organizationId: orgId });
+  }
   return identity;
 };
 
