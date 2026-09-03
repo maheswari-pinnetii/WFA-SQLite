@@ -26,6 +26,9 @@ export const initDb = async (): Promise<void> => {
         if (!(await columnExists('users', 'authProvider'))) {
           try { await execute("ALTER TABLE users ADD COLUMN authProvider TEXT DEFAULT 'local';"); } catch (e) {}
         }
+        if (!(await columnExists('users', 'supabase_auth_id'))) {
+          try { await execute("ALTER TABLE users ADD COLUMN supabase_auth_id TEXT UNIQUE;"); } catch (e) {}
+        }
         if (!(await columnExists('users', 'providerSubject'))) {
           try { await execute("ALTER TABLE users ADD COLUMN providerSubject TEXT;"); } catch (e) {}
         }
@@ -181,6 +184,38 @@ export const initDb = async (): Promise<void> => {
           )
         `);
 
+        // Materialized View for HR Dashboard
+        await execute(`
+          CREATE TABLE IF NOT EXISTS dashboard_summary_mv (
+            organizationId TEXT PRIMARY KEY,
+            totalEmployees INTEGER DEFAULT 0,
+            lastCalculatedAt TEXT
+          )
+        `);
+
+        // Materialized View Triggers for Employee Count
+        await execute(`
+          CREATE TRIGGER IF NOT EXISTS mv_employee_insert
+          AFTER INSERT ON employees
+          BEGIN
+            INSERT INTO dashboard_summary_mv (organizationId, totalEmployees, lastCalculatedAt)
+            VALUES (NEW.organizationId, 1, datetime('now'))
+            ON CONFLICT(organizationId) DO UPDATE SET 
+              totalEmployees = totalEmployees + 1,
+              lastCalculatedAt = datetime('now');
+          END;
+        `);
+
+        await execute(`
+          CREATE TRIGGER IF NOT EXISTS mv_employee_delete
+          AFTER DELETE ON employees
+          BEGIN
+            UPDATE dashboard_summary_mv 
+            SET totalEmployees = totalEmployees - 1, lastCalculatedAt = datetime('now')
+            WHERE organizationId = OLD.organizationId;
+          END;
+        `);
+
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_settings_user ON mfa_settings(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_recovery_user ON mfa_recovery_codes(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_passkey_user_id ON passkey_credentials(user_id)`);
@@ -195,6 +230,7 @@ export const initDb = async (): Promise<void> => {
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_date ON attendancerecords(employeeId, date)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_status ON attendancerecords(employeeId, status)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_date ON attendancerecords(date)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_org_date_status ON attendancerecords(organizationId, date, status)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_leaverequests_emp ON leaverequests(employeeId)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_leaverequests_status ON leaverequests(status)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_employees_dept ON employees(department)`);

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { getAuthorizedRoomsForUser, SocketUserContext } from './rooms.js';
 import logger from '../config/logger.js';
+import { User } from '../models/User.js';
 
 const JWT_SECRET = env.JWT_SECRET || 'stackly_wfa_super_secret_jwt_key_2026';
 
@@ -20,24 +21,41 @@ export const socketAuthMiddleware = (socket: Socket, next: (err?: Error) => void
     return next(new Error('Authentication error: Token missing'));
   }
 
-  jwt.verify(token, JWT_SECRET, (err, decoded: any) => {
-    if (err || !decoded) {
-      return next(new Error('Authentication error: Invalid or expired token'));
-    }
+  jwt.verify(token, JWT_SECRET, async (err, decoded: any) => {
+      if (err || !decoded) {
+        return next(new Error('Authentication error: Invalid or expired token'));
+      }
 
-    const user: SocketUserContext = {
-      id: decoded.id || decoded.sub,
-      email: decoded.email,
-      role: decoded.role,
-      department: decoded.department,
-      team: decoded.team,
-      organizationId: decoded.organizationId || decoded.companyId || 'org-stackly',
-      companyId: decoded.companyId || decoded.organizationId || 'org-stackly'
-    };
+      const supabaseId = decoded.sub;
+      const email = decoded.email;
 
-    (socket as any).user = user;
-    next();
-  });
+      let appUser = await User.findOne({ supabase_auth_id: supabaseId });
+      
+      if (!appUser && email) {
+        appUser = await User.findOne({ email });
+        if (appUser) {
+          appUser.supabase_auth_id = supabaseId;
+          await appUser.save();
+        }
+      }
+
+      if (!appUser) {
+        return next(new Error('Authentication error: User profile not found'));
+      }
+
+      const user: SocketUserContext = {
+        id: appUser.id,
+        email: appUser.email,
+        role: appUser.role,
+        department: appUser.department,
+        team: appUser.team,
+        organizationId: appUser.organizationId || appUser.companyId || 'org-stackly',
+        companyId: appUser.companyId || appUser.organizationId || 'org-stackly'
+      };
+
+      (socket as any).user = user;
+      next();
+    });
 };
 
 /**

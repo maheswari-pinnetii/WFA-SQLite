@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { socket, SOCKET_EVENTS } from '../websocket/socket';
@@ -9,9 +9,17 @@ export const useRealtimeAttendance = (onEventReceived?: (event: string, data: an
   const queryClient = useQueryClient();
   const dispatch = useDispatch<any>();
   const { user } = useAuth();
-
+  
+  // Use a ref to store the latest callback so we don't re-bind sockets if the callback changes
+  const onEventReceivedRef = useRef(onEventReceived);
+  
   useEffect(() => {
-    const handleAttendanceChange = (event: string) => (data: any) => {
+    onEventReceivedRef.current = onEventReceived;
+  }, [onEventReceived]);
+
+  // Memoize the handler creator
+  const handleAttendanceChange = useCallback(
+    (event: string) => (data: any) => {
       // Invalidate relevant React Query caches
       void queryClient.invalidateQueries({ queryKey: ['attendanceToday'] });
       void queryClient.invalidateQueries({ queryKey: ['attendanceRecords'] });
@@ -22,10 +30,14 @@ export const useRealtimeAttendance = (onEventReceived?: (event: string, data: an
         dispatch(fetchAttendanceDataThunk(user.id));
       }
 
-      if (onEventReceived) {
-        onEventReceived(event, data);
+      if (onEventReceivedRef.current) {
+        onEventReceivedRef.current(event, data);
       }
-    };
+    },
+    [queryClient, dispatch, user]
+  );
+
+  useEffect(() => {
 
     const handleCheckIn = handleAttendanceChange('CHECK_IN');
     const handleCheckOut = handleAttendanceChange('CHECK_OUT');
@@ -46,5 +58,5 @@ export const useRealtimeAttendance = (onEventReceived?: (event: string, data: an
       socket.off(SOCKET_EVENTS.ATTENDANCE_BREAK_END, handleBreakEnd);
       socket.off(SOCKET_EVENTS.ATTENDANCE_UPDATED, handleUpdated);
     };
-  }, [queryClient, dispatch, user, onEventReceived]);
+  }, [handleAttendanceChange]);
 };

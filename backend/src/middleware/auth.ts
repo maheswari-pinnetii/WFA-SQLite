@@ -6,19 +6,44 @@ import { env } from '../config/env.js';
 const ORGANIZATION_ID = 'org-stackly';
 const JWT_SECRET = env.JWT_SECRET;
 
-export const authenticateToken = (req, res, next) => {
+export const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   
   if (!token) return res.status(401).json({ success: false, message: 'Unauthorized access token missing' });
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(401).json({ success: false, message: 'Invalid or expired token' });
-    const orgId = user.organizationId || user.companyId || ORGANIZATION_ID;
-    req.user = { ...user, organizationId: orgId, companyId: orgId };
+  try {
+    // 1. Verify Supabase JWT (signed with JWT_SECRET / SUPABASE_JWT_SECRET)
+    // Note: Ensure env.JWT_SECRET matches your Supabase Project JWT Secret
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    // Supabase sets the user ID in the 'sub' claim and email in 'email' claim
+    const supabaseId = decoded.sub;
+    const email = decoded.email;
+
+    // 2. Lookup the corresponding application user in SQLite
+    let appUser = await User.findOne({ supabase_auth_id: supabaseId });
+    
+    if (!appUser && email) {
+      // Fallback: If they haven't been mapped yet, find by email and link them
+      appUser = await User.findOne({ email });
+      if (appUser) {
+        appUser.supabase_auth_id = supabaseId;
+        await appUser.save();
+      }
+    }
+
+    if (!appUser) {
+      return res.status(401).json({ success: false, message: 'User profile not found in system' });
+    }
+
+    const orgId = appUser.organizationId || appUser.companyId || ORGANIZATION_ID;
+    req.user = { ...appUser, organizationId: orgId, companyId: orgId };
     req.companyId = orgId;
     next();
-  });
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Invalid or expired token' });
+  }
 };
 
 export const authorizeRoles = (allowedRoles) => {

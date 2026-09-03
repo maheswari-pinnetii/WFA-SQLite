@@ -116,9 +116,9 @@ app.get('/health/metrics', async (req: Request, res: Response) => {
   });
 });
 
-// Register routers
-app.use('/api/auth', authFlowRouter);
-app.use('/v1', apiRouter);
+// API Routes (v1)
+app.use('/api/v1/auth', authFlowRouter);
+app.use('/api/v1', apiRouter);
 app.use('/api', apiRouter);
 
 // Database initialization

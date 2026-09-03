@@ -52,6 +52,15 @@ export class AnalyticsRepository {
     return rows;
   }
 
+  async getDashboardSummaryMV(orgId: string) {
+    const rows = await query(`
+      SELECT totalEmployees, lastCalculatedAt 
+      FROM dashboard_summary_mv 
+      WHERE organizationId = ?
+    `, [orgId]);
+    return rows.length ? rows[0] : null;
+  }
+
   async getAttendanceRecords(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
     const rows = await query(`

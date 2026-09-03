@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import { STORAGE_KEYS } from '../shared/constants/constants';
 
 let accessToken: string | null = (
@@ -32,6 +33,17 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+});
+
+// Configure automatic retries for idempotent requests (GET, PUT, DELETE, etc)
+// And also retry on Network Errors or 5xx status codes
+axiosRetry(apiClient, {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  retryCondition: (error) => {
+    // Retry on network errors or 5xx status codes
+    return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response?.status >= 500;
+  },
 });
 
 apiClient.interceptors.request.use(

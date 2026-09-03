@@ -19,6 +19,7 @@ import {
   validateLeaveRequest
 } from '../middleware/validateInput.js';
 import { validateFileUpload } from '../middleware/fileUpload.js';
+import { idempotencyMiddleware } from '../middleware/idempotency.js';
 
 const router = express.Router();
 
@@ -113,10 +114,10 @@ router.get('/permissions', authenticateToken, organizationController.getPermissi
 
 // Attendance Punch & Session Routes
 router.get('/attendance/today', authenticateToken, attendanceController.getTodayAttendance);
-router.post('/attendance/check-in', authenticateToken, enforceScope, validateAttendanceAction, attendanceController.checkIn);
-router.post('/attendance/break', authenticateToken, enforceScope, attendanceController.takeBreak);
-router.post('/attendance/resume', authenticateToken, enforceScope, attendanceController.resumeWork);
-router.post('/attendance/check-out', authenticateToken, enforceScope, attendanceController.checkOut);
+router.post('/attendance/check-in', authenticateToken, enforceScope, validateAttendanceAction, idempotencyMiddleware, attendanceController.checkIn);
+router.post('/attendance/break', authenticateToken, enforceScope, idempotencyMiddleware, attendanceController.takeBreak);
+router.post('/attendance/resume', authenticateToken, enforceScope, idempotencyMiddleware, attendanceController.resumeWork);
+router.post('/attendance/check-out', authenticateToken, enforceScope, idempotencyMiddleware, attendanceController.checkOut);
 router.get('/attendance/records', authenticateToken, enforceScope, attendanceController.getRecords);
 router.get('/attendance/shifts', authenticateToken, attendanceController.getShifts);
 router.get('/attendance/holidays', authenticateToken, attendanceController.getPublicHolidays);
@@ -125,15 +126,15 @@ router.get('/attendance/audit-logs', authenticateToken, attendanceController.get
 
 // Persisted leave and task workflows
 router.get('/leave-requests', authenticateToken, enforceScope, workforceController.getLeaveRequests);
-router.post('/leave-requests', authenticateToken, enforceScope, validateLeaveRequest, workforceController.createLeaveRequest);
-router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), workforceController.reviewLeaveRequest);
+router.post('/leave-requests', authenticateToken, enforceScope, validateLeaveRequest, idempotencyMiddleware, workforceController.createLeaveRequest);
+router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), idempotencyMiddleware, workforceController.reviewLeaveRequest);
 router.get('/tasks', authenticateToken, enforceScope, workforceController.getTasks);
 router.put('/tasks/:id', authenticateToken, workforceController.updateTask);
 
 // Corrections Requests
-router.post('/attendance/corrections', authenticateToken, enforceScope, attendanceController.submitCorrection);
+router.post('/attendance/corrections', authenticateToken, enforceScope, idempotencyMiddleware, attendanceController.submitCorrection);
 router.get('/attendance/corrections', authenticateToken, enforceScope, attendanceController.getCorrections);
-router.put('/attendance/corrections/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), attendanceController.reviewCorrection);
+router.put('/attendance/corrections/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), idempotencyMiddleware, attendanceController.reviewCorrection);
 
 // Analytics
 router.get('/analytics', authenticateToken, enforceScope, analyticsController.getAnalytics);

@@ -181,15 +181,18 @@ export class AnalyticsService {
   }
 
   async getDashboardSummary(reqUser: any) {
+    const orgId = reqUser.organizationId || 'org-stackly';
     const employeeQuery = getScope(reqUser, 'id');
     const attendanceQuery = getScope(reqUser, 'employeeId');
 
-    const [employees, attendance] = await Promise.all([
+    const [mvSummary, employees, attendance] = await Promise.all([
+      analyticsRepository.getDashboardSummaryMV(orgId),
       analyticsRepository.getEmployeesSummary(employeeQuery),
       analyticsRepository.getAttendanceRecords(attendanceQuery)
     ]);
 
-    const totalHeadcount = employees.length;
+    // Use MV for total headcount if available, fallback to full count
+    const totalHeadcount = mvSummary ? mvSummary.totalEmployees : employees.length;
     const activePresent = attendance.filter((record: any) => record.status !== 'Checked Out').length;
     
     const lateCount = attendance.filter((record: any) => {

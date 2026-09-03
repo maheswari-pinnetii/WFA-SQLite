@@ -1,11 +1,13 @@
 import { attendanceService } from '../services/attendance.service.js';
+import { getPaginationParams, buildPaginatedResponse } from '../utils/pagination.js';
+import { cacheService } from '../services/cache.service.js';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
 
 export const checkIn = async (req, res) => {
   try {
     const result = await attendanceService.checkIn(req.user, req.body);
-    return res.json({ success: true, data: result.data, idempotentReplay: result.idempotentReplay });
+    return res.status(201).json({ success: true, data: result.data, idempotentReplay: result.idempotentReplay });
   } catch (err) {
     console.error('checkIn Error:', err);
     if (err.message.includes('Duplicate') || err.code === 11000) {
@@ -21,7 +23,7 @@ export const checkIn = async (req, res) => {
 export const takeBreak = async (req, res) => {
   try {
     const data = await attendanceService.takeBreak(req.user, req.body);
-    return res.json({ success: true, data });
+    return res.status(200).json({ success: true, data });
   } catch (err) {
     console.error('takeBreak Error:', err);
     return res.status(400).json({ success: false, message: err.message });
@@ -31,7 +33,7 @@ export const takeBreak = async (req, res) => {
 export const resumeWork = async (req, res) => {
   try {
     const data = await attendanceService.resumeWork(req.user, req.body);
-    return res.json({ success: true, data });
+    return res.status(200).json({ success: true, data });
   } catch (err) {
     console.error('resumeWork Error:', err);
     return res.status(400).json({ success: false, message: err.message });
@@ -41,7 +43,7 @@ export const resumeWork = async (req, res) => {
 export const checkOut = async (req, res) => {
   try {
     const data = await attendanceService.checkOut(req.user, req.body);
-    return res.json({ success: true, data });
+    return res.status(200).json({ success: true, data });
   } catch (err) {
     console.error('checkOut Error:', err);
     if (err.message.includes('rejection') || err.message.includes('session')) {
@@ -53,8 +55,11 @@ export const checkOut = async (req, res) => {
 
 export const getRecords = async (req, res) => {
   try {
+    const { page, limit } = getPaginationParams(req);
     const data = await attendanceService.getRecords(req.user);
-    return res.json({ success: true, data });
+    // Standardize pagination using our utility (assuming getRecords returns all data for now)
+    const paginated = buildPaginatedResponse(data.slice((page - 1) * limit, page * limit), data.length, page, limit);
+    return res.status(200).json({ success: true, data: paginated });
   } catch (err) {
     console.error('getRecords Error:', err);
     return res.status(500).json({ success: false, message: err.message });
@@ -74,7 +79,7 @@ export const getTodayAttendance = async (req, res) => {
 export const submitCorrection = async (req, res) => {
   try {
     const data = await attendanceService.submitCorrection(req.user, req.body);
-    return res.json({ success: true, data });
+    return res.status(201).json({ success: true, data });
   } catch (err) {
     console.error('submitCorrection Error:', err);
     return res.status(400).json({ success: false, message: err.message });
@@ -85,7 +90,7 @@ export const reviewCorrection = async (req, res) => {
   try {
     const { status, managerComment } = req.body || {};
     await attendanceService.reviewCorrection(req.user, req.params.id, status, managerComment);
-    return res.json({ success: true, message: `Request successfully ${status}.` });
+    return res.status(200).json({ success: true, message: `Request successfully ${status}.` });
   } catch (err) {
     console.error('reviewCorrection Error:', err);
     if (err.message.includes('not found')) {
@@ -130,7 +135,11 @@ export const getAuditLogs = async (req, res) => {
 
 export const getPublicHolidays = async (req, res) => {
   try {
-    const data = await attendanceService.getPublicHolidays(getOrganizationId(req));
+    const orgId = getOrganizationId(req);
+    const data = await cacheService.getOrSet(`holidays:${orgId}`, () => 
+      attendanceService.getPublicHolidays(orgId),
+      86400 // Cache for 24 hours
+    );
     return res.json({ success: true, data });
   } catch (err) {
     console.error('getPublicHolidays Error:', err);

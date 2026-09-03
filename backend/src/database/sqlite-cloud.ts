@@ -128,6 +128,28 @@ const ensureLocalDbInitialized = async () => {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS dashboard_summary_mv (
+      organizationId TEXT PRIMARY KEY,
+      totalEmployees INTEGER DEFAULT 0,
+      lastCalculatedAt TEXT
+    );
+    CREATE TRIGGER IF NOT EXISTS mv_employee_insert
+    AFTER INSERT ON employees
+    BEGIN
+      INSERT INTO dashboard_summary_mv (organizationId, totalEmployees, lastCalculatedAt)
+      VALUES (NEW.organizationId, 1, datetime('now'))
+      ON CONFLICT(organizationId) DO UPDATE SET 
+        totalEmployees = totalEmployees + 1,
+        lastCalculatedAt = datetime('now');
+    END;
+    CREATE TRIGGER IF NOT EXISTS mv_employee_delete
+    AFTER DELETE ON employees
+    BEGIN
+      UPDATE dashboard_summary_mv 
+      SET totalEmployees = totalEmployees - 1, lastCalculatedAt = datetime('now')
+      WHERE organizationId = OLD.organizationId;
+    END;
+    CREATE INDEX IF NOT EXISTS idx_attendancerecords_org_date_status ON attendancerecords(organizationId, date, status);
   `);
 };
 
