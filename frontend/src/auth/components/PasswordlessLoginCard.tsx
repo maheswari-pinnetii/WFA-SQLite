@@ -69,7 +69,7 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         <span>Use your device&apos;s built-in Windows Hello, Touch ID, Face ID, or security key to sign in securely without passwords.</span>
       </div>
 
-      {/* Top Nav Row: Back Arrow (if provided) + Centered Microsoft Logo Header */}
+      {/* Top navigation row with Stackly branding */}
       <div className="card-top-nav" style={{ position: 'relative', minHeight: '28px', marginBottom: '0.75rem' }}>
         {onBack ? (
           <button
@@ -89,13 +89,8 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
         )}
 
         <div className="brand-logo-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="22" height="22" viewBox="0 0 21 21">
-            <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-            <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-            <rect x="11" y="1" width="9" height="9" fill="#00a4ef"/>
-            <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-          </svg>
-          <span className="ms-logo-text" style={{ fontSize: '1.25rem', fontWeight: 600, color: '#ffffff' }}>Microsoft</span>
+          <img src="/assets/images/logo.png" alt="Stackly" width="24" height="24" />
+          <span className="brand-logo-text">Stackly</span>
         </div>
       </div>
 
@@ -216,7 +211,7 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
 
       {/* Description Text matching Screenshot */}
       <p className="passkey-desc-text biometric-helper-text">
-        Create a passkey to sign in to your Microsoft account. No passwords, apps, or codes needed.
+        Create a passkey to sign in to your Stackly account. No passwords, apps, or codes needed.
       </p>
 
       {/* Dual Action Buttons */}

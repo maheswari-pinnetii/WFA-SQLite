@@ -109,7 +109,7 @@
   box-shadow: 0 0 0 1000px #f8fafc inset !important;
 }
 
-.light .ms-logo-text {
+.light .brand-logo-text {
   color: #172033 !important;
 }
 
@@ -844,8 +844,8 @@
   letter-spacing: -0.01em;
 }
 
-/* Microsoft Logo Header Row */
-.ms-branding-header {
+/* Brand header row */
+.brand-header {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -855,13 +855,13 @@
   min-height: 28px;
 }
 
-.ms-logo-wrapper {
+.brand-logo-wrapper {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
 }
 
-.ms-logo-text {
+.brand-logo-text {
   font-size: 1.25rem;
   font-weight: 600;
   color: #ffffff;
