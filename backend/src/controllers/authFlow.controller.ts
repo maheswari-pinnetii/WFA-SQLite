@@ -126,6 +126,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const email = (req.body.email || '').trim();
     const password = req.body.password;
     const requestedRole = (req.body.role || 'EMPLOYEE').toUpperCase();
+    const validRoles = ['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE'];
+    if (!validRoles.includes(requestedRole)) {
+      res.status(400).json({ success: false, error: 'Invalid account role.' });
+      return;
+    }
+    const requestedEmployeeId = (req.body.employeeId || '').trim();
     const department = req.body.department || 'Engineering';
     const team = req.body.team || 'Core Team';
     const location = req.body.location || 'San Francisco';
@@ -152,7 +158,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const userId = `usr_${crypto.randomUUID()}`;
-    const employeeCode = `EMP-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+    const employeeCode = requestedEmployeeId || `EMP-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
     const passwordHash = password ? await bcrypt.hash(password, 10) : '';
     const now = new Date().toISOString();
 

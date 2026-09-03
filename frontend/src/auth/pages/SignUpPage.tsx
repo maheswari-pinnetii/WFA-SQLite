@@ -10,8 +10,12 @@ export const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
 
   // Form State
-  const [fullName, setFullName] = useState<string>('');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [employeeId, setEmployeeId] = useState<string>('');
   const [email, setEmail] = useState<string>('');
+  const [department, setDepartment] = useState<string>('Human Resources');
+  const [role, setRole] = useState<string>('HR');
   const [authMethod, setAuthMethod] = useState<AuthMethod>('password');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
@@ -26,8 +30,12 @@ export const SignUpPage: React.FC = () => {
    * Validate Form Fields
    */
   const validateForm = (): boolean => {
-    if (!fullName.trim()) {
-      setErrorMessage('Please enter your full name.');
+    if (!firstName.trim() || !lastName.trim()) {
+      setErrorMessage('Please enter your first and last name.');
+      return false;
+    }
+    if (!employeeId.trim()) {
+      setErrorMessage('Please enter your employee ID.');
       return false;
     }
     if (!email.trim() || !email.includes('@')) {
@@ -72,8 +80,11 @@ export const SignUpPage: React.FC = () => {
       if (authMethod === 'password') {
         // Standard Registration
         await signup({
-          name: fullName.trim(),
+          name: `${firstName.trim()} ${lastName.trim()}`,
           email: email.trim(),
+          employeeId: employeeId.trim(),
+          department,
+          role,
           password,
         });
 
@@ -83,7 +94,14 @@ export const SignUpPage: React.FC = () => {
         }, 1500);
       } else {
         // Passwordless Passkey Registration
-        await handlePasskeyRegistration(email.trim(), fullName.trim());
+        await signup({
+          name: `${firstName.trim()} ${lastName.trim()}`,
+          email: email.trim(),
+          employeeId: employeeId.trim(),
+          department,
+          role,
+        });
+        await handlePasskeyRegistration(email.trim(), `${firstName.trim()} ${lastName.trim()}`);
         setSuccessMessage('Passkey registered successfully! Redirecting to login...');
         setTimeout(() => {
           navigate('/login');
@@ -146,30 +164,31 @@ export const SignUpPage: React.FC = () => {
           )}
 
           <form onSubmit={handleSubmit} noValidate>
-            {/* Full Name */}
             <div className="input-field-group">
-              <label htmlFor="signup-name-input" className="overlaid-label">
-                Full Name
-              </label>
+              <label htmlFor="signup-first-name" className="overlaid-label">First Name</label>
               <div className="auth-input-wrapper">
-                <input
-                  id="signup-name-input"
-                  type="text"
-                  className="auth-text-input"
-                  placeholder="e.g. Alex Morgan"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  disabled={isLoading}
-                  autoComplete="name"
-                  required
-                />
+                <input id="signup-first-name" type="text" className="auth-text-input" placeholder="Priya" value={firstName} onChange={(e) => setFirstName(e.target.value)} disabled={isLoading} autoComplete="given-name" required />
+              </div>
+            </div>
+
+            <div className="input-field-group">
+              <label htmlFor="signup-last-name" className="overlaid-label">Last Name</label>
+              <div className="auth-input-wrapper">
+                <input id="signup-last-name" type="text" className="auth-text-input" placeholder="Nair" value={lastName} onChange={(e) => setLastName(e.target.value)} disabled={isLoading} autoComplete="family-name" required />
+              </div>
+            </div>
+
+            <div className="input-field-group">
+              <label htmlFor="signup-employee-id" className="overlaid-label">Employee ID</label>
+              <div className="auth-input-wrapper">
+                <input id="signup-employee-id" type="text" className="auth-text-input" placeholder="EMP-1002" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} disabled={isLoading} required />
               </div>
             </div>
 
             {/* Email Address */}
             <div className="input-field-group">
               <label htmlFor="signup-email-input" className="overlaid-label">
-                Work Email
+                Company Email
               </label>
               <div className="auth-input-wrapper">
                 <input
@@ -183,6 +202,31 @@ export const SignUpPage: React.FC = () => {
                   autoComplete="email"
                   required
                 />
+              </div>
+            </div>
+
+            <div className="input-field-group">
+              <label htmlFor="signup-department" className="overlaid-label">Department</label>
+              <div className="auth-input-wrapper">
+                <select id="signup-department" className="auth-text-input" value={department} onChange={(e) => setDepartment(e.target.value)} disabled={isLoading} required>
+                  <option>Human Resources</option>
+                  <option>Engineering</option>
+                  <option>Product Management</option>
+                  <option>Sales & Marketing</option>
+                  <option>Finance & Operations</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="input-field-group">
+              <label htmlFor="signup-role" className="overlaid-label">Role</label>
+              <div className="auth-input-wrapper">
+                <select id="signup-role" className="auth-text-input" value={role} onChange={(e) => setRole(e.target.value)} disabled={isLoading} required>
+                  <option value="HR">HR</option>
+                  <option value="EMPLOYEE">Employee</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="TEAM_LEAD">Team Lead</option>
+                </select>
               </div>
             </div>
 

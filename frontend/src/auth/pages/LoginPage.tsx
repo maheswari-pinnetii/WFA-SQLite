@@ -4,10 +4,11 @@ import { useAuth } from '../hooks/useAuth';
 import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
 import { EmailLoginCard } from '../components/EmailLoginCard';
 import { EmailLoginPayload } from '../../types/authFlow.types';
+import { authService } from '../services/auth.service';
 import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {
-  const { login, role } = useAuth();
+  const { login, role, setSession } = useAuth();
   const navigate = useNavigate();
 
   // Authenticate with email and password, then route to the user's dashboard.
@@ -82,6 +83,20 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const handlePasskeyLogin = async () => {
+    setLoading(true);
+    setErrorMessage(null);
+    try {
+      const result = await authService.passkeyLogin(currentEmail || undefined);
+      setSession({ user: result.user, token: result.token });
+      proceedToDashboard(result.user.role as Role);
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : 'Passkey sign-in failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="auth-page-wrapper">
       {/* Top Navbar / Navigation Header */}
@@ -96,6 +111,14 @@ export const LoginPage: React.FC = () => {
 
       {/* Main Multi-Step Authentication Container */}
       <main className="auth-single-container" id="auth-flow-main">
+        <button
+          type="button"
+          className="btn-outline-gray"
+          onClick={handlePasskeyLogin}
+          disabled={loading}
+        >
+          {loading ? 'Authenticating...' : 'Sign in with a passkey'}
+        </button>
         <EmailLoginCard
           onSubmit={handleEmailLogin}
           onDirectLogin={handleDirectLogin}
