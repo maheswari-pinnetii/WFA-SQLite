@@ -1,0 +1,15 @@
+meta {
+  name: AI Workforce Insights
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/v1/ai/insights
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{bearerToken}}
+}
