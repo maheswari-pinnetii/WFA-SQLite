@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
 import { ShieldCheck, Mail, Lock, User as UserIcon } from 'lucide-react';
+import { authService } from '../services/auth.service';
 
 export const SignUpPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
@@ -11,6 +11,7 @@ export const SignUpPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [usePasskey, setUsePasskey] = useState(false);
   
   const navigate = useNavigate();
 
@@ -20,35 +21,28 @@ export const SignUpPage: React.FC = () => {
     setError(null);
     setSuccess(null);
 
-    if (password !== confirmPassword) {
+    if (!usePasskey && password !== confirmPassword) {
       setError('Passwords do not match.');
       setLoading(false);
       return;
     }
     
-    if (password.length < 8) {
+    if (!usePasskey && password.length < 8) {
       setError('Password must be at least 8 characters long.');
       setLoading(false);
       return;
     }
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName
-          }
-        }
-      });
-
-      if (signUpError) throw signUpError;
-      
-      setSuccess('Account created successfully! Check your email to confirm, or sign in.');
-      setTimeout(() => {
-        navigate('/login', { replace: true });
-      }, 3000);
+      await authService.signup({ fullName, email, password: usePasskey ? undefined : password });
+      if (usePasskey) {
+        await authService.registerPasskey(email, fullName);
+        setSuccess('Account created and passkey registered.');
+        navigate('/employee/dashboard', { replace: true });
+      } else {
+        setSuccess('Account created successfully. You can now sign in.');
+        setTimeout(() => navigate('/login', { replace: true }), 1200);
+      }
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -124,6 +118,11 @@ export const SignUpPage: React.FC = () => {
               </div>
             </div>
 
+            <label className="flex items-start gap-3 rounded-xl border border-[var(--border-color)] p-3 text-sm text-[var(--text-secondary)]">
+              <input type="checkbox" checked={usePasskey} onChange={(e) => setUsePasskey(e.target.checked)} className="mt-1 accent-blue-600" />
+              <span><strong className="text-[var(--text-primary)]">Use a passkey on this device</strong><br />Fingerprint, Face ID, Windows Hello, or a security key.</span>
+            </label>
+
             <div className="space-y-1">
               <label className="text-sm font-bold text-[var(--text-secondary)]">Work Email</label>
               <div className="relative">
@@ -148,7 +147,7 @@ export const SignUpPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Minimum 8 characters"
-                  required
+                  required={!usePasskey}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
                 />
               </div>
@@ -163,7 +162,7 @@ export const SignUpPage: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter password"
-                  required
+                  required={!usePasskey}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
                 />
               </div>

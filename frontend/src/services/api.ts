@@ -42,7 +42,7 @@ axiosRetry(apiClient, {
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
     // Retry on network errors or 5xx status codes
-    return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response?.status >= 500;
+    return axiosRetry.isNetworkOrIdempotentRequestError(error) || (error.response?.status ?? 0) >= 500;
   },
 });
 

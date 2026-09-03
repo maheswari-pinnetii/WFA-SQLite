@@ -61,11 +61,11 @@ class InMemoryCache {
   public async getOrSet<T>(key: string, fetcher: () => Promise<T>, ttlSeconds: number = 3600): Promise<T> {
     const cached = this.get<T>(key);
     if (cached !== null) {
-      logger.debug('cache.hit', `Cache hit for key: ${key}`);
+      logger.info('cache.hit', `Cache hit for key: ${key}`);
       return cached;
     }
 
-    logger.debug('cache.miss', `Cache miss for key: ${key}. Executing fetcher.`);
+    logger.info('cache.miss', `Cache miss for key: ${key}. Executing fetcher.`);
     const freshData = await fetcher();
     this.set(key, freshData, ttlSeconds);
     return freshData;

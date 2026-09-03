@@ -1,5 +1,4 @@
 import { apiClient } from '../../services/api';
-import usersData from '../../mocks/data/users.json';
 
 const handleApiError = (error: any, fallbackMessage: string): never => {
   const message = error.response?.data?.message || error.message || fallbackMessage;
@@ -9,11 +8,11 @@ const handleApiError = (error: any, fallbackMessage: string): never => {
 export const authApi = {
   signup: async (signupData: any): Promise<any> => {
     try {
-      const response = await apiClient.post('/v1/auth/signup', signupData);
+      const response = await apiClient.post('/v1/auth/register', signupData);
       if (response.data && response.data.success) {
-        return response.data.data;
+        return response.data.data || response.data;
       }
-      throw new Error(response.data?.message || 'Signup failed');
+      throw new Error(response.data?.error || response.data?.message || 'Signup failed');
     } catch (error: any) {
       handleApiError(error, 'Signup failed');
     }
@@ -28,21 +27,10 @@ export const authApi = {
         mfaMethod
       });
       if (response.data && response.data.success) {
-        return response.data.data;
+        return response.data.data || response.data;
       }
       throw new Error(response.data?.message || 'Login failed');
     } catch (error: any) {
-      // Graceful offline fallback on Network Error
-      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error' || !error.response) {
-        const found = usersData.find((u: any) => u.email.toLowerCase() === normalizedEmail) || usersData.find((u: any) => u.role === 'EMPLOYEE');
-        if (found) {
-          return {
-            token: `mock-jwt-auth-${found.id}-${Date.now()}`,
-            user: found,
-            requiresMfa: false
-          };
-        }
-      }
       handleApiError(error, 'Login failed');
     }
   },
@@ -58,14 +46,6 @@ export const authApi = {
       }
       throw new Error(response.data?.message || 'MFA OTP Verification failed');
     } catch (error: any) {
-      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error' || !error.response) {
-        const defaultUser = usersData[0];
-        return {
-          token: `mock-jwt-auth-${defaultUser.id}-${Date.now()}`,
-          user: defaultUser,
-          recoveryCodes: []
-        };
-      }
       handleApiError(error, 'MFA OTP Verification failed');
     }
   },
@@ -117,6 +97,30 @@ export const authApi = {
     }
   },
 
+  passkeyRegisterOptions: async (email: string, fullName: string): Promise<any> => {
+    const response = await apiClient.post('/api/auth/passkey/register-options', { email, fullName });
+    if (!response.data?.success) throw new Error(response.data?.error || 'Unable to start passkey registration.');
+    return response.data;
+  },
+
+  passkeyRegisterVerify: async (email: string, fullName: string, attestationResponse: any): Promise<any> => {
+    const response = await apiClient.post('/api/auth/passkey/register-verify', { email, fullName, attestationResponse });
+    if (!response.data?.success) throw new Error(response.data?.error || 'Passkey registration failed.');
+    return response.data;
+  },
+
+  passkeyLoginOptions: async (email?: string): Promise<any> => {
+    const response = await apiClient.post('/api/auth/passkey/login-options', { email });
+    if (!response.data?.success) throw new Error(response.data?.error || 'Unable to start passkey sign-in.');
+    return response.data;
+  },
+
+  passkeyLoginVerify: async (email: string, assertionResponse: any): Promise<any> => {
+    const response = await apiClient.post('/api/auth/passkey/login-verify', { email, assertionResponse });
+    if (!response.data?.success) throw new Error(response.data?.error || 'Passkey sign-in failed.');
+    return response.data;
+  },
+
   ssoCallback: async (code: string, state: string, provider: string): Promise<any> => {
     try {
       const response = await apiClient.post('/v1/auth/sso/callback', { code, state, provider });
@@ -145,15 +149,6 @@ export const authApi = {
       }
       throw new Error(response.data?.error || response.data?.message || 'Biometric authentication failed');
     } catch (error: any) {
-      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error' || !error.response) {
-        const found = usersData.find((u: any) => u.email.toLowerCase() === payload.email.toLowerCase().trim()) || usersData[0];
-        return {
-          success: true,
-          token: `mock-jwt-biometric-${found.id}-${Date.now()}`,
-          user: found,
-          authMethod: payload.authMethod
-        };
-      }
       handleApiError(error, 'Biometric authentication failed');
     }
   }

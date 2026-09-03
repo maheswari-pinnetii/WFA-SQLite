@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
 import { KeyRound, Mail, ShieldCheck } from 'lucide-react';
 import { ROLE_HOME_PATHS } from '../../security/roles/roles';
 import { useAuth } from '../hooks/useAuth';
+import { authService } from '../services/auth.service';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -12,7 +12,7 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   const navigate = useNavigate();
-  const { role } = useAuth(); // for fallback navigation if needed
+  const { login } = useAuth();
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,17 +20,8 @@ export const LoginPage: React.FC = () => {
     setError(null);
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) throw signInError;
-      
-      // Supabase onAuthStateChange in AuthProvider will handle the session
-      // and redirect once the role is fetched. 
-      // For now, we can just navigate to a safe fallback or let a ProtectedRoute handle it.
-      navigate('/admin/dashboard', { replace: true });
+      const result = await login(email, password);
+      navigate(ROLE_HOME_PATHS[result.user.role as keyof typeof ROLE_HOME_PATHS] || '/employee/dashboard', { replace: true });
     } catch (err: any) {
       setError('Email or password is incorrect.');
     } finally {
@@ -43,9 +34,8 @@ export const LoginPage: React.FC = () => {
     setError(null);
     
     try {
-      const { error: passkeyError } = await supabase.auth.signInWithPasskey();
-      if (passkeyError) throw passkeyError;
-      navigate('/admin/dashboard', { replace: true });
+      const result = await authService.passkeyLogin(email || undefined);
+      navigate(ROLE_HOME_PATHS[result.user.role as keyof typeof ROLE_HOME_PATHS] || '/employee/dashboard', { replace: true });
     } catch (err: any) {
       if (err.message?.includes('cancel')) {
         setError('Passkey sign-in was cancelled.');
@@ -61,10 +51,10 @@ export const LoginPage: React.FC = () => {
     setLoadingMethod(provider === 'google' ? 'google' : 'microsoft');
     setError(null);
     try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider,
-      });
-      if (oauthError) throw oauthError;
+      const url = provider === 'google'
+        ? await authService.getGoogleLoginUrl()
+        : await authService.getMicrosoftLoginUrl();
+      window.location.assign(url);
     } catch (err: any) {
       setError('Unable to complete sign-in. Please try again.');
     } finally {

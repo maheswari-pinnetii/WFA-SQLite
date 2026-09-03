@@ -2,12 +2,16 @@ import { Request, Response } from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse,
+} from '@simplewebauthn/server';
 import { query, execute } from '../database/connection.js';
 import { env } from '../config/env.js';
 import {
   UserProfile,
-  PublicKeyCredentialCreationOptionsJSON,
-  PublicKeyCredentialRequestOptionsJSON,
 } from '../types/authFlow.types.js';
 
 const JWT_SECRET = env.JWT_SECRET || 'wfa_platform_secret_jwt_key_2026';
@@ -81,6 +85,9 @@ function issueJwtToken(user: any): string {
     { expiresIn: JWT_EXPIRES_IN }
   );
 }
+
+const passkeyRpId = 'localhost';
+const passkeyOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // ======================================================================
 // 1. Standard Authentication (Email/Password) Handlers
@@ -312,32 +319,24 @@ export const generatePasskeyRegisterOptions = async (req: Request, res: Response
       [challenge, userId, normalizedEmail, expiresAt, now.toISOString()]
     );
 
-    const options: PublicKeyCredentialCreationOptionsJSON = {
-      challenge,
-      rp: {
-        name: 'Stackly Workforce Identity',
-        id: req.hostname === 'localhost' ? 'localhost' : undefined,
-      },
-      user: {
-        id: userId,
-        name: normalizedEmail,
-        displayName,
-      },
-      pubKeyCredParams: [
-        { type: 'public-key', alg: -7 },   // ES256 (ECDSA w/ SHA-256)
-        { type: 'public-key', alg: -257 }, // RS256 (RSA w/ SHA-256)
-      ],
+    const options = await generateRegistrationOptions({
+      rpName: 'Stackly Workforce Identity',
+      rpID: passkeyRpId,
+      userName: normalizedEmail,
+      userDisplayName: displayName,
+      userID: userId,
       timeout: 60000,
-      attestation: 'none',
-      authenticatorSelection: {
-        residentKey: 'preferred',
-        userVerification: 'preferred',
-      },
-    };
+      attestationType: 'none',
+      authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred' },
+    });
+    await execute(
+      "UPDATE passkey_challenges SET challenge = ? WHERE email = ? AND type = 'register'",
+      [options.challenge, normalizedEmail]
+    );
 
     res.status(200).json({
       success: true,
-      challenge,
+      challenge: options.challenge,
       options,
     });
   } catch (error: any) {
@@ -389,8 +388,26 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
       user = users[0];
     }
 
+    const challengeRows = await query<any>(
+      "SELECT challenge FROM passkey_challenges WHERE email = ? AND type = 'register' AND expires_at > datetime('now') ORDER BY created_at DESC LIMIT 1",
+      [normalizedEmail]
+    );
+    if (!challengeRows?.[0]) {
+      res.status(401).json({ success: false, error: 'Passkey registration challenge expired or missing.' });
+      return;
+    }
+    const verification = await verifyRegistrationResponse({
+      response: attestationResponse,
+      expectedChallenge: challengeRows[0].challenge,
+      expectedOrigin: passkeyOrigin,
+      expectedRPID: passkeyRpId,
+    });
+    if (!verification.verified || !verification.registrationInfo) {
+      res.status(400).json({ success: false, error: 'Passkey attestation could not be verified.' });
+      return;
+    }
     const credentialDbId = `pk_${crypto.randomUUID()}`;
-    const publicKey = `fido2_key_${crypto.randomBytes(24).toString('hex')}`;
+    const publicKey = Buffer.from(verification.registrationInfo.credential.publicKey).toString('base64url');
     const transports = JSON.stringify(attestationResponse.response?.transports || ['internal', 'hybrid']);
 
     // Persist passkey credential into SQLite passkey_credentials table
@@ -456,12 +473,12 @@ export const generatePasskeyLoginOptions = async (req: Request, res: Response): 
       [challenge, normalizedEmail, expiresAt, now.toISOString()]
     );
 
-    const options: PublicKeyCredentialRequestOptionsJSON = {
+    const options = await generateAuthenticationOptions({
+      rpID: passkeyRpId,
       challenge,
       timeout: 60000,
       userVerification: 'preferred',
-      rpId: req.hostname === 'localhost' ? 'localhost' : undefined,
-    };
+    });
 
     // If email is provided, query registered credential IDs from SQLite database
     if (normalizedEmail) {
@@ -524,6 +541,29 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
 
     if (credentials && credentials.length > 0) {
       const record = credentials[0];
+      const challengeRows = await query<any>(
+        "SELECT challenge FROM passkey_challenges WHERE email = ? AND type = 'login' AND expires_at > datetime('now') ORDER BY created_at DESC LIMIT 1",
+        [(email || '').toLowerCase().trim()]
+      );
+      if (!challengeRows?.[0]) {
+        res.status(401).json({ success: false, error: 'Passkey login challenge expired or missing.' });
+        return;
+      }
+      const verification = await verifyAuthenticationResponse({
+        response: assertionResponse,
+        expectedChallenge: challengeRows[0].challenge,
+        expectedOrigin: passkeyOrigin,
+        expectedRPID: passkeyRpId,
+        credential: {
+          id: record.credential_id,
+          publicKey: Buffer.from(record.public_key, 'base64url'),
+          counter: Number(record.counter || 0),
+        },
+      });
+      if (!verification.verified) {
+        res.status(401).json({ success: false, error: 'Passkey assertion could not be verified.' });
+        return;
+      }
       authenticatedUser = {
         id: record.user_id,
         name: record.name,
@@ -539,31 +579,15 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
       // Update counter and last_used_at in SQLite database
       const now = new Date().toISOString();
       await execute(
-        'UPDATE passkey_credentials SET counter = counter + 1, last_used_at = ? WHERE credential_id = ?',
-        [now, assertionResponse.id]
+        'UPDATE passkey_credentials SET counter = ?, last_used_at = ? WHERE credential_id = ?',
+        [verification.authenticationInfo.newCounter, now, assertionResponse.id]
       );
     } else {
-      // Check if target email was specified for direct user matching
-      const targetEmail = (email || assertionResponse.email || '').toLowerCase().trim();
-      if (targetEmail) {
-        const matchingUsers = await query<any>(
-          'SELECT * FROM users WHERE LOWER(email) = ?',
-          [targetEmail]
-        );
-        if (matchingUsers && matchingUsers.length > 0) {
-          authenticatedUser = matchingUsers[0];
-        }
-      }
-
-      // If still not found, fallback to active demo user in SQLite for dev simulation
-      if (!authenticatedUser) {
-        const defaultUsers = await query<any>(
-          "SELECT * FROM users WHERE status = 'ACTIVE' LIMIT 1"
-        );
-        if (defaultUsers && defaultUsers.length > 0) {
-          authenticatedUser = defaultUsers[0];
-        }
-      }
+      res.status(401).json({
+        success: false,
+        error: 'Passkey credential not recognized on this device.',
+      });
+      return;
     }
 
     if (!authenticatedUser) {

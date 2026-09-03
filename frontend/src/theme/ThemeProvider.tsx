@@ -48,7 +48,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.setProperty('--status-error', palette.error);
     root.style.setProperty('--status-warning', palette.warning);
     root.style.setProperty('--status-info', palette.info);
-    root.style.setProperty('--status-pending', palette.pending);
+    root.style.setProperty('--status-pending', (palette as any).pending || '#f59e0b');
 
     // Apply Role Colors in a Dynamic Style Tag
     const roles = themeObject.roles;
