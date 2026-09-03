@@ -60,6 +60,8 @@ export interface PasswordlessLoginPayload {
   saveTrustedDevice?: boolean;
   trustedDeviceName?: string;
   biometricLockMethod?: BiometricLockMethod;
+  pin?: string;
+  pattern?: number[];
 }
 
 export interface SignUpFormValues {

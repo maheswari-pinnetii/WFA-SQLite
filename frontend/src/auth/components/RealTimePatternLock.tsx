@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 interface RealTimePatternLockProps {
-  onSuccess: () => void;
+  onSuccess: (pattern?: number[]) => void;
   isLoading?: boolean;
 }
 
@@ -50,7 +50,7 @@ export const RealTimePatternLock: React.FC<RealTimePatternLockProps> = ({
     if (selectedDots.length >= 4) {
       setPatternStatus('success');
       setTimeout(() => {
-        onSuccess();
+        onSuccess(selectedDots);
       }, 500);
     } else if (selectedDots.length > 0) {
       setPatternStatus('error');
@@ -74,10 +74,11 @@ export const RealTimePatternLock: React.FC<RealTimePatternLockProps> = ({
   // Quick Demo Auto-Unlock (for accessibility or quick click)
   const handleQuickPattern = () => {
     if (isDrawing || patternStatus === 'success') return;
-    setSelectedDots([0, 1, 2, 4, 6, 7, 8]); // Z or S wave pattern
+    const demoDots = [0, 1, 2, 4, 6, 7, 8];
+    setSelectedDots(demoDots); // Z or S wave pattern
     setPatternStatus('success');
     setTimeout(() => {
-      onSuccess();
+      onSuccess(demoDots);
     }, 450);
   };
 

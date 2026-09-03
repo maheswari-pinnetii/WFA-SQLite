@@ -169,6 +169,63 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
 
       expect(verifyRes.data.isTrusted).toBe(false);
     });
+
+    it('1.9 should authenticate via real-time Biometric / Face recognition API (POST /api/auth/biometric/login)', async () => {
+      const res = await client.post('/api/auth/biometric/login', {
+        email: testEmail,
+        authMethod: 'face',
+        deviceName: 'MacBook Pro (Face ID)',
+        saveTrustedDevice: true,
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.data.success).toBe(true);
+      expect(res.data.token).toBeDefined();
+      expect(res.data.user.email).toBe(testEmail);
+      expect(res.data.authMethod).toBe('face');
+    });
+
+    it('1.10 should authenticate via real-time Device PIN API with pin: 1234', async () => {
+      const res = await client.post('/api/auth/biometric/login', {
+        email: testEmail,
+        authMethod: 'device_pin',
+        pin: '1234',
+        deviceName: 'Workstation Numeric Keypad',
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.data.success).toBe(true);
+      expect(res.data.token).toBeDefined();
+      expect(res.data.authMethod).toBe('device_pin');
+    });
+
+    it('1.11 should authenticate via real-time Pattern Lock API with pattern array', async () => {
+      const res = await client.post('/api/auth/biometric/login', {
+        email: testEmail,
+        authMethod: 'pattern',
+        pattern: [0, 1, 2, 4, 6, 7, 8],
+        deviceName: 'Android Pattern Device',
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.data.success).toBe(true);
+      expect(res.data.token).toBeDefined();
+      expect(res.data.authMethod).toBe('pattern');
+    });
+
+    it('1.12 should authenticate via real-time Homescreen Lock API and save trusted device', async () => {
+      const res = await client.post('/api/auth/biometric/login', {
+        email: testEmail,
+        authMethod: 'screen_lock',
+        saveTrustedDevice: true,
+        deviceName: 'Corporate Windows Hello Laptop',
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.data.success).toBe(true);
+      expect(res.data.token).toBeDefined();
+      expect(res.data.authMethod).toBe('screen_lock');
+    });
   });
 
   describe('2. Frontend UI: Real-Time Lock Mechanisms & Save Trusted Device', () => {

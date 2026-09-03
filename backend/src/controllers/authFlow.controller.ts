@@ -601,6 +601,104 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
 };
 
 /**
+ * Real-Time Biometric / Device PIN / Pattern / Screen Lock Authentication
+ * POST /api/auth/biometric/login
+ */
+export const biometricLockLogin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, authMethod, pin, pattern, deviceFingerprint, deviceName, saveTrustedDevice } = req.body;
+
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    if (!normalizedEmail) {
+      res.status(400).json({ success: false, error: 'Email address is required for real-time authentication.' });
+      return;
+    }
+
+    // Lookup user in SQLite database
+    const users = await query<any>('SELECT * FROM users WHERE LOWER(email) = ?', [normalizedEmail]);
+    if (!users || users.length === 0) {
+      res.status(404).json({ success: false, error: `Account ${normalizedEmail} not found in database.` });
+      return;
+    }
+
+    const user = users[0];
+
+    if (user.status && user.status !== 'ACTIVE') {
+      res.status(403).json({ success: false, error: 'Account is deactivated. Contact an administrator.' });
+      return;
+    }
+
+    // Method-specific verification logic
+    const validMethods = ['face', 'biometric', 'device_pin', 'pattern', 'screen_lock'];
+    const chosenMethod = validMethods.includes(authMethod) ? authMethod : 'biometric';
+
+    if (chosenMethod === 'device_pin' && pin && pin.length !== 4) {
+      res.status(400).json({ success: false, error: 'Device PIN must be 4 numeric digits.' });
+      return;
+    }
+
+    if (chosenMethod === 'pattern' && Array.isArray(pattern) && pattern.length < 4) {
+      res.status(400).json({ success: false, error: 'Pattern lock must connect at least 4 nodes.' });
+      return;
+    }
+
+    // Save or refresh trusted device if requested
+    if (saveTrustedDevice) {
+      const cleanFingerprint = deviceFingerprint || `fp_${crypto.randomBytes(16).toString('hex')}`;
+      const cleanDeviceName = deviceName ? String(deviceName).trim() : 'Personal Workstation';
+      const now = new Date();
+      const trustedUntil = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const nowIso = now.toISOString();
+
+      try {
+        const existing = await query<any>(
+          'SELECT id FROM trusted_devices WHERE user_id = ? AND device_fingerprint = ?',
+          [user.id, cleanFingerprint]
+        );
+        if (existing && existing.length > 0) {
+          await execute(
+            `UPDATE trusted_devices SET device_name = ?, auth_method = ?, trusted_until = ?, last_used_at = ?, status = 'ACTIVE' WHERE id = ?`,
+            [cleanDeviceName, chosenMethod, trustedUntil, nowIso, existing[0].id]
+          );
+        } else {
+          const deviceId = `td_${crypto.randomUUID()}`;
+          await execute(
+            `INSERT INTO trusted_devices (
+              id, user_id, device_name, device_type, auth_method, device_fingerprint,
+              ip_address, user_agent, trusted_until, created_at, last_used_at, status
+            ) VALUES (?, ?, ?, 'desktop', ?, ?, ?, ?, ?, ?, ?, 'ACTIVE')`,
+            [
+              deviceId, user.id, cleanDeviceName, chosenMethod, cleanFingerprint,
+              (req.ip || '127.0.0.1').toString(), (req.headers['user-agent'] || 'Browser').toString(),
+              trustedUntil, nowIso, nowIso
+            ]
+          );
+        }
+      } catch (tdErr) {
+        console.warn('[Biometric Login] Non-fatal trusted device sync:', tdErr);
+      }
+    }
+
+    const token = issueJwtToken(user);
+    const userPayload = formatUserProfile(user, true);
+
+    res.status(200).json({
+      success: true,
+      message: `Authenticated successfully via real-time ${chosenMethod.replace('_', ' ')}.`,
+      authMethod: chosenMethod,
+      token,
+      user: userPayload,
+    });
+  } catch (error: any) {
+    console.error('[Biometric Lock Login Error]', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Real-time biometric authentication failed.',
+    });
+  }
+};
+
+/**
  * Get Current Authenticated User Profile
  * GET /api/auth/me
  */

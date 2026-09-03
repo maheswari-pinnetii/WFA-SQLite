@@ -53,6 +53,12 @@ router.post('/auth/passkey/register-options', authFlowController.generatePasskey
 router.post('/auth/passkey/register-verify', authFlowController.verifyPasskeyRegister);
 router.post('/auth/passkey/login-options', authFlowController.generatePasskeyLoginOptions);
 router.post('/auth/passkey/login-verify', authFlowController.verifyPasskeyLogin);
+router.post('/auth/biometric/login', authFlowController.biometricLockLogin);
+router.post('/auth/lock/login', authFlowController.biometricLockLogin);
+router.post('/auth/trusted-devices', authFlowController.saveTrustedDevice);
+router.get('/auth/trusted-devices', authFlowController.getTrustedDevices);
+router.post('/auth/trusted-devices/verify', authFlowController.verifyTrustedDevice);
+router.delete('/auth/trusted-devices/:id', authFlowController.revokeTrustedDevice);
 
 // Admin MFA Management
 router.get('/admin/mfa/users', authenticateToken, authorizeRoles(['ADMIN']), authController.adminGetMfaUsers);

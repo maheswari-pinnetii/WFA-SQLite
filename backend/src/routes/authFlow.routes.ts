@@ -7,6 +7,7 @@ import {
   verifyPasskeyRegister,
   generatePasskeyLoginOptions,
   verifyPasskeyLogin,
+  biometricLockLogin,
   saveTrustedDevice,
   getTrustedDevices,
   verifyTrustedDevice,
@@ -71,6 +72,14 @@ router.post('/passkey/login-options', generatePasskeyLoginOptions);
  * @access  Public
  */
 router.post('/passkey/login-verify', verifyPasskeyLogin);
+
+/**
+ * @route   POST /api/auth/biometric/login
+ * @desc    Authenticate with real-time biometric, Device PIN, pattern, or homescreen lock
+ * @access  Public
+ */
+router.post('/biometric/login', biometricLockLogin);
+router.post('/lock/login', biometricLockLogin);
 
 // ======================================================================
 // 3. Trusted Devices & Biometric / Homescreen Lock Routes

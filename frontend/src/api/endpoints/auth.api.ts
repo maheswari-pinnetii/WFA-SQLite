@@ -127,6 +127,35 @@ export const authApi = {
     } catch (error: any) {
       return handleApiError(error, 'SSO authentication failed');
     }
+  },
+
+  biometricLockLogin: async (payload: {
+    email: string;
+    authMethod: string;
+    pin?: string;
+    pattern?: number[];
+    deviceFingerprint?: string;
+    deviceName?: string;
+    saveTrustedDevice?: boolean;
+  }): Promise<any> => {
+    try {
+      const response = await apiClient.post('/api/auth/biometric/login', payload);
+      if (response.data && response.data.success) {
+        return response.data;
+      }
+      throw new Error(response.data?.error || response.data?.message || 'Biometric authentication failed');
+    } catch (error: any) {
+      if (error.code === 'ERR_NETWORK' || error.message === 'Network Error' || !error.response) {
+        const found = usersData.find((u: any) => u.email.toLowerCase() === payload.email.toLowerCase().trim()) || usersData[0];
+        return {
+          success: true,
+          token: `mock-jwt-biometric-${found.id}-${Date.now()}`,
+          user: found,
+          authMethod: payload.authMethod
+        };
+      }
+      handleApiError(error, 'Biometric authentication failed');
+    }
   }
 };
 

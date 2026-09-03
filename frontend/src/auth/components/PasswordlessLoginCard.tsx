@@ -75,13 +75,17 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
   /**
    * Real-Time Unlock Success Handler
    */
-  const handleRealtimeSuccess = async () => {
+  const handleRealtimeSuccess = async (lockPayload?: string | number[]) => {
     saveTrustedDeviceRecord();
+    const pin = typeof lockPayload === 'string' ? lockPayload : undefined;
+    const pattern = Array.isArray(lockPayload) ? lockPayload : undefined;
     await onPasskeyLogin({
       email,
       biometricLockMethod: lockMethod,
       saveTrustedDevice,
       trustedDeviceName,
+      pin,
+      pattern,
     });
   };
 

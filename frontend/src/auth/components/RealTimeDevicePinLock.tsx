@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 interface RealTimeDevicePinLockProps {
-  onSuccess: () => void;
+  onSuccess: (pin?: string) => void;
   isLoading?: boolean;
 }
 
@@ -49,7 +49,7 @@ export const RealTimeDevicePinLock: React.FC<RealTimeDevicePinLockProps> = ({
       setIsSuccess(true);
       setIsVerifying(false);
       setTimeout(() => {
-        onSuccess();
+        onSuccess(enteredPin);
       }, 500);
     } else {
       setErrorStatus(true);

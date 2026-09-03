@@ -40,6 +40,30 @@ export const authService = {
     return response;
   },
 
+  biometricLockLogin: async (payload: {
+    email: string;
+    authMethod: string;
+    pin?: string;
+    pattern?: number[];
+    deviceFingerprint?: string;
+    deviceName?: string;
+    saveTrustedDevice?: boolean;
+  }) => {
+    const response = await authApi.biometricLockLogin(payload);
+    if (response && response.token && response.user) {
+      const user = normalizeUser(response.user);
+      if (!user) throw new Error('Biometric authentication returned an invalid user session.');
+      const token = response.token;
+      setAccessToken(token);
+      sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+      return { ...response, user };
+    }
+    return response;
+  },
+
   verifyMfa: async (challengeId: string, code: string) => {
     const data = await authApi.verifyMfa(challengeId, code);
     const { token, user, recoveryCodes } = data;
