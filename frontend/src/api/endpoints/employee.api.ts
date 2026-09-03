@@ -42,6 +42,12 @@ export const employeeApi = {
     return employees.find((employee: any) => employee.id === id);
   },
 
+  createEmployee: async (employee: Partial<Employee> & { id: string; name: string; email: string; department: string }): Promise<Employee> => {
+    const response = await apiClient.post('/v1/employees', employee);
+    if (response.data?.success) return response.data.data;
+    throw new Error(response.data?.message || 'Unable to create employee.');
+  },
+
   updateEmployeeStatus: async (id: string, status: Employee['status']): Promise<Employee> => {
     const response = await apiClient.put(`/v1/employees/${id}/status`, { status });
     if (response.data?.success) return response.data.data;

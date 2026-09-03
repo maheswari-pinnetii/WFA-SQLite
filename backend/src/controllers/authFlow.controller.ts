@@ -97,6 +97,21 @@ function getPasskeyConfig(req: Request): { rpID: string; origin: string } {
   return { origin, rpID: new URL(origin).hostname };
 }
 
+const wait = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+async function executeWithRetry(sql: string, params: any[] = [], attempts = 6): Promise<any> {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await execute(sql, params);
+    } catch (error: any) {
+      const message = String(error?.message || '').toLowerCase();
+      const retryable = message.includes('database is locked') || message.includes('database is busy') || error?.code === 'SQLITE_BUSY' || error?.code === 'SQLITE_LOCKED';
+      if (!retryable || attempt === attempts - 1) throw error;
+      await wait(25 * (attempt + 1));
+    }
+  }
+}
+
 // ======================================================================
 // 1. Standard Authentication (Email/Password) Handlers
 // ======================================================================
@@ -148,7 +163,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const defaultPermissions = JSON.stringify(permissionsList);
 
     // Persist into SQLite users table
-    await execute(
+    await executeWithRetry(
       `INSERT INTO users (
         id, name, email, password_hash, role, department, team, location,
         title, clearanceLevel, status, permissions, mfa_enabled,
@@ -159,7 +174,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     // Also persist corresponding record in employees table
     try {
-      await execute(
+      await executeWithRetry(
         `INSERT OR IGNORE INTO employees (
           id, employeeCode, name, email, role, department, team, location,
           designation, joinDate, status, organizationId, companyId, createdAt, updatedAt
@@ -193,6 +208,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
   } catch (error: any) {
     console.error('[Register Error]', error);
+    if (String(error?.message || '').toLowerCase().includes('unique') && String(error?.message || '').toLowerCase().includes('email')) {
+      res.status(409).json({
+        success: false,
+        error: 'An account with this email address already exists.',
+      });
+      return;
+    }
     res.status(500).json({
       success: false,
       error: error.message || 'Internal server error during registration.',
@@ -304,7 +326,6 @@ export const generatePasskeyRegisterOptions = async (req: Request, res: Response
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const challenge = generateChallenge();
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString(); // 5 min TTL
 
@@ -320,27 +341,25 @@ export const generatePasskeyRegisterOptions = async (req: Request, res: Response
     const userId = users && users.length > 0 ? users[0].id : `usr_${crypto.randomUUID()}`;
     const displayName = fullName || (users && users.length > 0 ? users[0].name : normalizedEmail.split('@')[0]);
 
-    // Persist challenge into SQLite
-    await execute(
-      `INSERT OR REPLACE INTO passkey_challenges (challenge, user_id, email, type, expires_at, created_at)
-       VALUES (?, ?, ?, 'register', ?, ?)`,
-      [challenge, userId, normalizedEmail, expiresAt, now.toISOString()]
-    );
-
     const { rpID } = getPasskeyConfig(req);
     const options = await generateRegistrationOptions({
       rpName: 'Stackly Workforce Identity',
       rpID,
       userName: normalizedEmail,
       userDisplayName: displayName,
-      userID: userId,
+      userID: new TextEncoder().encode(userId),
       timeout: 60000,
       attestationType: 'none',
       authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred' },
     });
     await execute(
-      "UPDATE passkey_challenges SET challenge = ? WHERE email = ? AND type = 'register'",
-      [options.challenge, normalizedEmail]
+      "DELETE FROM passkey_challenges WHERE email = ? AND type = 'register'",
+      [normalizedEmail]
+    );
+    await execute(
+      `INSERT INTO passkey_challenges (challenge, user_id, email, type, expires_at, created_at)
+       VALUES (?, ?, ?, 'register', ?, ?)`,
+      [options.challenge, userId, normalizedEmail, expiresAt, now.toISOString()]
     );
 
     res.status(200).json({

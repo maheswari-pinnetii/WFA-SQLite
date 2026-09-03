@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { supabase } from '../../lib/supabase';
-import { KeyRound, ShieldCheck, Mail, Smartphone, Activity } from 'lucide-react';
+import { KeyRound, ShieldCheck, Smartphone, Activity } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { authService } from '../services/auth.service';
 
 export const SecuritySettings: React.FC = () => {
   const { user } = useAuth();
@@ -15,21 +15,15 @@ export const SecuritySettings: React.FC = () => {
     setSuccess(null);
     
     try {
-      const { data, error: registerError } = await supabase.auth.admin.createUser({
-        // wait, we shouldn't use admin.createUser to register a passkey.
-        // the prompt specified: supabase.auth.registerPasskey()
-      });
-      // Actually, standard is:
-      // const { data, error } = await supabase.auth.updateUser({ ... }) or specific webauthn API.
-      // But let's trust the prompt's API instruction: `supabase.auth.registerPasskey()`
-      
-      const { error: passkeyError } = (supabase.auth as any).registerPasskey();
-      if (passkeyError) throw passkeyError;
+      if (!user?.email || !user.name) {
+        throw new Error('Your account profile is incomplete. Add a name and email before registering a passkey.');
+      }
+      await authService.registerPasskey(user.email, user.name);
 
       setSuccess('Passkey registered successfully! You can now use your device biometrics to sign in.');
     } catch (err: any) {
-      if (err.message?.includes('cancel')) {
-        setError('Passkey registration was cancelled.');
+      if (err.name === 'NotAllowedError' || err.message?.toLowerCase().includes('cancel')) {
+        setError('Passkey registration was cancelled or not allowed by the browser.');
       } else {
         setError(err.message || 'Unable to register passkey. Ensure your device supports WebAuthn.');
       }

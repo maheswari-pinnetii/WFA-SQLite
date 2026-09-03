@@ -37,6 +37,11 @@ export const EmployeeManagement: React.FC = () => {
   const [pageSize, setPageSize] = useState(25); // Default page size: 25
 
   const [employeesData, setEmployeesData] = useState<Employee[]>([]);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createSuccess, setCreateSuccess] = useState<string | null>(null);
+  const [newEmployee, setNewEmployee] = useState({ id: '', name: '', email: '', department: 'Human Resources', role: 'HR' });
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 25,
@@ -98,6 +103,30 @@ export const EmployeeManagement: React.FC = () => {
     setTempFilters(defaultFilters);
     setFilters(defaultFilters);
     setPage(1);
+  };
+
+  const handleCreateEmployee = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setCreateError(null);
+    setCreateSuccess(null);
+    setIsCreating(true);
+    try {
+      await employeeApi.createEmployee({
+        id: newEmployee.id.trim(),
+        name: newEmployee.name.trim(),
+        email: newEmployee.email.trim().toLowerCase(),
+        department: newEmployee.department,
+        role: newEmployee.role,
+      });
+      setCreateSuccess(`${newEmployee.name.trim()} was added to the employee directory.`);
+      setNewEmployee({ id: '', name: '', email: '', department: 'Human Resources', role: 'HR' });
+      setShowCreateForm(false);
+      await fetchPaginatedEmployees();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Unable to create employee.');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleClearAll = () => {
@@ -196,8 +225,62 @@ export const EmployeeManagement: React.FC = () => {
             <h2 className="text-2xl font-extrabold tracking-tight">Workforce Employee Directory</h2>
             <p className="text-sm text-slate-400">Complete workforce personnel roster and department assignments</p>
           </div>
-          <Button icon={<UserPlus size={16} />}>Onboard Employee</Button>
+          <Button icon={<UserPlus size={16} />} onClick={() => { setCreateError(null); setShowCreateForm(true); }}>
+            Onboard Employee
+          </Button>
         </div>
+
+        {createSuccess && (
+          <div role="status" className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+            {createSuccess}
+          </div>
+        )}
+
+        {showCreateForm && (
+          <div className="glass-panel p-5">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-white">Add employee</h3>
+                <p className="text-xs text-slate-400">Create a directory record with a name and work email.</p>
+              </div>
+              <button type="button" onClick={() => setShowCreateForm(false)} className="text-slate-400 hover:text-white" aria-label="Close add employee form">×</button>
+            </div>
+            {createError && <div role="alert" className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">{createError}</div>}
+            <form onSubmit={handleCreateEmployee} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <label className="space-y-1 text-xs font-semibold text-slate-300">
+                Employee ID
+                <input required value={newEmployee.id} onChange={(event) => setNewEmployee({ ...newEmployee, id: event.target.value })} placeholder="EMP-1001" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+              </label>
+              <label className="space-y-1 text-xs font-semibold text-slate-300">
+                Full name
+                <input required minLength={2} value={newEmployee.name} onChange={(event) => setNewEmployee({ ...newEmployee, name: event.target.value })} placeholder="Alex Morgan" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+              </label>
+              <label className="space-y-1 text-xs font-semibold text-slate-300">
+                Work email
+                <input required type="email" value={newEmployee.email} onChange={(event) => setNewEmployee({ ...newEmployee, email: event.target.value })} placeholder="alex@company.com" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+              </label>
+              <label className="space-y-1 text-xs font-semibold text-slate-300">
+                Department
+                <select required value={newEmployee.department} onChange={(event) => setNewEmployee({ ...newEmployee, department: event.target.value })} className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500">
+                  {departments.filter((department) => department !== 'ALL').map((department) => <option key={department}>{department}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1 text-xs font-semibold text-slate-300">
+                Role
+                <select required value={newEmployee.role} onChange={(event) => setNewEmployee({ ...newEmployee, role: event.target.value })} className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500">
+                  <option value="HR">HR</option>
+                  <option value="EMPLOYEE">Employee</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="TEAM_LEAD">Team Lead</option>
+                </select>
+              </label>
+              <div className="flex justify-end gap-3 md:col-span-2">
+                <Button type="button" variant="outline" onClick={() => setShowCreateForm(false)}>Cancel</Button>
+                <Button type="submit" icon={<UserPlus size={15} />} isLoading={isCreating}>Create employee</Button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Dedicated Filter Toolbar Card */}
         <div className="glass-panel p-5 space-y-4">
