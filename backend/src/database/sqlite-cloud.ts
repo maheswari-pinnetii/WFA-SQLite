@@ -88,6 +88,47 @@ const ensureLocalDbInitialized = async () => {
   localDb.pragma('journal_mode = WAL');
   localDb.pragma('synchronous = NORMAL');
   localDb.pragma('wal_checkpoint(PASSIVE)');
+
+  localDb.exec(`
+    CREATE TABLE IF NOT EXISTS ai_insights (
+      id TEXT PRIMARY KEY,
+      organization_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      severity TEXT NOT NULL DEFAULT 'INFO',
+      confidence REAL DEFAULT 0.85,
+      source TEXT NOT NULL,
+      department TEXT,
+      team TEXT,
+      employee_id TEXT,
+      data_period_start TEXT,
+      data_period_end TEXT,
+      created_at TEXT NOT NULL,
+      expires_at TEXT,
+      status TEXT NOT NULL DEFAULT 'ACTIVE'
+    );
+    CREATE TABLE IF NOT EXISTS feature_flags (
+      key TEXT PRIMARY KEY,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      description TEXT,
+      target_roles TEXT,
+      organization_id TEXT,
+      updated_at TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS delayed_jobs (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      payload TEXT,
+      status TEXT DEFAULT 'PENDING',
+      run_at TEXT NOT NULL,
+      attempts INTEGER DEFAULT 0,
+      max_attempts INTEGER DEFAULT 3,
+      last_error TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+  `);
 };
 
 export const getDatabase = (): any => {

@@ -8,6 +8,9 @@ import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillD
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
+import { AIWorkforceInsightsCard } from '../../../components/cards/AIWorkforceInsightsCard';
+import { useRealtimeDashboard } from '../../../hooks/useRealtimeDashboard';
+import { useRealtimeAttendance } from '../../../hooks/useRealtimeAttendance';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { UserCheck, Users, Briefcase, FileText, Plus, Clock, HeartHandshake, Star, AlertTriangle, DollarSign, Filter, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -219,10 +222,18 @@ export const HrDashboardPage: React.FC = () => {
   const headCount = typeof rawCount === 'number' ? rawCount : Number(rawCount) || 254;
   const attendanceRate = analytics?.metrics?.attendanceRate ?? '96.5%';
 
+  // Real-time synchronization for HR Dashboard
+  useRealtimeDashboard(() => reload());
+  useRealtimeAttendance(() => reload());
+
   return (
     <RoleGuard allowedRoles={[Role.ADMIN, Role.HR]} requiredPermission={Permission.EMPLOYEE_READ}>
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         <HrDashboardOverview getGreeting={getGreeting} firstName={firstName} />
+
+        {/* Real-time AI Workforce Insights Card */}
+        <AIWorkforceInsightsCard />
+
         <HrDashboardFilters
           dateFilter={dateFilter}
           setDateFilter={setDateFilter}

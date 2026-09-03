@@ -70,6 +70,44 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
+// Detailed API Health Monitor & System Metrics
+app.get('/health/metrics', async (req: Request, res: Response) => {
+  const startTime = Date.now();
+  let dbHealthy = false;
+  let dbLatencyMs = 0;
+  try {
+    dbHealthy = await healthCheck();
+    dbLatencyMs = Date.now() - startTime;
+  } catch (_) {}
+
+  const mem = process.memoryUsage();
+  const io = (await import('./sockets/socketEmitter.js')).getIO();
+  const activeSockets = io ? io.engine?.clientsCount || 0 : 0;
+
+  res.status(dbHealthy ? 200 : 503).json({
+    status: dbHealthy ? 'HEALTHY' : 'DEGRADED',
+    timestamp: new Date().toISOString(),
+    uptimeSeconds: Math.floor(process.uptime()),
+    database: {
+      provider: 'SQLite (WAL mode)',
+      connected: dbHealthy,
+      latencyMs: dbLatencyMs
+    },
+    realtimeSockets: {
+      activeConnections: activeSockets
+    },
+    memory: {
+      rssMb: Math.round((mem.rss / 1024 / 1024) * 100) / 100,
+      heapUsedMb: Math.round((mem.heapUsed / 1024 / 1024) * 100) / 100,
+      heapTotalMb: Math.round((mem.heapTotal / 1024 / 1024) * 100) / 100
+    },
+    process: {
+      pid: process.pid,
+      nodeVersion: process.version
+    }
+  });
+});
+
 // Register routers
 app.use('/api/auth', authFlowRouter);
 app.use('/v1', apiRouter);

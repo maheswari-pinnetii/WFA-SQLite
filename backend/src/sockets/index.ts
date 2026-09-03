@@ -1,37 +1,34 @@
-import jwt from 'jsonwebtoken';
-import { env } from '../config/env.js';
+import { Server as SocketServer, Socket } from 'socket.io';
 import { handleAttendanceEvents } from './attendance.socket.js';
 import { handleNotificationEvents } from './notification.socket.js';
 import { handleEmployeeEvents } from './employee.socket.js';
 import { handleDashboardEvents } from './dashboard.socket.js';
+import { socketAuthMiddleware, setupSocketUserRooms } from './socketAuth.js';
+import { isUserAuthorizedForRoom } from './rooms.js';
+import { setIO } from './socketEmitter.js';
+import logger from '../config/logger.js';
 
-const JWT_SECRET = env.JWT_SECRET;
+export * from './events.js';
+export * from './rooms.js';
+export * from './socketEmitter.js';
 
-export const initSockets = (io) => {
+export const initSockets = (io: SocketServer) => {
+  // Store singleton for backend services to emit events
+  setIO(io);
+
   // Authentication middleware for sockets
-  io.use((socket, next) => {
-    const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(' ')[1] || socket.handshake.query?.token;
-    
-    if (!token) {
-      return next(new Error('Authentication error: Token missing'));
-    }
-    
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-      if (err) {
-        return next(new Error('Authentication error: Invalid token'));
-      }
-      socket.user = decoded;
-      next();
-    });
-  });
+  io.use(socketAuthMiddleware);
 
-  io.on('connection', (socket) => {
-    console.log('Socket connected:', socket.id, 'User:', socket.user?.email);
+  io.on('connection', (socket: Socket) => {
+    const user = (socket as any).user;
+    
+    // Automatically join the user to their authorized rooms
+    setupSocketUserRooms(socket);
     
     // Connection rate limiting: limit messages/events per second to prevent DOS
     let messageCount = 0;
     const limitInterval = 1000; // 1s
-    const maxMessagesPerInterval = 20;
+    const maxMessagesPerInterval = 30;
     
     const rateLimitTimer = setInterval(() => {
       messageCount = 0;
@@ -41,21 +38,20 @@ export const initSockets = (io) => {
     const originalOn = socket.on;
     const lastEvents = new Map(); // Event name -> timestamp
     
-    socket.on = function (event, fn) {
-      return originalOn.call(socket, event, async function (...args) {
+    socket.on = function (event: string, fn: any) {
+      return originalOn.call(socket, event, async function (...args: any[]) {
         // Connection Rate Limiting
         messageCount++;
         if (messageCount > maxMessagesPerInterval) {
-          console.warn(`Socket rate limit exceeded for socket: ${socket.id}`);
+          logger.warn('socket.rate_limit_exceeded', `Rate limit exceeded for socket: ${socket.id}`);
           socket.emit('error', { message: 'Too many requests. Rate limit exceeded.' });
           return;
         }
         
-        // Duplicate event filtering (debounce/throttle within 50ms)
+        // Duplicate event filtering (debounce within 50ms)
         const now = Date.now();
         const lastTime = lastEvents.get(event);
         if (lastTime && now - lastTime < 50) {
-          // Ignore duplicate events sent within 50ms
           return;
         }
         lastEvents.set(event, now);
@@ -63,15 +59,8 @@ export const initSockets = (io) => {
         // Channel / Room Subscription Protection & Scoping
         if (event === 'join-room') {
           const room = args[0];
-          // Authorize room subscription: e.g. department/team scopes or user-specific scopes
-          const isAuthorized = 
-            socket.user?.role === 'ADMIN' || 
-            socket.user?.role === 'HR' || 
-            room === `dept:${socket.user?.department}` || 
-            room === `team:${socket.user?.team}` || 
-            room === `user:${socket.user?.id}`;
-          
-          if (!isAuthorized) {
+          if (!isUserAuthorizedForRoom(user, room)) {
+            logger.warn('socket.unauthorized_room_join', `User ${user?.email} attempted unauthorized join to room: ${room}`);
             socket.emit('error', { message: `Access denied to room ${room}` });
             return;
           }
@@ -81,9 +70,16 @@ export const initSockets = (io) => {
       });
     };
 
-    socket.on('join-room', (room) => {
-      socket.join(room);
-      console.log(`Socket ${socket.id} joined room ${room}`);
+    socket.on('join-room', (room: string) => {
+      if (isUserAuthorizedForRoom(user, room)) {
+        socket.join(room);
+        logger.info('socket.room_joined', `Socket ${socket.id} joined room ${room}`);
+      }
+    });
+
+    socket.on('leave-room', (room: string) => {
+      socket.leave(room);
+      logger.info('socket.room_left', `Socket ${socket.id} left room ${room}`);
     });
     
     // Register domain socket events
@@ -94,8 +90,9 @@ export const initSockets = (io) => {
     
     socket.on('disconnect', () => {
       clearInterval(rateLimitTimer);
-      console.log('Socket disconnected:', socket.id);
+      logger.info('socket.disconnected', `Socket disconnected: ${socket.id}`);
     });
   });
 };
+
 

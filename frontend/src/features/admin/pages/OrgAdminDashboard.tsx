@@ -1,5 +1,6 @@
 import React from 'react';
 import { Building2, MapPin, Users, GitBranch } from 'lucide-react';
+import { AIWorkforceInsightsCard } from '../../../components/cards/AIWorkforceInsightsCard';
 
 export const OrgAdminDashboard: React.FC = () => {
   const departments = [
@@ -30,6 +31,9 @@ export const OrgAdminDashboard: React.FC = () => {
           </span>
         </div>
       </div>
+
+      {/* AI Workforce Intelligence Card */}
+      <AIWorkforceInsightsCard />
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

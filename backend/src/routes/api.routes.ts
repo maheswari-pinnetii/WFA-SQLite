@@ -8,6 +8,7 @@ import * as employeeController from '../controllers/employee.controller.js';
 import * as organizationController from '../controllers/organization.controller.js';
 import * as auditController from '../controllers/audit.controller.js';
 import * as backupController from '../controllers/backup.controller.js';
+import * as aiController from '../controllers/ai.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { authRateLimiter, refreshRateLimiter } from '../middleware/resilience.js';
 import {
@@ -164,5 +165,13 @@ router.get('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backu
 router.post('/admin/backups/restore', authenticateToken, authorizeRoles(['ADMIN']), backupController.restoreBackup);
 router.get('/admin/backups/:filename/download', authenticateToken, authorizeRoles(['ADMIN']), backupController.downloadBackup);
 router.delete('/admin/backups/:filename', authenticateToken, authorizeRoles(['ADMIN']), backupController.deleteBackup);
+
+// AI Intelligence & Workforce Insights
+router.get('/ai/insights', authenticateToken, aiController.getAIInsights);
+router.post('/ai/insights/refresh', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), aiController.refreshAIInsights);
+
+// Feature Flags
+router.get('/feature-flags', authenticateToken, aiController.getFeatureFlags);
+router.put('/feature-flags/:key', authenticateToken, authorizeRoles(['ADMIN']), aiController.updateFeatureFlag);
 
 export default router;

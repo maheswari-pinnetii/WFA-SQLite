@@ -5,6 +5,8 @@ import { userRepository } from '../auth/auth.repository.js';
 import { Attendance, Correction, BreakSession, AttendanceEvent, IdempotencyRecord, Employee, AuditLog, Shift, Location } from '../../models/index.js';
 import { logAudit } from '../../database/connection.js';
 import * as notificationService from '../notifications/notification.service.js';
+import { emitToUser, emitToTeam, emitToDept, emitToOrg, emitToRole, SOCKET_EVENTS } from '../../sockets/index.js';
+import { aiService } from '../../services/ai/aiService.js';
 
 const OFFICE_COORDS = { lat: 12.9716, lng: 77.5946 };
 const ALLOWED_RADIUS_METERS = 100;
@@ -156,6 +158,29 @@ export class AttendanceService {
       logAudit(employeeId, 'CHECK_IN', `Checked in using ${workMode} mode on ${shiftType} shift`, orgId);
       notificationService.triggerGoogleCalendarNotification(employeeId, identity.name, 'Office Login Check-In', getKolkataDate());
       
+      // Real-time Event Broadcast (only after successful commit!)
+      const checkInEvent = {
+        employeeId,
+        employeeName: identity.name,
+        department: identity.department,
+        team: identity.team,
+        status: 'Present',
+        checkInTime: result?.data?.checkInTime,
+        workMode,
+        shiftType,
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, checkInEvent);
+      if (identity.team) emitToTeam(identity.team, SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      if (identity.department) emitToDept(identity.department, SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'CHECK_IN', employeeId });
+
+      // Trigger debounced AI workforce analysis
+      aiService.triggerDebouncedAnalysis(orgId);
+
       return { data: result.data, idempotentReplay: false };
     } catch (err) {
       if (idempotencyKey) {
@@ -215,6 +240,18 @@ export class AttendanceService {
       });
 
       logAudit(employeeId, 'BREAK_START', 'Started break', orgId);
+
+      const breakEvent = {
+        employeeId,
+        status: 'On Break',
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_BREAK_START, breakEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, breakEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_BREAK_START, breakEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_BREAK_START, breakEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'BREAK_START', employeeId });
+
       return record;
     } catch (err) {
       throw err;
@@ -271,6 +308,18 @@ export class AttendanceService {
       });
 
       logAudit(employeeId, 'BREAK_END', 'Resumed work', orgId);
+
+      const resumeEvent = {
+        employeeId,
+        status: 'Working',
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_BREAK_END, resumeEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, resumeEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_BREAK_END, resumeEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_BREAK_END, resumeEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'BREAK_END', employeeId });
+
       return record;
     } catch (err) {
       throw err;
@@ -362,6 +411,21 @@ export class AttendanceService {
       });
 
       logAudit(employeeId, 'CHECK_OUT', 'Checked out from active session', orgId);
+
+      const checkOutEvent = {
+        employeeId,
+        status: 'Checked Out',
+        checkOutTime: result?.data?.checkOutTime,
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_CHECK_OUT, checkOutEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, checkOutEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_CHECK_OUT, checkOutEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_CHECK_OUT, checkOutEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'CHECK_OUT', employeeId });
+
+      aiService.triggerDebouncedAnalysis(orgId);
+
       return result.data;
     } catch (err) {
       if (idempotencyKey) {

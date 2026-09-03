@@ -22,6 +22,9 @@ import ChatIcon from '@mui/icons-material/Chat';
 import HelpIcon from '@mui/icons-material/Help';
 import HomeIcon from '@mui/icons-material/Home';
 import LayersIcon from '@mui/icons-material/Layers';
+import { RealtimeStatusBadge } from '../../../components/common/RealtimeStatusBadge';
+import { useRealtimeNotifications } from '../../../hooks/useRealtimeNotifications';
+import { connectSocket } from '../../../websocket/socket';
 
 interface EnterpriseHeaderProps {
   onToggleSidebar: () => void;
@@ -53,6 +56,30 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   // Scope & Modal States
   const [showPermissionsPreview, setShowPermissionsPreview] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Connect Real-Time WebSocket Engine on authentication
+  React.useEffect(() => {
+    if (user?.id) {
+      connectSocket(undefined, user.id, (user as any).organizationId || 'org-stackly');
+    }
+  }, [user]);
+
+  // Real-time notifications listener
+  useRealtimeNotifications((newNotif: any) => {
+    setNotifications((prev) => [
+      {
+        id: newNotif.id || `notif-${Date.now()}`,
+        title: newNotif.title || 'Workforce Notification',
+        subtitle: newNotif.message || '',
+        time: 'Just now',
+        type: newNotif.type === 'WARNING' ? 'warning' : 'info',
+        path: '/hr/attendance',
+        read: false
+      },
+      ...prev
+    ]);
+    setUnreadCount((c) => c + 1);
+  });
 
   const searchResultsMap = [
     { title: 'Global Headcount & Department Analytics', category: 'reports', path: '/admin/analytics' },
@@ -221,6 +248,9 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
       {/* RIGHT SECTION: Quick Actions, Theme, Notifications & User Profile Menu */}
       <div className="header-actions flex items-center gap-2 sm:gap-3 shrink-0">
         
+        {/* Real-Time Engine Status Badge */}
+        <RealtimeStatusBadge />
+
         {/* Language Flag Selector */}
         <button
           type="button"

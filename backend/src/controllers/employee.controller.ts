@@ -1,5 +1,6 @@
 import { employeeService } from '../services/employee.service.js';
 import { logAudit } from '../config/db.js';
+import { emitToOrg, SOCKET_EVENTS } from '../sockets/index.js';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
 
@@ -57,6 +58,7 @@ export const updateEmployee = async (req, res) => {
     }
 
     logAudit(req.user.id, 'EMPLOYEE_UPDATE', `Updated employee profile: ${id}`, orgId);
+    emitToOrg(orgId, SOCKET_EVENTS.EMPLOYEE_UPDATED, updatedEmp);
     return res.json({ success: true, data: updatedEmp });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -77,6 +79,8 @@ export const updateEmployeeStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Employee not found.' });
     }
 
+    logAudit(req.user.id, 'EMPLOYEE_STATUS_CHANGED', `Changed employee ${id} status to ${status}`, orgId);
+    emitToOrg(orgId, SOCKET_EVENTS.EMPLOYEE_STATUS_CHANGED, { id, status, updatedAt: new Date().toISOString() });
     return res.json({ success: true, data: updated });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

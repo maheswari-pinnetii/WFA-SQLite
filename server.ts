@@ -22,6 +22,14 @@ if (process.env.NODE_ENV !== 'test') {
 
   initSockets(io);
 
+  // Initialize delayed job scheduler & default feature flags
+  import('./backend/src/services/jobScheduler.service.js').then(({ jobScheduler }) => {
+    jobScheduler.start(10000);
+  });
+  import('./backend/src/services/featureFlag.service.js').then(({ featureFlagService }) => {
+    featureFlagService.initDefaults().catch(() => undefined);
+  });
+
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
       logger.error('server.port_in_use', `Port ${PORT} is already in use by another process. Please free port ${PORT} or configure a different PORT in .env.`);

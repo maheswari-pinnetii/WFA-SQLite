@@ -129,6 +129,58 @@ export const initDb = async (): Promise<void> => {
           )
         `);
 
+        // AI Insights Table
+        await execute(`
+          CREATE TABLE IF NOT EXISTS ai_insights (
+            id TEXT PRIMARY KEY,
+            organization_id TEXT NOT NULL DEFAULT 'org-stackly',
+            type TEXT NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            severity TEXT NOT NULL DEFAULT 'INFO',
+            confidence REAL DEFAULT 0.85,
+            source TEXT DEFAULT 'statistical-model',
+            department TEXT,
+            team TEXT,
+            employee_id TEXT,
+            data_period_start TEXT,
+            data_period_end TEXT,
+            created_at TEXT NOT NULL,
+            expires_at TEXT,
+            status TEXT DEFAULT 'ACTIVE'
+          )
+        `);
+
+        // Feature Flags Table
+        await execute(`
+          CREATE TABLE IF NOT EXISTS feature_flags (
+            key TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT,
+            enabled INTEGER DEFAULT 1,
+            target_roles TEXT DEFAULT '["ADMIN","HR","MANAGER","TEAM_LEAD","EMPLOYEE"]',
+            organization_id TEXT NOT NULL DEFAULT 'org-stackly',
+            updated_at TEXT NOT NULL,
+            created_at TEXT NOT NULL
+          )
+        `);
+
+        // Delayed Job Scheduler Table
+        await execute(`
+          CREATE TABLE IF NOT EXISTS delayed_jobs (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            payload TEXT,
+            status TEXT DEFAULT 'PENDING',
+            run_at TEXT NOT NULL,
+            attempts INTEGER DEFAULT 0,
+            max_attempts INTEGER DEFAULT 3,
+            last_error TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          )
+        `);
+
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_settings_user ON mfa_settings(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_mfa_recovery_user ON mfa_recovery_codes(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_passkey_user_id ON passkey_credentials(user_id)`);
@@ -136,6 +188,10 @@ export const initDb = async (): Promise<void> => {
         await execute(`CREATE INDEX IF NOT EXISTS idx_passkey_challenge_expires ON passkey_challenges(expires_at)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_trusted_devices_fingerprint ON trusted_devices(device_fingerprint)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_ai_insights_org_status ON ai_insights(organization_id, status)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_ai_insights_created ON ai_insights(created_at)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_ai_insights_dept ON ai_insights(department)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_delayed_jobs_status_run ON delayed_jobs(status, run_at)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_date ON attendancerecords(employeeId, date)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_status ON attendancerecords(employeeId, status)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_attendancerecords_date ON attendancerecords(date)`);

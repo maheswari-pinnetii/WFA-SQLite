@@ -383,5 +383,54 @@ CREATE TABLE IF NOT EXISTS trusted_devices (
 CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id);
 CREATE INDEX IF NOT EXISTS idx_trusted_devices_fingerprint ON trusted_devices(device_fingerprint);
 
+-- AI Insights Table (Workforce anomalies, predictions, trends)
+CREATE TABLE IF NOT EXISTS ai_insights (
+  id TEXT PRIMARY KEY,
+  organization_id TEXT NOT NULL DEFAULT 'org-stackly',
+  type TEXT NOT NULL, /* ATTENDANCE, ABSENCE, LATE_ARRIVAL, OVERTIME, LEAVE, WORKFORCE_UTILIZATION, ANOMALY, PREDICTION */
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  severity TEXT NOT NULL DEFAULT 'INFO', /* INFO, LOW, MEDIUM, HIGH, CRITICAL */
+  confidence REAL DEFAULT 0.85,
+  source TEXT DEFAULT 'statistical-model',
+  department TEXT,
+  team TEXT,
+  employee_id TEXT,
+  data_period_start TEXT,
+  data_period_end TEXT,
+  created_at TEXT NOT NULL,
+  expires_at TEXT,
+  status TEXT DEFAULT 'ACTIVE' /* ACTIVE, ACKNOWLEDGED, RESOLVED, DISMISSED */
+);
 
+CREATE INDEX IF NOT EXISTS idx_ai_insights_org_status ON ai_insights(organization_id, status);
+CREATE INDEX IF NOT EXISTS idx_ai_insights_created ON ai_insights(created_at);
+CREATE INDEX IF NOT EXISTS idx_ai_insights_dept ON ai_insights(department);
 
+-- Feature Flags Table
+CREATE TABLE IF NOT EXISTS feature_flags (
+  key TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  enabled INTEGER DEFAULT 1,
+  target_roles TEXT DEFAULT '["ADMIN","HR","MANAGER","TEAM_LEAD","EMPLOYEE"]',
+  organization_id TEXT NOT NULL DEFAULT 'org-stackly',
+  updated_at TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+-- Delayed Job Scheduler Table
+CREATE TABLE IF NOT EXISTS delayed_jobs (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  payload TEXT,
+  status TEXT DEFAULT 'PENDING', /* PENDING, RUNNING, COMPLETED, FAILED */
+  run_at TEXT NOT NULL,
+  attempts INTEGER DEFAULT 0,
+  max_attempts INTEGER DEFAULT 3,
+  last_error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_delayed_jobs_status_run ON delayed_jobs(status, run_at);

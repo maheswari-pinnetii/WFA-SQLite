@@ -2,6 +2,7 @@ import { LeaveRequest, Notification, Task } from '../models/Department.js';
 import { Employee } from '../models/Employee.js';
 import { User } from '../models/User.js';
 import { logAudit } from '../config/db.js';
+import { emitToUser, emitToDept, emitToTeam, emitToRole, SOCKET_EVENTS } from '../sockets/index.js';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
 
@@ -102,6 +103,46 @@ export const createLeaveRequest = async (req, res) => {
     });
 
     logAudit(employeeId, 'LEAVE_REQUESTED', `Submitted ${type} leave request for ${startDate} to ${endDate}`, orgId);
+
+    // Real-time Event Broadcast
+    const leavePayload = {
+      id: leave.id,
+      employeeId,
+      employeeName: identity.name,
+      department: identity.department,
+      team: identity.team,
+      type,
+      startDate,
+      endDate,
+      status: 'PENDING',
+      createdAt
+    };
+    emitToRole('HR', SOCKET_EVENTS.LEAVE_SUBMITTED, leavePayload);
+    emitToRole('ADMIN', SOCKET_EVENTS.LEAVE_SUBMITTED, leavePayload);
+    if (identity.department) emitToDept(identity.department, SOCKET_EVENTS.LEAVE_SUBMITTED, leavePayload);
+    if (identity.team) emitToTeam(identity.team, SOCKET_EVENTS.LEAVE_SUBMITTED, leavePayload);
+
+    // Create and emit notification for HR
+    const notifId = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    try {
+      await Notification.create({
+        id: notifId,
+        userId: 'HR_GROUP',
+        title: 'New Leave Request Submitted',
+        message: `${identity.name} requested ${type} leave from ${startDate} to ${endDate}`,
+        type: 'LEAVE',
+        read: 0,
+        createdAt,
+        organizationId: orgId
+      });
+      emitToRole('HR', SOCKET_EVENTS.NOTIFICATION_NEW, {
+        id: notifId,
+        title: 'New Leave Request Submitted',
+        message: `${identity.name} requested ${type} leave`,
+        type: 'LEAVE'
+      });
+    } catch (_) {}
+
     return res.status(201).json({ success: true, data: leave });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -137,6 +178,39 @@ export const reviewLeaveRequest = async (req, res) => {
     await request.save();
 
     logAudit(request.employeeId, `LEAVE_${status}`, `${req.user.name} reviewed leave request ${request.id}`, orgId);
+
+    // Real-time Event Broadcast to employee
+    const reviewEvent = status === 'APPROVED' ? SOCKET_EVENTS.LEAVE_APPROVED : SOCKET_EVENTS.LEAVE_REJECTED;
+    emitToUser(request.employeeId, reviewEvent, {
+      id: request.id,
+      status,
+      reviewedBy: req.user.name,
+      reviewComment,
+      type: request.type,
+      startDate: request.startDate,
+      endDate: request.endDate
+    });
+
+    // Create and emit notification to employee
+    const empNotifId = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    try {
+      await Notification.create({
+        id: empNotifId,
+        userId: request.employeeId,
+        title: `Leave Request ${status}`,
+        message: `Your ${request.type} leave request was ${status.toLowerCase()} by ${req.user.name}.`,
+        type: status === 'APPROVED' ? 'SUCCESS' : 'WARNING',
+        read: 0,
+        createdAt: new Date().toISOString(),
+        organizationId: orgId
+      });
+      emitToUser(request.employeeId, SOCKET_EVENTS.NOTIFICATION_NEW, {
+        id: empNotifId,
+        title: `Leave Request ${status}`,
+        message: `Your ${request.type} leave request was ${status.toLowerCase()}.`
+      });
+    } catch (_) {}
+
     return res.json({ success: true, data: request });
   } catch (err) {
     console.error('reviewLeaveRequest Error:', err);
