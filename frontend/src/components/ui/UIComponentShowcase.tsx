@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from './card';
 import { Badge } from './badge';
 import { Switch } from './switch';
 import { Input } from './input';
-import { Dialog } from './dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog';
 
 export interface UIComponentShowcaseProps {
   className?: string;
@@ -135,16 +135,21 @@ export const UIComponentShowcase: React.FC<UIComponentShowcaseProps> = ({ classN
               Open Audit Modal
             </button>
             {isModalOpen && (
-              <Dialog title="Audit Correction Desk Modal" onClose={() => setIsModalOpen(false)}>
-                <div className="p-4 text-slate-300 text-sm space-y-3">
-                  <p>Submit attendance correction request for HR/Manager review.</p>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-500"
-                  >
-                    Close Modal
-                  </button>
-                </div>
+              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent onClose={() => setIsModalOpen(false)}>
+                  <DialogHeader>
+                    <DialogTitle>Audit Correction Desk Modal</DialogTitle>
+                  </DialogHeader>
+                  <div className="p-4 text-slate-300 text-sm space-y-3">
+                    <p>Submit attendance correction request for HR/Manager review.</p>
+                    <button
+                      onClick={() => setIsModalOpen(false)}
+                      className="px-4 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-500"
+                    >
+                      Close Modal
+                    </button>
+                  </div>
+                </DialogContent>
               </Dialog>
             )}
           </CardContent>
