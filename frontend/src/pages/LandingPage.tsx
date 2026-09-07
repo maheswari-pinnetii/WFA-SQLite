@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/hooks/useAuth';
+import { CookieConsentBanner } from '../components/ui';
 import './LandingPage.css';
 
 // Lightweight Icon Components
@@ -596,11 +597,13 @@ export const LandingPage: React.FC = () => {
               All Systems Operational (99.99%)
             </span>
             <span>SOC2 Type II</span>
-            <span>Privacy Policy</span>
+            <a href="#" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-slate-300 transition-colors">Terms of Use</a>
             <span>© 2026 Stackly Inc.</span>
           </div>
         </div>
       </footer>
+      <CookieConsentBanner />
     </div>
   );
 };

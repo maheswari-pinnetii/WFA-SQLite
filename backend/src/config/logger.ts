@@ -14,7 +14,9 @@ const SENSITIVE_KEYS = new Set([
   'api_key',
   'cookie',
   'creditcard',
-  'ssn'
+  'ssn',
+  'latitude',
+  'longitude'
 ]);
 
 function redactSensitiveData(data: any): any {

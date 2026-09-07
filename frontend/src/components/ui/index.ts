@@ -15,3 +15,4 @@ export * from './switch';
 export * from './tooltip';
 export * from './select';
 export * from './pagination';
+export * from './CookieConsentBanner';
