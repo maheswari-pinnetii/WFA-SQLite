@@ -389,7 +389,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         {user && (
           <div className="header-profile relative border-l border-slate-800/80 pl-2.5 ml-1 shrink-0">
             <button
-              onClick={() => navigate('/employee/profile')}
+              onClick={() => toggleDropdown('profile')}
               aria-label="User Profile Menu"
               className="flex items-center gap-2 focus:outline-none group cursor-pointer p-1 rounded-xl hover:bg-slate-800/50 transition-colors"
               title={`${user.name} (${ROLE_LABELS[role]})`}

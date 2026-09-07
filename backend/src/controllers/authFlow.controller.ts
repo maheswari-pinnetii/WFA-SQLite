@@ -14,7 +14,7 @@ import {
   UserProfile,
 } from '../types/authFlow.types.js';
 
-const JWT_SECRET = env.JWT_SECRET || 'wfa_platform_secret_jwt_key_2026';
+const JWT_SECRET = env.JWT_SECRET;
 const JWT_EXPIRES_IN = '24h';
 const ORGANIZATION_ID = 'org-stackly';
 const COMPANY_ID = 'org-stackly';
@@ -89,11 +89,17 @@ function issueJwtToken(user: any): string {
 function getPasskeyConfig(req: Request): { rpID: string; origin: string } {
   const configuredOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
   const requestOrigin = req.get('origin');
-  const origin = requestOrigin && (
-    requestOrigin === configuredOrigin ||
-    requestOrigin === 'http://localhost:3000' ||
-    requestOrigin === 'http://127.0.0.1:3000'
-  ) ? requestOrigin : configuredOrigin;
+  const isProd = process.env.NODE_ENV === 'production';
+  
+  let origin = configuredOrigin;
+  if (requestOrigin) {
+    if (requestOrigin === configuredOrigin) {
+      origin = requestOrigin;
+    } else if (!isProd && (requestOrigin === 'http://localhost:3000' || requestOrigin === 'http://127.0.0.1:3000' || requestOrigin === 'http://localhost:5173')) {
+      origin = requestOrigin;
+    }
+  }
+  
   return { origin, rpID: new URL(origin).hostname };
 }
 
@@ -125,12 +131,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const name = (req.body.fullName || req.body.name || '').trim();
     const email = (req.body.email || '').trim();
     const password = req.body.password;
-    const requestedRole = (req.body.role || 'EMPLOYEE').toUpperCase();
-    const validRoles = ['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE'];
-    if (!validRoles.includes(requestedRole)) {
-      res.status(400).json({ success: false, error: 'Invalid account role.' });
-      return;
-    }
+    const requestedRole = 'EMPLOYEE'; // Security: Force default role for public signup
     const requestedEmployeeId = (req.body.employeeId || '').trim().toUpperCase();
     const department = req.body.department || 'Engineering';
     const team = req.body.team || 'Core Team';
@@ -163,9 +164,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const now = new Date().toISOString();
 
     // Default permissions based on role
-    const permissionsList = requestedRole === 'ADMIN'
-      ? ['USER_CREATE', 'USER_UPDATE', 'USER_DELETE', 'USER_MANAGE', 'ROLE_MANAGE', 'EMPLOYEE_VIEW_ALL', 'REPORT_VIEW_ALL', 'SYSTEM_CONFIG', 'AUDIT_LOG_VIEW']
-      : ['PROFILE_VIEW', 'PROFILE_UPDATE', 'ATTENDANCE_VIEW_SELF', 'LEAVE_REQUEST', 'VIEW_DASHBOARD'];
+    const permissionsList = ['PROFILE_VIEW', 'PROFILE_UPDATE', 'ATTENDANCE_VIEW_SELF', 'LEAVE_REQUEST', 'VIEW_DASHBOARD'];
     const defaultPermissions = JSON.stringify(permissionsList);
 
     // Persist into SQLite users table
@@ -324,7 +323,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
  */
 export const generatePasskeyRegisterOptions = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, fullName } = req.body;
+    const { fullName } = req.body;
+    // Extract authenticated user's email securely from req.user
+    const email = (req as any).user?.email || req.body.email;
 
     if (!email) {
       res.status(400).json({ success: false, error: 'Email is required to initiate passkey registration.' });
@@ -332,6 +333,12 @@ export const generatePasskeyRegisterOptions = async (req: Request, res: Response
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    // Verify that if a user is logged in, they can only register for themselves
+    if ((req as any).user && (req as any).user.email.toLowerCase().trim() !== normalizedEmail) {
+      res.status(403).json({ success: false, error: 'Cannot register passkey for a different user.' });
+      return;
+    }
+
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 5 * 60 * 1000).toISOString(); // 5 min TTL
 
@@ -388,7 +395,8 @@ export const generatePasskeyRegisterOptions = async (req: Request, res: Response
  */
 export const verifyPasskeyRegister = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, fullName, attestationResponse } = req.body;
+    const { fullName, attestationResponse } = req.body;
+    const email = (req as any).user?.email || req.body.email;
 
     if (!attestationResponse || !attestationResponse.id) {
       res.status(400).json({ success: false, error: 'Attestation response is required.' });
@@ -396,6 +404,11 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
     }
 
     const normalizedEmail = (email || '').toLowerCase().trim();
+    if ((req as any).user && (req as any).user.email.toLowerCase().trim() !== normalizedEmail) {
+      res.status(403).json({ success: false, error: 'Cannot verify passkey for a different user.' });
+      return;
+    }
+
     const now = new Date().toISOString();
 
     // Check or create user in SQLite database

@@ -51,16 +51,16 @@ router.post('/auth/mfa/totp/disable', authenticateToken, authController.disableT
 router.post('/auth/mfa/totp/recovery-codes/regenerate', authenticateToken, authController.regenerateRecoveryCodes);
 
 // Passkey / WebAuthn Routes
-router.post('/auth/passkey/register-options', authFlowController.generatePasskeyRegisterOptions);
-router.post('/auth/passkey/register-verify', authFlowController.verifyPasskeyRegister);
+router.post('/auth/passkey/register-options', authenticateToken, authFlowController.generatePasskeyRegisterOptions);
+router.post('/auth/passkey/register-verify', authenticateToken, authFlowController.verifyPasskeyRegister);
 router.post('/auth/passkey/login-options', authFlowController.generatePasskeyLoginOptions);
 router.post('/auth/passkey/login-verify', authFlowController.verifyPasskeyLogin);
 router.post('/auth/biometric/login', authFlowController.biometricLockLogin);
 router.post('/auth/lock/login', authFlowController.biometricLockLogin);
-router.post('/auth/trusted-devices', authFlowController.saveTrustedDevice);
-router.get('/auth/trusted-devices', authFlowController.getTrustedDevices);
+router.post('/auth/trusted-devices', authenticateToken, authFlowController.saveTrustedDevice);
+router.get('/auth/trusted-devices', authenticateToken, authFlowController.getTrustedDevices);
 router.post('/auth/trusted-devices/verify', authFlowController.verifyTrustedDevice);
-router.delete('/auth/trusted-devices/:id', authFlowController.revokeTrustedDevice);
+router.delete('/auth/trusted-devices/:id', authenticateToken, authFlowController.revokeTrustedDevice);
 
 // Admin MFA Management
 router.get('/admin/mfa/users', authenticateToken, authorizeRoles(['ADMIN']), authController.adminGetMfaUsers);

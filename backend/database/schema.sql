@@ -5,9 +5,9 @@ CREATE TABLE IF NOT EXISTS companies (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   domain TEXT,
-  status TEXT DEFAULT 'ACTIVE',
-  createdAt TEXT,
-  updatedAt TEXT
+  status TEXT NOT NULL DEFAULT 'ACTIVE',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS departments (
@@ -15,33 +15,37 @@ CREATE TABLE IF NOT EXISTS departments (
   name TEXT NOT NULL,
   code TEXT UNIQUE NOT NULL,
   managerId TEXT,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS teams (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  departmentId TEXT,
+  departmentId TEXT NOT NULL,
   leadId TEXT,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (departmentId) REFERENCES departments(id) ON DELETE CASCADE,
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS shifts (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  startTime TEXT,
-  endTime TEXT,
-  gracePeriodMinutes INTEGER DEFAULT 0,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  startTime TEXT NOT NULL,
+  endTime TEXT NOT NULL,
+  gracePeriodMinutes INTEGER NOT NULL DEFAULT 0,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS locations (
@@ -52,11 +56,12 @@ CREATE TABLE IF NOT EXISTS locations (
   country TEXT,
   latitude REAL,
   longitude REAL,
-  geofenceRadius INTEGER DEFAULT 100,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  geofenceRadius INTEGER NOT NULL DEFAULT 100,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -104,50 +109,53 @@ CREATE TABLE IF NOT EXISTS employees (
   employeeCode TEXT UNIQUE,
   name TEXT NOT NULL,
   email TEXT UNIQUE,
-  role TEXT DEFAULT 'EMPLOYEE',
+  role TEXT NOT NULL DEFAULT 'EMPLOYEE',
   department TEXT,
   designation TEXT,
-  status TEXT DEFAULT 'ACTIVE',
+  status TEXT NOT NULL DEFAULT 'ACTIVE',
   avatar TEXT,
   joinDate TEXT,
-  performanceScore REAL DEFAULT 90,
-  attendanceRate REAL DEFAULT 95,
+  performanceScore REAL NOT NULL DEFAULT 90,
+  attendanceRate REAL NOT NULL DEFAULT 95,
   team TEXT,
   location TEXT,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS skills (
   id TEXT PRIMARY KEY,
   employeeId TEXT NOT NULL,
   skillName TEXT NOT NULL,
-  level INTEGER DEFAULT 1,
-  isTopSkill INTEGER DEFAULT 0,
-  isMissingSkill INTEGER DEFAULT 0,
+  level INTEGER NOT NULL DEFAULT 1,
+  isTopSkill INTEGER NOT NULL DEFAULT 0,
+  isMissingSkill INTEGER NOT NULL DEFAULT 0,
   department TEXT,
   team TEXT,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS performancerecords (
   id TEXT PRIMARY KEY,
   employeeId TEXT NOT NULL,
   quarter TEXT NOT NULL,
-  kpiScore REAL DEFAULT 0,
-  targetScore REAL DEFAULT 0,
-  productivityScore REAL DEFAULT 0,
+  kpiScore REAL NOT NULL DEFAULT 0,
+  targetScore REAL NOT NULL DEFAULT 0,
+  productivityScore REAL NOT NULL DEFAULT 0,
   department TEXT,
   team TEXT,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tasks (
@@ -157,13 +165,14 @@ CREATE TABLE IF NOT EXISTS tasks (
   assigneeName TEXT,
   department TEXT,
   team TEXT,
-  organizationId TEXT DEFAULT 'org-stackly',
-  priority TEXT DEFAULT 'MEDIUM',
-  status TEXT DEFAULT 'TODO',
-  points INTEGER DEFAULT 0,
-  updatedAt TEXT,
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  priority TEXT NOT NULL DEFAULT 'MEDIUM',
+  status TEXT NOT NULL DEFAULT 'TODO',
+  points INTEGER NOT NULL DEFAULT 0,
+  updatedAt TEXT NOT NULL,
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  FOREIGN KEY (assigneeId) REFERENCES employees(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS leaverequests (

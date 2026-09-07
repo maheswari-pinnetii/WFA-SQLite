@@ -10,6 +10,26 @@ const __dirname = path.dirname(__filename);
 export const seedSqlite = async () => {
   await connectDatabase();
   const db = getDb();
+  console.log('[SQLite Seeder] Dropping tables for a fresh seed...');
+  db.exec(`
+    PRAGMA foreign_keys = OFF;
+    DROP TABLE IF EXISTS mfachallenges;
+    DROP TABLE IF EXISTS correctionrequests;
+    DROP TABLE IF EXISTS leaverequests;
+    DROP TABLE IF EXISTS attendancerecords;
+    DROP TABLE IF EXISTS tasks;
+    DROP TABLE IF EXISTS performancerecords;
+    DROP TABLE IF EXISTS skills;
+    DROP TABLE IF EXISTS employees;
+    DROP TABLE IF EXISTS users;
+    DROP TABLE IF EXISTS locations;
+    DROP TABLE IF EXISTS shifts;
+    DROP TABLE IF EXISTS teams;
+    DROP TABLE IF EXISTS departments;
+    DROP TABLE IF EXISTS companies;
+    PRAGMA foreign_keys = ON;
+  `);
+
   console.log('[SQLite Seeder] Ensuring tables exist...');
   
   // Read and run schema.sql
@@ -29,21 +49,6 @@ export const seedSqlite = async () => {
   try { db.exec("ALTER TABLE mfachallenges ADD COLUMN type TEXT DEFAULT 'totp-mfa';"); } catch (e) {}
   try { db.exec("ALTER TABLE failed_logins ADD COLUMN lockedAt TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE failed_logins ADD COLUMN lockReason TEXT;"); } catch (e) {}
-
-  console.log('[SQLite Seeder] Truncating tables for a fresh seed...');
-  db.exec(`
-    DELETE FROM companies;
-    DELETE FROM departments;
-    DELETE FROM teams;
-    DELETE FROM shifts;
-    DELETE FROM locations;
-    DELETE FROM users;
-    DELETE FROM employees;
-    DELETE FROM skills;
-    DELETE FROM performancerecords;
-    DELETE FROM tasks;
-    DELETE FROM attendancerecords;
-  `);
 
   console.log('[SQLite Seeder] Starting database seeding...');
 

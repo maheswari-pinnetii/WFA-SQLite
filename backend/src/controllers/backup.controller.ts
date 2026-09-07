@@ -51,7 +51,7 @@ export const restoreBackup = async (req: any, res: Response): Promise<any> => {
 
 export const downloadBackup = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { filename } = req.params;
+    const filename = req.params.filename as string;
     const filePath = backupService.getBackupDownloadPath(filename);
     return res.download(filePath, filename);
   } catch (err: any) {

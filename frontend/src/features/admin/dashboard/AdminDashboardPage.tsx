@@ -271,12 +271,22 @@ export const AdminDashboardPage: React.FC = () => {
   }, []);
 
   const openDrillDown = (title: string, value: string | number, subtitle: string, details: { label: string; value: string | number }[]) => {
+    const records = employees.map(emp => ({
+      id: emp.employeeCode || emp.id,
+      name: emp.name,
+      role: emp.role,
+      department: emp.department || 'N/A',
+      metric: `${emp.performanceScore || 0}% Score`,
+      status: emp.status
+    }));
+    
     setDrillDownData({
       title,
       metricValue: value,
       subtitle,
       category: 'Stackly Enterprise Analytics',
       details,
+      records
     });
   };
 

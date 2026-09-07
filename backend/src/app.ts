@@ -6,6 +6,7 @@ import { initDb, healthCheck } from './config/db.js';
 import { configureResilience, globalRateLimiter } from './middleware/resilience.js';
 import { inputSanitizer } from './middleware/validateInput.js';
 import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
+import { authenticateToken, authorizeRoles } from './middleware/auth.js';
 import logger from './config/logger.js';
 
 const app = express();
@@ -78,8 +79,8 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
 
-// Detailed API Health Monitor & System Metrics
-app.get('/health/metrics', async (req: Request, res: Response) => {
+// Detailed API Health Monitor & System Metrics (Protected)
+app.get('/health/metrics', authenticateToken as any, authorizeRoles(['ADMIN']) as any, async (req: Request, res: Response) => {
   const startTime = Date.now();
   let dbHealthy = false;
   let dbLatencyMs = 0;
@@ -118,12 +119,9 @@ app.get('/health/metrics', async (req: Request, res: Response) => {
 
 import systemDesignRouter from './routes/systemDesign.routes.js';
 
-// API Routes (v1 & aliases)
-app.use('/api/v1/auth-flow', authFlowRouter);
+// API Routes (Canonical /api/v1 only)
 app.use('/api/v1/system-design', systemDesignRouter);
 app.use('/api/v1', apiRouter);
-app.use('/v1', apiRouter);
-app.use('/api', apiRouter);
 
 // Database initialization
 if (process.env.NODE_ENV !== 'test') {

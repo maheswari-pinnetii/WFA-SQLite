@@ -13,6 +13,7 @@ import {
   verifyTrustedDevice,
   revokeTrustedDevice,
 } from '../controllers/authFlow.controller.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -48,16 +49,16 @@ router.get('/me', getCurrentUser);
 /**
  * @route   POST /api/auth/passkey/register-options
  * @desc    Generate WebAuthn registration challenge & options
- * @access  Public
+ * @access  Private (Bearer Token)
  */
-router.post('/passkey/register-options', generatePasskeyRegisterOptions);
+router.post('/passkey/register-options', authenticateToken as any, generatePasskeyRegisterOptions);
 
 /**
  * @route   POST /api/auth/passkey/register-verify
  * @desc    Verify public-key attestation & save user's passkey credential
- * @access  Public
+ * @access  Private (Bearer Token)
  */
-router.post('/passkey/register-verify', verifyPasskeyRegister);
+router.post('/passkey/register-verify', authenticateToken as any, verifyPasskeyRegister);
 
 /**
  * @route   POST /api/auth/passkey/login-options
@@ -88,16 +89,16 @@ router.post('/lock/login', biometricLockLogin);
 /**
  * @route   POST /api/auth/trusted-devices
  * @desc    Save/register a trusted device (Face, Biometric, or Homescreen Lock)
- * @access  Public (or with Token)
+ * @access  Private (Bearer Token)
  */
-router.post('/trusted-devices', saveTrustedDevice);
+router.post('/trusted-devices', authenticateToken as any, saveTrustedDevice);
 
 /**
  * @route   GET /api/auth/trusted-devices
  * @desc    List all trusted devices for a user
- * @access  Public (or with Token)
+ * @access  Private (Bearer Token)
  */
-router.get('/trusted-devices', getTrustedDevices);
+router.get('/trusted-devices', authenticateToken as any, getTrustedDevices);
 
 /**
  * @route   POST /api/auth/trusted-devices/verify
@@ -109,8 +110,8 @@ router.post('/trusted-devices/verify', verifyTrustedDevice);
 /**
  * @route   DELETE /api/auth/trusted-devices/:id
  * @desc    Revoke a saved trusted device
- * @access  Public (or with Token)
+ * @access  Private (Bearer Token)
  */
-router.delete('/trusted-devices/:id', revokeTrustedDevice);
+router.delete('/trusted-devices/:id', authenticateToken as any, revokeTrustedDevice);
 
 export default router;

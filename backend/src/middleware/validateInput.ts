@@ -71,8 +71,20 @@ export const validateRegistration = (req: Request, res: Response, next: NextFunc
   }
   req.body.employeeId = employeeId.toUpperCase();
   if (password !== undefined) {
-    if (typeof password !== 'string' || password.length < 8) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters long.' });
+    if (typeof password !== 'string' || password.length < 12) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 12 characters long.' });
+    }
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[^A-Za-z0-9]/.test(password);
+    
+    if (!(hasUpper && hasLower && hasNumber && hasSymbol)) {
+      return res.status(400).json({ success: false, message: 'Password must contain uppercase, lowercase, number, and special character.' });
+    }
+    const commonPasswords = ['password123', 'StacklyWFA2026!', 'qwertyuiop', '1234567890'];
+    if (commonPasswords.includes(password)) {
+      return res.status(400).json({ success: false, message: 'Password is too common or easily guessed.' });
     }
   }
   next();

