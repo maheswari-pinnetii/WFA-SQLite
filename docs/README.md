@@ -18,6 +18,7 @@ Welcome to the central documentation hub for WFA-SQLite. This repository contain
 ## Database
 * [Database Architecture](./database/DATABASE_ARCHITECTURE.md)
 * [Database Guide](./database/DATABASE_GUIDE.md)
+* [Indexes Guide](./database/INDEXES.md)
 
 ## API
 * [API Overview](./api/API_OVERVIEW.md)
@@ -27,6 +28,11 @@ Welcome to the central documentation hub for WFA-SQLite. This repository contain
 
 ## Authentication & Security
 * [Security Overview](./security/SECURITY.md)
+
+## Compliance & Legal
+* [Data Classification Policy](./compliance/DATA_CLASSIFICATION.md)
+* [Internal Privacy Policy](./compliance/PRIVACY_POLICY.md)
+* [Terms of Use](./compliance/TERMS_OF_USE.md)
 
 ## Tests
 * [Testing Strategy](./tests/TESTING_STRATEGY.md)

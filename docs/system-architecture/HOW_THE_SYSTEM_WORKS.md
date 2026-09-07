@@ -10,8 +10,8 @@ At its core, WFA-SQLite is a monolithic Express.js backend paired with a React S
 
 ```mermaid
 graph TD
-  A[User / Browser] -->|HTTP REST| B(Express Backend)
-  B -->|SQL Queries| C[(SQLite Database)]
+  A["User / Browser"] -->|"HTTP REST"| B("Express Backend")
+  B -->|"SQL Queries"| C[("SQLite Database")]
 ```
 
 ## 2. End-to-End Action: Checking In
