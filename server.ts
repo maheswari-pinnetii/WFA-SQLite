@@ -13,10 +13,21 @@ let io: SocketServer;
 
 if (process.env.NODE_ENV !== 'test') {
   server = http.createServer(app);
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:3001'
+  ];
+  if (process.env.FRONTEND_URL) {
+    allowedOrigins.push(process.env.FRONTEND_URL);
+  }
+
   io = new SocketServer(server, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST']
+      origin: allowedOrigins,
+      methods: ['GET', 'POST'],
+      credentials: true
     }
   });
 

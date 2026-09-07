@@ -32,7 +32,7 @@ const setRefreshTokenCookie = (res: Response, token: string) => {
   res.cookie('refreshToken', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   });
 };
@@ -71,7 +71,10 @@ export const register = async (req: Request, res: Response): Promise<any> => {
     const name = (fullName || req.body.name || '').trim();
     const email = (req.body.email || '').trim();
     const employeeId = typeof req.body.employeeId === 'string' ? req.body.employeeId.trim().toUpperCase() : '';
-    const role: string = req.body.role || 'EMPLOYEE';
+    
+    // CRITICAL FIX: Prevent privilege escalation. Public registration must always use EMPLOYEE.
+    const role = 'EMPLOYEE';
+    
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Name, email, and password are required' });
     }
@@ -95,21 +98,8 @@ export const register = async (req: Request, res: Response): Promise<any> => {
     const password_hash = bcrypt.hashSync(password, salt);
     
     // Auto-assign permissions based on role
-    let permissions: string[] = ['EMPLOYEE_VIEW'];
-    let clearanceLevel = 1;
-    if (role === 'ADMIN') {
-      permissions = ['USER_CREATE', 'USER_UPDATE', 'USER_DELETE', 'EMPLOYEE_VIEW_ALL', 'VIEW_ALL_DATA', 'EMPLOYEE_MANAGE'];
-      clearanceLevel = 5;
-    } else if (role === 'HR') {
-      permissions = ['EMPLOYEE_CREATE', 'EMPLOYEE_UPDATE', 'EMPLOYEE_VIEW_ALL', 'EMPLOYEE_MANAGE'];
-      clearanceLevel = 4;
-    } else if (role === 'MANAGER') {
-      permissions = ['EMPLOYEE_UPDATE', 'EMPLOYEE_VIEW_ALL'];
-      clearanceLevel = 3;
-    } else if (role === 'TEAM_LEAD') {
-      permissions = ['EMPLOYEE_VIEW_ALL'];
-      clearanceLevel = 2;
-    }
+    const permissions: string[] = ['EMPLOYEE_VIEW', 'PROFILE_VIEW', 'PROFILE_UPDATE', 'ATTENDANCE_VIEW_SELF', 'LEAVE_REQUEST'];
+    const clearanceLevel = 1;
 
     const userId = 'usr-' + Math.random().toString(36).substring(2, 11);
 
@@ -351,7 +341,7 @@ export const logout = async (req: any, res: Response): Promise<any> => {
   res.clearCookie('refreshToken', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+    sameSite: 'strict'
   });
 
   if (req.user) {

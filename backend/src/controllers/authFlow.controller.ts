@@ -443,6 +443,15 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
       res.status(401).json({ success: false, error: 'Passkey registration challenge expired or missing.' });
       return;
     }
+
+    // Consume the challenge immediately to prevent replays
+    try {
+      await execute(
+        "DELETE FROM passkey_challenges WHERE email = ? AND type = 'register'",
+        [normalizedEmail]
+      );
+    } catch {}
+
     const { rpID, origin } = getPasskeyConfig(req);
     const verification = await verifyRegistrationResponse({
       response: attestationResponse,
@@ -465,16 +474,6 @@ export const verifyPasskeyRegister = async (req: Request, res: Response): Promis
       ) VALUES (?, ?, ?, ?, 0, 'Biometric Authenticator', ?, ?, ?)`,
       [credentialDbId, user.id, attestationResponse.id, publicKey, transports, now, now]
     );
-
-    // Clean up consumed registration challenges for this user/email
-    try {
-      await execute(
-        "DELETE FROM passkey_challenges WHERE (email = ? OR user_id = ?) AND type = 'register'",
-        [normalizedEmail, user.id]
-      );
-    } catch {
-      // Non-fatal
-    }
 
     const token = issueJwtToken(user);
     const userPayload = formatUserProfile(user, true);
@@ -598,14 +597,24 @@ export const verifyPasskeyLogin = async (req: Request, res: Response): Promise<v
 
     if (credentials && credentials.length > 0) {
       const record = credentials[0];
+      
+      // Fetch AND DELETE the challenge atomically to prevent replay attacks (Single-Use Constraint)
       const challengeRows = await query<any>(
         "SELECT challenge FROM passkey_challenges WHERE email = ? AND type = 'login' AND expires_at > datetime('now') ORDER BY created_at DESC LIMIT 1",
         [(email || '').toLowerCase().trim()]
       );
+      
       if (!challengeRows?.[0]) {
         res.status(401).json({ success: false, error: 'Passkey login challenge expired or missing.' });
         return;
       }
+      
+      // Consume the challenge immediately
+      await execute(
+        "DELETE FROM passkey_challenges WHERE email = ? AND type = 'login'",
+        [(email || '').toLowerCase().trim()]
+      );
+
       const { rpID, origin } = getPasskeyConfig(req);
       const verification = await verifyAuthenticationResponse({
         response: assertionResponse,

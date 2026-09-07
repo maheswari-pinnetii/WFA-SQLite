@@ -58,6 +58,23 @@ export class WebhookDispatcher {
 
   private static async sendWebhook(config: WebhookConfig, payloadString: string): Promise<void> {
     try {
+      // Basic SSRF Protection
+      const parsedUrl = new URL(config.url);
+      const hostname = parsedUrl.hostname.toLowerCase();
+      
+      const isLoopback = hostname === 'localhost' || hostname.startsWith('127.') || hostname === '::1';
+      const isCloudMetadata = hostname === '169.254.169.254' || hostname === '169.254.169.253';
+      
+      if (isLoopback || isCloudMetadata) {
+        logger.warn('webhook.ssrf.blocked', `Blocked webhook dispatch to restricted hostname: ${hostname}`);
+        return;
+      }
+
+      if (parsedUrl.protocol !== 'https:' && process.env.NODE_ENV === 'production') {
+        logger.warn('webhook.insecure.blocked', `Blocked non-HTTPS webhook dispatch in production to: ${hostname}`);
+        return;
+      }
+
       const signature = this.generateSignature(payloadString, config.secret);
 
       await axios.post(config.url, payloadString, {

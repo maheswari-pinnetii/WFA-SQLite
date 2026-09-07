@@ -29,15 +29,16 @@ export const getEmployeeById = async (req, res) => {
 export const createEmployee = async (req, res) => {
   try {
     const body = req.body || {};
-    const { id, name, email, department } = body;
+    const { id, name, email, department, designation, avatar, joinDate, team, location } = body;
     if (!id || !name || !email || !department) {
       return res.status(400).json({ success: false, message: 'Required fields: id, name, email, department.' });
     }
 
     const orgId = getOrganizationId(req);
     const newEmp = await employeeService.createEmployee({
-      ...body,
-      organizationId: orgId
+      id, name, email, department, designation, avatar, joinDate, team, location,
+      organizationId: orgId,
+      companyId: orgId
     });
 
     logAudit(req.user.id, 'EMPLOYEE_CREATE', `Created employee profile for ${name} (${id})`, orgId);
@@ -52,7 +53,24 @@ export const updateEmployee = async (req, res) => {
     const { id } = req.params;
     const orgId = getOrganizationId(req);
 
-    const updatedEmp = await employeeService.updateEmployee(id, orgId, req.body);
+    // Prevent mass assignment and BOLA by extracting only allowed fields
+    const { name, department, designation, avatar, team, location, performanceScore, attendanceRate } = req.body;
+    
+    // Only ADMIN/HR can update performance and attendance directly via this route
+    const updateData: any = { name, department, designation, avatar, team, location };
+    if (['ADMIN', 'HR'].includes(req.user.role)) {
+      if (performanceScore !== undefined) updateData.performanceScore = performanceScore;
+      if (attendanceRate !== undefined) updateData.attendanceRate = attendanceRate;
+    }
+
+    // Clean undefined values
+    Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid fields provided for update.' });
+    }
+
+    const updatedEmp = await employeeService.updateEmployee(id, orgId, updateData);
     if (!updatedEmp) {
       return res.status(404).json({ success: false, message: 'Employee not found.' });
     }

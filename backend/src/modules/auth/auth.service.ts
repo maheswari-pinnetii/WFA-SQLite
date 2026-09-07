@@ -48,7 +48,12 @@ export const signAccessToken = (user: any): string => {
       requiresMfa: false
     },
     JWT_SECRET,
-    { expiresIn: ACCESS_TOKEN_EXPIRY }
+    { 
+      expiresIn: ACCESS_TOKEN_EXPIRY,
+      algorithm: 'HS256',
+      issuer: 'wfa-sqlite',
+      audience: 'wfa-client'
+    }
   );
 };
 

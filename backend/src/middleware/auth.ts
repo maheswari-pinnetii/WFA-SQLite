@@ -15,7 +15,11 @@ export const authenticateToken = async (req, res, next) => {
   try {
     // 1. Verify Supabase JWT (signed with JWT_SECRET / SUPABASE_JWT_SECRET)
     // Note: Ensure env.JWT_SECRET matches your Supabase Project JWT Secret
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET, {
+      algorithms: ['HS256'],
+      issuer: 'wfa-sqlite',
+      audience: 'wfa-client'
+    }) as any;
     
     const userId = decoded.id || decoded.sub;
     const email = decoded.email;

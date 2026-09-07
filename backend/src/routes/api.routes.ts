@@ -29,15 +29,12 @@ router.get('/health/db', authController.healthCheckDb);
 
 // Auth Routes
 router.post('/auth/login', authRateLimiter, validateLogin, authController.login);
-router.post('/auth/signup', authRateLimiter, validateRegistration, authController.register);
 router.post('/auth/register', authRateLimiter, validateRegistration, authController.register);
 router.get('/auth/sso/google', authController.googleLogin);
 router.get('/auth/sso/microsoft', authController.microsoftLogin);
 router.post('/auth/sso/callback', authRateLimiter, authController.ssoCallback);
 router.post('/auth/mfa/verify', authRateLimiter, validateMfaCode, authController.verifyMfa);
-router.post('/auth/mfa-verify', authRateLimiter, validateMfaCode, authController.verifyMfa);
 router.post('/auth/mfa/resend', authRateLimiter, authController.resendMfa);
-router.post('/auth/mfa-resend', authRateLimiter, authController.resendMfa);
 router.post('/auth/logout', authenticateToken, authController.logout);
 router.get('/auth/me', authenticateToken, authController.getMe);
 router.post('/auth/refresh', refreshRateLimiter, authController.refresh);
@@ -121,7 +118,6 @@ router.post('/attendance/check-out', authenticateToken, enforceScope, idempotenc
 router.get('/attendance/records', authenticateToken, enforceScope, attendanceController.getRecords);
 router.get('/attendance/shifts', authenticateToken, attendanceController.getShifts);
 router.get('/attendance/holidays', authenticateToken, attendanceController.getPublicHolidays);
-router.get('/holidays', authenticateToken, attendanceController.getPublicHolidays);
 router.get('/attendance/audit-logs', authenticateToken, attendanceController.getAuditLogs);
 
 // Persisted leave and task workflows

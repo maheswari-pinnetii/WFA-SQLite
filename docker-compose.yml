@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wfa_sqlite_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - JWT_SECRET=wfa_super_secret_for_docker_deployment_1234
+    volumes:
+      - sqlite_data:/app/backend/database/sqlite
+
+volumes:
+  sqlite_data:
