@@ -8,6 +8,9 @@ import { LoginPage } from '../../auth/pages/LoginPage';
 import { SignUpPage } from '../../auth/pages/SignUpPage';
 import { LogoutPage } from '../../auth/pages/LogoutPage';
 import { SsoCallbackPage } from '../../auth/pages/SsoCallbackPage';
+import { ForgotPasswordPage } from '../../auth/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '../../auth/pages/ResetPasswordPage';
+import { ChangePasswordPage } from '../../auth/pages/ChangePasswordPage';
 import { Role, ROLE_HOME_PATHS } from '../../security/roles/roles';
 import { useAuth } from '../../auth/hooks/useAuth';
 
@@ -114,12 +117,12 @@ export const AppRoutes: React.FC = () => {
 
       {/* Public Auth Routes */}
       <Route path="/login" element={<LoginPage />} />
-
       <Route path="/sso-callback" element={<SsoCallbackPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/logout" element={<LogoutPage />} />
-      <Route path="/verify-email" element={<LoginPage />} />
-      <Route path="/forgot-password" element={<LoginPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={<ResetPasswordPage />} />
 
       {/* Protected Routes Enclosed in Enterprise MainLayout */}
       <Route
@@ -128,6 +131,9 @@ export const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <MainLayout>
               <Routes>
+                {/* ========== Account Security Routes (all authenticated roles) ========== */}
+                <Route path="/change-password" element={<ChangePasswordPage />} />
+
                 {/* ==================== 1. ADMIN ROUTES ==================== */}
                 <Route path="/admin/dashboard" element={<RoleGuard allowedRoles={[Role.ADMIN]}><AdminDashboard /></RoleGuard>} />
                 <Route path="/admin/users" element={<RoleGuard allowedRoles={[Role.ADMIN]}><UserManagement /></RoleGuard>} />

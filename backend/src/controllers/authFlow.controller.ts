@@ -949,30 +949,17 @@ export const saveTrustedDevice = async (req: Request, res: Response): Promise<vo
 /**
  * Retrieve User's Trusted Devices
  * GET /api/auth/trusted-devices
+ *
+ * SECURITY FIX: Always uses req.user.id from the authenticated JWT.
+ * The previous implementation accepted userId/email from query params
+ * (unauthenticated IDOR vulnerability) — that has been removed.
  */
-export const getTrustedDevices = async (req: Request, res: Response): Promise<void> => {
+export const getTrustedDevices = async (req: any, res: Response): Promise<void> => {
   try {
-    const { userId, email } = req.query;
-    let targetUserId = userId as string;
-
-    if (!targetUserId && email) {
-      const users = await query<any>('SELECT id FROM users WHERE LOWER(email) = ?', [String(email).toLowerCase().trim()]);
-      if (users && users.length > 0) targetUserId = users[0].id;
-    }
-
-    if (!targetUserId) {
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
-        try {
-          const decoded = jwt.verify(token, JWT_SECRET) as any;
-          targetUserId = decoded.id || decoded.userId;
-        } catch {}
-      }
-    }
-
-    if (!targetUserId) {
-      res.status(400).json({ success: false, error: 'User identifier is required to fetch trusted devices.' });
+    // Always derive the user ID from the authenticated token — never from request params
+    const authenticatedUserId = req.user?.id;
+    if (!authenticatedUserId) {
+      res.status(401).json({ success: false, error: 'Unauthorized. Authentication required.' });
       return;
     }
 
@@ -981,7 +968,7 @@ export const getTrustedDevices = async (req: Request, res: Response): Promise<vo
        FROM trusted_devices
        WHERE user_id = ? AND status = 'ACTIVE'
        ORDER BY last_used_at DESC`,
-      [targetUserId]
+      [authenticatedUserId]
     );
 
     res.status(200).json({
@@ -1055,19 +1042,46 @@ export const verifyTrustedDevice = async (req: Request, res: Response): Promise<
 /**
  * Revoke a Trusted Device
  * DELETE /api/auth/trusted-devices/:id
+ *
+ * SECURITY FIX: Added ownership check. Previously any authenticated user could
+ * revoke ANY device by ID — a critical IDOR vulnerability.
  */
-export const revokeTrustedDevice = async (req: Request, res: Response): Promise<void> => {
+export const revokeTrustedDevice = async (req: any, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+    const authenticatedUserId = req.user?.id;
 
     if (!id) {
       res.status(400).json({ success: false, error: 'Device ID is required.' });
       return;
     }
 
-    await execute(
-      "UPDATE trusted_devices SET status = 'REVOKED' WHERE id = ?",
+    if (!authenticatedUserId) {
+      res.status(401).json({ success: false, error: 'Unauthorized.' });
+      return;
+    }
+
+    // SECURITY FIX: Verify ownership before revoking — device MUST belong to the authenticated user
+    const devices = await query<any>(
+      'SELECT id, user_id FROM trusted_devices WHERE id = ? AND status = \'ACTIVE\'',
       [id]
+    );
+
+    if (!devices || devices.length === 0) {
+      res.status(404).json({ success: false, error: 'Device not found.' });
+      return;
+    }
+
+    const device = devices[0];
+    if (device.user_id !== authenticatedUserId) {
+      // Return 404 rather than 403 to avoid revealing that the device exists
+      res.status(404).json({ success: false, error: 'Device not found.' });
+      return;
+    }
+
+    await execute(
+      "UPDATE trusted_devices SET status = 'REVOKED' WHERE id = ? AND user_id = ?",
+      [id, authenticatedUserId]
     );
 
     res.status(200).json({

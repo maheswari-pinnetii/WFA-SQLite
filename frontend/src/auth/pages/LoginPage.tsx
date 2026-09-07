@@ -146,10 +146,15 @@ export const LoginPage: React.FC = () => {
 
       {/* Bottom Switch Link */}
       <footer className="auth-page-footer" style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <p style={{ color: '#94a3b8', fontSize: '14px' }}>
+        <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '8px' }}>
           Don&apos;t have an enterprise account?{' '}
           <Link to="/signup" id="create-account-link" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
             Create an account
+          </Link>
+        </p>
+        <p style={{ color: '#64748b', fontSize: '13px' }}>
+          <Link to="/forgot-password" id="forgot-password-link" style={{ color: '#94a3b8', textDecoration: 'none' }}>
+            Forgot your password?
           </Link>
         </p>
       </footer>

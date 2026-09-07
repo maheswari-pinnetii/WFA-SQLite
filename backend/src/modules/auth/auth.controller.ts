@@ -8,6 +8,7 @@ import mongoose from '../../database/transaction.js';
 import { healthCheck as dbHealthCheck } from '../../database/sqlite-cloud.js';
 import { decryptSecret, verifyTotpCode, verifyRecoveryCode } from './totp.js';
 import { env } from '../../config/env.js';
+import { validatePasswordPolicy } from './auth.service.js';
 
 const ORGANIZATION_ID = 'org-stackly';
 const COMPANY_EMAIL_REGEX = /^[^\s@]+@thestackly\.com$/i;
@@ -49,20 +50,13 @@ const getRefreshTokenFromRequest = (req: Request): string | undefined => {
   return cookies.refreshToken;
 };
 
-const passwordHashCache = new Map<string, boolean>();
-
-const queueBcryptCompare = async (password: string, hash: string): Promise<boolean> => {
-  const cacheKey = crypto.createHash('sha256').update(password + ':::' + hash).digest('hex');
-  if (passwordHashCache.has(cacheKey)) {
-    return passwordHashCache.get(cacheKey)!;
-  }
-  const match = await bcrypt.compare(password, hash);
-  if (passwordHashCache.size > 5000) {
-    const firstKey = passwordHashCache.keys().next().value;
-    if (firstKey) passwordHashCache.delete(firstKey);
-  }
-  passwordHashCache.set(cacheKey, match);
-  return match;
+/**
+ * SECURITY FIX: The previous bcrypt result cache (passwordHashCache) was removed.
+ * Caching bcrypt results creates a timing side-channel and stores sensitive data in memory.
+ * Direct bcrypt.compare() is used for all password verifications.
+ */
+const secureBcryptCompare = async (password: string, hash: string): Promise<boolean> => {
+  return bcrypt.compare(password, hash);
 };
 
 export const register = async (req: Request, res: Response): Promise<any> => {
@@ -101,7 +95,8 @@ export const register = async (req: Request, res: Response): Promise<any> => {
     const permissions: string[] = ['EMPLOYEE_VIEW', 'PROFILE_VIEW', 'PROFILE_UPDATE', 'ATTENDANCE_VIEW_SELF', 'LEAVE_REQUEST'];
     const clearanceLevel = 1;
 
-    const userId = 'usr-' + Math.random().toString(36).substring(2, 11);
+    // SECURITY FIX: crypto.randomUUID() replaces Math.random() for unpredictable user IDs
+    const userId = 'usr-' + crypto.randomUUID().replace(/-/g, '').substring(0, 16);
 
     const newUser = await userRepository.create({
       id: userId,
@@ -188,14 +183,19 @@ export const login = async (req: Request, res: Response): Promise<any> => {
     }
 
     try {
-      let isMatch = await queueBcryptCompare(password, user.password_hash);
+      // SECURITY FIX: Direct bcrypt.compare (no cache — avoids timing side-channel)
+      let isMatch = await secureBcryptCompare(password, user.password_hash);
       if (!isMatch) {
         const attempts = failedRecord ? failedRecord.attempts + 1 : 1;
         let lockedUntil: string | null = null;
-        if (attempts >= 2) {
-          const lockHours = user.role === 'ADMIN' ? 72 : 48;
-          lockedUntil = new Date(Date.now() + lockHours * 60 * 60 * 1000).toISOString();
-          logAudit(user.id, 'ACCOUNT_LOCKOUT', `Account ${email} locked for ${lockHours} hours due to 2 failures`);
+        // SECURITY FIX: 5 failures → 15-min lockout; 10 failures → 1-hour lockout
+        // (was: 2 failures → 48-72h which is trivially weaponizable for DoS)
+        if (attempts >= 10) {
+          lockedUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour
+          logAudit(user.id, 'ACCOUNT_LOCKOUT', `Account ${email} locked for 1 hour after ${attempts} failures`);
+        } else if (attempts >= 5) {
+          lockedUntil = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+          logAudit(user.id, 'ACCOUNT_LOCKOUT', `Account ${email} locked for 15 minutes after ${attempts} failures`);
         }
         await userRepository.incrementFailedLogins(lookupEmail, lockedUntil);
 
@@ -527,7 +527,7 @@ export const disableTotpMfa = async (req: any, res: Response): Promise<any> => {
     }
 
     // Verify Password
-    const isMatch = await queueBcryptCompare(password, fullUser.password_hash);
+    const isMatch = await secureBcryptCompare(password, fullUser.password_hash);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Invalid password' });
     }
@@ -581,7 +581,7 @@ export const regenerateRecoveryCodes = async (req: any, res: Response): Promise<
     }
 
     // Verify Password
-    const isMatch = await queueBcryptCompare(password, fullUser.password_hash);
+    const isMatch = await secureBcryptCompare(password, fullUser.password_hash);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Invalid password' });
     }
@@ -839,7 +839,8 @@ export const ssoCallback = async (req: Request, res: Response): Promise<any> => 
         await execute('UPDATE users SET authProvider = ?, providerSubject = ? WHERE id = ?', [provider, providerSubject, existing.id]);
         targetUser = await userRepository.findById(existing.id);
       } else {
-        const userId = 'usr-' + Math.random().toString(36).substring(2, 11);
+        // SECURITY FIX: crypto.randomUUID() replaces Math.random()
+      const userId = 'usr-' + crypto.randomUUID().replace(/-/g, '').substring(0, 16);
         const role = 'EMPLOYEE';
         const permissions = ['EMPLOYEE_VIEW'];
         targetUser = await userRepository.create({
@@ -890,6 +891,208 @@ export const ssoCallback = async (req: Request, res: Response): Promise<any> => 
         }
       });
     }
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─── Forgot Password / Reset Password / Change Password ─────────────────────
+
+/**
+ * POST /auth/forgot-password
+ *
+ * Initiates a secure password reset flow. ALWAYS returns a generic success
+ * response regardless of whether the email exists (prevents user enumeration).
+ */
+export const forgotPassword = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const rawEmail = req.body?.email;
+    if (!rawEmail || typeof rawEmail !== 'string') {
+      // Return generic response to prevent email enumeration
+      return res.json({ success: true, message: 'If an account exists for that email, a reset link has been sent.' });
+    }
+
+    await authService.forgotPassword(
+      rawEmail,
+      req.ip || '',
+      req.headers['user-agent'] as string || ''
+    );
+
+    logAudit('anonymous', 'FORGOT_PASSWORD_REQUESTED', `Password reset requested for redacted email`);
+
+    // Generic response — never reveal account existence
+    return res.json({
+      success: true,
+      message: 'If an account exists for that email, a reset link has been sent. Please check your inbox (and spam folder).'
+    });
+  } catch (err: any) {
+    // Even on internal errors, return generic response
+    return res.json({
+      success: true,
+      message: 'If an account exists for that email, a reset link has been sent.'
+    });
+  }
+};
+
+/**
+ * POST /auth/reset-password
+ *
+ * Validates reset token, sets new password, invalidates all sessions.
+ * On success: user must log in again (no auto-login).
+ */
+export const resetPassword = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { token, password } = req.body;
+
+    if (!token || !password) {
+      return res.status(400).json({ success: false, message: 'Reset token and new password are required.' });
+    }
+
+    const result = await authService.resetPassword(token, password);
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: result.message });
+    }
+
+    logAudit('anonymous', 'PASSWORD_RESET_COMPLETED', 'Password successfully reset via secure reset token');
+
+    // Clear any refresh token cookie that may exist
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    return res.json({
+      success: true,
+      message: 'Password has been reset successfully. Please sign in with your new password.'
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: 'An error occurred while resetting your password.' });
+  }
+};
+
+/**
+ * POST /auth/change-password  (requires authentication)
+ *
+ * Changes password for an authenticated user. Requires current password.
+ * Invalidates ALL sessions after change.
+ */
+export const changePassword = async (req: any, res: Response): Promise<any> => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Current password and new password are required.' });
+    }
+
+    const result = await authService.changePassword(user.id, currentPassword, newPassword);
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: result.message });
+    }
+
+    logAudit(user.id, 'PASSWORD_CHANGED', `User ${user.email} changed their password`);
+
+    // Clear the current session's refresh token cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    return res.json({
+      success: true,
+      message: 'Password changed successfully. All active sessions have been signed out.'
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: 'An error occurred while changing your password.' });
+  }
+};
+
+/**
+ * POST /auth/send-verification  (requires authentication)
+ */
+export const sendVerification = async (req: any, res: Response): Promise<any> => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const result = await authService.sendVerificationEmail(user.id);
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: result.message });
+    }
+
+    logAudit(user.id, 'EMAIL_VERIFICATION_SENT', `Verification email sent to ${user.email}`);
+
+    return res.json({
+      success: true,
+      message: 'Verification email sent. Please check your inbox.'
+    });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * POST /auth/verify-email  (public — token from email link)
+ */
+export const verifyEmail = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { token } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ success: false, message: 'Verification token is required.' });
+    }
+
+    const result = await authService.verifyEmail(token);
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: result.message });
+    }
+
+    logAudit('anonymous', 'EMAIL_VERIFIED', 'Email address verified via token');
+
+    return res.json({ success: true, message: 'Email verified successfully.' });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * POST /auth/logout-all  (requires authentication)
+ *
+ * Revokes all active sessions for the authenticated user.
+ */
+export const logoutAll = async (req: any, res: Response): Promise<any> => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    await authService.revokeAllUserSessions(user.id);
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    logAudit(user.id, 'LOGOUT_ALL', `User ${user.email} revoked all active sessions`);
+
+    return res.json({
+      success: true,
+      message: 'All sessions have been signed out successfully.'
+    });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
   }

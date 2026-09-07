@@ -10,7 +10,14 @@ import * as auditController from '../controllers/audit.controller.js';
 import * as backupController from '../controllers/backup.controller.js';
 import * as aiController from '../controllers/ai.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
-import { authRateLimiter, refreshRateLimiter } from '../middleware/resilience.js';
+import {
+  authRateLimiter,
+  refreshRateLimiter,
+  forgotPasswordRateLimiter,
+  registerRateLimiter,
+  otpResendRateLimiter,
+  changePasswordRateLimiter
+} from '../middleware/resilience.js';
 import {
   validateLogin,
   validateRegistration,
@@ -29,16 +36,26 @@ router.get('/health/db', authController.healthCheckDb);
 
 // Auth Routes
 router.post('/auth/login', authRateLimiter, validateLogin, authController.login);
-router.post('/auth/register', authRateLimiter, validateRegistration, authController.register);
+router.post('/auth/register', registerRateLimiter, validateRegistration, authController.register);
 router.get('/auth/sso/google', authController.googleLogin);
 router.get('/auth/sso/microsoft', authController.microsoftLogin);
 router.post('/auth/sso/callback', authRateLimiter, authController.ssoCallback);
 router.post('/auth/mfa/verify', authRateLimiter, validateMfaCode, authController.verifyMfa);
-router.post('/auth/mfa/resend', authRateLimiter, authController.resendMfa);
+router.post('/auth/mfa/resend', otpResendRateLimiter, authController.resendMfa);
 router.post('/auth/logout', authenticateToken, authController.logout);
+router.post('/auth/logout-all', authenticateToken, authController.logoutAll);
 router.get('/auth/me', authenticateToken, authController.getMe);
 router.post('/auth/refresh', refreshRateLimiter, authController.refresh);
 router.post('/auth/admin/unlock', authenticateToken, authorizeRoles(['ADMIN']), authController.adminUnlockUser);
+
+// Password Reset Routes (Forgot Password Flow)
+router.post('/auth/forgot-password', forgotPasswordRateLimiter, authController.forgotPassword);
+router.post('/auth/reset-password', authRateLimiter, authController.resetPassword);
+router.post('/auth/change-password', authenticateToken, changePasswordRateLimiter, authController.changePassword);
+
+// Email Verification Routes
+router.post('/auth/send-verification', authenticateToken, authController.sendVerification);
+router.post('/auth/verify-email', authController.verifyEmail);
 
 // TOTP MFA Routes
 router.get('/auth/mfa/totp/status', authenticateToken, authController.getMfaStatus);

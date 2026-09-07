@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { connectDatabase, query, execute, healthCheck } from './sqlite-cloud.js';
 
 export const ORGANIZATION_ID = 'org-stackly';
@@ -131,6 +132,52 @@ export const initDb = async (): Promise<void> => {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
           )
         `);
+
+        // Password Reset Tokens Table
+        await execute(`
+          CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id          TEXT    PRIMARY KEY,
+            user_id     TEXT    NOT NULL,
+            token_hash  TEXT    NOT NULL UNIQUE,
+            created_at  TEXT    NOT NULL,
+            expires_at  TEXT    NOT NULL,
+            used_at     TEXT,
+            ip_address  TEXT,
+            user_agent  TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+          )
+        `);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_prt_token_hash ON password_reset_tokens(token_hash)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_prt_user_id    ON password_reset_tokens(user_id)`);
+
+        // Email Verification Tokens Table
+        await execute(`
+          CREATE TABLE IF NOT EXISTS email_verification_tokens (
+            id          TEXT    PRIMARY KEY,
+            user_id     TEXT    NOT NULL,
+            email       TEXT    NOT NULL,
+            token_hash  TEXT    NOT NULL UNIQUE,
+            created_at  TEXT    NOT NULL,
+            expires_at  TEXT    NOT NULL,
+            used_at     TEXT,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+          )
+        `);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_evt_token_hash ON email_verification_tokens(token_hash)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_evt_user_id    ON email_verification_tokens(user_id)`);
+
+        // Ensure email_verified columns exist on users
+        if (!(await columnExists('users', 'email_verified'))) {
+          try { await execute('ALTER TABLE users ADD COLUMN email_verified    INTEGER DEFAULT 0'); } catch (e) {}
+        }
+        if (!(await columnExists('users', 'email_verified_at'))) {
+          try { await execute('ALTER TABLE users ADD COLUMN email_verified_at TEXT'); } catch (e) {}
+        }
+
+        // Ensure last_resend_at column exists on mfachallenges for resend cooldown
+        if (!(await columnExists('mfachallenges', 'last_resend_at'))) {
+          try { await execute('ALTER TABLE mfachallenges ADD COLUMN last_resend_at TEXT'); } catch (e) {}
+        }
 
         // AI Insights Table
         await execute(`
@@ -273,7 +320,7 @@ export const initDb = async (): Promise<void> => {
 };
 
 export const logAudit = async (userId: string, action: string, details: string, organizationId: string = ORGANIZATION_ID): Promise<void> => {
-  const id = Math.random().toString(36).slice(2, 11);
+  const id = crypto.randomUUID();
   const timestamp = new Date().toISOString();
   try {
     await execute(`

@@ -379,6 +379,142 @@ export class UserRepository {
   async deleteRecoveryCodes(userId: string): Promise<void> {
     await execute('DELETE FROM mfa_recovery_codes WHERE user_id = ?', [userId]);
   }
+
+  // ─── Password Reset Token Repository ───────────────────────────────────────
+
+  /**
+   * Invalidate all existing unused reset tokens for a user, then create a new one.
+   * This ensures only one active token per user at any time.
+   */
+  async createPasswordResetToken(data: {
+    id: string;
+    user_id: string;
+    token_hash: string;
+    expires_at: string;
+    ip_address?: string;
+    user_agent?: string;
+  }): Promise<void> {
+    const now = new Date().toISOString();
+    // Invalidate any existing unused tokens for this user (single-token-per-user policy)
+    await execute(
+      `UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL`,
+      [now, data.user_id]
+    );
+    await execute(
+      `INSERT INTO password_reset_tokens (id, user_id, token_hash, created_at, expires_at, used_at, ip_address, user_agent)
+       VALUES (?, ?, ?, ?, ?, NULL, ?, ?)`,
+      [data.id, data.user_id, data.token_hash, now, data.expires_at, data.ip_address || null, data.user_agent || null]
+    );
+  }
+
+  async findPasswordResetTokenByHash(tokenHash: string): Promise<any | null> {
+    const rows = await query(
+      `SELECT * FROM password_reset_tokens WHERE token_hash = ? LIMIT 1`,
+      [tokenHash]
+    );
+    return rows && rows.length > 0 ? rows[0] : null;
+  }
+
+  async markPasswordResetTokenUsed(tokenId: string): Promise<void> {
+    await execute(
+      `UPDATE password_reset_tokens SET used_at = ? WHERE id = ?`,
+      [new Date().toISOString(), tokenId]
+    );
+  }
+
+  async invalidateAllPasswordResetTokensForUser(userId: string): Promise<void> {
+    await execute(
+      `UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL`,
+      [new Date().toISOString(), userId]
+    );
+  }
+
+  // ─── Email Verification Token Repository ───────────────────────────────────
+
+  async createEmailVerificationToken(data: {
+    id: string;
+    user_id: string;
+    email: string;
+    token_hash: string;
+    expires_at: string;
+  }): Promise<void> {
+    const now = new Date().toISOString();
+    // Invalidate previous verification tokens for this user
+    await execute(
+      `UPDATE email_verification_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL`,
+      [now, data.user_id]
+    );
+    await execute(
+      `INSERT INTO email_verification_tokens (id, user_id, email, token_hash, created_at, expires_at, used_at)
+       VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+      [data.id, data.user_id, data.email, data.token_hash, now, data.expires_at]
+    );
+  }
+
+  async findEmailVerificationTokenByHash(tokenHash: string): Promise<any | null> {
+    const rows = await query(
+      `SELECT * FROM email_verification_tokens WHERE token_hash = ? LIMIT 1`,
+      [tokenHash]
+    );
+    return rows && rows.length > 0 ? rows[0] : null;
+  }
+
+  async markEmailVerificationTokenUsed(tokenId: string): Promise<void> {
+    await execute(
+      `UPDATE email_verification_tokens SET used_at = ? WHERE id = ?`,
+      [new Date().toISOString(), tokenId]
+    );
+  }
+
+  // ─── Session Revocation ─────────────────────────────────────────────────────
+
+  /**
+   * Revoke ALL active sessions and refresh tokens for a user.
+   * Called after successful password reset or change-password to invalidate existing sessions.
+   */
+  async revokeAllSessionsForUser(userId: string): Promise<void> {
+    const now = new Date().toISOString();
+    // Revoke all active sessions
+    await execute(
+      `UPDATE sessions SET revokedAt = ?, updatedAt = ? WHERE userId = ? AND revokedAt IS NULL`,
+      [now, now, userId]
+    );
+    // Revoke all refresh tokens for those sessions
+    await execute(`
+      UPDATE refreshtokens SET revokedAt = ?, updatedAt = ?
+      WHERE sessionId IN (
+        SELECT id FROM sessions WHERE userId = ?
+      ) AND revokedAt IS NULL
+    `, [now, now, userId]);
+  }
+
+  async findActiveSessionsByUserId(userId: string): Promise<any[]> {
+    return await query(
+      `SELECT * FROM sessions WHERE userId = ? AND revokedAt IS NULL AND expiresAt > ?`,
+      [userId, new Date().toISOString()]
+    );
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string): Promise<void> {
+    const now = new Date().toISOString();
+    await execute(
+      `UPDATE users SET password_hash = ?, updatedAt = ? WHERE id = ?`,
+      [passwordHash, now, userId]
+    );
+    // Invalidate user cache entries
+    userCacheById.delete(userId);
+    const emailEntry = [...userCacheByEmail.entries()].find(([, v]) => v.user.id === userId);
+    if (emailEntry) userCacheByEmail.delete(emailEntry[0]);
+  }
+
+  async markEmailVerified(userId: string): Promise<void> {
+    const now = new Date().toISOString();
+    await execute(
+      `UPDATE users SET email_verified = 1, email_verified_at = ?, updatedAt = ? WHERE id = ?`,
+      [now, now, userId]
+    );
+    userCacheById.delete(userId);
+  }
 }
 
 export const userRepository = new UserRepository();

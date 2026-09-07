@@ -213,6 +213,73 @@ export const authService = {
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
   },
 
+  /**
+   * Sign out from ALL active sessions across all devices.
+   */
+  logoutAll: async () => {
+    try {
+      await apiClient.post('/v1/auth/logout-all');
+    } catch (err) {
+      console.error('Logout-all request failed:', err);
+    }
+    setAccessToken(null);
+    sessionStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+  },
+
+  /**
+   * Request a password reset email.
+   * Returns same generic message regardless of account existence.
+   */
+  forgotPassword: async (email: string) => {
+    const response = await apiClient.post('/v1/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  /**
+   * Submit a new password using the reset token from the email link.
+   * Token is read from the URL — NEVER from localStorage.
+   */
+  resetPassword: async (token: string, password: string) => {
+    const response = await apiClient.post('/v1/auth/reset-password', { token, password });
+    return response.data;
+  },
+
+  /**
+   * Change password for authenticated user. Requires current password.
+   * All active sessions are invalidated after success.
+   */
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    const response = await apiClient.post('/v1/auth/change-password', { currentPassword, newPassword });
+    if (response.data?.success) {
+      // Clear local session — user must re-authenticate
+      setAccessToken(null);
+      sessionStorage.removeItem(STORAGE_KEYS.USER_DATA);
+      localStorage.removeItem(STORAGE_KEYS.USER_DATA);
+      sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    }
+    return response.data;
+  },
+
+  /**
+   * Send an email verification link to the authenticated user's email.
+   */
+  sendVerification: async () => {
+    const response = await apiClient.post('/v1/auth/send-verification');
+    return response.data;
+  },
+
+  /**
+   * Verify an email address using the token from the verification email link.
+   */
+  verifyEmail: async (token: string) => {
+    const response = await apiClient.post('/v1/auth/verify-email', { token });
+    return response.data;
+  },
+
   getStoredSession: () => {
     const userData = sessionStorage.getItem(STORAGE_KEYS.USER_DATA) || localStorage.getItem(STORAGE_KEYS.USER_DATA);
     const token = sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
@@ -234,3 +301,4 @@ export const authService = {
     return null;
   }
 };
+
