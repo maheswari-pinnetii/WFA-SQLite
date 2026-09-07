@@ -4,6 +4,7 @@ Welcome to the central documentation hub for WFA-SQLite. This repository contain
 
 ## System Architecture
 * [System Overview](./system-architecture/SYSTEM_OVERVIEW.md)
+* [Architecture Styles](./system-architecture/ARCHITECTURE_STYLES.md)
 * [How the System Works](./system-architecture/HOW_THE_SYSTEM_WORKS.md)
 * [System Data Flow](./system-architecture/SYSTEM_DATA_FLOW.md)
 * [Request Lifecycle](./system-architecture/REQUEST_LIFECYCLE.md)
