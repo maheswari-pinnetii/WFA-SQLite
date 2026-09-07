@@ -1,7 +1,7 @@
 import React from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
-import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
+import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Map, ShieldCheck, Award, Users } from 'lucide-react';
 
 export const SkillCoveragePage: React.FC = () => {

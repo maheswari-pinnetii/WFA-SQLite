@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
-import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
+import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Clock, ShieldCheck, Activity, Users, Plus, Edit2, CheckCircle2, UserCheck, AlertCircle, Save } from 'lucide-react';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { Button } from '../../../components/ui/button';

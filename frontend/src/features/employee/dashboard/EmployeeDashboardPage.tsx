@@ -6,7 +6,7 @@ import { useAuth } from '../../../auth/hooks/useAuth';
 import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWidget';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api/attendanceApi';
-import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
+import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { AnalyticsBarChart, AnalyticsDonutChart } from '../../../components/charts/AnalyticsCharts';
 import {
   Clock,

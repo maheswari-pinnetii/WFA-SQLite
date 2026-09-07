@@ -8,7 +8,10 @@ export * from './motion';
 export * from './bento-grid';
 export * from './number-ticker';
 export * from './shimmer-button';
-export * from './tremor-kpi';
+
 export * from './tabs';
 export * from './avatar';
 export * from './switch';
+export * from './tooltip';
+export * from './select';
+export * from './pagination';

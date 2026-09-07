@@ -1,7 +1,7 @@
 import React from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
-import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
+import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { AnalyticsDonutChart } from '../../../components/charts/AnalyticsCharts';
 import { AlertTriangle, Users, HeartCrack, Activity } from 'lucide-react';
 import { useAnalytics } from '../../../hooks/useAnalytics';

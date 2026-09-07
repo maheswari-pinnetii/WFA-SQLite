@@ -4,7 +4,7 @@ import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
-import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
+import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { employeeApi } from '../../../api/endpoints/employee.api';

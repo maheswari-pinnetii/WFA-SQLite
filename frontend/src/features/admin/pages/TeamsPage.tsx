@@ -1,7 +1,7 @@
 import React from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
-import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
+import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Users, User, Clock, ShieldCheck } from 'lucide-react';
 import { useEmployees } from '../../../hooks/useEmployees';
 import { Employee } from '../../../shared/types/common.types';

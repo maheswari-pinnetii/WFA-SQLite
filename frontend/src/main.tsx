@@ -1,4 +1,11 @@
 import React from 'react';
+import { scan } from 'react-scan';
+
+if (typeof window !== 'undefined') {
+  scan({
+    enabled: process.env.NODE_ENV === 'development',
+  });
+}
 import ReactDOM from 'react-dom/client';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';

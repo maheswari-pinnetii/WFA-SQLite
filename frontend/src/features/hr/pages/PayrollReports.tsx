@@ -35,7 +35,7 @@ import { Badge } from '../../../components/ui/badge';
 import { Input } from '../../../components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../../components/ui/dialog';
 import { AnimatedTabs } from '../../../components/ui/tabs';
-import { DeltaBadge, Callout, ProgressBar } from '../../../components/ui/tremor-kpi';
+import { DeltaBadge, Callout, ProgressBar } from '../../../components/cards/tremor-kpi';
 import { Avatar } from '../../../components/ui/avatar';
 import { Skeleton } from '../../../components/ui/skeleton';
 

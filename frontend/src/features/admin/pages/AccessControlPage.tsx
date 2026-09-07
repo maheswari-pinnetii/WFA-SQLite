@@ -1,7 +1,7 @@
 import React from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
-import { MinimalKpiCard } from '../../../components/ui/MinimalKpiCard';
+import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Lock, ShieldCheck, AlertTriangle, History, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { auditLogger } from '../../../security/audit/auditLogger';
 
