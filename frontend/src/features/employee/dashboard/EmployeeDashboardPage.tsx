@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
@@ -14,28 +14,20 @@ import {
   FileText,
   Compass,
   CheckCircle2,
-  AlertCircle,
   Plus,
   Layers,
   ClipboardList,
   Briefcase,
   Award,
-  Filter,
   RefreshCw,
   Zap,
   History,
   Timer,
   Download,
-  Users,
-  Palmtree,
-  Target,
-  CreditCard,
   Activity,
   Coffee,
   Check,
-  Sparkles,
   LayoutDashboard,
-  Bell
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
@@ -68,238 +60,51 @@ export const StepSectionHeader: React.FC<{
 );
 
 
-// 1. Employee Dashboard Overview / My Workspace Header with In-Header Notifications
+// 1. Employee Dashboard Overview Header
 export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [hasNewAlert, setHasNewAlert] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: '1', title: 'Shift Check-In Confirmed', desc: 'Punch recorded at 09:02 AM today', time: '10m ago', type: 'success', unread: true },
-    { id: '2', title: 'Leave Approval Status', desc: 'PTO request for Friday approved by HR', time: '1h ago', type: 'info', unread: true },
-    { id: '3', title: 'Team Kudos Received', desc: 'Manager recognized your performance on Sprint 24', time: '3h ago', type: 'kudos', unread: true },
-    { id: '4', title: 'Upcoming Holiday', desc: 'Corporate holiday next Monday for Bengaluru Hub', time: '1d ago', type: 'info', unread: false },
-  ]);
-
-  const unreadCount = notifications.filter(n => n.unread).length;
-
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-    setHasNewAlert(false);
-  };
-
-  const markItemRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? ({ ...n, unread: false }) : n));
-  };
-
-  const toggleNotifications = () => {
-    setHasNewAlert(false);
-    setShowNotifications(!showNotifications);
-  };
+  const initials = (user?.name || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
-      <div className="flex items-center gap-4">
-        <img
-          src={user?.avatar || "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150"}
-          alt={user?.name || "Employee"}
-          className="w-12 h-12 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
-        />
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+      <div className="flex items-center gap-3.5">
+        <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-semibold text-sm shrink-0">
+          {initials}
+        </div>
         <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Welcome back, {user?.name || "Alex Mercer"}!</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-              My Workspace
-            </span>
-            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-              Active Shift
-            </span>
-          </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {user?.title || "Senior Software Engineer"} &bull; {user?.department || "Engineering & Technology"} &bull; Shift: <span className="text-slate-700 dark:text-slate-200 font-medium">General Day Shift (09:00 AM - 06:00 PM)</span>
+          <h1 className="text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+            {user?.name || 'My Workspace'}
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {[user?.role, user?.department].filter(Boolean).join(' · ')}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-        {/* In-Header Notifications Bell & Dropdown */}
-        <div className="relative">
-          <button
-            onClick={toggleNotifications}
-            className={`relative px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-2 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer ${
-              hasNewAlert && unreadCount > 0 ? "ring-2 ring-amber-400/40 text-amber-500" : ""
-            }`}
-            title="Notifications"
-            aria-label={`Notifications (${unreadCount} unread)`}
-          >
-            <Bell size={15} className={hasNewAlert && unreadCount > 0 ? "text-amber-500" : "text-slate-500 dark:text-slate-400"} />
-            <span>Notifications</span>
-            {unreadCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-semibold shrink-0">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-
-          {/* In-Header Notifications Popover */}
-          {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg p-4 z-50 text-slate-900 dark:text-slate-100 font-sans space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
-                    Notifications ({unreadCount} new)
-                  </span>
-                </div>
-                {unreadCount > 0 && (
-                  <button
-                    onClick={markAllRead}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
-                  >
-                    Mark All Read
-                  </button>
-                )}
-              </div>
-
-              <div className="space-y-1.5 max-h-72 overflow-y-auto no-scrollbar">
-                {notifications.length === 0 ? (
-                  <div className="text-center py-6 text-slate-400 text-xs">No notifications</div>
-                ) : (
-                  notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      onClick={() => markItemRead(n.id)}
-                      className={`p-2.5 rounded-md border transition-all cursor-pointer flex items-start gap-2.5 ${
-                        n.unread
-                          ? 'bg-slate-50 dark:bg-slate-800/90 border-slate-200 dark:border-emerald-500/30 hover:bg-slate-100 dark:hover:bg-slate-800'
-                          : 'bg-white dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/80 opacity-75'
-                      }`}
-                    >
-                      <span className="text-base mt-0.5 shrink-0">
-                        {n.type === 'success' ? '📍' : n.type === 'kudos' ? '👏' : '📢'}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-1">
-                          <p className="text-xs font-bold text-white truncate">{n.title}</p>
-                          <span className="text-[10px] text-slate-400 shrink-0">{n.time}</span>
-                        </div>
-                        <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{n.desc}</p>
-                      </div>
-                      {n.unread && (
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 mt-1.5" />
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <a href="#step-1-punch" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-600/20 cursor-pointer">
-          <Clock size={14} /> Punch Station
+      <div className="flex items-center gap-2 shrink-0 flex-wrap">
+        <a
+          href="#step-1-punch"
+          className="px-3.5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm flex items-center gap-1.5 transition-colors"
+        >
+          <Clock size={14} /> Check In
         </a>
-        <Link to="/employee/profile" className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all border border-slate-700">
-          <Compass size={14} className="text-emerald-400" /> My Profile
+        <Link
+          to="/employee/leave"
+          className="px-3.5 py-2 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm flex items-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
+        >
+          <Calendar size={14} /> Apply Leave
+        </Link>
+        <Link
+          to="/employee/profile"
+          className="px-3.5 py-2 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm flex items-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
+        >
+          <Compass size={14} /> Profile
         </Link>
       </div>
     </div>
   );
 };
 
-// 1a. Employee Quick Actions Command Bar
-export const EmployeeQuickActionsBar: React.FC<{
-  onOpenCorrection: () => void;
-}> = ({ onOpenCorrection }) => (
-  <div className="p-4 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl flex items-center justify-between gap-3 overflow-x-auto">
-    <div className="flex items-center gap-2.5 shrink-0">
-      <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Quick Actions:</span>
-    </div>
-    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-      <a
-        href="#step-1-punch"
-        className="px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/30 text-sm font-black flex items-center gap-2 transition-all shrink-0 cursor-pointer"
-      >
-        <Clock size={18} /> PUNCH CLOCK
-      </a>
-      <Link
-        to="/employee/leave"
-        className="px-5 py-3 rounded-2xl bg-purple-500 hover:bg-purple-400 text-white shadow-lg shadow-purple-500/30 text-sm font-black flex items-center gap-2 transition-all shrink-0 cursor-pointer"
-      >
-        <Palmtree size={18} /> APPLY PTO
-      </Link>
-      <div className="h-8 w-px bg-slate-800 mx-2 hidden sm:block"></div>
-      <button
-        onClick={onOpenCorrection}
-        className="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
-      >
-        <ClipboardList size={14} /> Correction
-      </button>
-      <Link
-        to="/employee/shifts"
-        className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
-      >
-        <Timer size={14} /> Shifts
-      </Link>
-      <Link
-        to="/employee/payslips"
-        className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
-      >
-        <CreditCard size={14} /> Payslips
-      </Link>
-    </div>
-  </div>
-);
 
-// 2. Employee Dashboard Filters
-export const EmployeeDashboardFilters: React.FC<{
-  dateFilter: string;
-  setDateFilter: (val: string) => void;
-  statusFilter: string;
-  setStatusFilter: (val: string) => void;
-  onRefresh: () => void;
-  isLoading: boolean;
-}> = ({ dateFilter, setDateFilter, statusFilter, setStatusFilter, onRefresh, isLoading }) => (
-  <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
-    <div className="flex items-center gap-3 flex-wrap">
-      <div className="flex items-center gap-2 text-slate-300 text-xs font-bold uppercase tracking-wider">
-        <Filter size={15} className="text-emerald-400" /> Filters:
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-400 font-medium">Date:</span>
-        <input
-          type="date"
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
-          className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-400 font-medium">Status:</span>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
-        >
-          <option value="All">All Attendance Logs</option>
-          <option value="Present">Present Only</option>
-          <option value="Absent">Absent Only</option>
-          <option value="Leave">Leave / PTO</option>
-          <option value="Weekend">Weekends</option>
-        </select>
-      </div>
-    </div>
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={onRefresh}
-      disabled={isLoading}
-      className="text-xs h-8 text-slate-300"
-    >
-      <RefreshCw size={13} className={`mr-1.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
-      {isLoading ? 'Syncing...' : 'Live Refresh'}
-    </Button>
-  </div>
-);
 
 // 3. Employee KPI Cards
 export const EmployeeKpiGrid: React.FC<{
@@ -324,66 +129,7 @@ export const EmployeeKpiGrid: React.FC<{
   </div>
 );
 
-// 3b. 7-Day Upcoming Shift Roster Schedule Card
-export const EmployeeUpcomingRosterCard: React.FC = () => {
-  const roster = [
-    { day: 'Mon', date: 'Sep 01', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Today (Active)', isToday: true, isOff: false },
-    { day: 'Tue', date: 'Sep 02', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
-    { day: 'Wed', date: 'Sep 03', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
-    { day: 'Thu', date: 'Sep 04', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
-    { day: 'Fri', date: 'Sep 05', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
-    { day: 'Sat', date: 'Sep 06', shift: 'Weekend Off', time: 'Rest Day', type: 'Weekend', isToday: false, isOff: true },
-    { day: 'Sun', date: 'Sep 07', shift: 'Weekend Off', time: 'Rest Day', type: 'Weekend', isToday: false, isOff: true },
-  ];
 
-  return (
-    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
-      <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
-        <div>
-          <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-            <Calendar size={18} className="text-teal-400" /> 7-Day Shift Roster Schedule
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">Standard 9.0h Shift (8.0h Net Work + 1.0h Break)</p>
-        </div>
-        <span className="text-[10px] text-teal-400 font-black uppercase tracking-wider bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/30">
-          40.0h Target
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 text-center text-xs">
-        {roster.map((r, i) => (
-          <div
-            key={i}
-            className={`p-3 rounded-2xl border transition-all ${
-              r.isToday
-                ? 'bg-emerald-950/60 border-emerald-500/50 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/30'
-                : r.isOff
-                ? 'bg-slate-950/40 border-slate-800 text-slate-500'
-                : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800/40'
-            }`}
-          >
-            <span className={`text-[10px] font-black uppercase ${r.isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
-              {r.day}
-            </span>
-            <p className="font-bold text-xs text-white mt-0.5">{r.date}</p>
-            <p className={`font-mono text-[11px] font-bold mt-1 ${r.isToday ? 'text-emerald-300 font-extrabold' : r.isOff ? 'text-slate-500' : 'text-teal-400'}`}>
-              {r.time}
-            </p>
-            <span className={`inline-block mt-2 px-2 py-0.5 rounded text-[9px] font-black uppercase ${
-              r.isToday
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                : r.isOff
-                ? 'bg-slate-800 text-slate-500'
-                : 'bg-slate-800 text-slate-300'
-            }`}>
-              {r.type}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // 3c. Employee Shift Timings & Schedule Card
 export const EmployeeShiftScheduleCard: React.FC = () => {
@@ -681,310 +427,8 @@ export const LeaveBalanceCard: React.FC = () => {
   );
 };
 
-// 5. Leadership Accolades & Kudos Showcase
-export const EmployeeManagerKudosCard: React.FC = () => {
-  const [reactions, setReactions] = useState<{ [key: string]: { claps: number; hearts: number; rockets: number } }>({
-    'kudos-1': { claps: 14, hearts: 8, rockets: 19 },
-    'kudos-2': { claps: 22, hearts: 12, rockets: 7 },
-    'kudos-3': { claps: 16, hearts: 15, rockets: 10 }
-  });
-  const [acknowledged, setAcknowledged] = useState<{ [key: string]: boolean }>({});
-  const [thankYouModalKudos, setThankYouModalKudos] = useState<any | null>(null);
-  const [thankYouMsg, setThankYouMsg] = useState('');
-  const [toastMsg, setToastMsg] = useState('');
 
-  const appreciations = [
-    {
-      id: 'kudos-1',
-      author: 'David Sterling',
-      role: 'Engineering Manager',
-      department: 'Platform Infra',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      badge: 'Sprint MVP & Architecture Excellence',
-      badgeColor: 'emerald',
-      date: 'Aug 30, 2026',
-      quote: 'Alex delivered the zero-trust biometric geofence engine 3 days ahead of schedule with 100% test coverage. Exceptional technical leadership and dedication during sprint 24!',
-      points: '+150 Recognition Points'
-    },
-    {
-      id: 'kudos-2',
-      author: 'Marcus Vance',
-      role: 'Team Lead',
-      department: 'Mobile Core',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-      badge: 'Shift Reliability & Punctuality Champion',
-      badgeColor: 'teal',
-      date: 'Aug 26, 2026',
-      quote: 'Maintained 99.8% on-time arrival and shift adherence for 3 consecutive months. Always steps in to cover emergency deployments and assists peers across time zones!',
-      points: '+100 Recognition Points'
-    },
-    {
-      id: 'kudos-3',
-      author: 'Elena Rostova',
-      role: 'HR Operations & People Lead',
-      department: 'People Operations',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
-      badge: 'Team Culture & Mentorship Hero',
-      badgeColor: 'purple',
-      date: 'Aug 18, 2026',
-      quote: 'Recognized for mentoring 3 newly onboarded developers and leading weekly architecture retrospectives. Thank you for building a positive, high-performing team culture!',
-      points: '+120 Recognition Points'
-    }
-  ];
 
-  const handleReact = (id: string, type: 'claps' | 'hearts' | 'rockets') => {
-    setReactions(prev => ({
-      ...prev,
-      [id]: {
-        ...prev[id],
-        [type]: (prev[id]?.[type] || 0) + 1
-      }
-    }));
-  };
-
-  const handleSendThankYou = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!thankYouModalKudos) return;
-    setToastMsg(`Thank you note sent to ${thankYouModalKudos.author}! 💌`);
-    setAcknowledged(prev => ({ ...prev, [thankYouModalKudos.id]: true }));
-    setThankYouModalKudos(null);
-    setThankYouMsg('');
-    setTimeout(() => setToastMsg(''), 3500);
-  };
-
-  return (
-    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]/60">
-        <div>
-          <div className="flex items-center gap-2">
-            <Sparkles size={20} className="text-amber-400 animate-pulse" />
-            <h3 className="text-base font-extrabold text-[var(--text-primary)]">
-              Leadership Appreciations & Kudos
-            </h3>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30">
-              Kudos & Recognition
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Praise, spot awards, and performance accolades awarded by your leadership team.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <span className="text-xs font-bold text-white block">370 Total Points</span>
-            <span className="text-[10px] text-emerald-400 font-semibold font-mono">Top 5% in Engineering</span>
-          </div>
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 font-black text-sm shadow-md">
-            🏆 3
-          </div>
-        </div>
-      </div>
-
-      {toastMsg && (
-        <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
-          <CheckCircle2 size={16} /> {toastMsg}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-        {appreciations.map((item) => {
-          const count = reactions[item.id] || { claps: 0, hearts: 0, rockets: 0 };
-          const isAcked = acknowledged[item.id];
-
-          return (
-            <div
-              key={item.id}
-              className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700/80 transition-all flex flex-col justify-between space-y-3 relative overflow-hidden group shadow-lg"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <img
-                      src={item.avatar}
-                      alt={item.author}
-                      className="w-9 h-9 rounded-xl object-cover border border-slate-700 shrink-0"
-                    />
-                    <div>
-                      <h4 className="text-xs font-bold text-white leading-tight">{item.author}</h4>
-                      <p className="text-[10px] text-slate-400">{item.role}</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-500">{item.date}</span>
-                </div>
-
-                <div className={`p-2 rounded-xl text-xs font-bold flex items-center justify-between ${
-                  item.badgeColor === 'emerald'
-                    ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30'
-                    : item.badgeColor === 'teal'
-                    ? 'bg-teal-950/60 text-teal-300 border border-teal-500/30'
-                    : 'bg-purple-950/60 text-purple-300 border border-purple-500/30'
-                }`}>
-                  <span className="truncate pr-1 text-[11px] font-extrabold flex items-center gap-1.5">
-                    <Award size={13} /> {item.badge}
-                  </span>
-                  <span className="text-[9px] font-mono shrink-0 bg-black/30 px-1.5 py-0.5 rounded">
-                    {item.points}
-                  </span>
-                </div>
-
-                <p className="text-xs text-slate-300 italic leading-relaxed bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
-                  "{item.quote}"
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => handleReact(item.id, 'claps')}
-                    title="Send Claps"
-                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
-                  >
-                    👏 {count.claps}
-                  </button>
-                  <button
-                    onClick={() => handleReact(item.id, 'hearts')}
-                    title="Send Heart"
-                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-rose-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
-                  >
-                    ❤️ {count.hearts}
-                  </button>
-                  <button
-                    onClick={() => handleReact(item.id, 'rockets')}
-                    title="Send Rocket"
-                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-amber-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
-                  >
-                    🚀 {count.rockets}
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => setThankYouModalKudos(item)}
-                  disabled={isAcked}
-                  className={`text-[11px] font-bold px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
-                    isAcked
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
-                      : 'bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30'
-                  }`}
-                >
-                  {isAcked ? '✓ Replied' : 'Reply 💌'}
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Thank You Reply Modal */}
-      {thankYouModalKudos && (
-        <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <Sparkles className="text-amber-400" size={18} />
-                <h3 className="text-sm font-bold text-white">
-                  Reply to {thankYouModalKudos.author}
-                </h3>
-              </div>
-              <button
-                onClick={() => setThankYouModalKudos(null)}
-                className="text-slate-400 hover:text-white text-xl leading-none font-bold cursor-pointer"
-              >
-                &times;
-              </button>
-            </div>
-
-            <form onSubmit={handleSendThankYou} className="space-y-3 text-xs">
-              <p className="text-slate-300">
-                Send a personalized acknowledgment or thank you note to <strong className="text-white">{thankYouModalKudos.author} ({thankYouModalKudos.role})</strong>:
-              </p>
-
-              <textarea
-                required
-                rows={3}
-                value={thankYouMsg}
-                onChange={(e) => setThankYouMsg(e.target.value)}
-                placeholder="Thank you so much! Really appreciate the recognition and support..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500"
-              />
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                <Button variant="outline" size="sm" type="button" onClick={() => setThankYouModalKudos(null)}>
-                  Cancel
-                </Button>
-                <Button size="sm" type="submit">
-                  Send Thank You Note 💌
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// 7. Team Live Presence Card
-export const EmployeeTeamLivePresenceCard: React.FC = () => {
-  const teamMembers = [
-    { name: 'Marcus Vance', role: 'Team Lead', status: 'On-Duty (Office)', mode: 'Bengaluru Campus', color: 'emerald', time: 'In at 08:55 AM' },
-    { name: 'David Sterling', role: 'Engineering Manager', status: 'On-Duty (Office)', mode: 'Bengaluru Campus', color: 'emerald', time: 'In at 08:45 AM' },
-    { name: 'Sarah Connor', role: 'Senior Platform Engineer', status: 'Remote Active', mode: 'Hyderabad Hub', color: 'blue', time: 'In at 09:00 AM' },
-    { name: 'Elena Rostova', role: 'HR Lead', status: 'On Break', mode: 'Salem Hub', color: 'amber', time: 'Break 35m' },
-    { name: 'Vikram Sharma', role: 'Frontend Engineer', status: 'On Leave (CL)', mode: 'Paid PTO', color: 'purple', time: 'Returns Tomorrow' },
-  ];
-
-  return (
-    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
-          <div>
-            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-              <Users size={18} className="text-blue-400" /> Team Live Presence
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">Engineering & Product Core Team</p>
-          </div>
-          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 4 / 5 Active
-          </span>
-        </div>
-
-        <div className="space-y-2">
-          {teamMembers.map((m, i) => (
-            <div key={i} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:bg-slate-800/40 transition-colors">
-              <div className="flex items-center gap-2.5">
-                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
-                  m.color === 'emerald' ? 'bg-emerald-400 shadow-sm shadow-emerald-400' :
-                  m.color === 'blue' ? 'bg-blue-400' :
-                  m.color === 'amber' ? 'bg-amber-400 animate-pulse' : 'bg-purple-400'
-                }`} />
-                <div>
-                  <h4 className="text-xs font-bold text-white leading-tight">{m.name}</h4>
-                  <p className="text-[10px] text-slate-400">{m.role} &bull; {m.mode}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
-                  m.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                  m.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
-                  m.color === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                }`}>
-                  {m.status}
-                </span>
-                <p className="text-[9px] text-slate-500 font-mono mt-0.5">{m.time}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-        <span className="text-[11px] text-slate-400">Geofenced Hubs Active</span>
-        <span className="text-blue-400 font-bold text-[11px]">Sync: Real-Time</span>
-      </div>
-    </div>
-  );
-};
 
 // 7b. Monthly Timesheet Summary Card
 export const EmployeeTimesheetSummaryCard: React.FC = () => {
@@ -1109,9 +553,8 @@ export const EmployeeActivityTimelineFeed: React.FC = () => {
         </div>
       </div>
 
-      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-        <span className="text-[11px] text-slate-400">ISO 27001 Audit Compliant</span>
-        <span className="text-emerald-400 font-bold text-[11px]">Encrypted & Verified</span>
+      <div className="pt-3 border-t border-slate-800">
+        <p className="text-[11px] text-slate-500">Showing recent activity from your shift history</p>
       </div>
     </div>
   );
@@ -1651,7 +1094,7 @@ export const EmployeeDashboardPage: React.FC = () => {
               }`}
             >
               <LayoutDashboard size={15} />
-              Full 9-Step Daily Workspace
+              Overview
             </button>
 
             <button
@@ -1662,11 +1105,8 @@ export const EmployeeDashboardPage: React.FC = () => {
                   : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
               }`}
             >
-              <Palmtree size={15} className="text-emerald-400" />
-              Absence & Leave Suite
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
-                Full Suite
-              </span>
+              <Calendar size={15} />
+              Absence & Leave
             </button>
 
             <button
@@ -1689,15 +1129,20 @@ export const EmployeeDashboardPage: React.FC = () => {
                   : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
               }`}
             >
-              <Target size={15} className="text-indigo-400" />
-              Sprint Tasks & Deliverables
+              <Layers size={15} />
+              Sprint Tasks
             </button>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400 font-semibold hidden md:inline">
-              Hub: <strong className="text-white font-mono">Bengaluru Campus</strong>
-            </span>
+            <button
+              onClick={loadDashboardData}
+              disabled={loading}
+              className="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+              {loading ? 'Syncing...' : 'Refresh'}
+            </button>
           </div>
         </div>
 
@@ -1763,34 +1208,25 @@ export const EmployeeDashboardPage: React.FC = () => {
         {workspaceMode === 'all-in-one' && (
           <div className="space-y-8 animate-fadeIn">
 
-            {/* STEP 1: Daily Work Station & Live Check-In */}
+            {/* STEP 1: Check-In Station */}
             <section id="step-1-punch" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Daily Work Station & Check-In"
-                subtitle="Profile identity, quick actions, and geofenced attendance check-in station"
+                title="Work Station & Check-In"
+                subtitle="Geofenced attendance check-in and your shift status for today"
                 tagColor="blue"
                 badge="Live Sync"
               />
               <EmployeeDashboardOverview user={user} />
-              <EmployeeQuickActionsBar onOpenCorrection={() => handleOpenCorrection()} />
               <LiveCheckInWidget />
             </section>
 
             {/* STEP 2: Productivity & Attendance KPIs */}
             <section id="step-2-kpis" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Productivity & Adherence KPIs"
+                title="Productivity & Adherence"
                 subtitle="Hours logged today, weekly progress, lifetime adherence, and overtime tracking"
                 tagColor="emerald"
                 badge="Target: 40h/wk"
-              />
-              <EmployeeDashboardFilters
-                dateFilter={dateFilter}
-                setDateFilter={setDateFilter}
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-                onRefresh={loadDashboardData}
-                isLoading={loading}
               />
               <EmployeeKpiGrid
                 hoursToday={hoursToday}
@@ -1807,12 +1243,11 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 3: Shift Schedule & Monthly Attendance Calendar */}
             <section id="step-3-schedule" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Shift Schedule & Monthly Attendance Calendar"
-                subtitle="Assigned work timings, 7-day upcoming roster, and monthly attendance day heat tiles"
+                title="Shift Schedule & Attendance Calendar"
+                subtitle="Assigned work timings and monthly attendance heatmap"
                 tagColor="cyan"
                 badge="Auto-Rotated"
               />
-              <EmployeeUpcomingRosterCard />
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
                 <div className="w-full h-full">
                   <EmployeeShiftScheduleCard />
@@ -1841,24 +1276,15 @@ export const EmployeeDashboardPage: React.FC = () => {
               </div>
             </section>
 
-            {/* STEP 5: Leadership Appreciations & Recognition */}
-            <section id="step-5-kudos" className="space-y-5 scroll-mt-24">
-              <StepSectionHeader
-                title="Leadership Appreciations & Kudos"
-                subtitle="Direct accolades from your Department Manager and Team Lead with live reactions"
-                tagColor="amber"
-                badge="Recognition Stream"
-              />
-              <EmployeeManagerKudosCard />
-            </section>
 
-            {/* STEP 6: Shift Adherence & Performance Analytics */}
-            <section id="step-6-analytics" className="space-y-5 scroll-mt-24">
+
+            {/* STEP 5: Shift Adherence & Performance Analytics */}
+            <section id="step-5-analytics" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
                 title="Shift Adherence & Performance Analytics"
-                subtitle="Weekly regular vs overtime hours and monthly attendance distribution breakdowns"
+                subtitle="Weekly regular vs overtime hours and monthly attendance distribution"
                 tagColor="indigo"
-                badge="Visual Intelligence"
+                badge="Current Month"
               />
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <AnalyticsBarChart
@@ -1881,18 +1307,15 @@ export const EmployeeDashboardPage: React.FC = () => {
               </div>
             </section>
 
-            {/* STEP 7: Team Live Presence & Timesheet Submissions */}
-            <section id="step-7-team" className="space-y-5 scroll-mt-24">
+            {/* STEP 6: Monthly Timesheet & Activity */}
+            <section id="step-6-timesheet" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Team Live Presence & Timesheet Lock"
-                subtitle="Colleague status across Bengaluru, Salem, & Hyderabad, plus monthly timesheet lock"
+                title="Monthly Timesheet & Activity Log"
+                subtitle="Timesheet submission status and recent shift activity timeline"
                 tagColor="emerald"
-                badge="Cross-Hub Roster"
+                badge="Current Month"
               />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-                <div className="w-full h-full">
-                  <EmployeeTeamLivePresenceCard />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                 <div className="w-full h-full">
                   <EmployeeTimesheetSummaryCard />
                 </div>
