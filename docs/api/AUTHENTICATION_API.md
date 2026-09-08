@@ -43,6 +43,7 @@ Enterprise login endpoint supporting password credentials and OTP challenge disp
 ### 2. `POST /v1/auth/mfa/verify`
 Verifies 6-digit TOTP / email OTP challenge and issues session JWT.
 
+
 ### 3. `POST /v1/auth/mfa/resend`
 Resends OTP challenge code.
 
@@ -54,3 +55,33 @@ Rotates refresh tokens and issues fresh access token.
 
 ### 6. `POST /v1/auth/logout`
 Revokes active session tokens.
+
+---
+
+## 🔒 Security Hardening & Gateway Protection
+
+### 1. Strict Schema Validation
+All authentication requests pass through strict Zod middleware (`.strict()`):
+- **Email Validation**: Must match corporate domain `@thestackly.com`.
+- **Password Complexity**: Minimum 10 characters with uppercase, lowercase, number, and special symbol.
+- **Employee ID**: Must match format `STK-YYYY-NNNN`.
+- **Unknown Properties**: Any extraneous property sent in body or query causes instant `400 Bad Request` rejection with parameter whitelist error.
+
+### 2. Dual-Key Tiered Rate Limiting & Exponential Backoff
+- **Per-IP and Per-Account**: Authenticated and unauthenticated attempts track both client IP address and the account identifier (email/username).
+- **Thresholds**:
+  - Sensitive Auth (`/api/auth/login`, `/api/auth/register`, `/v1/auth/login`): **5 attempts / 15 minutes**.
+  - Password Reset (`/api/auth/password-reset`): **3 attempts / 15 minutes**.
+- **Exponential Backoff**: Successive failures trigger progressive backoff headers (`Retry-After: <seconds>`) ranging from 15 seconds up to 30 minutes, preventing brute-force and credential stuffing without permanent account lockouts.
+- **Storage**: Backed by high-concurrency SQLite table `rate_limits` with automatic expired key purging.
+
+### 3. Safe Error Handling
+- Internal database details, SQL statements, and stack traces are never leaked in API responses.
+- Standardized error format:
+```json
+{
+  "success": false,
+  "message": "Invalid credentials provided.",
+  "errors": []
+}
+```

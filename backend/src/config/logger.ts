@@ -19,10 +19,16 @@ const SENSITIVE_KEYS = new Set([
   'longitude'
 ]);
 
-function redactSensitiveData(data: any): any {
+function redactSensitiveData(data: any, depth = 0, seen = new WeakSet()): any {
   if (data === null || data === undefined) return data;
   if (typeof data !== 'object') return data;
-  if (Array.isArray(data)) return data.map(redactSensitiveData);
+  if (depth > 6) return '[MAX_DEPTH]';
+  if (seen.has(data)) return '[CIRCULAR]';
+  seen.add(data);
+
+  if (Array.isArray(data)) {
+    return data.map(item => redactSensitiveData(item, depth + 1, seen));
+  }
 
   const clean: Record<string, any> = {};
   for (const key of Object.keys(data)) {
@@ -30,7 +36,7 @@ function redactSensitiveData(data: any): any {
     if (SENSITIVE_KEYS.has(lowerKey)) {
       clean[key] = '[REDACTED]';
     } else {
-      clean[key] = redactSensitiveData(data[key]);
+      clean[key] = redactSensitiveData(data[key], depth + 1, seen);
     }
   }
   return clean;

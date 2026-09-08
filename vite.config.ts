@@ -62,8 +62,8 @@ export default defineConfig({
     external: ['better-sqlite3', '@sqlitecloud/drivers']
   },
   test: {
-    include: ['tests/unit/**/*.test.{ts,tsx}'],
-    exclude: ['node_modules', 'tests/**/*.spec.ts'],
+    include: ['tests/**/*.test.{ts,tsx}'],
+    exclude: ['node_modules', 'playwright/**'],
     globals: true,
     server: {
       deps: {

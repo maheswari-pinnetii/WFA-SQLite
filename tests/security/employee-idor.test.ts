@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import * as employeeController from '../../../backend/src/controllers/employee.controller.js';
-import { employeeService } from '../../../backend/src/services/employee.service.js';
+import * as employeeController from '../../backend/src/controllers/employee.controller.js';
+import { employeeService } from '../../backend/src/services/employee.service.js';
 
-vi.mock('../../../backend/src/services/employee.service.js');
-vi.mock('../../../backend/src/config/db.js', () => ({ logAudit: vi.fn() }));
-vi.mock('../../../backend/src/sockets/index.js', () => ({ emitToOrg: vi.fn(), SOCKET_EVENTS: {} }));
+vi.mock('../../backend/src/services/employee.service.js');
+vi.mock('../../backend/src/config/db.js', () => ({ logAudit: vi.fn() }));
+vi.mock('../../backend/src/sockets/index.js', () => ({ emitToOrg: vi.fn(), SOCKET_EVENTS: {} }));
 
 describe('Employee Controller - IDOR & BOLA Prevention', () => {
   it('blocks EMPLOYEE from updating another user profile', async () => {

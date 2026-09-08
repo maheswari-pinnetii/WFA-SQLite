@@ -2,6 +2,11 @@
 
 Welcome to the central documentation hub for WFA-SQLite. This repository contains all architectural, API, security, and operational documentation, structured cleanly into distinct domains.
 
+## Overview
+* [Project Overview](./Project-Overview.md)
+* [Tech Stack](./TECH_STACK.md)
+* [Traceability Matrix](./TRACEABILITY_MATRIX.md)
+
 ## System Architecture
 * [System Overview](./system-architecture/SYSTEM_OVERVIEW.md)
 * [Architecture Styles](./system-architecture/ARCHITECTURE_STYLES.md)

@@ -35,8 +35,8 @@ Status: **NOT APPLICABLE**
 
 ### Rate Limiting
 Status: **IMPLEMENTED**
-* **Reason:** Protects against DoS and brute-force logins.
-* **Location:** `backend/src/middleware/resilience.ts` (using `express-rate-limit`)
+* **Reason:** Protects against DoS and brute-force logins with tiered thresholds (Sensitive Auth: 5/15m, Password Reset: 3/15m, Public: 30/1m, Authenticated: 300/15m).
+* **Location:** `backend/src/middleware/rateLimiter.ts` (Dual-key IP + Account tracking backed by self-healing SQLite `rate_limits` table)
 
 ### Circuit Breaker
 Status: **IMPLEMENTED**
@@ -49,8 +49,9 @@ Status: **IMPLEMENTED**
 * **Location:** `backend/src/middleware/idempotency.ts`
 
 ### Retry with Exponential Backoff
-Status: **PARTIALLY IMPLEMENTED**
-* **Reason:** Useful for flaky network requests, though not fully utilized inside the core SQLite-first operations.
+Status: **IMPLEMENTED**
+* **Reason:** Throttles repeated failed authentication attempts using exponential backoff (15s up to 30 minutes with `Retry-After` header), preventing credential stuffing.
+* **Location:** `backend/src/middleware/rateLimiter.ts`
 
 ### Bulkhead
 Status: **FUTURE**
@@ -79,8 +80,8 @@ Status: **IMPLEMENTED**
 
 ### Centralized Error Handling & Input Validation
 Status: **IMPLEMENTED**
-* **Reason:** Standardized JSON error formats and guaranteed request sanity.
-* **Location:** `backend/src/app.ts` & Validation Middlewares.
+* **Reason:** Standardized JSON error formats (`{ success: false, message, errors }`) and guaranteed request sanity. Strict Zod schemas with `.strict()` reject extraneous parameters. Safe error sanitizer (`backend/src/utils/errorHandler.ts`) suppresses database schema details, file paths, and internal stack traces from client responses while retaining Winston file audit logs.
+* **Location:** `backend/src/app.ts`, `backend/src/schemas/validation.schemas.ts`, and `backend/src/utils/errorHandler.ts`.
 
 ---
 

@@ -18,8 +18,11 @@ export const connectDatabase = async (): Promise<any> => {
   if (cloudUrl && process.env.NODE_ENV !== 'test') {
     try {
       console.log('[Database] Connecting to SQLite Cloud database...');
-      // Bypass TLS certificate expiration check for SQLite Cloud connections
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      // Only allow insecure TLS bypass in explicit non-production environments if explicitly requested
+      if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_INSECURE_TLS === 'true') {
+        console.warn('⚠️ [Security Warning]: Insecure TLS certificate verification is active via ALLOW_INSECURE_TLS=true');
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+      }
       const testDb = new SQLiteCloudDatabase(cloudUrl);
       // Run test query immediately to check if server is paused/down
       await testDb.sql('SELECT 1 as active');
@@ -50,6 +53,9 @@ export const connectDatabase = async (): Promise<any> => {
   // Checkpoint WAL frames to base database file
   localDb.pragma('wal_checkpoint(PASSIVE)');
   
+  // Ensure base schema exists
+  initLocalSchema(localDb);
+
   return localDb;
 };
 
@@ -77,6 +83,93 @@ const isConnectionError = (err: any): boolean => {
   );
 };
 
+const initLocalSchema = (db: BetterSqlite3.Database) => {
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS rate_limits (
+        key TEXT PRIMARY KEY,
+        hits INTEGER NOT NULL DEFAULT 1,
+        expiresAt INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_rate_limits_expiry ON rate_limits(expiresAt);
+
+      CREATE TABLE IF NOT EXISTS security_audit_logs (
+        id TEXT PRIMARY KEY,
+        userId TEXT,
+        action TEXT NOT NULL,
+        ipAddress TEXT,
+        userAgent TEXT,
+        details TEXT,
+        timestamp TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_security_audit_user ON security_audit_logs(userId);
+
+      CREATE TABLE IF NOT EXISTS ai_insights (
+        id TEXT PRIMARY KEY,
+        organization_id TEXT NOT NULL,
+        type TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        severity TEXT NOT NULL DEFAULT 'INFO',
+        confidence REAL DEFAULT 0.85,
+        source TEXT NOT NULL,
+        department TEXT,
+        team TEXT,
+        employee_id TEXT,
+        data_period_start TEXT,
+        data_period_end TEXT,
+        created_at TEXT NOT NULL,
+        expires_at TEXT,
+        status TEXT NOT NULL DEFAULT 'ACTIVE'
+      );
+      CREATE TABLE IF NOT EXISTS feature_flags (
+        key TEXT PRIMARY KEY,
+        enabled INTEGER NOT NULL DEFAULT 1,
+        description TEXT,
+        target_roles TEXT,
+        organization_id TEXT,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS delayed_jobs (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        payload TEXT,
+        status TEXT DEFAULT 'PENDING',
+        run_at TEXT NOT NULL,
+        attempts INTEGER DEFAULT 0,
+        max_attempts INTEGER DEFAULT 3,
+        last_error TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS dashboard_summary_mv (
+        organizationId TEXT PRIMARY KEY,
+        totalEmployees INTEGER DEFAULT 0,
+        lastCalculatedAt TEXT
+      );
+      CREATE TRIGGER IF NOT EXISTS mv_employee_insert
+      AFTER INSERT ON employees
+      BEGIN
+        INSERT INTO dashboard_summary_mv (organizationId, totalEmployees, lastCalculatedAt)
+        VALUES (NEW.organizationId, 1, datetime('now'))
+        ON CONFLICT(organizationId) DO UPDATE SET 
+          totalEmployees = totalEmployees + 1,
+          lastCalculatedAt = datetime('now');
+      END;
+      CREATE TRIGGER IF NOT EXISTS mv_employee_delete
+      AFTER DELETE ON employees
+      BEGIN
+        UPDATE dashboard_summary_mv 
+        SET totalEmployees = totalEmployees - 1, lastCalculatedAt = datetime('now')
+        WHERE organizationId = OLD.organizationId;
+      END;
+      CREATE INDEX IF NOT EXISTS idx_attendancerecords_org_date_status ON attendancerecords(organizationId, date, status);
+    `);
+  } catch (err: any) {
+    console.warn('[Database] Warning: Failed to execute initLocalSchema:', err?.message || err);
+  }
+};
+
 const ensureLocalDbInitialized = async () => {
   if (localDb) return;
   console.log(`[Database] Initializing local SQLite fallback database at ${DB_PATH}`);
@@ -89,68 +182,7 @@ const ensureLocalDbInitialized = async () => {
   localDb.pragma('synchronous = NORMAL');
   localDb.pragma('wal_checkpoint(PASSIVE)');
 
-  localDb.exec(`
-    CREATE TABLE IF NOT EXISTS ai_insights (
-      id TEXT PRIMARY KEY,
-      organization_id TEXT NOT NULL,
-      type TEXT NOT NULL,
-      title TEXT NOT NULL,
-      description TEXT NOT NULL,
-      severity TEXT NOT NULL DEFAULT 'INFO',
-      confidence REAL DEFAULT 0.85,
-      source TEXT NOT NULL,
-      department TEXT,
-      team TEXT,
-      employee_id TEXT,
-      data_period_start TEXT,
-      data_period_end TEXT,
-      created_at TEXT NOT NULL,
-      expires_at TEXT,
-      status TEXT NOT NULL DEFAULT 'ACTIVE'
-    );
-    CREATE TABLE IF NOT EXISTS feature_flags (
-      key TEXT PRIMARY KEY,
-      enabled INTEGER NOT NULL DEFAULT 1,
-      description TEXT,
-      target_roles TEXT,
-      organization_id TEXT,
-      updated_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS delayed_jobs (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      payload TEXT,
-      status TEXT DEFAULT 'PENDING',
-      run_at TEXT NOT NULL,
-      attempts INTEGER DEFAULT 0,
-      max_attempts INTEGER DEFAULT 3,
-      last_error TEXT,
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS dashboard_summary_mv (
-      organizationId TEXT PRIMARY KEY,
-      totalEmployees INTEGER DEFAULT 0,
-      lastCalculatedAt TEXT
-    );
-    CREATE TRIGGER IF NOT EXISTS mv_employee_insert
-    AFTER INSERT ON employees
-    BEGIN
-      INSERT INTO dashboard_summary_mv (organizationId, totalEmployees, lastCalculatedAt)
-      VALUES (NEW.organizationId, 1, datetime('now'))
-      ON CONFLICT(organizationId) DO UPDATE SET 
-        totalEmployees = totalEmployees + 1,
-        lastCalculatedAt = datetime('now');
-    END;
-    CREATE TRIGGER IF NOT EXISTS mv_employee_delete
-    AFTER DELETE ON employees
-    BEGIN
-      UPDATE dashboard_summary_mv 
-      SET totalEmployees = totalEmployees - 1, lastCalculatedAt = datetime('now')
-      WHERE organizationId = OLD.organizationId;
-    END;
-    CREATE INDEX IF NOT EXISTS idx_attendancerecords_org_date_status ON attendancerecords(organizationId, date, status);
-  `);
+  initLocalSchema(localDb);
 };
 
 export const getDatabase = (): any => {

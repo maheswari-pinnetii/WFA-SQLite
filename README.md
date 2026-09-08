@@ -60,8 +60,20 @@ SQLITE_DB_PATH=./database/sqlite/wfa.sqlite
 
 ## 7. Testing
 ```bash
-# Run unit & integration test suite
+# Run all Vitest suites (unit, integration, security)
 npm test
+
+# Run isolated suites
+npm run test:unit           # Component and pure unit tests
+npm run test:integration    # Multi-layer backend integration tests
+npm run test:security       # Schema hardening and IDOR security tests
+
+# Run Playwright End-to-End browser tests (requires server running)
+npm run test:e2e            # Headless Chromium E2E
+npm run test:e2e:ui         # Interactive UI mode
+
+# Static type check
+npm run typecheck
 
 # Build production bundle
 npm run build
@@ -69,19 +81,23 @@ npm run build
 
 ## 8. Documentation
 For comprehensive guides and architectural details, please visit our **[Documentation Hub](./docs/README.md)**.
-- [System Architecture](./docs/architecture/SYSTEM_ARCHITECTURE.md)
-- [Backend Architecture](./docs/architecture/BACKEND_ARCHITECTURE.md)
+- [Project Overview](./docs/Project-Overview.md)
+- [Testing Strategy & QA Architecture](./docs/tests/TESTING_STRATEGY.md)
+- [Security Hardening & Threat Model](./docs/security/SECURITY.md)
+- [Backend Architecture](./docs/backend/BACKEND_ARCHITECTURE.md)
+- [Frontend Architecture](./docs/frontend/FRONTEND_ARCHITECTURE.md)
 - [API Reference](./docs/api/API_OVERVIEW.md)
 - [Database Guide](./docs/database/DATABASE_GUIDE.md)
 
 ## 9. Repository Structure
 ```text
 WFA-SQLite/
-├── src/           # Frontend React source code
-├── backend/       # Node.js/Express backend source code
-├── database/      # SQLite database and migrations
-├── docs/          # Comprehensive Documentation Hub
-├── postman/       # API testing collections
+├── frontend/          # Frontend React 18 + TypeScript source code
+├── backend/           # Node.js/Express backend source code
+├── database/          # SQLite database files and migrations
+├── playwright/        # Playwright E2E browser tests (Page Object Models, fixtures)
+├── tests/             # Vitest test suites (unit, integration, security, load)
+├── docs/              # Comprehensive Documentation Hub
 ├── package.json
 └── README.md
 ```

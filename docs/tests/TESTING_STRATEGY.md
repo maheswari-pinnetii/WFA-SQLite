@@ -1,90 +1,139 @@
-<!-- Content from Testing-Strategy.md -->
+# Testing Strategy & Quality Assurance Architecture
 
-# Testing Strategy & Quality Assurance
-
-This document details the quality assurance procedures, the test runner, and the exact specifications of the 125 unit and integration tests across 15 test suites written for the **Workforce Analytics Platform**.
+This document details the multi-tiered quality assurance architecture for the **Workforce Analytics Platform (WFA)**, covering End-to-End browser testing with Playwright, and Unit, Integration, Security, and Load testing with Vitest.
 
 ---
 
 ## 🧪 Verification Layers
 
-### 1. Unit & Integration Testing (Vitest)
-We use **Vitest** as our core test runner. It allows fast, parallelized execution of ES module tests with built-in mock environments.
-To execute all tests (15 test files, 125 tests — 100% passing):
-```bash
-npm run test
-```
+| Layer | Runner / Tool | Target Directory | Description | Execution Command |
+| --- | --- | --- | --- | --- |
+| **End-to-End (E2E)** | Playwright | `playwright/` | Full browser interactions, page object models, auth flows, and UI assertions | `npm run test:e2e` |
+| **Unit Testing** | Vitest (JSDOM) | `tests/unit/` | Isolated React component cards, form validation, and client state hooks | `npm run test:unit` |
+| **Integration Testing**| Vitest (Node) | `tests/integration/`| Backend Express controllers, SQLite transactions, Socket.IO realtime events | `npm run test:integration` |
+| **Security Testing** | Vitest (Node) | `tests/security/` | IDOR/BOLA authorization checks, password recovery, and strict schema hardening | `npm run test:security` |
+| **Load Testing** | Node.js Benchmark | `tests/load/` | Peak concurrency, 500 simultaneous logins, and database lock contention | `node tests/load/loadTest.js` |
+| **Type Integrity** | TypeScript | Project Root | Static type checks (`tsc --noEmit`) across frontend and backend | `npm run typecheck` |
 
-### 2. TypeScript Type Safety
-Runs static type checking across the whole project:
-```bash
-npm run typecheck
-```
+---
 
-### 3. Vite Production Compilation
-Validates rollup bundling and code splitting compatibility:
-```bash
-npm run build
+## 📂 Directory Layout
+
+```text
+WFA-SQLite/
+├── playwright/                     # Playwright End-to-End Test Suite
+│   ├── config/
+│   │   └── test-env.ts             # Test environment URLs, credentials & route paths
+│   ├── fixtures/
+│   │   └── test.fixture.ts         # Custom Playwright fixture with POM injection & rate-limit resets
+│   ├── helpers/
+│   │   └── reset-rate-limits.ts    # Helper to clean rate limits prior to E2E runs
+│   ├── pages/
+│   │   ├── BasePage.ts             # Shared navigation, toast, and theme helpers
+│   │   ├── LoginPage.ts            # Page Object Model for two-step email & password login
+│   │   └── DashboardPage.ts        # Page Object Model for employee & admin dashboards
+│   └── tests/
+│       ├── auth.spec.ts            # E2E login, domain rejection, password entry & dashboard transition
+│       ├── dashboard.spec.ts       # E2E layout integrity, in-header notification toggle & badge checks
+│       └── navigation.spec.ts      # E2E unauthenticated route guards & public landing page
+│
+├── tests/                          # Automated Vitest & Load Testing Suites
+│   ├── unit/                       # Component & UI Unit Tests
+│   │   ├── auth-flow.test.tsx
+│   │   ├── email-login-card.test.tsx
+│   │   ├── frontend.test.tsx
+│   │   ├── landing-page.test.tsx
+│   │   ├── passwordless-login-card.test.tsx
+│   │   ├── signup-page.test.tsx
+│   │   └── trusted-devices.test.tsx
+│   ├── integration/                # Multi-Layer Backend Integration Tests
+│   │   ├── ai-intelligence.test.ts
+│   │   ├── api.test.ts
+│   │   ├── attendance.test.ts
+│   │   ├── auth-flow-api.test.ts
+│   │   ├── auth.test.ts
+│   │   ├── backup.test.ts
+│   │   ├── comprehensive.test.ts
+│   │   ├── concurrency-500-logins.test.ts
+│   │   ├── e2e-api.test.ts
+│   │   ├── realtime-sockets.test.ts
+│   │   ├── system-design-patterns.test.ts
+│   │   └── totp-mfa.test.ts
+│   ├── security/                   # Dedicated Security Hardening Suites
+│   │   ├── employee-idor.test.ts
+│   │   ├── password-reset.test.ts
+│   │   └── security-hardening.test.ts
+│   └── load/                       # Stress & Concurrency Benchmarks
+│       └── loadTest.js
+│
+├── playwright.config.ts            # Playwright configuration (Chromium, HTML report, screenshots)
+└── vite.config.ts                  # Vitest configuration (isolated test inclusion, external DB drivers)
 ```
 
 ---
 
-## 📋 Comprehensive List of Test Suites (15 Files, 125 Tests)
+## 🚀 Running Tests
 
-The test suite is structured inside the `tests/unit/` directory:
+### Running All Unit, Integration, and Security Tests
+```bash
+npm test
+```
 
-### A. RBAC & Roles Specifications (`tests/unit/auth.test.ts`)
-Verifies role definitions, access paths, and permission structures.
+### Running Specific Test Suites
+```bash
+# Run unit tests only
+npm run test:unit
 
-1. **"should match roles to their corporate titles"**:
-   - Asserts that `ROLE_LABELS` matches roles (`Role.ADMIN`, `Role.HR`, etc.) to human-readable strings.
-2. **"should route roles to correct dashboard entry points"**:
-   - Asserts that `ROLE_HOME_PATHS` maps users to their respective workspace dashboard panels.
-3. **"should declare strict nested hierarchy ranks"**:
-   - Asserts that role ranks follow the correct zero-trust priority order (`Role.ADMIN = 0` to `Role.EMPLOYEE = 4`).
-4. **"should map legacy permission codes to correct modern counterparts"**:
-   - Validates mapping of permission codes (e.g. `SYSTEM_ALL` mapping to `VIEW_ALL_DATA`).
+# Run integration tests only
+npm run test:integration
 
-### B. Smart Attendance & Geofencing (`tests/unit/attendance.test.ts`)
-Verifies clocking actions, geographical calculations, and state machine boundaries.
+# Run security hardening tests only
+npm run test:security
+```
 
-5. **"should correctly measure distance within bounds"**:
-   - Asserts the Haversine distance formula returns less than 100 meters for close coordinates.
-6. **"should correctly flag coordinates outside office boundary"**:
-   - Asserts distance returns greater than 100 meters for coordinates far from the Bangalore campus.
-7. **"should allow normal check-in and check-out transition"**:
-   - Asserts that checking in sets status to `Checked In` and checking out sets status to `Checked Out` with timestamps.
-8. **"should reject duplicate check-in attempts"**:
-   - Asserts that active duty users cannot check in twice.
-9. **"should reject check-out before check-in"**:
-   - Asserts that non-clocked users cannot check out.
-10. **"should support take break and resume cycle"**:
-    - Validates state shifts from `Working` ➔ `On Break` ➔ `Working` and logs accurate break timestamps.
-11. **"should reject check-in if coordinates are missing for In-Office mode"**:
-    - Asserts validation throws an error if coordinates are absent when work mode is set to 'Office'.
-12. **"should reject check-in if coordinates are outside Bengaluru office radius"**:
-    - Asserts that geofencing flags coordinates outside the allowed MAHE campus perimeter.
-13. **"should allow check-in if coordinates are within office bounds"**:
-    - Asserts check-in succeeds if coordinates match the office lat/long coordinates.
-14. **"should correctly flag late arrival on regular shift"**:
-    - Asserts that arriving past the 9:15 AM grace period sets the `lateArrival` flag to true.
-15. **"should calculate accurate working hours and overtime"**:
-    - Validates that break intervals are deducted from overall duration to compute net working hours.
-16. **"should queue attendance actions offline and process them upon synchronization"**:
-    - Verifies that offline clock actions are saved to `localStorage` queue and successfully synced when network is restored.
+### Running Playwright End-to-End Tests
+Ensure both the backend API and frontend Vite servers are running (`npm run dev`), then execute:
+```bash
+# Headless Chromium test execution
+npm run test:e2e
 
-### C. Backend API Integration & Authorization Tests (`tests/unit/api.test.ts`)
-Verifies Express routes, HTTP methods, payloads, headers, tokens, and data validation.
+# Interactive UI Mode
+npm run test:e2e:ui
 
-17-28. **12 API & Controller Security Tests**:
-   - Authenticate ADMIN, HR, MANAGER, TEAM_LEAD, and EMPLOYEE.
-   - Enforce DBAC/RBAC scope-based data isolation for department/team listings.
-   - Prevent parameter tampering and invalid status transitions.
+# View HTML Test Report
+npm run test:e2e:report
+```
 
-### D. E2E User Flow Tests (`tests/unit/e2e.test.ts`)
-Validates complete multi-step lifecycle scenarios.
+---
 
-29. **"Flow: Login -> Check-In -> Break -> Resume -> Check-Out -> View History"**:
-    - Asserts seamless authentication, clocking, state transition, activity log persisting, and history listing.
-30. **"should enforce geofence, duplicate check-in, and double-checkout restrictions"**:
-    - Asserts robust system defense when boundary parameters or actions are violated.
+## 📋 Test Specifications & Coverage
+
+### 1. Playwright E2E Suite (`playwright/tests/`)
+1. **`auth.spec.ts`**:
+   - Renders corporate email input with `@thestackly.com` domain pattern.
+   - Rejects non-corporate email domains (e.g. `@gmail.com`) with instant client validation alerts.
+   - Advances to password step with valid corporate email.
+   - Completes full two-step login flow and lands on dashboard.
+2. **`dashboard.spec.ts`**:
+   - Validates that legacy step indicator badges (`Step 01`, `Step 02`, etc.) and the "Quick Step Jump" bar are absent.
+   - Verifies the in-header notification bell button and interacts with the unread notifications dropdown.
+3. **`navigation.spec.ts`**:
+   - Verifies that accessing `/employee/dashboard` without session token redirects to `/login`.
+   - Validates public landing page rendering and branding headers.
+
+### 2. Security Test Suite (`tests/security/`)
+1. **`security-hardening.test.ts`**:
+   - Strict Zod schema input validation rejecting extraneous parameters (`.strict()`).
+   - Corporate email format and employee ID regex checking.
+   - Exponential backoff rate limiting setting `Retry-After` headers.
+   - Binary magic-number validation blocking dangerous executable file uploads.
+   - Generic error messages preventing stack trace and SQL query leakage.
+2. **`employee-idor.test.ts`**:
+   - Validates IDOR/BOLA prevention blocking employees from modifying profiles outside their own ID.
+3. **`password-reset.test.ts`**:
+   - Validates password reset token generation, expiry hashing, and brute-force rate limit lockout.
+
+### 3. Unit & Component Test Suite (`tests/unit/`)
+- Renders and tests isolated authentication cards (`EmailLoginCard`, `PasswordlessLoginCard`).
+- Validates trusted device registration (Face recognition, Biometrics, Device PIN, Pattern).
+- Asserts signup form state transitions and client-side password complexity requirements.

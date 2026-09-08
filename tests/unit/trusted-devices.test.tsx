@@ -5,9 +5,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import axios, { AxiosInstance } from 'axios';
+import jwt from 'jsonwebtoken';
 import { app } from '../../backend/src/app.js';
 import { initDb } from '../../backend/src/database/connection.js';
-import { execute } from '../../backend/src/database/sqlite-cloud.js';
+import { execute, query } from '../../backend/src/database/sqlite-cloud.js';
+import { env } from '../../backend/src/config/env.js';
 import { PasswordlessLoginCard } from '../../frontend/src/auth/components/PasswordlessLoginCard';
 import { LoginPage } from '../../frontend/src/auth/pages/LoginPage';
 import { RealTimeDevicePinLock } from '../../frontend/src/auth/components/RealTimeDevicePinLock';
@@ -52,6 +54,24 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
       await initDb();
       // Clear ALL rate limits so cross-test pollution doesn't cause 429s
       await execute('DELETE FROM rate_limits').catch(() => {});
+
+      const users = await query('SELECT id, email FROM users WHERE LOWER(email) = ?', [testEmail.toLowerCase()]);
+      let userId = users?.[0]?.id;
+      if (!userId) {
+        userId = 'admin-test-user-id';
+        await execute("INSERT OR IGNORE INTO users (id, email, name, role) VALUES (?, ?, 'Admin', 'ADMIN')", [userId, testEmail]);
+      }
+      const token = jwt.sign(
+        { id: userId, email: testEmail, role: 'ADMIN', organizationId: 'org-stackly' },
+        env.JWT_SECRET,
+        {
+          algorithm: 'HS256',
+          issuer: 'wfa-sqlite',
+          audience: 'wfa-client',
+          expiresIn: '1h'
+        }
+      );
+
       return new Promise<void>((resolve) => {
         server = app.listen(0, () => {
           const address = server.address();
@@ -59,6 +79,9 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
           client = axios.create({
             baseURL: `http://localhost:${port}`,
             validateStatus: () => true,
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           });
           resolve();
         });
@@ -72,7 +95,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.1 should save a trusted device with Face Recognition (face)', async () => {
-      const res = await client.post('/api/auth/trusted-devices', {
+      const res = await client.post('/api/v1/auth/trusted-devices', {
         email: testEmail,
         deviceName: 'Admin Workstation (Windows Hello Face)',
         authMethod: 'face',
@@ -90,7 +113,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.2 should save a trusted device with Biometrics / Fingerprint (biometric)', async () => {
-      const res = await client.post('/api/auth/trusted-devices', {
+      const res = await client.post('/api/v1/auth/trusted-devices', {
         email: testEmail,
         deviceName: 'Admin MacBook (Touch ID)',
         authMethod: 'biometric',
@@ -104,7 +127,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.3 should save a trusted device with Homescreen Lock / PIN (screen_lock)', async () => {
-      const res = await client.post('/api/auth/trusted-devices', {
+      const res = await client.post('/api/v1/auth/trusted-devices', {
         email: testEmail,
         deviceName: 'Mobile Phone (Screen Lock)',
         authMethod: 'screen_lock',
@@ -118,7 +141,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.4 should save a trusted device with Device PIN (device_pin)', async () => {
-      const res = await client.post('/api/auth/trusted-devices', {
+      const res = await client.post('/api/v1/auth/trusted-devices', {
         email: testEmail,
         deviceName: 'Office Tablet (Device PIN)',
         authMethod: 'device_pin',
@@ -132,7 +155,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.5 should save a trusted device with Pattern Lock (pattern)', async () => {
-      const res = await client.post('/api/auth/trusted-devices', {
+      const res = await client.post('/api/v1/auth/trusted-devices', {
         email: testEmail,
         deviceName: 'Field Android (Pattern Lock)',
         authMethod: 'pattern',
@@ -146,7 +169,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.6 should list all active trusted devices for user', async () => {
-      const res = await client.get(`/api/auth/trusted-devices?email=${encodeURIComponent(testEmail)}`);
+      const res = await client.get(`/api/v1/auth/trusted-devices?email=${encodeURIComponent(testEmail)}`);
 
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
@@ -158,7 +181,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.7 should verify active trusted device by device fingerprint', async () => {
-      const res = await client.post('/api/auth/trusted-devices/verify', {
+      const res = await client.post('/api/v1/auth/trusted-devices/verify', {
         email: testEmail,
         deviceFingerprint: testFingerprint,
       });
@@ -170,14 +193,14 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.8 should revoke a trusted device by ID', async () => {
-      const res = await client.delete(`/api/auth/trusted-devices/${createdDeviceId}`);
+      const res = await client.delete(`/api/v1/auth/trusted-devices/${createdDeviceId}`);
 
       expect(res.status).toBe(200);
       expect(res.data.success).toBe(true);
       expect(res.data.message).toContain('revoked');
 
       // Verify device is no longer active
-      const verifyRes = await client.post('/api/auth/trusted-devices/verify', {
+      const verifyRes = await client.post('/api/v1/auth/trusted-devices/verify', {
         email: testEmail,
         deviceFingerprint: testFingerprint,
       });
@@ -186,7 +209,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.9 should authenticate via real-time Biometric / Face recognition API (POST /api/auth/biometric/login)', async () => {
-      const res = await client.post('/api/auth/biometric/login', {
+      const res = await client.post('/api/v1/auth/biometric/login', {
         email: testEmail,
         authMethod: 'face',
         deviceName: 'MacBook Pro (Face ID)',
@@ -201,7 +224,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.10 should authenticate via real-time Device PIN API with pin: 1234', async () => {
-      const res = await client.post('/api/auth/biometric/login', {
+      const res = await client.post('/api/v1/auth/biometric/login', {
         email: testEmail,
         authMethod: 'device_pin',
         pin: '1234',
@@ -215,7 +238,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.11 should authenticate via real-time Pattern Lock API with pattern array', async () => {
-      const res = await client.post('/api/auth/biometric/login', {
+      const res = await client.post('/api/v1/auth/biometric/login', {
         email: testEmail,
         authMethod: 'pattern',
         pattern: [0, 1, 2, 4, 6, 7, 8],
@@ -229,7 +252,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
     });
 
     it('1.12 should authenticate via real-time Homescreen Lock API and save trusted device', async () => {
-      const res = await client.post('/api/auth/biometric/login', {
+      const res = await client.post('/api/v1/auth/biometric/login', {
         email: testEmail,
         authMethod: 'screen_lock',
         saveTrustedDevice: true,

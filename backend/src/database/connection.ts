@@ -294,6 +294,30 @@ export const initDb = async (): Promise<void> => {
         await execute(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp)`);
 
+        // Rate Limiting Table
+        await execute(`
+          CREATE TABLE IF NOT EXISTS rate_limits (
+            key       TEXT    PRIMARY KEY,
+            hits      INTEGER NOT NULL DEFAULT 1,
+            expiresAt INTEGER NOT NULL
+          )
+        `);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_rate_limits_expiry ON rate_limits(expiresAt)`);
+
+        // Security Audit Logs Table
+        await execute(`
+          CREATE TABLE IF NOT EXISTS security_audit_logs (
+            id         TEXT    PRIMARY KEY,
+            userId     TEXT,
+            action     TEXT    NOT NULL,
+            ipAddress  TEXT,
+            userAgent  TEXT,
+            details    TEXT,
+            timestamp  TEXT    NOT NULL
+          )
+        `);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_security_audit_user ON security_audit_logs(userId)`);
+
         // Perform health check write test
         const isHealthy = await healthCheck();
         if (!isHealthy) {

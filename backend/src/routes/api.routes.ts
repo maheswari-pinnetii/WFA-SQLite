@@ -23,7 +23,17 @@ import {
   validateRegistration,
   validateMfaCode,
   validateAttendanceAction,
-  validateLeaveRequest
+  validateLeaveRequest,
+  validateForgotPassword,
+  validateResetPassword,
+  validateChangePassword,
+  validateReviewLeaveRequest,
+  validateCorrectionRequest,
+  validateReviewCorrection,
+  validateUpdateUserRole,
+  validateBackupRestore,
+  validateSaveTrustedDevice,
+  validateVerifyTrustedDevice
 } from '../middleware/validateInput.js';
 import { validateFileUpload } from '../middleware/fileUpload.js';
 import { idempotencyMiddleware } from '../middleware/idempotency.js';
@@ -49,9 +59,9 @@ router.post('/auth/refresh', refreshRateLimiter, authController.refresh);
 router.post('/auth/admin/unlock', authenticateToken, authorizeRoles(['ADMIN']), authController.adminUnlockUser);
 
 // Password Reset Routes (Forgot Password Flow)
-router.post('/auth/forgot-password', forgotPasswordRateLimiter, authController.forgotPassword);
-router.post('/auth/reset-password', authRateLimiter, authController.resetPassword);
-router.post('/auth/change-password', authenticateToken, changePasswordRateLimiter, authController.changePassword);
+router.post('/auth/forgot-password', forgotPasswordRateLimiter, validateForgotPassword, authController.forgotPassword);
+router.post('/auth/reset-password', authRateLimiter, validateResetPassword, authController.resetPassword);
+router.post('/auth/change-password', authenticateToken, changePasswordRateLimiter, validateChangePassword, authController.changePassword);
 
 // Email Verification Routes
 router.post('/auth/send-verification', authenticateToken, authController.sendVerification);
@@ -71,9 +81,9 @@ router.post('/auth/passkey/login-options', authFlowController.generatePasskeyLog
 router.post('/auth/passkey/login-verify', authFlowController.verifyPasskeyLogin);
 router.post('/auth/biometric/login', authFlowController.biometricLockLogin);
 router.post('/auth/lock/login', authFlowController.biometricLockLogin);
-router.post('/auth/trusted-devices', authenticateToken, authFlowController.saveTrustedDevice);
+router.post('/auth/trusted-devices', authenticateToken, validateSaveTrustedDevice, authFlowController.saveTrustedDevice);
 router.get('/auth/trusted-devices', authenticateToken, authFlowController.getTrustedDevices);
-router.post('/auth/trusted-devices/verify', authFlowController.verifyTrustedDevice);
+router.post('/auth/trusted-devices/verify', validateVerifyTrustedDevice, authFlowController.verifyTrustedDevice);
 router.delete('/auth/trusted-devices/:id', authenticateToken, authFlowController.revokeTrustedDevice);
 
 // Admin MFA Management
@@ -140,14 +150,14 @@ router.get('/attendance/audit-logs', authenticateToken, attendanceController.get
 // Persisted leave and task workflows
 router.get('/leave-requests', authenticateToken, enforceScope, workforceController.getLeaveRequests);
 router.post('/leave-requests', authenticateToken, enforceScope, validateLeaveRequest, idempotencyMiddleware, workforceController.createLeaveRequest);
-router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), idempotencyMiddleware, workforceController.reviewLeaveRequest);
+router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), idempotencyMiddleware, validateReviewLeaveRequest, workforceController.reviewLeaveRequest);
 router.get('/tasks', authenticateToken, enforceScope, workforceController.getTasks);
 router.put('/tasks/:id', authenticateToken, workforceController.updateTask);
 
 // Corrections Requests
-router.post('/attendance/corrections', authenticateToken, enforceScope, idempotencyMiddleware, attendanceController.submitCorrection);
+router.post('/attendance/corrections', authenticateToken, enforceScope, validateCorrectionRequest, idempotencyMiddleware, attendanceController.submitCorrection);
 router.get('/attendance/corrections', authenticateToken, enforceScope, attendanceController.getCorrections);
-router.put('/attendance/corrections/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), idempotencyMiddleware, attendanceController.reviewCorrection);
+router.put('/attendance/corrections/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), idempotencyMiddleware, validateReviewCorrection, attendanceController.reviewCorrection);
 
 // Analytics
 router.get('/analytics', authenticateToken, enforceScope, analyticsController.getAnalytics);
@@ -170,13 +180,13 @@ router.get('/audit/logs/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR'])
 
 // User Management (Admin Only)
 router.get('/users', authenticateToken, authorizeRoles(['ADMIN']), employeeController.getUsers);
-router.put('/users/:userId/role', authenticateToken, authorizeRoles(['ADMIN']), employeeController.updateUserRole);
+router.put('/users/:userId/role', authenticateToken, authorizeRoles(['ADMIN']), validateUpdateUserRole, employeeController.updateUserRole);
 router.delete('/users/:userId', authenticateToken, authorizeRoles(['ADMIN']), employeeController.deleteUser);
 
 // Database Backup & Disaster Recovery (Admin Only)
 router.post('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backupController.createBackup);
 router.get('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backupController.listBackups);
-router.post('/admin/backups/restore', authenticateToken, authorizeRoles(['ADMIN']), backupController.restoreBackup);
+router.post('/admin/backups/restore', authenticateToken, authorizeRoles(['ADMIN']), validateBackupRestore, backupController.restoreBackup);
 router.get('/admin/backups/:filename/download', authenticateToken, authorizeRoles(['ADMIN']), backupController.downloadBackup);
 router.delete('/admin/backups/:filename', authenticateToken, authorizeRoles(['ADMIN']), backupController.deleteBackup);
 

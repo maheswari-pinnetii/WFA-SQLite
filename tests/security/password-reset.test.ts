@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../../../backend/src/app';
-import { execute } from '../../../backend/src/database/sqlite-cloud';
-import { connectDatabase } from '../../../backend/src/database/sqlite-cloud';
-import { initDb } from '../../../backend/src/config/db';
+import { app } from '../../backend/src/app';
+import { execute } from '../../backend/src/database/sqlite-cloud';
+import { connectDatabase } from '../../backend/src/database/sqlite-cloud';
+import { initDb } from '../../backend/src/config/db';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 

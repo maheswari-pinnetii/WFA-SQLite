@@ -1,9 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
-
-// Email validation regex (RFC 5322 compliant subset)
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-const COMPANY_EMAIL_REGEX = /^[^\s@]+@thestackly\.com$/i;
-const EMPLOYEE_ID_REGEX = /^STK-\d{4}-\d+$/i;
+import { z } from 'zod';
+import {
+  EMAIL_REGEX,
+  COMPANY_EMAIL_REGEX,
+  EMPLOYEE_ID_REGEX,
+  loginSchema,
+  registrationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
+  mfaVerifySchema,
+  mfaResendSchema,
+  totpConfirmSchema,
+  attendanceActionSchema,
+  leaveRequestSchema,
+  reviewLeaveRequestSchema,
+  correctionRequestSchema,
+  reviewCorrectionSchema,
+  updateUserRoleSchema,
+  backupRestoreSchema,
+  saveTrustedDeviceSchema,
+  verifyTrustedDeviceSchema
+} from '../schemas/validation.schemas.js';
 
 // Sanitize string to prevent basic XSS and injection
 export const sanitizeString = (str: string): string => {
@@ -41,88 +59,101 @@ export const inputSanitizer = (req: Request, res: Response, next: NextFunction) 
   next();
 };
 
-// Validate login request
-export const validateLogin = (req: Request, res: Response, next: NextFunction) => {
-  const { email, password } = req.body;
-  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
-    return res.status(400).json({ success: false, message: 'Valid email address is required.' });
-  }
-  if (!password || typeof password !== 'string' || password.length < 4) {
-    return res.status(400).json({ success: false, message: 'Password must be provided.' });
-  }
-  next();
+// Generic schema validator for Request Body
+export const validateBody = (schema: z.ZodTypeAny) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.body);
+    if (!result.success) {
+      const firstIssue = result.error.issues[0];
+      return res.status(400).json({
+        success: false,
+        message: firstIssue?.message || 'Invalid request body.',
+        errors: result.error.issues.map(e => ({
+          path: e.path.join('.'),
+          message: e.message
+        }))
+      });
+    }
+    req.body = result.data;
+    next();
+  };
 };
 
-// Validate registration / user creation
+// Generic schema validator for Request Query
+export const validateQuery = (schema: z.ZodTypeAny) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.query);
+    if (!result.success) {
+      const firstIssue = result.error.issues[0];
+      return res.status(400).json({
+        success: false,
+        message: firstIssue?.message || 'Invalid query parameters.',
+        errors: result.error.issues.map(e => ({
+          path: e.path.join('.'),
+          message: e.message
+        }))
+      });
+    }
+    req.query = result.data as any;
+    next();
+  };
+};
+
+// Generic schema validator for Request Params
+export const validateParams = (schema: z.ZodTypeAny) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req.params);
+    if (!result.success) {
+      const firstIssue = result.error.issues[0];
+      return res.status(400).json({
+        success: false,
+        message: firstIssue?.message || 'Invalid route parameters.',
+        errors: result.error.issues.map(e => ({
+          path: e.path.join('.'),
+          message: e.message
+        }))
+      });
+    }
+    req.params = result.data as any;
+    next();
+  };
+};
+
+// ─── SPECIFIC ROUTE VALIDATORS ───────────────────────────────────────────────
+
+export const validateLogin = validateBody(loginSchema);
+
 export const validateRegistration = (req: Request, res: Response, next: NextFunction) => {
-  const { email, password } = req.body;
-  const name = req.body.fullName || req.body.name;
-  if (!name || typeof name !== 'string' || name.trim().length < 2) {
-    return res.status(400).json({ success: false, message: 'Full name is required (at least 2 characters).' });
+  const result = registrationSchema.safeParse(req.body);
+  if (!result.success) {
+    const firstIssue = result.error.issues[0];
+    return res.status(400).json({
+      success: false,
+      message: firstIssue?.message || 'Invalid registration payload.'
+    });
   }
-  req.body.name = name.trim();
-  req.body.fullName = name.trim();
-  if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim()) || !COMPANY_EMAIL_REGEX.test(email.trim())) {
-    return res.status(400).json({ success: false, message: 'Use a valid company email ending with @thestackly.com.' });
-  }
-  const employeeId = typeof req.body.employeeId === 'string' ? req.body.employeeId.trim() : '';
-  if (!EMPLOYEE_ID_REGEX.test(employeeId)) {
-    return res.status(400).json({ success: false, message: 'Employee ID must use the format STK-YYYY-RollNumber.' });
-  }
-  req.body.employeeId = employeeId.toUpperCase();
-  if (password !== undefined) {
-    if (typeof password !== 'string' || password.length < 12) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 12 characters long.' });
-    }
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSymbol = /[^A-Za-z0-9]/.test(password);
-    
-    if (!(hasUpper && hasLower && hasNumber && hasSymbol)) {
-      return res.status(400).json({ success: false, message: 'Password must contain uppercase, lowercase, number, and special character.' });
-    }
-    const commonPasswords = ['password123', 'StacklyWFA2026!', 'qwertyuiop', '1234567890'];
-    if (commonPasswords.includes(password)) {
-      return res.status(400).json({ success: false, message: 'Password is too common or easily guessed.' });
-    }
-  }
+  const name = (result.data.name || result.data.fullName || '').trim();
+  req.body = {
+    ...result.data,
+    name,
+    fullName: name,
+    employeeId: result.data.employeeId.toUpperCase()
+  };
   next();
 };
 
-// Validate MFA Verification Code
-export const validateMfaCode = (req: Request, res: Response, next: NextFunction) => {
-  const { otp, code, challengeId } = req.body;
-  const token = otp || code;
-  if (!token || typeof token !== 'string' || token.trim().length < 6) {
-    return res.status(400).json({ success: false, message: 'Valid 6-digit verification code is required.' });
-  }
-  next();
-};
-
-// Validate Attendance Actions (Punch / Check-in / Check-out)
-export const validateAttendanceAction = (req: Request, res: Response, next: NextFunction) => {
-  const { latitude, longitude } = req.body;
-  if (latitude !== undefined && (typeof latitude !== 'number' || latitude < -90 || latitude > 90)) {
-    return res.status(400).json({ success: false, message: 'Invalid latitude coordinate (-90 to 90).' });
-  }
-  if (longitude !== undefined && (typeof longitude !== 'number' || longitude < -180 || longitude > 180)) {
-    return res.status(400).json({ success: false, message: 'Invalid longitude coordinate (-180 to 180).' });
-  }
-  next();
-};
-
-// Validate Leave Request payload
-export const validateLeaveRequest = (req: Request, res: Response, next: NextFunction) => {
-  const { startDate, endDate, type, reason } = req.body;
-  if (!startDate || !endDate) {
-    return res.status(400).json({ success: false, message: 'Start date and end date are required.' });
-  }
-  if (new Date(startDate).toString() === 'Invalid Date' || new Date(endDate).toString() === 'Invalid Date') {
-    return res.status(400).json({ success: false, message: 'Dates must be valid ISO date strings.' });
-  }
-  if (new Date(startDate) > new Date(endDate)) {
-    return res.status(400).json({ success: false, message: 'Start date cannot be after end date.' });
-  }
-  next();
-};
+export const validateForgotPassword = validateBody(forgotPasswordSchema);
+export const validateResetPassword = validateBody(resetPasswordSchema);
+export const validateChangePassword = validateBody(changePasswordSchema);
+export const validateMfaCode = validateBody(mfaVerifySchema);
+export const validateMfaResend = validateBody(mfaResendSchema);
+export const validateTotpCode = validateBody(totpConfirmSchema);
+export const validateAttendanceAction = validateBody(attendanceActionSchema);
+export const validateLeaveRequest = validateBody(leaveRequestSchema);
+export const validateReviewLeaveRequest = validateBody(reviewLeaveRequestSchema);
+export const validateCorrectionRequest = validateBody(correctionRequestSchema);
+export const validateReviewCorrection = validateBody(reviewCorrectionSchema);
+export const validateUpdateUserRole = validateBody(updateUserRoleSchema);
+export const validateBackupRestore = validateBody(backupRestoreSchema);
+export const validateSaveTrustedDevice = validateBody(saveTrustedDeviceSchema);
+export const validateVerifyTrustedDevice = validateBody(verifyTrustedDeviceSchema);

@@ -3,7 +3,11 @@ import axios from 'axios';
 import http from 'http';
 import { Database } from '@sqlitecloud/drivers';
 
-const cloudUrl = process.env.SQLITE_CLOUD_URL || 'sqlitecloud://chrk2ahwvk.g2.sqlite.cloud:8860/auth.sqlitecloud?apikey=xenaeusZqMZhUIfNKX9p9qx8TNRR7Y1XisX4APazqdE';
+const cloudUrl = process.env.SQLITE_CLOUD_URL || process.env.SQLITE_CLOUD_CONNECTION_STRING || '';
+if (!cloudUrl) {
+  console.error('❌ Error: SQLITE_CLOUD_URL or SQLITE_CLOUD_CONNECTION_STRING environment variable is required.');
+  process.exit(1);
+}
 
 // Configure high-performance Keep-Alive agent for Windows TCP socket reuse
 const httpAgent = new http.Agent({

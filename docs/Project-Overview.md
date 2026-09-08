@@ -52,3 +52,17 @@ The **Stackly Workforce Analytics Platform** is a enterprise SaaS web applicatio
    - Multi-tab management: Requests Inbox, Employee Balances, Team Coverage Calendar, Holiday Calendar, and Policy Configurations.
    - Direct cross-linking between Leave Hub and Payroll Compensation Hub.
 
+10. **Enterprise Security Hardening & Zero-Trust Architecture**:
+    - **Strict Schema Validation**: Zod schemas enforcing strict property whitelisting (`.strict()`), corporate email domain boundaries (`@thestackly.com`), employee ID regexes (`STK-YYYY-NNNN`), and bounded geolocations.
+    - **Tiered Rate Limiting & Exponential Backoff**: Per-IP and per-account rate limiters with dynamic backoff up to 30 minutes, supported by a self-healing SQLite store.
+    - **Binary Magic-Number File Uploads**: Deep byte inspection for avatars and documentation preventing executable payload masquerading.
+    - **Safe Error Handling**: Abstracted client error messaging suppressing database schema details, file paths, and internal stack traces.
+
+11. **Modernized Employee Self-Service Workspace (`/employee/dashboard`)**:
+    - Clean executive layout without clutter or step indicators.
+    - Direct in-header interactive notification bell and popover with unread counters and live system alert previews.
+
+12. **End-to-End Playwright & Multi-Tier Vitest Suite**:
+    - Dedicated `playwright/` directory containing Page Object Models (`LoginPage`, `DashboardPage`), custom test fixtures, and automated Chromium test suites.
+    - Modular Vitest suites partitioned into `tests/unit/`, `tests/integration/`, `tests/security/`, and `tests/load/`.
+

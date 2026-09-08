@@ -34,7 +34,8 @@ import {
   Coffee,
   Check,
   Sparkles,
-  LayoutDashboard
+  LayoutDashboard,
+  Bell
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
@@ -43,25 +44,14 @@ import { AbsenceManagementPage } from '../pages/AbsenceManagementPage';
 
 // Helper: Step-by-Step Section Header
 export const StepSectionHeader: React.FC<{
-  stepNumber: string;
+  stepNumber?: string;
   title: string;
   subtitle: string;
   tagColor?: string;
   badge?: string;
-}> = ({ stepNumber, title, subtitle, tagColor = 'blue', badge }) => (
+}> = ({ title, subtitle, badge }) => (
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-4 pb-2 border-b border-[var(--border-color)]/60">
     <div className="flex items-center gap-3">
-      <span className={`px-2.5 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider ${
-        tagColor === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' :
-        tagColor === 'purple' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30' :
-        tagColor === 'amber' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' :
-        tagColor === 'indigo' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
-        tagColor === 'cyan' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' :
-        tagColor === 'rose' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' :
-        'bg-blue-500/10 text-blue-400 border border-blue-500/30'
-      }`}>
-        {stepNumber}
-      </span>
       <div>
         <h2 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">
           {title}
@@ -77,84 +67,134 @@ export const StepSectionHeader: React.FC<{
   </div>
 );
 
-// Helper: Sticky Step-by-Step Navigator
-export const StepNavigatorBar: React.FC = () => {
-  const steps = [
-    { id: 'step-1-punch', label: '1. Check-In', icon: '📍' },
-    { id: 'step-2-kpis', label: '2. Metrics & KPIs', icon: '📊' },
-    { id: 'step-3-schedule', label: '3. Shift & Calendar', icon: '📅' },
-    { id: 'step-4-leaves', label: '4. Holidays & Leaves', icon: '🏖️' },
-    { id: 'step-5-kudos', label: '5. Kudos & Praise', icon: '👏' },
-    { id: 'step-6-analytics', label: '6. Shift Analytics', icon: '📈' },
-    { id: 'step-7-team', label: '7. Team Presence', icon: '👥' },
-    { id: 'step-8-tasks', label: '8. Sprint Tasks', icon: '⚡' },
-    { id: 'step-9-logs', label: '9. Logs & Corrections', icon: '📝' },
-  ];
 
-  const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+// 1. Employee Dashboard Overview / My Workspace Header with In-Header Notifications
+export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: '1', title: 'Shift Check-In Confirmed', desc: 'Punch recorded at 09:02 AM today', time: '10m ago', type: 'success', unread: true },
+    { id: '2', title: 'Leave Approval Status', desc: 'PTO request for Friday approved by HR', time: '1h ago', type: 'info', unread: true },
+    { id: '3', title: 'Team Kudos Received', desc: 'Manager recognized your performance on Sprint 24', time: '3h ago', type: 'kudos', unread: true },
+    { id: '4', title: 'Upcoming Holiday', desc: 'Corporate holiday next Monday for Bengaluru Hub', time: '1d ago', type: 'info', unread: false },
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
+  const markItemRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? ({ ...n, unread: false }) : n));
   };
 
   return (
-    <div className="p-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-md sticky top-16 z-30 shadow-xl overflow-x-auto no-scrollbar">
-      <div className="flex items-center gap-2 min-w-max">
-        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 flex items-center gap-1.5 shrink-0">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          Quick Step Jump:
-        </span>
-        {steps.map((s) => (
+    <div className="relative p-6 rounded-3xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-teal-950/50 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+      <div className="flex items-center gap-4">
+        <img
+          src={user?.avatar || "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150"}
+          alt={user?.name || "Employee"}
+          className="w-14 h-14 rounded-2xl object-cover border-2 border-emerald-500 shadow-md shrink-0"
+        />
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-2xl font-black tracking-tight text-white">Welcome back, {user?.name || "Alex Mercer"}!</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase">
+              MY WORKSPACE
+            </span>
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              ACTIVE SHIFT
+            </span>
+          </div>
+          <p className="text-xs text-slate-300 mt-1">
+            {user?.title || "Senior Software Engineer"} &bull; {user?.department || "Engineering & Technology"} &bull; Shift: <span className="text-emerald-400 font-bold">General Day Shift (09:00 AM - 06:00 PM)</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+        {/* In-Header Notifications Bell & Dropdown */}
+        <div className="relative">
           <button
-            key={s.id}
-            onClick={() => scrollToSection(s.id)}
-            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800/80 hover:border-blue-500/40 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-2 transition-all border border-slate-700 shadow-md cursor-pointer"
+            title="Notifications"
           >
-            <span>{s.icon}</span>
-            <span>{s.label}</span>
+            <Bell size={15} className={unreadCount > 0 ? "text-amber-400 animate-pulse" : "text-slate-400"} />
+            <span>Notifications</span>
+            {unreadCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black shrink-0 animate-pulse">
+                {unreadCount}
+              </span>
+            )}
           </button>
-        ))}
+
+          {/* In-Header Notifications Popover */}
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-slate-900/95 border border-slate-700/80 backdrop-blur-xl shadow-2xl p-4 z-50 text-slate-100 font-sans space-y-3 animate-fadeIn">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="font-extrabold text-xs text-white uppercase tracking-wider">
+                    Notifications ({unreadCount} new)
+                  </span>
+                </div>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllRead}
+                    className="text-[11px] text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
+                  >
+                    Mark All Read
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-2 max-h-72 overflow-y-auto no-scrollbar">
+                {notifications.length === 0 ? (
+                  <div className="text-center py-6 text-slate-400 text-xs">No notifications</div>
+                ) : (
+                  notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      onClick={() => markItemRead(n.id)}
+                      className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                        n.unread
+                          ? 'bg-slate-800/90 border-emerald-500/30 hover:bg-slate-800'
+                          : 'bg-slate-950/60 border-slate-800 hover:bg-slate-900/80 opacity-70'
+                      }`}
+                    >
+                      <span className="text-base mt-0.5 shrink-0">
+                        {n.type === 'success' ? '📍' : n.type === 'kudos' ? '👏' : '📢'}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <p className="text-xs font-bold text-white truncate">{n.title}</p>
+                          <span className="text-[10px] text-slate-400 shrink-0">{n.time}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">{n.desc}</p>
+                      </div>
+                      {n.unread && (
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 mt-1.5" />
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <a href="#step-1-punch" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-600/20 cursor-pointer">
+          <Clock size={14} /> Punch Station
+        </a>
+        <Link to="/employee/profile" className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all border border-slate-700">
+          <Compass size={14} className="text-emerald-400" /> My Profile
+        </Link>
       </div>
     </div>
   );
 };
-
-// 1. Employee Dashboard Overview / My Workspace Header
-export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => (
-  <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-teal-950/50 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
-    <div className="flex items-center gap-4">
-      <img
-        src={user?.avatar || "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150"}
-        alt={user?.name || "Employee"}
-        className="w-14 h-14 rounded-2xl object-cover border-2 border-emerald-500 shadow-md shrink-0"
-      />
-      <div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <h2 className="text-2xl font-black tracking-tight text-white">Welcome back, {user?.name || "Alex Mercer"}!</h2>
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase">
-            MY WORKSPACE
-          </span>
-          <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-            ACTIVE SHIFT
-          </span>
-        </div>
-        <p className="text-xs text-slate-300 mt-1">
-          {user?.title || "Senior Software Engineer"} &bull; {user?.department || "Engineering & Technology"} &bull; Shift: <span className="text-emerald-400 font-bold">General Day Shift (09:00 AM - 06:00 PM)</span>
-        </p>
-      </div>
-    </div>
-    <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-      <a href="#step-1-punch" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-600/20 cursor-pointer">
-        <Clock size={14} /> Punch Station
-      </a>
-      <Link to="/employee/profile" className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all border border-slate-700">
-        <Compass size={14} className="text-emerald-400" /> My Profile
-      </Link>
-    </div>
-  </div>
-);
 
 // 1a. Employee Quick Actions Command Bar
 export const EmployeeQuickActionsBar: React.FC<{
@@ -1712,13 +1752,10 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* MODE: ALL-IN-ONE 9-STEP WORKFLOW */}
         {workspaceMode === 'all-in-one' && (
           <div className="space-y-8 animate-fadeIn">
-            {/* Step-by-Step Quick Navigator */}
-            <StepNavigatorBar />
 
             {/* STEP 1: Daily Work Station & Live Check-In */}
             <section id="step-1-punch" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 01"
                 title="Daily Work Station & Check-In"
                 subtitle="Profile identity, quick actions, and geofenced attendance check-in station"
                 tagColor="blue"
@@ -1732,7 +1769,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 2: Productivity & Attendance KPIs */}
             <section id="step-2-kpis" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 02"
                 title="Productivity & Adherence KPIs"
                 subtitle="Hours logged today, weekly progress, lifetime adherence, and overtime tracking"
                 tagColor="emerald"
@@ -1761,7 +1797,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 3: Shift Schedule & Monthly Attendance Calendar */}
             <section id="step-3-schedule" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 03"
                 title="Shift Schedule & Monthly Attendance Calendar"
                 subtitle="Assigned work timings, 7-day upcoming roster, and monthly attendance day heat tiles"
                 tagColor="cyan"
@@ -1781,7 +1816,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 4: Corporate Public Holidays & Leave Entitlements */}
             <section id="step-4-leaves" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 04"
                 title="Public Holidays & Leave Entitlements"
                 subtitle="2026 gazetted holidays for Bengaluru, Salem, Hyderabad, and remaining PTO quotas"
                 tagColor="purple"
@@ -1800,7 +1834,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 5: Leadership Appreciations & Recognition */}
             <section id="step-5-kudos" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 05"
                 title="Leadership Appreciations & Kudos"
                 subtitle="Direct accolades from your Department Manager and Team Lead with live reactions"
                 tagColor="amber"
@@ -1812,7 +1845,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 6: Shift Adherence & Performance Analytics */}
             <section id="step-6-analytics" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 06"
                 title="Shift Adherence & Performance Analytics"
                 subtitle="Weekly regular vs overtime hours and monthly attendance distribution breakdowns"
                 tagColor="indigo"
@@ -1842,7 +1874,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 7: Team Live Presence & Timesheet Submissions */}
             <section id="step-7-team" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 07"
                 title="Team Live Presence & Timesheet Lock"
                 subtitle="Colleague status across Bengaluru, Salem, & Hyderabad, plus monthly timesheet lock"
                 tagColor="emerald"
@@ -1864,7 +1895,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 8: Sprint Deliverables & Task Board */}
             <section id="step-8-tasks" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 08"
                 title="Sprint Deliverables & Task Board"
                 subtitle="Track assigned deliverables, update task states, and review sprint completion"
                 tagColor="cyan"
@@ -1880,7 +1910,6 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 9: Detailed Attendance Logs & Correction Workflow */}
             <section id="step-9-logs" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                stepNumber="Step 09"
                 title="Audit Logs & Attendance Corrections"
                 subtitle="Historical check-in records, audit verification, and punch correction requests"
                 tagColor="rose"

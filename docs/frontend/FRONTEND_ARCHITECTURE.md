@@ -1143,8 +1143,36 @@ server {
    ```bash
    npm run typecheck    # Run TypeScript Compiler Diagnostics
    npm run lint         # Run ESLint Code Quality Rules
-   npm run test         # Execute Vitest Suite
+   npm run test         # Execute Vitest Suites (Unit, Integration, Security)
+   npm run test:e2e     # Run Playwright End-to-End Test Suite
    ```
+
+---
+
+## 16. Recent Architectural Enhancements & UI Modernization
+
+### 16.1 Modernized Employee Workspace (`/employee/dashboard`)
+* **Removal of Legacy Progress Step Indicators**:
+  - The archaic wizard steps (`Step 01`, `Step 02`, etc.) and the "Quick Step Jump" floating bar have been removed in favor of an executive self-service dashboard.
+  - Workers directly access daily punch actions (Clock In / Clock Out, Start / End Break), live shift timers, task rosters, and attendance statistics without unnecessary wizard barriers.
+* **Unified In-Header Notifications Dropdown**:
+  - Notification management is consolidated directly within the top header (`EmployeeDashboardOverview.tsx`).
+  - An interactive bell button with live unread indicator badge toggles an animated, accessible popover dropdown (`aria-expanded`, unread filtering, instant dismissal) eliminating separated notification panels and page clutter.
+
+### 16.2 Enterprise Multi-Modal Authentication Showcase (`/multiple-login-methods`)
+* **Two-Step Email & Password Flow**:
+  - Validates `@thestackly.com` domain format upfront before rendering password inputs.
+  - Incorporates interactive role switcher chips (Admin, HR, Manager, Employee) for instant credential population during evaluation.
+* **WebAuthn Biometric Passkey Experience**:
+  - Side-by-side demonstration of FIDO2 passwordless biometric passkeys with real-time feedback and attestation validation.
+
+### 16.3 Production Playwright End-to-End Testing Layer
+* **Page Object Model (POM) Architecture**:
+  - `playwright/pages/BasePage.ts`: Encapsulates shared browser navigation, automatic onboarding modal dismissal, and toast assertions.
+  - `playwright/pages/LoginPage.ts`: Automates the two-step corporate login flow with email and password progression.
+  - `playwright/pages/DashboardPage.ts`: Automates employee and admin dashboard verification, header notification toggles, and badge absence assertions.
+* **Decoupled Vitest & Playwright Configs**:
+  - `vite.config.ts` explicitly excludes `playwright/**`, preventing runner conflicts between Vitest JSDOM and Playwright Chromium engines.
 
 ---
 **End of Frontend Architectural & Engineering Documentation Manual**
