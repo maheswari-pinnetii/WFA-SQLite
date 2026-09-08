@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import rateLimit, { Options, Store, IncrementResponse } from 'express-rate-limit';
+import rateLimit, { Options, Store, IncrementResponse, ipKeyGenerator } from 'express-rate-limit';
 import { query, execute } from '../database/sqlite-cloud.js';
 import logger from '../config/logger.js';
 
@@ -101,8 +101,9 @@ export const loginRateLimiter = rateLimit({
   store: new SQLiteStore(15 * 60 * 1000),
   message: { success: false, message: 'Too many login attempts. Please try again in 15 minutes.' },
   keyGenerator: (req) => {
-    // Rate limit by IP + Email (if provided)
-    return req.body.email ? `login:${req.ip}:${req.body.email.toLowerCase()}` : `login:${req.ip}`;
+    // Rate limit by IP + Email (if provided) — use ipKeyGenerator for IPv6 safety
+    const ip = ipKeyGenerator(req);
+    return req.body.email ? `login:${ip}:${req.body.email.toLowerCase()}` : `login:${ip}`;
   },
   handler: (req, res, next, options) => {
     logger.warn('security.rate_limit.login', 'Login rate limit exceeded', { ip: req.ip, email: req.body.email });
@@ -121,7 +122,8 @@ export const passwordResetLimiter = rateLimit({
   store: new SQLiteStore(15 * 60 * 1000),
   message: { success: false, message: 'Too many password reset requests. Please try again in 15 minutes.' },
   keyGenerator: (req) => {
-    return req.body.email ? `pwd_reset:${req.ip}:${req.body.email.toLowerCase()}` : `pwd_reset:${req.ip}`;
+    const ip = ipKeyGenerator(req);
+    return req.body.email ? `pwd_reset:${ip}:${req.body.email.toLowerCase()}` : `pwd_reset:${ip}`;
   },
   handler: (req, res, next, options) => {
     logger.warn('security.rate_limit.pwd_reset', 'Password reset rate limit exceeded', { ip: req.ip, email: req.body.email });
@@ -139,7 +141,7 @@ export const registerRateLimiter = rateLimit({
   legacyHeaders: false,
   store: new SQLiteStore(60 * 60 * 1000),
   message: { success: false, message: 'Too many accounts created from this IP. Please try again later.' },
-  keyGenerator: (req) => `register:${req.ip}`,
+  keyGenerator: (req) => `register:${ipKeyGenerator(req)}`,
   handler: (req, res, next, options) => {
     logger.warn('security.rate_limit.register', 'Registration rate limit exceeded', { ip: req.ip });
     res.status(options.statusCode).json(options.message);
@@ -157,7 +159,8 @@ export const otpRateLimiter = rateLimit({
   store: new SQLiteStore(60 * 60 * 1000),
   message: { success: false, message: 'Too many verification code requests. Please try again later.' },
   keyGenerator: (req) => {
-    return req.body.email ? `otp:${req.ip}:${req.body.email.toLowerCase()}` : `otp:${req.ip}`;
+    const ip = ipKeyGenerator(req);
+    return req.body.email ? `otp:${ip}:${req.body.email.toLowerCase()}` : `otp:${ip}`;
   },
   handler: (req, res, next, options) => {
     logger.warn('security.rate_limit.otp', 'OTP rate limit exceeded', { ip: req.ip, email: req.body.email });

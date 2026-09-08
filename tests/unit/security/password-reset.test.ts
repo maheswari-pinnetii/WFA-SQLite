@@ -6,10 +6,8 @@ import { connectDatabase } from '../../../backend/src/database/sqlite-cloud';
 import { initDb } from '../../../backend/src/config/db';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import type { Server } from 'http';
 
 describe('Security & Account Recovery', () => {
-  let server: Server;
   const testEmail = 'security-test@thestackly.com';
   let userId: string;
 
@@ -17,7 +15,7 @@ describe('Security & Account Recovery', () => {
     await connectDatabase();
     await initDb();
     await execute('DELETE FROM password_reset_tokens');
-    await execute('DELETE FROM rate_limits');
+    await execute('DELETE FROM rate_limits WHERE key LIKE \'pwd_reset:%\'');
     await execute('DELETE FROM security_audit_logs');
     await execute('DELETE FROM users WHERE email = ?', [testEmail]);
 
@@ -29,18 +27,15 @@ describe('Security & Account Recovery', () => {
       INSERT INTO users (id, name, email, password_hash, role, status)
       VALUES (?, 'Security User', ?, ?, 'EMPLOYEE', 'ACTIVE')
     `, [id, testEmail, hash]);
-
-    server = app.listen(0);
   });
 
   afterAll(async () => {
     await execute('DELETE FROM users WHERE email = ?', [testEmail]);
-    server.close();
   });
 
   describe('Forgot Password Flow', () => {
     it('returns generic success for existing email', async () => {
-      const res = await request(server)
+      const res = await request(app)
         .post('/api/v1/auth/forgot-password')
         .send({ email: testEmail });
       
@@ -50,7 +45,7 @@ describe('Security & Account Recovery', () => {
     });
 
     it('returns generic success for non-existing email to prevent enumeration', async () => {
-      const res = await request(server)
+      const res = await request(app)
         .post('/api/v1/auth/forgot-password')
         .send({ email: 'nobody@thestackly.com' });
       
@@ -61,11 +56,11 @@ describe('Security & Account Recovery', () => {
 
     it('rate limits forgot password after 3 attempts', async () => {
       const floodEmail = 'flood@thestackly.com';
-      await request(server).post('/api/v1/auth/forgot-password').send({ email: floodEmail });
-      await request(server).post('/api/v1/auth/forgot-password').send({ email: floodEmail });
-      await request(server).post('/api/v1/auth/forgot-password').send({ email: floodEmail });
+      await request(app).post('/api/v1/auth/forgot-password').send({ email: floodEmail });
+      await request(app).post('/api/v1/auth/forgot-password').send({ email: floodEmail });
+      await request(app).post('/api/v1/auth/forgot-password').send({ email: floodEmail });
       
-      const res = await request(server)
+      const res = await request(app)
         .post('/api/v1/auth/forgot-password')
         .send({ email: floodEmail });
       
@@ -76,7 +71,7 @@ describe('Security & Account Recovery', () => {
 
   describe('Reset Password Flow', () => {
     it('rejects invalid tokens safely', async () => {
-      const res = await request(server)
+      const res = await request(app)
         .post('/api/v1/auth/reset-password')
         .send({ token: 'fake-token-123', newPassword: 'NewPassword123!' });
         
@@ -85,7 +80,7 @@ describe('Security & Account Recovery', () => {
     });
 
     it('enforces password complexity', async () => {
-      const res = await request(server)
+      const res = await request(app)
         .post('/api/v1/auth/reset-password')
         .send({ token: 'fake-token-123', newPassword: 'weak' });
         

@@ -444,42 +444,49 @@ CREATE TABLE IF NOT EXISTS delayed_jobs (
 
 CREATE INDEX IF NOT EXISTS idx_delayed_jobs_status_run ON delayed_jobs(status, run_at);
 
--- Security and Authentication Overhaul
+-- Security and Authentication Tables (aligned with connection.ts)
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
-  tokenHash TEXT PRIMARY KEY,
-  userId TEXT NOT NULL,
-  ipAddress TEXT,
-  expiresAt TEXT NOT NULL,
-  usedAt TEXT,
-  createdAt TEXT NOT NULL,
-  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+  id          TEXT    PRIMARY KEY,
+  user_id     TEXT    NOT NULL,
+  token_hash  TEXT    NOT NULL UNIQUE,
+  created_at  TEXT    NOT NULL,
+  expires_at  TEXT    NOT NULL,
+  used_at     TEXT,
+  ip_address  TEXT,
+  user_agent  TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS email_verification_tokens (
-  tokenHash TEXT PRIMARY KEY,
-  userId TEXT NOT NULL,
-  expiresAt TEXT NOT NULL,
-  usedAt TEXT,
-  createdAt TEXT NOT NULL,
-  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+  id          TEXT    PRIMARY KEY,
+  user_id     TEXT    NOT NULL,
+  email       TEXT    NOT NULL,
+  token_hash  TEXT    NOT NULL UNIQUE,
+  created_at  TEXT    NOT NULL,
+  expires_at  TEXT    NOT NULL,
+  used_at     TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS rate_limits (
-  key TEXT PRIMARY KEY,
-  hits INTEGER NOT NULL DEFAULT 1,
+  key       TEXT    PRIMARY KEY,
+  hits      INTEGER NOT NULL DEFAULT 1,
   expiresAt INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS security_audit_logs (
-  id TEXT PRIMARY KEY,
-  userId TEXT,
-  action TEXT NOT NULL,
-  ipAddress TEXT,
-  userAgent TEXT,
-  details TEXT,
-  timestamp TEXT NOT NULL
+  id         TEXT    PRIMARY KEY,
+  userId     TEXT,
+  action     TEXT    NOT NULL,
+  ipAddress  TEXT,
+  userAgent  TEXT,
+  details    TEXT,
+  timestamp  TEXT    NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_pwd_reset_user ON password_reset_tokens(userId);
+CREATE INDEX IF NOT EXISTS idx_prt_token_hash   ON password_reset_tokens(token_hash);
+CREATE INDEX IF NOT EXISTS idx_prt_user_id      ON password_reset_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_evt_token_hash   ON email_verification_tokens(token_hash);
+CREATE INDEX IF NOT EXISTS idx_evt_user_id      ON email_verification_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_rate_limits_expiry ON rate_limits(expiresAt);
 CREATE INDEX IF NOT EXISTS idx_security_audit_user ON security_audit_logs(userId);
