@@ -10,6 +10,7 @@ import { decryptSecret, verifyTotpCode, verifyRecoveryCode } from './totp.js';
 import { env } from '../../config/env.js';
 import { validatePasswordPolicy } from './auth.service.js';
 import { disconnectUserSockets } from '../../sockets/socketEmitter.js';
+import { handleControllerError } from '../../utils/errorHandler.js';
 
 const ORGANIZATION_ID = 'org-stackly';
 const COMPANY_EMAIL_REGEX = /^[^\s@]+@thestackly\.com$/i;
@@ -140,7 +141,7 @@ export const register = async (req: Request, res: Response): Promise<any> => {
       }
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.register', 500, 'Failed to complete registration.');
   }
 };
 
@@ -270,10 +271,10 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         }
       });
     } catch (sessionErr: any) {
-      return res.status(500).json({ success: false, message: sessionErr.message });
+      return handleControllerError(sessionErr, req, res, 'auth.login.session', 500, 'Failed to establish session.');
     }
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.login', 500, 'Authentication error occurred.');
   }
 };
 
@@ -624,7 +625,7 @@ export const getMfaStatus = async (req: any, res: Response): Promise<any> => {
       }
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.getMfaStatus', 500, 'Failed to retrieve MFA status.');
   }
 };
 
@@ -647,7 +648,7 @@ export const adminResetMfa = async (req: any, res: Response): Promise<any> => {
 
     return res.json({ success: true, message: `MFA credentials reset for ${targetUser.name}.` });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.adminResetMfa', 500, 'Failed to reset MFA credentials.');
   }
 };
 
@@ -678,7 +679,7 @@ export const adminGetMfaUsers = async (req: any, res: Response): Promise<any> =>
       data: records
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.adminGetMfaUsers', 500, 'Failed to retrieve MFA users list.');
   }
 };
 
@@ -719,7 +720,7 @@ export const googleLogin = async (req: Request, res: Response): Promise<any> => 
 
     return res.json({ success: true, redirectUrl: authUrl });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.googleLogin', 500, 'Failed to initialize Google login.');
   }
 };
 
@@ -747,7 +748,7 @@ export const microsoftLogin = async (req: Request, res: Response): Promise<any> 
 
     return res.json({ success: true, redirectUrl: authUrl });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.microsoftLogin', 500, 'Failed to initialize Microsoft login.');
   }
 };
 
@@ -1056,7 +1057,7 @@ export const sendVerification = async (req: any, res: Response): Promise<any> =>
       message: 'Verification email sent. Please check your inbox.'
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.sendVerification', 500, 'Failed to send verification email.');
   }
 };
 
@@ -1081,7 +1082,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<any> => 
 
     return res.json({ success: true, message: 'Email verified successfully.' });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.verifyEmail', 500, 'Failed to verify email address.');
   }
 };
 
@@ -1115,7 +1116,7 @@ export const logoutAll = async (req: any, res: Response): Promise<any> => {
       message: 'All sessions have been signed out successfully.'
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.logoutAll', 500, 'Failed to sign out all sessions.');
   }
 };
 
@@ -1139,7 +1140,7 @@ export const adminUnlockUser = async (req: Request, res: Response): Promise<any>
       message: 'Account unlocked successfully.'
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.adminUnlockUser', 500, 'Failed to unlock user account.');
   }
 };
 
@@ -1164,7 +1165,7 @@ export const getActiveSessions = async (req: any, res: Response): Promise<any> =
 
     return res.json({ success: true, data: sanitized });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.getActiveSessions', 500, 'Failed to retrieve active sessions.');
   }
 };
 
@@ -1204,7 +1205,7 @@ export const revokeUserSession = async (req: any, res: Response): Promise<any> =
 
     return res.json({ success: true, message: 'Session successfully revoked.' });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'auth.revokeUserSession', 500, 'Failed to revoke user session.');
   }
 };
 

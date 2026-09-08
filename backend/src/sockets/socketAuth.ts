@@ -6,7 +6,7 @@ import logger from '../config/logger.js';
 import { User } from '../models/User.js';
 import { query } from '../database/sqlite-cloud.js';
 
-const JWT_SECRET = env.JWT_SECRET || 'stackly_wfa_super_secret_jwt_key_2026';
+const JWT_SECRET = env.JWT_SECRET;
 
 /**
  * Socket.IO Authentication Middleware

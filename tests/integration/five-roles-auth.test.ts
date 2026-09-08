@@ -3,7 +3,6 @@ import request from 'supertest';
 import { app } from '../../backend/src/app.js';
 import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
 import { seedSqlite } from '../../backend/scripts/seed-sqlite.js';
-import { authenticator } from 'otplib';
 
 describe('5 Enterprise Roles Authentication & Authorization Test Suite', () => {
   beforeAll(async () => {

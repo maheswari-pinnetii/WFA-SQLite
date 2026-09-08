@@ -3,6 +3,7 @@ import { Employee } from '../models/Employee.js';
 import { User } from '../models/User.js';
 import { logAudit } from '../config/db.js';
 import { emitToUser, emitToDept, emitToTeam, emitToRole, SOCKET_EVENTS } from '../sockets/index.js';
+import { handleControllerError } from '../utils/errorHandler.js';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
 
@@ -63,8 +64,8 @@ export const getLeaveRequests = async (req, res) => {
     });
 
     return res.json({ success: true, data: validLeaves });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.getLeaveRequests', 500, 'Failed to retrieve leave requests.');
   }
 };
 
@@ -152,8 +153,8 @@ export const createLeaveRequest = async (req, res) => {
     } catch (_) {}
 
     return res.status(201).json({ success: true, data: leave });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.createLeaveRequest', 500, 'Failed to create leave request.');
   }
 };
 
@@ -220,9 +221,8 @@ export const reviewLeaveRequest = async (req, res) => {
     } catch (_) {}
 
     return res.json({ success: true, data: request });
-  } catch (err) {
-    console.error('reviewLeaveRequest Error:', err);
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.reviewLeaveRequest', 500, 'Failed to review leave request.');
   }
 };
 
@@ -265,8 +265,8 @@ export const getTasks = async (req, res) => {
     });
 
     return res.json({ success: true, data: validTasks });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.getTasks', 500, 'Failed to retrieve tasks.');
   }
 };
 
@@ -302,7 +302,7 @@ export const updateTask = async (req, res) => {
 
     logAudit(req.user.id, 'TASK_UPDATED', `Updated task ${req.params.id} to ${status}`, orgId);
     return res.json({ success: true, data: task });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.updateTask', 500, 'Failed to update task.');
   }
 };

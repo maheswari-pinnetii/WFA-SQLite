@@ -9,14 +9,27 @@ const SENSITIVE_ERROR_PATTERNS = [
   /syntax error/i,
   /no such table/i,
   /no such column/i,
+  /pragma/i,
+  /table\s+\w+/i,
+  /column\s+\w+/i,
   /enoent/i,
   /eacces/i,
-  /c:\\/i,
+  /ebusy/i,
+  /eexist/i,
+  /[a-zA-Z]:\\/i,
   /\/users\//i,
   /\/home\//i,
-  /at\s+.*\.(ts|js):\d+:\d+/i,
+  /\/var\//i,
+  /\/tmp\//i,
+  /\/etc\//i,
+  /at\s+.*\.(ts|js|jsx|tsx):\d+:\d+/i,
   /node_modules/i,
-  /call stack/i
+  /call stack/i,
+  /typeerror/i,
+  /referenceerror/i,
+  /rangeerror/i,
+  /evalerror/i,
+  /internal error/i
 ];
 
 /**

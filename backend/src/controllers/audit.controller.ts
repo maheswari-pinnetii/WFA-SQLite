@@ -1,8 +1,9 @@
 import { AuditLog } from '../models/AuditLog.js';
 import { query } from '../database/sqlite-cloud.js';
 import { getDb } from '../config/db.js';
+import { handleControllerError } from '../utils/errorHandler.js';
 
-const getOrganizationId = (req: any) => req.user.organizationId || 'org-stackly';
+const getOrganizationId = (req: any) => req.user?.organizationId || 'org-stackly';
 
 /**
  * GET /api/audit/logs
@@ -13,7 +14,7 @@ export const getAuditLogs = async (req: any, res: any) => {
     const logs = await AuditLog.find({ organizationId: orgId }).sort({ timestamp: -1 }).limit(100);
     return res.json({ success: true, data: logs });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'audit.getAuditLogs', 500, 'Failed to retrieve audit logs.');
   }
 };
 
@@ -30,7 +31,7 @@ export const getAuditLogDetail = async (req: any, res: any) => {
     }
     return res.json({ success: true, data: log });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'audit.getAuditLogDetail', 500, 'Failed to retrieve audit log details.');
   }
 };
 
@@ -75,7 +76,7 @@ export const getSecurityDashboard = async (req: any, res: any) => {
       }
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'audit.getSecurityDashboard', 500, 'Failed to retrieve security dashboard metrics.');
   }
 };
 
@@ -88,7 +89,7 @@ export const getFailedLogins = async (req: any, res: any) => {
     const rows = await query('SELECT email, attempts, lockedUntil, updatedAt FROM failed_logins ORDER BY attempts DESC LIMIT 50');
     return res.json({ success: true, count: rows.length, data: rows });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'audit.getFailedLogins', 500, 'Failed to retrieve failed login attempts.');
   }
 };
 
@@ -112,7 +113,6 @@ export const getDatabaseIntegrity = async (req: any, res: any) => {
       }
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'audit.getDatabaseIntegrity', 500, 'Failed to execute database integrity check.');
   }
 };
-

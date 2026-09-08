@@ -2,19 +2,20 @@ import { employeeService } from '../services/employee.service.js';
 import { logAudit } from '../config/db.js';
 import { emitToOrg, emitToUser, SOCKET_EVENTS } from '../sockets/index.js';
 import { query, execute } from '../database/sqlite-cloud.js';
+import { handleControllerError } from '../utils/errorHandler.js';
 
-const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
+const getOrganizationId = (req: any) => req.user?.organizationId || 'org-stackly';
 
-export const getEmployees = async (req, res) => {
+export const getEmployees = async (req: any, res: any) => {
   try {
     const data = await employeeService.getEmployees(req.user, req.query);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getEmployees', 500, 'Failed to retrieve employees.');
   }
 };
 
-export const getEmployeeById = async (req, res) => {
+export const getEmployeeById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const employee = await employeeService.getEmployeeById(id, getOrganizationId(req));
@@ -22,12 +23,12 @@ export const getEmployeeById = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Employee not found.' });
     }
     return res.json({ success: true, data: employee });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getEmployeeById', 500, 'Failed to retrieve employee profile.');
   }
 };
 
-export const createEmployee = async (req, res) => {
+export const createEmployee = async (req: any, res: any) => {
   try {
     const body = req.body || {};
     const { id, name, email, department, designation, avatar, joinDate, team, location } = body;
@@ -44,30 +45,25 @@ export const createEmployee = async (req, res) => {
 
     logAudit(req.user.id, 'EMPLOYEE_CREATE', `Created employee profile for ${name} (${id})`, orgId);
     return res.status(201).json({ success: true, data: newEmp });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.createEmployee', 500, 'Failed to create employee profile.');
   }
 };
 
-export const updateEmployee = async (req, res) => {
+export const updateEmployee = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const orgId = getOrganizationId(req);
 
-    // 1. IDOR / BOLA Prevention
-    // An employee can only update their OWN profile unless they are ADMIN or HR
     const isPrivileged = ['ADMIN', 'HR'].includes(req.user.role);
     if (!isPrivileged && req.user.id !== id) {
       return res.status(403).json({ success: false, message: 'Forbidden: You can only update your own profile.' });
     }
 
-    // 2. Mass Assignment Prevention
     const { name, department, designation, avatar, team, location, performanceScore, attendanceRate } = req.body;
     
-    // Base update data allowed for the employee themselves
     const updateData: any = { avatar, location };
     
-    // Only privileged roles can update structural fields
     if (isPrivileged) {
       if (name !== undefined) updateData.name = name;
       if (department !== undefined) updateData.department = department;
@@ -77,7 +73,6 @@ export const updateEmployee = async (req, res) => {
       if (attendanceRate !== undefined) updateData.attendanceRate = attendanceRate;
     }
 
-    // Clean undefined values
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
     if (Object.keys(updateData).length === 0) {
@@ -92,12 +87,12 @@ export const updateEmployee = async (req, res) => {
     logAudit(req.user.id, 'EMPLOYEE_UPDATE', `Updated employee profile: ${id}`, orgId);
     emitToOrg(orgId, SOCKET_EVENTS.EMPLOYEE_UPDATED, updatedEmp);
     return res.json({ success: true, data: updatedEmp });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.updateEmployee', 500, 'Failed to update employee profile.');
   }
 };
 
-export const updateEmployeeStatus = async (req, res) => {
+export const updateEmployeeStatus = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -114,12 +109,12 @@ export const updateEmployeeStatus = async (req, res) => {
     logAudit(req.user.id, 'EMPLOYEE_STATUS_CHANGED', `Changed employee ${id} status to ${status}`, orgId);
     emitToOrg(orgId, SOCKET_EVENTS.EMPLOYEE_STATUS_CHANGED, { id, status, updatedAt: new Date().toISOString() });
     return res.json({ success: true, data: updated });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.updateEmployeeStatus', 500, 'Failed to update employee status.');
   }
 };
 
-export const deleteEmployee = async (req, res) => {
+export const deleteEmployee = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const orgId = getOrganizationId(req);
@@ -131,40 +126,40 @@ export const deleteEmployee = async (req, res) => {
 
     logAudit(req.user.id, 'EMPLOYEE_DELETE', `Soft deleted/terminated employee: ${id}`, orgId);
     return res.json({ success: true, message: 'Employee successfully terminated.' });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.deleteEmployee', 500, 'Failed to delete employee.');
   }
 };
 
-export const getTeams = async (req, res) => {
+export const getTeams = async (req: any, res: any) => {
   try {
     const teams = await employeeService.getTeams(getOrganizationId(req));
     return res.json({ success: true, data: teams });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getTeams', 500, 'Failed to retrieve teams.');
   }
 };
 
-export const getTeamMembers = async (req, res) => {
+export const getTeamMembers = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const members = await employeeService.getTeamMembers(id, getOrganizationId(req));
     return res.json({ success: true, data: members });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getTeamMembers', 500, 'Failed to retrieve team members.');
   }
 };
 
-export const getUsers = async (req, res) => {
+export const getUsers = async (req: any, res: any) => {
   try {
     const users = await employeeService.getUsers(getOrganizationId(req));
     return res.json({ success: true, data: users });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getUsers', 500, 'Failed to retrieve users.');
   }
 };
 
-export const updateUserRole = async (req, res) => {
+export const updateUserRole = async (req: any, res: any) => {
   try {
     const { userId } = req.params;
     const { role } = req.body;
@@ -186,12 +181,12 @@ export const updateUserRole = async (req, res) => {
     });
 
     return res.json({ success: true, data: updated });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.updateUserRole', 500, 'Failed to update user role.');
   }
 };
 
-export const deleteUser = async (req, res) => {
+export const deleteUser = async (req: any, res: any) => {
   try {
     const { userId } = req.params;
     const deleted = await employeeService.deleteUser(userId, getOrganizationId(req));
@@ -199,21 +194,16 @@ export const deleteUser = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
     return res.json({ success: true });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.deleteUser', 500, 'Failed to delete user.');
   }
 };
 
-/**
- * GET /api/employees/:id/export-data
- * GDPR / CCPA Data Subject Access Request (DSAR) - Export employee data bundle
- */
-export const exportEmployeeData = async (req, res) => {
+export const exportEmployeeData = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const orgId = getOrganizationId(req);
 
-    // BOLA/IDOR protection: Only self or ADMIN/HR can export
     const isSelf = req.user.id === id;
     const isPrivileged = ['ADMIN', 'HR'].includes(req.user.role);
     if (!isSelf && !isPrivileged) {
@@ -225,7 +215,6 @@ export const exportEmployeeData = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Employee not found.' });
     }
 
-    // Pull attendance records, leave requests, and audit logs safely
     let attendance = [];
     try {
       attendance = await query('SELECT date, checkInTime, checkOutTime, status, workMode, shiftType FROM attendancerecords WHERE employeeId = ?', [id]);
@@ -260,16 +249,12 @@ export const exportEmployeeData = async (req, res) => {
         auditHistory: auditLogs || []
       }
     });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.exportEmployeeData', 500, 'Failed to export employee data.');
   }
 };
 
-/**
- * POST /api/employees/:id/anonymize-data
- * Right to Erasure / Anonymization (ADMIN only)
- */
-export const anonymizeEmployeeData = async (req, res) => {
+export const anonymizeEmployeeData = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const orgId = getOrganizationId(req);
@@ -279,7 +264,6 @@ export const anonymizeEmployeeData = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Employee not found.' });
     }
 
-    // Anonymize employee PII
     const anonymousName = `Anonymized Employee ${id.slice(-4)}`;
     const anonymousEmail = `redacted-${id.slice(-6)}@thestackly.com`;
 
@@ -289,7 +273,6 @@ export const anonymizeEmployeeData = async (req, res) => {
       WHERE id = ? AND organizationId = ?
     `, [anonymousName, anonymousEmail, new Date().toISOString(), id, orgId]);
 
-    // Anonymize associated user record if exists
     await execute(`
       UPDATE users 
       SET name = ?, email = ?, password_hash = 'REDACTED', status = 'TERMINATED', updatedAt = ?
@@ -302,8 +285,7 @@ export const anonymizeEmployeeData = async (req, res) => {
       success: true,
       message: `Employee ${id} PII has been successfully anonymized.`
     });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.anonymizeEmployeeData', 500, 'Failed to anonymize employee data.');
   }
 };
-

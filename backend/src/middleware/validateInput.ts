@@ -19,47 +19,52 @@ import {
   reviewCorrectionSchema,
   updateUserRoleSchema,
   backupRestoreSchema,
+  featureFlagUpdateSchema,
   saveTrustedDeviceSchema,
-  verifyTrustedDeviceSchema
+  verifyTrustedDeviceSchema,
+  biometricLoginSchema,
+  passkeyLoginOptionsSchema,
+  passkeyLoginVerifySchema,
+  passkeyRegisterVerifySchema,
+  verifyEmailSchema,
+  sendVerificationSchema,
+  createEmployeeSchema,
+  updateEmployeeSchema,
+  updateEmployeeStatusSchema,
+  updateTaskSchema,
+  idParamSchema,
+  userIdParamSchema,
+  backupFilenameParamSchema,
+  featureFlagParamSchema
 } from '../schemas/validation.schemas.js';
 
-// Sanitize string to prevent basic XSS and injection
-export const sanitizeString = (str: string): string => {
-  if (typeof str !== 'string') return str;
-  return str
-    .replace(/[<>]/g, '') // Strip angle brackets
-    .trim();
-};
-
-// Deep sanitize request body objects
-export const sanitizePayload = (obj: any): any => {
+// Clean prototype pollution without silently modifying legitimate inputs
+export const preventPrototypePollution = (obj: any): any => {
   if (obj === null || obj === undefined) return obj;
-  if (typeof obj === 'string') return sanitizeString(obj);
-  if (Array.isArray(obj)) return obj.map(sanitizePayload);
+  if (Array.isArray(obj)) return obj.map(preventPrototypePollution);
   if (typeof obj === 'object') {
     const cleaned: Record<string, any> = {};
     for (const key of Object.keys(obj)) {
-      // Prevent prototype pollution
       if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-      cleaned[key] = sanitizePayload(obj[key]);
+      cleaned[key] = preventPrototypePollution(obj[key]);
     }
     return cleaned;
   }
   return obj;
 };
 
-// Global input sanitizer middleware
+// Global input guard middleware (guards prototype pollution while keeping inputs intact for strict schema rejection)
 export const inputSanitizer = (req: Request, res: Response, next: NextFunction) => {
   if (req.body && typeof req.body === 'object') {
-    req.body = sanitizePayload(req.body);
+    req.body = preventPrototypePollution(req.body);
   }
   if (req.query && typeof req.query === 'object') {
-    req.query = sanitizePayload(req.query);
+    req.query = preventPrototypePollution(req.query);
   }
   next();
 };
 
-// Generic schema validator for Request Body
+// Generic schema validator for Request Body (Strict rejection)
 export const validateBody = (schema: z.ZodTypeAny) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.body);
@@ -79,7 +84,7 @@ export const validateBody = (schema: z.ZodTypeAny) => {
   };
 };
 
-// Generic schema validator for Request Query
+// Generic schema validator for Request Query (Strict rejection)
 export const validateQuery = (schema: z.ZodTypeAny) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.query);
@@ -99,7 +104,7 @@ export const validateQuery = (schema: z.ZodTypeAny) => {
   };
 };
 
-// Generic schema validator for Request Params
+// Generic schema validator for Request Params (Strict rejection)
 export const validateParams = (schema: z.ZodTypeAny) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const result = schema.safeParse(req.params);
@@ -129,7 +134,11 @@ export const validateRegistration = (req: Request, res: Response, next: NextFunc
     const firstIssue = result.error.issues[0];
     return res.status(400).json({
       success: false,
-      message: firstIssue?.message || 'Invalid registration payload.'
+      message: firstIssue?.message || 'Invalid registration payload.',
+      errors: result.error.issues.map(e => ({
+        path: e.path.join('.'),
+        message: e.message
+      }))
     });
   }
   const name = (result.data.name || result.data.fullName || '').trim();
@@ -157,3 +166,21 @@ export const validateUpdateUserRole = validateBody(updateUserRoleSchema);
 export const validateBackupRestore = validateBody(backupRestoreSchema);
 export const validateSaveTrustedDevice = validateBody(saveTrustedDeviceSchema);
 export const validateVerifyTrustedDevice = validateBody(verifyTrustedDeviceSchema);
+
+export const validateBiometricLogin = validateBody(biometricLoginSchema);
+export const validatePasskeyLoginOptions = validateBody(passkeyLoginOptionsSchema);
+export const validatePasskeyLoginVerify = validateBody(passkeyLoginVerifySchema);
+export const validatePasskeyRegisterVerify = validateBody(passkeyRegisterVerifySchema);
+export const validateVerifyEmail = validateBody(verifyEmailSchema);
+export const validateSendVerification = validateBody(sendVerificationSchema);
+
+export const validateCreateEmployee = validateBody(createEmployeeSchema);
+export const validateUpdateEmployee = validateBody(updateEmployeeSchema);
+export const validateUpdateEmployeeStatus = validateBody(updateEmployeeStatusSchema);
+export const validateUpdateTask = validateBody(updateTaskSchema);
+
+export const validateIdParam = validateParams(idParamSchema);
+export const validateUserIdParam = validateParams(userIdParamSchema);
+export const validateBackupFilenameParam = validateParams(backupFilenameParamSchema);
+export const validateFeatureFlagParam = validateParams(featureFlagParamSchema);
+export const validateFeatureFlagUpdate = validateBody(featureFlagUpdateSchema);

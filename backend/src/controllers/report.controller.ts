@@ -1,5 +1,6 @@
 import { query } from '../database/sqlite-cloud.js';
 import { logAudit } from '../config/db.js';
+import { handleControllerError } from '../utils/errorHandler.js';
 
 const getOrganizationId = (req: any): string => req.user?.organizationId || req.user?.companyId || 'org-stackly';
 
@@ -159,7 +160,7 @@ export const exportAttendanceReport = async (req: any, res: any) => {
     const filenameDate = new Date().toISOString().slice(0, 10);
     if (String(format).toLowerCase() === 'json') {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="attendance_report_${filenameDate}.json"`);
+      res.setHeader('Content-Disposition', 'attachment; filename="attendance_report_' + filenameDate + '.json"');
       return res.json({
         success: true,
         meta: {
@@ -175,11 +176,10 @@ export const exportAttendanceReport = async (req: any, res: any) => {
     // Default: CSV format
     const csvContent = convertToCSV(formattedRecords);
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="attendance_report_${filenameDate}.csv"`);
+    res.setHeader('Content-Disposition', 'attachment; filename="attendance_report_' + filenameDate + '.csv"');
     return res.status(200).send(csvContent);
   } catch (err: any) {
-    console.error('Export Attendance Report Error:', err);
-    return res.status(500).json({ success: false, message: err.message || 'Failed to export attendance report.' });
+    return handleControllerError(err, req, res, 'report.exportAttendanceReport', 500, 'Failed to export attendance report.');
   }
 };
 
@@ -256,7 +256,7 @@ export const exportWorkforceReport = async (req: any, res: any) => {
     const filenameDate = new Date().toISOString().slice(0, 10);
     if (String(format).toLowerCase() === 'json') {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="workforce_roster_${filenameDate}.json"`);
+      res.setHeader('Content-Disposition', 'attachment; filename="workforce_roster_' + filenameDate + '.json"');
       return res.json({
         success: true,
         meta: {
@@ -271,11 +271,10 @@ export const exportWorkforceReport = async (req: any, res: any) => {
 
     const csvContent = convertToCSV(formattedEmployees);
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="workforce_roster_${filenameDate}.csv"`);
+    res.setHeader('Content-Disposition', 'attachment; filename="workforce_roster_' + filenameDate + '.csv"');
     return res.status(200).send(csvContent);
   } catch (err: any) {
-    console.error('Export Workforce Report Error:', err);
-    return res.status(500).json({ success: false, message: err.message || 'Failed to export workforce report.' });
+    return handleControllerError(err, req, res, 'report.exportWorkforceReport', 500, 'Failed to export workforce report.');
   }
 };
 
@@ -370,7 +369,7 @@ export const exportLeaveReport = async (req: any, res: any) => {
     const filenameDate = new Date().toISOString().slice(0, 10);
     if (String(format).toLowerCase() === 'json') {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="leave_report_${filenameDate}.json"`);
+      res.setHeader('Content-Disposition', 'attachment; filename="leave_report_' + filenameDate + '.json"');
       return res.json({
         success: true,
         meta: {
@@ -385,11 +384,10 @@ export const exportLeaveReport = async (req: any, res: any) => {
 
     const csvContent = convertToCSV(formattedLeaves);
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="leave_report_${filenameDate}.csv"`);
+    res.setHeader('Content-Disposition', 'attachment; filename="leave_report_' + filenameDate + '.csv"');
     return res.status(200).send(csvContent);
   } catch (err: any) {
-    console.error('Export Leave Report Error:', err);
-    return res.status(500).json({ success: false, message: err.message || 'Failed to export leave report.' });
+    return handleControllerError(err, req, res, 'report.exportLeaveReport', 500, 'Failed to export leave report.');
   }
 };
 
@@ -416,6 +414,6 @@ export const getReportMetrics = async (req: any, res: any) => {
       }
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'report.getReportMetrics', 500, 'Failed to retrieve report metrics.');
   }
 };

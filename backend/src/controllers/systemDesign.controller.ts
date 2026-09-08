@@ -7,6 +7,7 @@ import { sagaOrchestrator } from '../patterns/saga.js';
 import { twoPhaseCommitCoordinator } from '../patterns/twoPhaseCommit.js';
 import { materializedViewManager } from '../patterns/materializedView.js';
 import { writeAheadLogManager } from '../patterns/writeAheadLog.js';
+import { handleControllerError } from '../utils/errorHandler.js';
 
 export const getPatternsOverview = (req: Request, res: Response) => {
   try {
@@ -16,7 +17,7 @@ export const getPatternsOverview = (req: Request, res: Response) => {
       data: overview
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
+    return handleControllerError(err, req, res, 'systemDesign.getPatternsOverview', 500, 'Failed to retrieve patterns overview.');
   }
 };
 
@@ -27,7 +28,7 @@ export const getBaaSOverview = (req: Request, res: Response) => {
       data: baaSServiceRegistry.getBaaSServices()
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
+    return handleControllerError(err, req, res, 'systemDesign.getBaaSOverview', 500, 'Failed to retrieve BaaS overview.');
   }
 };
 
@@ -84,6 +85,6 @@ export const executePatternDemo = async (req: Request, res: Response) => {
       message: `Pattern ${pattern} demonstration executed successfully.`
     });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
+    return handleControllerError(err, req, res, 'systemDesign.executePatternDemo', 500, 'Failed to execute pattern demonstration.');
   }
 };

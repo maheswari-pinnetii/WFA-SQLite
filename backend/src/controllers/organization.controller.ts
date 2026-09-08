@@ -1,40 +1,41 @@
 import { Employee } from '../models/Employee.js';
 import { Organization } from '../models/Department.js';
+import { handleControllerError } from '../utils/errorHandler.js';
 
-const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
+const getOrganizationId = (req: any) => req.user?.organizationId || 'org-stackly';
 
 /**
  * GET /api/departments
  */
-export const getDepartments = async (req, res) => {
+export const getDepartments = async (req: any, res: any) => {
   try {
     const orgId = getOrganizationId(req);
     const depts = await Employee.distinct('department', { organizationId: orgId, department: { $ne: [null, ''] } });
-    const formatted = depts.sort().map(d => ({ name: d }));
+    const formatted = depts.sort().map((d: any) => ({ name: d }));
     return res.json({ success: true, data: formatted });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'organization.getDepartments', 500, 'Failed to retrieve departments.');
   }
 };
 
 /**
  * GET /api/locations
  */
-export const getLocations = async (req, res) => {
+export const getLocations = async (req: any, res: any) => {
   try {
     const orgId = getOrganizationId(req);
     const locs = await Employee.distinct('location', { organizationId: orgId, location: { $ne: [null, ''] } });
-    const formatted = locs.sort().map(l => ({ name: l }));
+    const formatted = locs.sort().map((l: any) => ({ name: l }));
     return res.json({ success: true, data: formatted });
   } catch (err: any) {
-    return res.status(500).json({ success: false, message: err.message });
+    return handleControllerError(err, req, res, 'organization.getLocations', 500, 'Failed to retrieve locations.');
   }
 };
 
 /**
  * GET /api/organizations
  */
-export const getOrganizations = async (req, res) => {
+export const getOrganizations = async (req: any, res: any) => {
   try {
     const currentOrg = getOrganizationId(req);
     const org = await Organization.findOne({ id: currentOrg });
@@ -48,15 +49,15 @@ export const getOrganizations = async (req, res) => {
       success: true,
       data
     });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'organization.getOrganizations', 500, 'Failed to retrieve organization details.');
   }
 };
 
 /**
  * GET /api/roles
  */
-export const getRoles = (req, res) => {
+export const getRoles = (req: any, res: any) => {
   return res.json({
     success: true,
     data: [
@@ -72,7 +73,7 @@ export const getRoles = (req, res) => {
 /**
  * GET /api/permissions
  */
-export const getPermissions = (req, res) => {
+export const getPermissions = (req: any, res: any) => {
   return res.json({
     success: true,
     data: [
