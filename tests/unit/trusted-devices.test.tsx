@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom';
 import axios, { AxiosInstance } from 'axios';
 import { app } from '../../backend/src/app.js';
 import { initDb } from '../../backend/src/database/connection.js';
+import { execute } from '../../backend/src/database/sqlite-cloud.js';
 import { PasswordlessLoginCard } from '../../frontend/src/auth/components/PasswordlessLoginCard';
 import { LoginPage } from '../../frontend/src/auth/pages/LoginPage';
 import { RealTimeDevicePinLock } from '../../frontend/src/auth/components/RealTimeDevicePinLock';
@@ -49,6 +50,8 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
 
     beforeAll(async () => {
       await initDb();
+      // Clear ALL rate limits so cross-test pollution doesn't cause 429s
+      await execute('DELETE FROM rate_limits').catch(() => {});
       return new Promise<void>((resolve) => {
         server = app.listen(0, () => {
           const address = server.address();
