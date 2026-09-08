@@ -40,6 +40,11 @@ export const SOCKET_EVENTS = {
   AI_ALERT_GENERATED: 'ai:alert-generated',
   AI_PREDICTION_UPDATED: 'ai:prediction-updated',
 
+  // Auth & Security Session Events
+  AUTH_REVOKED: 'auth:revoked',
+  AUTH_ROLE_CHANGED: 'auth:role-changed',
+  SECURITY_ALERT: 'security:alert',
+
   // Feature Flags
   FEATURE_FLAG_UPDATED: 'feature-flag:updated'
 } as const;

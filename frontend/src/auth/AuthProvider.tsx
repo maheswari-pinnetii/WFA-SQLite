@@ -42,6 +42,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setPermissions((storedSession.user.permissions || []) as Permission[]);
     }
     setLoading(false);
+
+    const handleSessionExpired = () => {
+      setSessionState(null);
+      setAppUser(null);
+      setRole(Role.EMPLOYEE);
+      setPermissions([]);
+      authService.logout().catch(() => {});
+    };
+
+    const handleRoleChanged = (event: any) => {
+      const newRole = event.detail?.role;
+      if (newRole) {
+        setRole(newRole as Role);
+        const stored = authService.getStoredSession();
+        if (stored?.user) {
+          stored.user.role = newRole;
+          authService.setStoredSession(stored);
+          setAppUser({ ...stored.user });
+        }
+      }
+    };
+
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+    window.addEventListener('auth:role-changed', handleRoleChanged);
+    return () => {
+      window.removeEventListener('auth:session-expired', handleSessionExpired);
+      window.removeEventListener('auth:role-changed', handleRoleChanged);
+    };
   }, []);
 
   const signOut = async () => {

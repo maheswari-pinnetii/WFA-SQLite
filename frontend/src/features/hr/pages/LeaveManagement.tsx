@@ -307,7 +307,7 @@ export const LeaveManagement: React.FC = () => {
       case 'APPROVED': return <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full text-xs font-bold"><CheckCircle2 size={12} /> Approved</span>;
       case 'REJECTED': return <span className="inline-flex items-center gap-1 text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded-full text-xs font-bold"><XCircle size={12} /> Rejected</span>;
       case 'CANCELLED': return <span className="inline-flex items-center gap-1 text-slate-400 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full text-xs font-bold"><CalendarX size={12} /> Cancelled</span>;
-      default: return <span className="inline-flex items-center gap-1 text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full text-xs font-bold"><Clock size={12} className="animate-spin" /> Pending</span>;
+      default: return <span className="inline-flex items-center gap-1 text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full text-xs font-bold"><Clock size={12} /> Pending</span>;
     }
   };
 

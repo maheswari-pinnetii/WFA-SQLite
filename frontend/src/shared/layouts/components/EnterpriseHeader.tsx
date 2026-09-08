@@ -6,22 +6,24 @@ import { ROLE_LABELS } from '../../../security/roles/roles';
 import { getRoleBadgeClass } from '../../utils/helpers';
 import { StacklyLogo } from '../../../components/common/StacklyLogo';
 import { LogoutModal } from '../../../auth/components/LogoutModal';
-import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import PersonIcon from '@mui/icons-material/Person';
-import SettingsIcon from '@mui/icons-material/Settings';
-import ShieldIcon from '@mui/icons-material/Shield';
-import LogoutIcon from '@mui/icons-material/Logout';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import CloseIcon from '@mui/icons-material/Close';
-import ChatIcon from '@mui/icons-material/Chat';
-import HelpIcon from '@mui/icons-material/Help';
-import HomeIcon from '@mui/icons-material/Home';
-import LayersIcon from '@mui/icons-material/Layers';
+import {
+  Menu,
+  Search,
+  Bell,
+  Sun,
+  Moon,
+  User,
+  Settings,
+  Shield,
+  LogOut,
+  ChevronDown,
+  ChevronRight,
+  X,
+  MessageSquare,
+  HelpCircle,
+  Home,
+  Layers,
+} from 'lucide-react';
 import { RealtimeStatusBadge } from '../../../components/common/RealtimeStatusBadge';
 import { useRealtimeNotifications } from '../../../hooks/useRealtimeNotifications';
 import { connectSocket } from '../../../websocket/socket';
@@ -44,6 +46,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
 
   // Notifications State
   const [unreadCount, setUnreadCount] = useState(3);
+  const [hasNewNotification, setHasNewNotification] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: '1', title: 'Attendance Alert: 3 Late Check-Ins', subtitle: 'HR Operations', time: '5m ago', type: 'warning', path: '/hr/attendance', read: false },
     { id: '2', title: 'Leave Request Pending Review', subtitle: 'Sarah Connor (Engineering)', time: '45m ago', type: 'info', path: '/manager/approvals', read: false },
@@ -64,7 +67,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
     }
   }, [user]);
 
-  // Real-time notifications listener
+  // Real-time notifications listener - pulses only on new arrival
   useRealtimeNotifications((newNotif: any) => {
     setNotifications((prev) => [
       {
@@ -79,6 +82,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
       ...prev
     ]);
     setUnreadCount((c) => c + 1);
+    setHasNewNotification(true);
   });
 
   const searchResultsMap = [
@@ -93,12 +97,16 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
 
 
   const toggleDropdown = (name: 'profile' | 'role' | 'notif' | 'messages') => {
+    if (name === 'notif') {
+      setHasNewNotification(false);
+    }
     setActiveDropdown((prev) => (prev === name ? null : name));
   };
 
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setUnreadCount(0);
+    setHasNewNotification(false);
   };
 
   const handleSearchSubmit = (path: string) => {
@@ -147,26 +155,26 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
           type="button"
           onClick={onToggleSidebar}
           aria-label="Toggle navigation"
-          className="header-menu-button p-2 rounded-xl border cursor-pointer"
+          className="header-menu-button p-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer transition-colors"
         >
-          <MenuIcon style={{ fontSize: 18 }} />
+          <Menu size={18} />
         </button>
 
         {/* STACKLY Brand Logo */}
         <Link to="/" className="shrink-0 flex items-center hover:opacity-90 transition-opacity">
-          <StacklyLogo size={34} />
+          <StacklyLogo size={32} />
         </Link>
 
         {/* Dynamic Breadcrumbs */}
-        <div className="hidden sm:flex items-center gap-1.5 text-xs min-w-0 pl-2 border-l border-slate-800/80">
-          <Link to="/" className="text-slate-400 hover:text-blue-400 flex items-center gap-1">
-            <HomeIcon style={{ fontSize: 13 }} />
+        <div className="hidden sm:flex items-center gap-1.5 text-xs min-w-0 pl-2 border-l border-slate-200 dark:border-slate-800">
+          <Link to="/" className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
+            <Home size={14} />
           </Link>
           {breadcrumbs.map((b, idx) => (
             <React.Fragment key={b.path}>
-              <ChevronRightIcon className="text-slate-500" style={{ fontSize: 12 }} />
+              <ChevronRight className="text-slate-400 dark:text-slate-600" size={13} />
               <span className={`truncate max-w-[130px] ${
-                idx === breadcrumbs.length - 1 ? 'font-bold text-blue-400' : 'text-slate-400 hover:text-slate-200'
+                idx === breadcrumbs.length - 1 ? 'font-medium text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
               }`}>
                 {b.label}
               </span>
@@ -178,31 +186,31 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
       {/* CENTER SECTION: Global Command Search Surface */}
       <div className="flex-1 max-w-md mx-4 hidden md:block relative">
         <div className="relative flex items-center">
-          <SearchIcon className="absolute left-3.5 text-slate-400 pointer-events-none" style={{ fontSize: 16 }} />
+          <Search className="absolute left-3 text-slate-400 pointer-events-none" size={15} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             placeholder="Search employees, departments, reports..."
-            style={{ paddingLeft: '2.5rem' }}
-            className={`w-full rounded-2xl pl-10 pr-4 py-2 text-xs transition-all outline-none border ${
+            style={{ paddingLeft: '2.25rem' }}
+            className={`w-full rounded-lg pr-4 py-1.5 text-xs transition-all outline-none border ${
               isDark
-                ? 'bg-slate-900/90 border-slate-800 text-slate-100 placeholder-slate-500 focus:border-blue-500 focus:bg-slate-900'
-                : 'bg-slate-100 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white'
+                ? 'bg-slate-900 border-slate-800 text-slate-100 placeholder-slate-500 focus:border-blue-500'
+                : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white'
             }`}
           />
         </div>
 
         {/* Global Search Results Overlay */}
         {searchFocused && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900 border border-slate-800 p-3 shadow-2xl z-50 rounded-2xl animate-fadeIn space-y-2 text-slate-100">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
-                <SearchIcon className="text-blue-400" style={{ fontSize: 12 }} /> Command Palette Search
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 shadow-lg z-50 rounded-lg space-y-2 text-slate-900 dark:text-slate-100">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <Search className="text-blue-500" size={13} /> Command Palette Search
               </span>
-              <button onClick={() => setSearchFocused(false)} className="text-slate-400 hover:text-white">
-                <CloseIcon style={{ fontSize: 14 }} />
+              <button onClick={() => setSearchFocused(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+                <X size={14} />
               </button>
             </div>
 
@@ -211,10 +219,10 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                 <button
                   key={cat}
                   onClick={() => setSearchCategory(cat)}
-                  className={`px-3 py-1 text-xs rounded-xl font-bold capitalize transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs rounded-md font-medium capitalize transition-all cursor-pointer ${
                     searchCategory === cat
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                   }`}
                 >
                   {cat}
@@ -222,21 +230,21 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
               ))}
             </div>
 
-            <div className="pt-2 border-t border-slate-800 max-h-64 overflow-y-auto space-y-1.5">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 max-h-64 overflow-y-auto space-y-1">
               {filteredSearchResults.length === 0 ? (
-                <p className="text-xs text-slate-400 py-4 text-center">No matching results found</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 py-3 text-center">No matching results found</p>
               ) : (
                 filteredSearchResults.map((res, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSearchSubmit(res.path)}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-slate-800/90 transition-colors flex items-center justify-between group cursor-pointer"
+                    className="w-full text-left p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors flex items-center justify-between group cursor-pointer"
                   >
                     <div>
-                      <p className="text-xs font-bold text-slate-200 group-hover:text-blue-400">{res.title}</p>
-                      <p className="text-[10px] text-slate-500 capitalize">{res.category}</p>
+                      <p className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">{res.title}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 capitalize">{res.category}</p>
                     </div>
-                    <ChevronRightIcon className="text-slate-500 group-hover:text-blue-400" style={{ fontSize: 14 }} />
+                    <ChevronRight className="text-slate-400 group-hover:text-blue-500" size={14} />
                   </button>
                 ))
               )}
@@ -255,10 +263,10 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         <button
           type="button"
           aria-label="Select Language"
-          className={`p-2 rounded-xl border transition-all cursor-pointer text-sm flex items-center justify-center ${
+          className={`p-2 rounded-lg border transition-all cursor-pointer text-sm flex items-center justify-center ${
             isDark
-              ? 'bg-slate-900/90 border-slate-800 text-slate-300 hover:bg-slate-800'
-              : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
+              ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+              : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
           }`}
           title="Language: English (UK)"
         >
@@ -269,34 +277,34 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         <div className="header-action-wrap relative">
           <button
             onClick={() => toggleDropdown('notif')}
-            aria-label="View Notifications"
-            className={`p-2 rounded-xl border transition-all relative cursor-pointer ${
+            aria-label={`View Notifications (${unreadCount} unread)`}
+            className={`p-2 rounded-lg border transition-all relative cursor-pointer ${
               isDark
-                ? 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
-                : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
-            }`}
-            title="Notifications & System Alerts"
+                ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+                : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+            } ${hasNewNotification ? 'ring-2 ring-rose-500/40 text-rose-500' : ''}`}
+            title={hasNewNotification ? "New notification received!" : "Notifications & System Alerts"}
           >
-            <NotificationsIcon style={{ fontSize: 18 }} />
+            <Bell size={18} className={hasNewNotification ? "text-rose-500" : ""} />
             {unreadCount > 0 && (
               <span
                 style={{
                   position: 'absolute',
-                  top: '-4px',
-                  right: '-4px',
-                  width: '16px',
-                  height: '16px',
+                  top: '-3px',
+                  right: '-3px',
+                  minWidth: '15px',
+                  height: '15px',
+                  padding: '0 3px',
                   backgroundColor: '#f43f5e',
                   color: 'white',
                   borderRadius: '9999px',
                   fontSize: '9px',
-                  fontWeight: 900,
+                  fontWeight: 700,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
                 }}
-                className="animate-pulse"
               >
                 {unreadCount}
               </span>
@@ -305,18 +313,18 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
 
           {/* Notifications Dropdown Panel */}
           {activeDropdown === 'notif' && (
-            <div className="header-popover header-notifications absolute right-0 mt-2 w-80 bg-slate-900 border border-slate-800 p-3 shadow-2xl z-50 rounded-2xl text-xs text-slate-100 animate-fadeIn space-y-2 font-sans">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                <span className="font-extrabold text-sm text-white">Notifications ({unreadCount})</span>
+            <div className="header-popover header-notifications absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 shadow-lg z-50 rounded-lg text-xs text-slate-900 dark:text-slate-100 space-y-2 font-sans">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">Notifications ({unreadCount})</span>
                 <button
                   onClick={markAllNotificationsRead}
-                  className="text-[11px] text-blue-400 hover:underline font-bold"
+                  className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
                 >
                   Mark All Read
                 </button>
               </div>
 
-              <div className="space-y-2 max-h-72 overflow-y-auto">
+              <div className="space-y-1.5 max-h-72 overflow-y-auto">
                 {notifications.map((n) => (
                   <div
                     key={n.id}
@@ -325,14 +333,14 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                       setActiveDropdown(null);
                       navigate(n.path);
                     }}
-                    className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-md border transition-all cursor-pointer ${
                       n.read
-                        ? 'bg-slate-950/60 border-slate-800/60 opacity-75'
-                        : 'bg-slate-800/80 border-slate-700 text-slate-100 hover:bg-slate-800'
+                        ? 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/60 opacity-75'
+                        : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
-                    <p className="font-bold text-xs text-slate-100">{n.title}</p>
-                    <div className="flex items-center justify-between mt-1 text-[10px] text-slate-400">
+                    <p className="font-medium text-xs text-slate-900 dark:text-slate-100">{n.title}</p>
+                    <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500 dark:text-slate-400">
                       <span>{n.subtitle}</span>
                       <span>{n.time}</span>
                     </div>
@@ -347,89 +355,89 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         <button
           onClick={() => toggleDropdown('messages')}
           aria-label="View Messages"
-          className={`p-2 rounded-xl border transition-all hidden sm:block cursor-pointer ${
+          className={`p-2 rounded-lg border transition-all hidden sm:block cursor-pointer ${
             isDark
-              ? 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
-              : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+              ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
           }`}
           title="Team Messages"
         >
-          <ChatIcon style={{ fontSize: 18 }} />
+          <MessageSquare size={18} />
         </button>
 
         {/* 3. Theme Toggle */}
         <button
           onClick={toggleTheme}
           aria-label="Toggle Light or Dark Theme"
-          className={`p-2 rounded-xl border transition-all cursor-pointer ${
+          className={`p-2 rounded-lg border transition-all cursor-pointer ${
             isDark
-              ? 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
-              : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+              ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
           }`}
           title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
         >
-          {isDark ? <LightModeIcon className="text-amber-400" style={{ fontSize: 18 }} /> : <DarkModeIcon className="text-blue-400" style={{ fontSize: 18 }} />}
+          {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-slate-600" />}
         </button>
 
         {/* 4. Help Icon */}
         <button
           onClick={onOpenHelp}
           aria-label="Help & IT Desk Support"
-          className={`p-2 rounded-xl border transition-all hidden md:block cursor-pointer ${
+          className={`p-2 rounded-lg border transition-all hidden md:block cursor-pointer ${
             isDark
-              ? 'bg-slate-900/90 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
-              : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+              ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
           }`}
           title="24/7 Enterprise Help Desk"
         >
-          <HelpIcon style={{ fontSize: 18 }} />
+          <HelpCircle size={18} />
         </button>
 
         {/* 5. User Profile Menu Container */}
         {user && (
-          <div className="header-profile relative border-l border-slate-800/80 pl-2.5 ml-1 shrink-0">
+          <div className="header-profile relative border-l border-slate-200 dark:border-slate-800 pl-2.5 ml-1 shrink-0">
             <button
               onClick={() => toggleDropdown('profile')}
               aria-label="User Profile Menu"
-              className="flex items-center gap-2 focus:outline-none group cursor-pointer p-1 rounded-xl hover:bg-slate-800/50 transition-colors"
+              className="flex items-center gap-2 focus:outline-none group cursor-pointer p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
               title={`${user.name} (${ROLE_LABELS[role]})`}
             >
               <div className="relative shrink-0">
                 <img
                   src={user.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}
                   alt={user.name}
-                  className="w-8 h-8 rounded-full object-cover border-2 border-blue-500/80 group-hover:border-blue-400 transition-all shadow-md"
+                  className="w-8 h-8 rounded-full object-cover border border-slate-300 dark:border-slate-700 shadow-sm"
                 />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-950" />
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-950" />
               </div>
-              <KeyboardArrowDownIcon className="text-slate-400 group-hover:text-white transition-colors shrink-0" style={{ fontSize: 14 }} />
+              <ChevronDown size={14} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors shrink-0" />
             </button>
 
             {/* STRICTLY CONSTRAINED USER PROFILE DROPDOWN MENU */}
             {activeDropdown === 'profile' && (
-              <div className="header-popover absolute right-0 top-full mt-2 w-80 max-w-[320px] bg-slate-900 border border-slate-800 p-3.5 shadow-2xl z-50 rounded-2xl text-xs text-slate-100 animate-fadeIn space-y-3 font-sans overflow-hidden">
+              <div className="header-popover absolute right-0 top-full mt-2 w-80 max-w-[320px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3.5 shadow-lg z-50 rounded-lg text-xs text-slate-900 dark:text-slate-100 space-y-3 font-sans overflow-hidden">
                 {/* Profile Header */}
-                <div className="px-2 py-1 border-b border-slate-800 space-y-1">
-                  <p className="font-extrabold text-sm text-white truncate">{user.name}</p>
-                  <p className="text-[11px] text-slate-400 font-mono truncate">{user.email}</p>
+                <div className="px-2 py-1 border-b border-slate-200 dark:border-slate-800 space-y-1">
+                  <p className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate">{user.name}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">{user.email}</p>
                   <div className="mt-2 flex items-center justify-between pt-1">
                     <span className={`badge ${getRoleBadgeClass(role)}`}>{ROLE_LABELS[role]}</span>
                     <button
                       onClick={() => setShowPermissionsPreview(!showPermissionsPreview)}
-                      className="text-[10px] font-bold text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
                     >
-                      <LayersIcon style={{ fontSize: 12 }} /> {showPermissionsPreview ? 'Hide' : 'Permissions'}
+                      <Layers size={13} /> {showPermissionsPreview ? 'Hide' : 'Permissions'}
                     </button>
                   </div>
                 </div>
 
-                {/* Permissions Expandable Box (Strictly Constrained) */}
+                {/* Permissions Expandable Box */}
                 {showPermissionsPreview && (
-                  <div className="p-2.5 bg-slate-950 rounded-xl border border-slate-800 text-[10px] space-y-1 max-h-32 overflow-y-auto max-w-full">
-                    <p className="font-extrabold text-slate-400 uppercase tracking-wider">Active Permissions ({permissions.length})</p>
+                  <div className="p-2.5 bg-slate-50 dark:bg-slate-950 rounded-md border border-slate-200 dark:border-slate-800 text-[10px] space-y-1 max-h-32 overflow-y-auto max-w-full">
+                    <p className="font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Permissions ({permissions.length})</p>
                     <div className="flex flex-wrap gap-1">
                       {permissions.map((p, idx) => (
-                        <span key={idx} className="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded font-mono text-[9px] truncate max-w-full">
+                        <span key={idx} className="bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 px-1.5 py-0.5 rounded font-mono text-[9px] truncate max-w-full">
                           {p}
                         </span>
                       ))}
@@ -441,31 +449,31 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                 <div className="py-1 space-y-1 font-medium">
                   <button
                     onClick={() => { navigate('/employee/profile'); setActiveDropdown(null); }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 flex items-center gap-2.5 text-slate-200 transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
-                    <PersonIcon className="text-blue-400 shrink-0" style={{ fontSize: 16 }} /> View Profile
+                    <User size={15} className="text-blue-600 dark:text-blue-400 shrink-0" /> View Profile
                   </button>
                   <button
                     onClick={() => { navigate('/admin/settings'); setActiveDropdown(null); }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 flex items-center gap-2.5 text-slate-200 transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
-                    <SettingsIcon className="text-indigo-400 shrink-0" style={{ fontSize: 16 }} /> Account Settings
+                    <Settings size={15} className="text-indigo-600 dark:text-indigo-400 shrink-0" /> Account Settings
                   </button>
                   <button
                     onClick={() => { navigate('/admin/users'); setActiveDropdown(null); }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 flex items-center gap-2.5 text-slate-200 transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
-                    <ShieldIcon className="text-purple-400 shrink-0" style={{ fontSize: 16 }} /> Access Control Matrix
+                    <Shield size={15} className="text-purple-600 dark:text-purple-400 shrink-0" /> Access Control Matrix
                   </button>
                 </div>
 
                 {/* Log Out Action */}
-                <div className="pt-2 border-t border-slate-800">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
                   <button
                     onClick={handleConfirmLogout}
-                    className="w-full text-left px-3 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-2.5 font-extrabold transition-colors cursor-pointer"
+                    className="w-full text-left px-3 py-2 rounded-md bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 flex items-center gap-2.5 font-medium transition-colors cursor-pointer"
                   >
-                    <LogoutIcon className="shrink-0 text-rose-400" style={{ fontSize: 16 }} /> Log Out
+                    <LogOut size={15} className="shrink-0 text-rose-600 dark:text-rose-400" /> Log Out
                   </button>
                 </div>
               </div>

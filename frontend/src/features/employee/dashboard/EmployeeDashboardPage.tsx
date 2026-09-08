@@ -71,6 +71,7 @@ export const StepSectionHeader: React.FC<{
 // 1. Employee Dashboard Overview / My Workspace Header with In-Header Notifications
 export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [hasNewAlert, setHasNewAlert] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: '1', title: 'Shift Check-In Confirmed', desc: 'Punch recorded at 09:02 AM today', time: '10m ago', type: 'success', unread: true },
     { id: '2', title: 'Leave Approval Status', desc: 'PTO request for Friday approved by HR', time: '1h ago', type: 'info', unread: true },
@@ -82,33 +83,39 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
 
   const markAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    setHasNewAlert(false);
   };
 
   const markItemRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? ({ ...n, unread: false }) : n));
   };
 
+  const toggleNotifications = () => {
+    setHasNewAlert(false);
+    setShowNotifications(!showNotifications);
+  };
+
   return (
-    <div className="relative p-6 rounded-3xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-teal-950/50 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-sm">
       <div className="flex items-center gap-4">
         <img
           src={user?.avatar || "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150"}
           alt={user?.name || "Employee"}
-          className="w-14 h-14 rounded-2xl object-cover border-2 border-emerald-500 shadow-md shrink-0"
+          className="w-12 h-12 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shadow-sm shrink-0"
         />
         <div>
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-2xl font-black tracking-tight text-white">Welcome back, {user?.name || "Alex Mercer"}!</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase">
-              MY WORKSPACE
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Welcome back, {user?.name || "Alex Mercer"}!</h1>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+              My Workspace
             </span>
-            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-              ACTIVE SHIFT
+            <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Active Shift
             </span>
           </div>
-          <p className="text-xs text-slate-300 mt-1">
-            {user?.title || "Senior Software Engineer"} &bull; {user?.department || "Engineering & Technology"} &bull; Shift: <span className="text-emerald-400 font-bold">General Day Shift (09:00 AM - 06:00 PM)</span>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            {user?.title || "Senior Software Engineer"} &bull; {user?.department || "Engineering & Technology"} &bull; Shift: <span className="text-slate-700 dark:text-slate-200 font-medium">General Day Shift (09:00 AM - 06:00 PM)</span>
           </p>
         </div>
       </div>
@@ -117,14 +124,17 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
         {/* In-Header Notifications Bell & Dropdown */}
         <div className="relative">
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-2 transition-all border border-slate-700 shadow-md cursor-pointer"
+            onClick={toggleNotifications}
+            className={`relative px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-2 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer ${
+              hasNewAlert && unreadCount > 0 ? "ring-2 ring-amber-400/40 text-amber-500" : ""
+            }`}
             title="Notifications"
+            aria-label={`Notifications (${unreadCount} unread)`}
           >
-            <Bell size={15} className={unreadCount > 0 ? "text-amber-400 animate-pulse" : "text-slate-400"} />
+            <Bell size={15} className={hasNewAlert && unreadCount > 0 ? "text-amber-500" : "text-slate-500 dark:text-slate-400"} />
             <span>Notifications</span>
             {unreadCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black shrink-0 animate-pulse">
+              <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-semibold shrink-0">
                 {unreadCount}
               </span>
             )}
@@ -132,25 +142,25 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
 
           {/* In-Header Notifications Popover */}
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-slate-900/95 border border-slate-700/80 backdrop-blur-xl shadow-2xl p-4 z-50 text-slate-100 font-sans space-y-3 animate-fadeIn">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg p-4 z-50 text-slate-900 dark:text-slate-100 font-sans space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="font-extrabold text-xs text-white uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="font-semibold text-xs text-slate-900 dark:text-slate-100">
                     Notifications ({unreadCount} new)
                   </span>
                 </div>
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
-                    className="text-[11px] text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
                   >
                     Mark All Read
                   </button>
                 )}
               </div>
 
-              <div className="space-y-2 max-h-72 overflow-y-auto no-scrollbar">
+              <div className="space-y-1.5 max-h-72 overflow-y-auto no-scrollbar">
                 {notifications.length === 0 ? (
                   <div className="text-center py-6 text-slate-400 text-xs">No notifications</div>
                 ) : (
@@ -158,10 +168,10 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
                     <div
                       key={n.id}
                       onClick={() => markItemRead(n.id)}
-                      className={`p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                      className={`p-2.5 rounded-md border transition-all cursor-pointer flex items-start gap-2.5 ${
                         n.unread
-                          ? 'bg-slate-800/90 border-emerald-500/30 hover:bg-slate-800'
-                          : 'bg-slate-950/60 border-slate-800 hover:bg-slate-900/80 opacity-70'
+                          ? 'bg-slate-50 dark:bg-slate-800/90 border-slate-200 dark:border-emerald-500/30 hover:bg-slate-100 dark:hover:bg-slate-800'
+                          : 'bg-white dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/80 opacity-75'
                       }`}
                     >
                       <span className="text-base mt-0.5 shrink-0">

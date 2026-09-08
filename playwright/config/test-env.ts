@@ -23,11 +23,23 @@ export const TEST_ENV = {
       role: 'ADMIN',
       expectedDashboardUrl: '/admin/dashboard',
     },
+    HR: {
+      email: 'hr@thestackly.com',
+      name: 'Stackly HR',
+      role: 'HR',
+      expectedDashboardUrl: '/hr/dashboard',
+    },
     MANAGER: {
       email: 'manager@thestackly.com',
       name: 'Stackly Manager',
       role: 'MANAGER',
       expectedDashboardUrl: '/manager/dashboard',
+    },
+    TEAM_LEAD: {
+      email: 'teamlead@thestackly.com',
+      name: 'Stackly Team Lead',
+      role: 'TEAM_LEAD',
+      expectedDashboardUrl: '/team-lead/dashboard',
     },
   },
   ROUTES: {

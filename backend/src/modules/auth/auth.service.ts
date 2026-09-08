@@ -623,7 +623,7 @@ export const forgotPassword = async (
 export const resetPassword = async (
   rawToken: string,
   newPassword: string
-): Promise<{ success: boolean; message?: string }> => {
+): Promise<{ success: boolean; message?: string; userId?: string }> => {
   if (!rawToken || !newPassword) {
     return { success: false, message: 'Token and new password are required.' };
   }
@@ -666,7 +666,7 @@ export const resetPassword = async (
   // 5. Send security notification (fire-and-forget)
   sendPasswordChangedNotification(user.email, user.name).catch(() => {});
 
-  return { success: true };
+  return { success: true, userId: user.id };
 };
 
 /**

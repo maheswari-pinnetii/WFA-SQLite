@@ -104,8 +104,14 @@ export const attendanceActionSchema = z.object({
   longitude: z.number().min(-180).max(180).optional(),
   accuracy: z.number().min(0).max(100000).optional(),
   deviceId: z.string().trim().max(255).optional(),
-  note: z.string().trim().max(500).optional()
-});
+  note: z.string().trim().max(500).optional(),
+  employeeId: z.string().trim().max(100).optional(),
+  employeeName: z.string().trim().max(255).optional(),
+  department: z.string().trim().max(100).optional(),
+  shiftType: z.string().trim().max(100).optional(),
+  workMode: z.string().trim().max(100).optional(),
+  idempotencyKey: z.string().trim().max(255).optional()
+}).passthrough();
 
 export const leaveRequestSchema = z.object({
   startDate: z.string({ required_error: 'Start date is required.' }).refine(val => !isNaN(Date.parse(val)), {

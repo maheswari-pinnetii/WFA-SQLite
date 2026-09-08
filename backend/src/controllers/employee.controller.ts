@@ -1,6 +1,7 @@
 import { employeeService } from '../services/employee.service.js';
 import { logAudit } from '../config/db.js';
-import { emitToOrg, SOCKET_EVENTS } from '../sockets/index.js';
+import { emitToOrg, emitToUser, SOCKET_EVENTS } from '../sockets/index.js';
+import { query, execute } from '../database/sqlite-cloud.js';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
 
@@ -171,10 +172,18 @@ export const updateUserRole = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid role.' });
     }
 
-    const updated = await employeeService.updateUserRole(userId, role, getOrganizationId(req));
+    const orgId = getOrganizationId(req);
+    const updated = await employeeService.updateUserRole(userId, role, orgId);
     if (!updated) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
+
+    logAudit(req.user.id, 'ROLE_CHANGED', `Changed role of user ${userId} to ${role}`, orgId);
+    emitToUser(userId, SOCKET_EVENTS.AUTH_ROLE_CHANGED, {
+      userId,
+      role,
+      timestamp: new Date().toISOString()
+    });
 
     return res.json({ success: true, data: updated });
   } catch (err) {
@@ -194,3 +203,107 @@ export const deleteUser = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/**
+ * GET /api/employees/:id/export-data
+ * GDPR / CCPA Data Subject Access Request (DSAR) - Export employee data bundle
+ */
+export const exportEmployeeData = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const orgId = getOrganizationId(req);
+
+    // BOLA/IDOR protection: Only self or ADMIN/HR can export
+    const isSelf = req.user.id === id;
+    const isPrivileged = ['ADMIN', 'HR'].includes(req.user.role);
+    if (!isSelf && !isPrivileged) {
+      return res.status(403).json({ success: false, message: 'Forbidden: You can only export your own personal data.' });
+    }
+
+    const employee = await employeeService.getEmployeeById(id, orgId);
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    // Pull attendance records, leave requests, and audit logs safely
+    let attendance = [];
+    try {
+      attendance = await query('SELECT date, checkInTime, checkOutTime, status, workMode, shiftType FROM attendancerecords WHERE employeeId = ?', [id]);
+    } catch {
+      attendance = [];
+    }
+
+    let leaves = [];
+    try {
+      leaves = await query('SELECT type as leaveType, startDate, endDate, status, reason FROM leaverequests WHERE employeeId = ?', [id]);
+    } catch {
+      leaves = [];
+    }
+
+    let auditLogs = [];
+    try {
+      auditLogs = await query('SELECT timestamp, action, details FROM audit_logs WHERE employeeId = ? LIMIT 50', [id]);
+    } catch {
+      auditLogs = [];
+    }
+
+    logAudit(req.user.id, 'DATA_EXPORT_REQUESTED', `Exported full GDPR/PII data bundle for employee ${id}`, orgId);
+
+    return res.json({
+      success: true,
+      data: {
+        exportedAt: new Date().toISOString(),
+        dataClassification: 'CONFIDENTIAL_PII',
+        profile: employee,
+        attendanceHistory: attendance || [],
+        leaveHistory: leaves || [],
+        auditHistory: auditLogs || []
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * POST /api/employees/:id/anonymize-data
+ * Right to Erasure / Anonymization (ADMIN only)
+ */
+export const anonymizeEmployeeData = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const orgId = getOrganizationId(req);
+
+    const employee = await employeeService.getEmployeeById(id, orgId);
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    // Anonymize employee PII
+    const anonymousName = `Anonymized Employee ${id.slice(-4)}`;
+    const anonymousEmail = `redacted-${id.slice(-6)}@thestackly.com`;
+
+    await execute(`
+      UPDATE employees 
+      SET name = ?, email = ?, avatar = NULL, status = 'TERMINATED', updatedAt = ?
+      WHERE id = ? AND organizationId = ?
+    `, [anonymousName, anonymousEmail, new Date().toISOString(), id, orgId]);
+
+    // Anonymize associated user record if exists
+    await execute(`
+      UPDATE users 
+      SET name = ?, email = ?, password_hash = 'REDACTED', status = 'TERMINATED', updatedAt = ?
+      WHERE id = ? AND organizationId = ?
+    `, [anonymousName, anonymousEmail, new Date().toISOString(), id, orgId]);
+
+    logAudit(req.user.id, 'DATA_ANONYMIZED', `Anonymized PII for employee ${id} pursuant to erasure request`, orgId);
+
+    return res.json({
+      success: true,
+      message: `Employee ${id} PII has been successfully anonymized.`
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+

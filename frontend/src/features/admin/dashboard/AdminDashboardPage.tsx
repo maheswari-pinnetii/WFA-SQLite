@@ -34,27 +34,30 @@ export const AdminDashboardOverview: React.FC<{
   firstName: string;
   user: any;
 }> = ({ currentDateFormatted, getGreeting, firstName, user }) => (
-  <div className="dashboard-hero p-6 lg:p-8 rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-950 text-white border border-blue-500/30 shadow-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
-    <div className="space-y-2 z-10">
-      <div style={{ display: 'inline-flex', width: 'fit-content' }} className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-xs font-bold backdrop-blur-md border border-white/20">
-        <Calendar size={14} className="text-blue-300" /> {currentDateFormatted}
+  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
+    <div className="space-y-1">
+      <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+        <Calendar size={13} className="text-slate-400" />
+        <span>{currentDateFormatted}</span>
+        <span>•</span>
+        <span className="text-blue-600 dark:text-blue-400 font-medium">System Administrator</span>
       </div>
-      <h2 className="text-2xl lg:text-3xl font-black tracking-tight">
-        {getGreeting()}, {firstName} 👋
-      </h2>
-      <p className="text-xs text-blue-100 font-medium">
-        Department: <span className="font-bold text-white">{user?.department || 'Executive Governance'}</span> • Role: <span className="font-bold text-amber-300">System Administrator</span>
+      <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+        {getGreeting()}, {firstName}
+      </h1>
+      <p className="text-sm text-slate-500 dark:text-slate-400">
+        Workforce analytics, live attendance governance, and enterprise shift oversight.
       </p>
     </div>
-    <div className="flex flex-wrap items-center gap-2.5 z-10">
+    <div className="flex flex-wrap items-center gap-2.5 shrink-0">
       <Link to="/admin/employees" className="btn btn-primary btn-sm flex items-center gap-2">
-        <UserPlus size={16} /> Add Employee
+        <UserPlus size={15} /> Add Employee
       </Link>
       <Link to="/admin/attendance-overview" className="btn btn-secondary btn-sm flex items-center gap-2">
-        <Clock size={16} /> View Attendance
+        <Clock size={15} /> View Attendance
       </Link>
       <Link to="/admin/reports" className="btn btn-secondary btn-sm flex items-center gap-2">
-        <FileSpreadsheet size={16} /> Generate Report
+        <FileSpreadsheet size={15} /> Generate Report
       </Link>
     </div>
   </div>
@@ -72,26 +75,26 @@ export const AdminDashboardFilters: React.FC<{
   statusFilter: string;
   setStatusFilter: (val: string) => void;
 }> = (props) => (
-  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-    <div className="flex items-center gap-2 text-slate-300 text-xs font-extrabold uppercase">
-      <Filter size={16} className="text-blue-400" /> Executive Analytics Scopes
+  <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-medium uppercase tracking-wider">
+      <Filter size={14} className="text-blue-500" /> Executive Analytics Scopes
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Date</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Date</label>
         <input
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal"
         />
       </div>
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Location</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Location</label>
         <select
           value={props.locationFilter}
           onChange={(e) => props.setLocationFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
         >
           <option value="All">All Locations</option>
           <option value="Bengaluru">Bengaluru</option>
@@ -100,11 +103,11 @@ export const AdminDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Department</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Department</label>
         <select
           value={props.deptFilter}
           onChange={(e) => props.setDeptFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
         >
           <option value="All">All Departments</option>
           <option value="Engineering">Engineering</option>
@@ -114,11 +117,11 @@ export const AdminDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Team</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Team</label>
         <select
           value={props.teamFilter}
           onChange={(e) => props.setTeamFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
         >
           <option value="All">All Teams</option>
           <option value="Frontend">Frontend Devs</option>
@@ -127,11 +130,11 @@ export const AdminDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Status</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Status</label>
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
@@ -183,51 +186,49 @@ const formatJoinDate = (dateStr?: string) => {
   return `${day} ${month} ${year}`;
 };
 
-
-
 export const AdminSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
-  <div className="p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl space-y-4">
+  <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-4">
     <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
-      <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-        <Layers size={18} className="text-blue-500" /> Active Sprint Work
+      <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
+        <Layers size={17} className="text-blue-500" /> Active Sprint Work
       </h3>
-      <span className="badge badge-success text-[10px] font-bold">ORGANIZATION SPRINT</span>
+      <span className="badge badge-success text-xs font-medium">ORGANIZATION SPRINT</span>
     </div>
-    <div className="overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-tertiary)]/20">
+    <div className="overflow-x-auto rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)]/20">
       <table className="w-full text-left text-xs min-w-[800px]">
-        <thead className="bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-b border-[var(--border-color)] uppercase font-bold text-[10px] tracking-wider">
+        <thead className="bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-b border-[var(--border-color)] font-semibold text-xs">
           <tr>
-            <th className="py-3 px-4">Sprint</th>
-            <th className="py-3 px-4">Task</th>
-            <th className="py-3 px-4">Assignee</th>
-            <th className="py-3 px-4">Priority</th>
-            <th className="py-3 px-4">Status</th>
-            <th className="py-3 px-4">Progress</th>
-            <th className="py-3 px-4">Due Date</th>
+            <th className="py-2.5 px-4">Sprint</th>
+            <th className="py-2.5 px-4">Task</th>
+            <th className="py-2.5 px-4">Assignee</th>
+            <th className="py-2.5 px-4">Priority</th>
+            <th className="py-2.5 px-4">Status</th>
+            <th className="py-2.5 px-4">Progress</th>
+            <th className="py-2.5 px-4">Due Date</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[var(--border-color)]/80">
+        <tbody className="divide-y divide-[var(--border-color)]/80 text-xs">
           {tasks.slice(0, 8).map((task) => (
             <tr key={task.id} className="hover:bg-[var(--bg-hover)] transition-colors">
-              <td className="py-3 px-4 font-bold text-[var(--text-secondary)]">Sprint 24B</td>
-              <td className="py-3 px-4 text-[var(--text-primary)] font-medium max-w-[200px] truncate">{task.title}</td>
-              <td className="py-3 px-4 text-[var(--text-muted)]">{task.assigneeName || 'Unassigned'}</td>
-              <td className="py-3 px-4">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                  task.priority === 'CRITICAL' || task.priority === 'HIGH' ? 'bg-rose-500/10 text-rose-400' : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'
+              <td className="py-2.5 px-4 font-medium text-[var(--text-secondary)]">Sprint 24B</td>
+              <td className="py-2.5 px-4 text-[var(--text-primary)] font-medium max-w-[200px] truncate">{task.title}</td>
+              <td className="py-2.5 px-4 text-[var(--text-muted)]">{task.assigneeName || 'Unassigned'}</td>
+              <td className="py-2.5 px-4">
+                <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                  task.priority === 'CRITICAL' || task.priority === 'HIGH' ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20' : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)]'
                 }`}>
                   {task.priority}
                 </span>
               </td>
-              <td className="py-3 px-4">
-                <span className="text-[var(--text-primary)] font-bold uppercase">{task.status}</span>
+              <td className="py-2.5 px-4">
+                <span className="text-[var(--text-primary)] font-medium uppercase text-[11px]">{task.status}</span>
               </td>
-              <td className="py-3 px-4">
+              <td className="py-2.5 px-4">
                 <div className="w-full bg-[var(--bg-tertiary)] rounded-full h-1.5 max-w-[100px]">
                   <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: task.status === 'COMPLETED' ? '100%' : task.status === 'IN_PROGRESS' ? '50%' : '0%' }}></div>
                 </div>
               </td>
-              <td className="py-3 px-4 font-mono text-[var(--text-muted)]">2026-09-10</td>
+              <td className="py-2.5 px-4 font-mono text-[var(--text-muted)]">2026-09-10</td>
             </tr>
           ))}
         </tbody>
@@ -336,6 +337,7 @@ export const AdminDashboardPage: React.FC = () => {
             value={employees.length || "500"}
             icon={<Users size={26} />}
             iconBgColor="emerald"
+            isLive={true}
             trend="+12.4% than last month"
             trendType="positive"
             onClick={() => openDrillDown('Total Employee Headcount', employees.length || 500, 'Global workforce roster', [
@@ -343,11 +345,35 @@ export const AdminDashboardPage: React.FC = () => {
               { label: 'Contractors', value: Math.round((employees.length || 500) * 0.15) },
             ])}
           />
-          <MinimalKpiCard title="Active Duty Rate" value="242" icon={<ShieldCheck size={26} />} iconBgColor="blue" trend="+96.8% active shift" trendType="positive" />
-          <MinimalKpiCard title="Attendance Rate" value="96.5%" icon={<Clock size={26} />} iconBgColor="amber" trend="+1.5% compliance" trendType="positive" />
+          <MinimalKpiCard
+            title="Active Duty Rate"
+            value={analytics.data?.metrics?.activePresent || Math.round((employees.length || 500) * 0.96)}
+            icon={<ShieldCheck size={26} />}
+            iconBgColor="blue"
+            isLive={true}
+            trend="+96.8% active shift"
+            trendType="positive"
+          />
+          <MinimalKpiCard
+            title="Attendance Rate"
+            value={analytics.data?.metrics?.attendanceRate || "96.5%"}
+            icon={<Clock size={26} />}
+            iconBgColor="amber"
+            isLive={true}
+            trend="+1.5% compliance"
+            trendType="positive"
+          />
           <MinimalKpiCard title="Annual Attrition" value="4.2%" icon={<TrendingDown size={26} />} iconBgColor="rose" trend="-0.8% than last year" trendType="positive" />
           <MinimalKpiCard title="Monthly Payroll" value="$4.8M" icon={<DollarSign size={26} />} iconBgColor="purple" trend="+4.35% budget allocation" trendType="positive" />
-          <MinimalKpiCard title="Productivity Score" value="94.8%" icon={<Award size={26} />} iconBgColor="cyan" trend="+3.2% performance" trendType="positive" />
+          <MinimalKpiCard
+            title="Productivity Score"
+            value={analytics.data?.metrics?.productivityScore || "94.8%"}
+            icon={<Award size={26} />}
+            iconBgColor="cyan"
+            isLive={true}
+            trend="+3.2% performance"
+            trendType="positive"
+          />
           <MinimalKpiCard title="Open Vacancies" value="124" icon={<Briefcase size={26} />} iconBgColor="indigo" trend="+8.4% open requisitions" trendType="positive" />
           <MinimalKpiCard title="Audit Compliance" value="99.8%" icon={<Layers size={26} />} iconBgColor="teal" trend="100% Zero-Trust Pass" trendType="positive" />
         </div>

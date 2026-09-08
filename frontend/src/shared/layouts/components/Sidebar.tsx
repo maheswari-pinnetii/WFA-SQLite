@@ -555,13 +555,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : ''
                       } ${collapsed ? 'is-collapsed justify-center' : ''}`}
                     >
-                      <span className="sidebar-icon-shell shrink-0 transition-transform duration-200 group-hover:scale-110">
+                      <span className="sidebar-icon-shell shrink-0">
                         {item.icon}
                       </span>
 
                       {!collapsed && (
                         <>
-                          <span className="sidebar-link-label font-bold text-xs tracking-tight truncate flex-1 min-w-0">
+                          <span className="sidebar-link-label font-medium text-sm truncate flex-1 min-w-0">
                             {item.label}
                           </span>
                           <ChevronRight size={14} className="sidebar-link-arrow shrink-0" />
@@ -571,7 +571,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       {/* Unread Badge Counter */}
                       {!collapsed && item.badge && (
                         <span
-                          className={`sidebar-badge px-1.5 py-0.5 text-[10px] font-extrabold rounded-md border ml-auto shrink-0 ${getBadgeStyle(
+                          className={`sidebar-badge px-1.5 py-0.5 text-xs font-medium rounded border ml-auto shrink-0 ${getBadgeStyle(
                             item.badge.variant
                           )}`}
                         >
@@ -584,7 +584,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <span className="sidebar-tooltip">
                           {item.label}
                           {item.badge && (
-                            <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded ${getBadgeStyle(item.badge.variant)}`}>
+                            <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${getBadgeStyle(item.badge.variant)}`}>
                               {item.badge.text}
                             </span>
                           )}

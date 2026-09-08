@@ -24,33 +24,33 @@ export const AnalyticsChartContainer: React.FC<AnalyticsChartContainerProps> = (
 }) => {
   return (
     <section
-      className="w-full min-w-0 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-3xl p-6 shadow-xl font-sans text-[var(--text-primary)] flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-blue-500/40"
+      className="w-full min-w-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 shadow-sm font-sans text-slate-900 dark:text-slate-100 flex flex-col justify-between relative"
       style={{ minHeight }}
       aria-busy={isLoading}
     >
       
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-base font-bold tracking-tight text-slate-100">{title}</h3>
-        {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+        {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-normal">{subtitle}</p>}
       </div>
 
       {/* Content Area */}
       <div className="flex-1 flex items-center justify-center min-h-[260px] w-full">
         {isLoading && (
           <div className="flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-            <span className="text-xs font-semibold text-slate-400">Loading analysis data...</span>
+            <Loader2 className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-spin" />
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Loading analysis data...</span>
           </div>
         )}
 
         {!isLoading && error && (
           <div className="flex flex-col items-center justify-center text-center p-4 space-y-2">
-            <AlertCircle className="h-8 w-8 text-rose-500" />
-            <span className="text-xs font-bold text-[var(--text-primary)]">Failed to load chart</span>
-            <span className="text-[10px] text-slate-400 max-w-[200px]">{error}</span>
+            <AlertCircle className="h-6 w-6 text-rose-500" />
+            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">Failed to load chart</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 max-w-[240px]">{error}</span>
             {onRetry && (
-              <button type="button" onClick={onRetry} className="mt-2 rounded-lg bg-blue-600 px-3 py-1.5 text-[10px] font-bold text-white hover:bg-blue-500">
+              <button type="button" onClick={onRetry} className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 shadow-sm transition-colors">
                 Try again
               </button>
             )}
@@ -59,9 +59,9 @@ export const AnalyticsChartContainer: React.FC<AnalyticsChartContainerProps> = (
 
         {!isLoading && !error && isEmpty && (
           <div className="flex flex-col items-center justify-center text-center p-4 space-y-2">
-            <Inbox className="h-8 w-8 text-slate-500" />
-            <span className="text-xs font-bold text-slate-400">No data available</span>
-            <span className="text-[10px] text-slate-500">There are no records matching current filters</span>
+            <Inbox className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">No data available</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">There are no records matching current filters</span>
           </div>
         )}
 

@@ -53,6 +53,39 @@ export const initDb = async (): Promise<void> => {
           )
         `);
 
+        // Ensure session tracking and refresh token rotation tables exist
+        await execute(`
+          CREATE TABLE IF NOT EXISTS sessions (
+            id TEXT PRIMARY KEY,
+            userId TEXT NOT NULL,
+            deviceFingerprint TEXT,
+            ipAddress TEXT,
+            createdAt TEXT NOT NULL,
+            expiresAt TEXT NOT NULL,
+            revokedAt TEXT,
+            companyId TEXT NOT NULL,
+            updatedAt TEXT NOT NULL
+          )
+        `);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(userId)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expiresAt)`);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS refreshtokens (
+            token_hash TEXT PRIMARY KEY,
+            sessionId TEXT NOT NULL,
+            tokenFamily TEXT NOT NULL,
+            parentHash TEXT,
+            expiresAt TEXT NOT NULL,
+            revokedAt TEXT,
+            companyId TEXT NOT NULL,
+            createdAt TEXT NOT NULL,
+            updatedAt TEXT NOT NULL
+          )
+        `);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_refreshtokens_session_id ON refreshtokens(sessionId)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_refreshtokens_family ON refreshtokens(tokenFamily)`);
+
         // Ensure OAuth PKCE state table exists
         await execute(`
           CREATE TABLE IF NOT EXISTS oauth_states (
@@ -317,6 +350,25 @@ export const initDb = async (): Promise<void> => {
           )
         `);
         await execute(`CREATE INDEX IF NOT EXISTS idx_security_audit_user ON security_audit_logs(userId)`);
+
+        // Ensure teamlead@thestackly.com alias exists alongside lead@thestackly.com
+        try {
+          const leadRows = await query('SELECT * FROM users WHERE email = ?', ['lead@thestackly.com']);
+          const teamLeadRows = await query('SELECT * FROM users WHERE email = ?', ['teamlead@thestackly.com']);
+          if (leadRows && leadRows.length > 0 && (!teamLeadRows || teamLeadRows.length === 0)) {
+            const l = leadRows[0];
+            await execute(`
+              INSERT OR REPLACE INTO users (id, name, email, password_hash, role, department, team, location, title, clearanceLevel, status, permissions, mfa_enabled, organizationId, companyId, createdAt, updatedAt)
+              VALUES (?, ?, 'teamlead@thestackly.com', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+              'usr-lead-02', l.name, l.password_hash, l.role, l.department, l.team,
+              l.location, l.title, l.clearanceLevel, l.status,
+              typeof l.permissions === 'string' ? l.permissions : JSON.stringify(l.permissions || []),
+              l.mfa_enabled, l.organizationId || ORGANIZATION_ID, l.companyId || ORGANIZATION_ID,
+              l.createdAt, l.updatedAt
+            ]);
+          }
+        } catch (e) {}
 
         // Perform health check write test
         const isHealthy = await healthCheck();

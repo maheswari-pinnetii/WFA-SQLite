@@ -299,6 +299,18 @@ export const authService = {
       }
     }
     return null;
+  },
+
+  setStoredSession: (session: { user: any; token?: string }) => {
+    if (session.user) {
+      sessionStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(session.user));
+      localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(session.user));
+    }
+    if (session.token) {
+      setAccessToken(session.token);
+      sessionStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, session.token);
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, session.token);
+    }
   }
 };
 

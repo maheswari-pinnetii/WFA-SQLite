@@ -171,6 +171,8 @@ export const authKeyGen = (prefix: string) => (req: Request) => {
   return account ? `${prefix}:${ip}:${account}` : `${prefix}:${ip}`;
 };
 
+const isTestMode = (req: Request) => process.env.NODE_ENV === 'test' && req.headers['x-test-rate-limit'] !== 'true';
+
 // ------------------------------------------------------------------
 // 1. STRICT AUTH LIMITERS (Configurable + Per-IP & Per-Account + Backoff)
 // ------------------------------------------------------------------
@@ -180,6 +182,7 @@ export const loginRateLimiter = rateLimit({
   max: env.RATE_LIMIT_LOGIN_MAX,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isTestMode,
   store: new SQLiteStore(env.RATE_LIMIT_LOGIN_WINDOW_MS),
   keyGenerator: authKeyGen('login'),
   handler: createExponentialBackoffHandler(
@@ -210,6 +213,7 @@ export const registerRateLimiter = rateLimit({
   max: env.RATE_LIMIT_SIGNUP_MAX,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isTestMode,
   store: new SQLiteStore(env.RATE_LIMIT_SIGNUP_WINDOW_MS),
   keyGenerator: authKeyGen('register'),
   handler: createExponentialBackoffHandler(
@@ -225,6 +229,7 @@ export const otpRateLimiter = rateLimit({
   max: env.RATE_LIMIT_OTP_MAX,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isTestMode,
   store: new SQLiteStore(env.RATE_LIMIT_OTP_WINDOW_MS),
   keyGenerator: authKeyGen('otp'),
   handler: createExponentialBackoffHandler(
@@ -243,6 +248,7 @@ export const publicApiLimiter = rateLimit({
   max: env.RATE_LIMIT_PUBLIC_MAX,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isTestMode,
   store: new SQLiteStore(env.RATE_LIMIT_PUBLIC_WINDOW_MS),
   keyGenerator: (req) => `public:${getClientIp(req)}`,
   message: { success: false, message: 'Too many public requests, please try again later.' }
@@ -256,6 +262,7 @@ export const authenticatedUserLimiter = rateLimit({
   max: env.RATE_LIMIT_AUTHENTICATED_MAX,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isTestMode,
   store: new SQLiteStore(env.RATE_LIMIT_AUTHENTICATED_WINDOW_MS),
   keyGenerator: (req) => {
     const userId = (req as any).user?.id;
@@ -272,6 +279,7 @@ export const globalApiLimiter = rateLimit({
   max: env.RATE_LIMIT_GLOBAL_MAX,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: isTestMode,
   store: new SQLiteStore(env.RATE_LIMIT_GLOBAL_WINDOW_MS),
   message: { success: false, message: 'Too many requests, please try again later.' },
   handler: (req, res, next, options) => {

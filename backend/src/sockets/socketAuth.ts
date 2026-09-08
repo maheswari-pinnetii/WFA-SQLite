@@ -4,6 +4,7 @@ import { env } from '../config/env.js';
 import { getAuthorizedRoomsForUser, SocketUserContext } from './rooms.js';
 import logger from '../config/logger.js';
 import { User } from '../models/User.js';
+import { query } from '../database/sqlite-cloud.js';
 
 const JWT_SECRET = env.JWT_SECRET || 'stackly_wfa_super_secret_jwt_key_2026';
 
@@ -41,6 +42,31 @@ export const socketAuthMiddleware = (socket: Socket, next: (err?: Error) => void
 
       if (!appUser) {
         return next(new Error('Authentication error: User profile not found'));
+      }
+
+      if (appUser.status && appUser.status !== 'ACTIVE') {
+        return next(new Error('Authentication error: Account is inactive or suspended'));
+      }
+
+      // Check if user is locked out
+      const lockCheck = await query('SELECT lockedUntil FROM failed_logins WHERE email = ?', [appUser.email]);
+      if (lockCheck && lockCheck.length > 0 && lockCheck[0].lockedUntil) {
+        if (new Date(lockCheck[0].lockedUntil) > new Date()) {
+          return next(new Error('Authentication error: Account is temporarily locked'));
+        }
+      }
+
+      // Check session revocation if token contains sessionId
+      if (decoded.sessionId) {
+        const sess = await query('SELECT revokedAt, expiresAt FROM sessions WHERE id = ?', [decoded.sessionId]);
+        if (sess && sess.length > 0) {
+          if (sess[0].revokedAt) {
+            return next(new Error('Authentication error: Session has been revoked'));
+          }
+          if (new Date(sess[0].expiresAt) < new Date()) {
+            return next(new Error('Authentication error: Session has expired'));
+          }
+        }
       }
 
       const user: SocketUserContext = {

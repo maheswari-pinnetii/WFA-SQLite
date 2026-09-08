@@ -46,6 +46,18 @@ socket.on('reconnect_attempt', () => {
   updateStatus('connecting');
 });
 
+socket.on(SOCKET_EVENTS.AUTH_REVOKED, (data: any) => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth:session-expired', { detail: data }));
+  }
+});
+
+socket.on(SOCKET_EVENTS.AUTH_ROLE_CHANGED, (data: any) => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth:role-changed', { detail: data }));
+  }
+});
+
 export const subscribeConnectionStatus = (listener: StatusListener) => {
   statusListeners.add(listener);
   listener(currentStatus);

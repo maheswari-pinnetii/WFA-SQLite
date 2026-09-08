@@ -9,6 +9,7 @@ import { healthCheck as dbHealthCheck } from '../../database/sqlite-cloud.js';
 import { decryptSecret, verifyTotpCode, verifyRecoveryCode } from './totp.js';
 import { env } from '../../config/env.js';
 import { validatePasswordPolicy } from './auth.service.js';
+import { disconnectUserSockets } from '../../sockets/socketEmitter.js';
 
 const ORGANIZATION_ID = 'org-stackly';
 const COMPANY_EMAIL_REGEX = /^[^\s@]+@thestackly\.com$/i;
@@ -345,6 +346,13 @@ export const logout = async (req: any, res: Response): Promise<any> => {
   });
 
   if (req.user) {
+    if (req.user.sessionId) {
+      try {
+        await userRepository.revokeSession(req.user.sessionId);
+      } catch (err) {
+        console.error('Error revoking session:', err);
+      }
+    }
     logAudit(req.user.id, 'LOGOUT', `User ${req.user.email} initiated logout`);
   }
   return res.json({ success: true, message: 'Logout successful' });
@@ -954,6 +962,12 @@ export const resetPassword = async (req: Request, res: Response): Promise<any> =
       return res.status(400).json({ success: false, message: result.message });
     }
 
+    if (result.userId) {
+      try {
+        await disconnectUserSockets(result.userId, 'Password reset - please sign in again');
+      } catch (e) {}
+    }
+
     logAudit('anonymous', 'PASSWORD_RESET_COMPLETED', 'Password successfully reset via secure reset token');
 
     // Clear any refresh token cookie that may exist
@@ -996,6 +1010,10 @@ export const changePassword = async (req: any, res: Response): Promise<any> => {
     if (!result.success) {
       return res.status(400).json({ success: false, message: result.message });
     }
+
+    try {
+      await disconnectUserSockets(user.id, 'Password changed - please sign in again');
+    } catch (e) {}
 
     logAudit(user.id, 'PASSWORD_CHANGED', `User ${user.email} changed their password`);
 
@@ -1080,6 +1098,9 @@ export const logoutAll = async (req: any, res: Response): Promise<any> => {
     }
 
     await authService.revokeAllUserSessions(user.id);
+    try {
+      await disconnectUserSockets(user.id, 'Logged out from all devices');
+    } catch (e) {}
 
     res.clearCookie('refreshToken', {
       httpOnly: true,
@@ -1121,4 +1142,70 @@ export const adminUnlockUser = async (req: Request, res: Response): Promise<any>
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/**
+ * GET /auth/sessions
+ * Returns all active sessions for the authenticated user.
+ */
+export const getActiveSessions = async (req: any, res: Response): Promise<any> => {
+  try {
+    const user = req.user;
+    if (!user) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    const sessions = await userRepository.findActiveSessionsByUserId(user.id);
+    const sanitized = (sessions || []).map((s: any) => ({
+      id: s.id,
+      deviceFingerprint: s.deviceFingerprint,
+      ipAddress: s.ipAddress,
+      createdAt: s.createdAt,
+      expiresAt: s.expiresAt,
+      isCurrent: s.id === user.sessionId
+    }));
+
+    return res.json({ success: true, data: sanitized });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/**
+ * DELETE /auth/sessions/:sessionId
+ * Revokes a specific active session.
+ */
+export const revokeUserSession = async (req: any, res: Response): Promise<any> => {
+  try {
+    const user = req.user;
+    if (!user) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    const { sessionId } = req.params;
+    if (!sessionId) return res.status(400).json({ success: false, message: 'Session ID is required.' });
+
+    // Verify session belongs to requesting user (unless ADMIN)
+    const targetSession = await userRepository.findSessionById(sessionId);
+    if (!targetSession) {
+      return res.status(404).json({ success: false, message: 'Session not found.' });
+    }
+
+    if (targetSession.userId !== user.id && user.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Forbidden: You cannot revoke another user\'s session.' });
+    }
+
+    await userRepository.revokeSession(sessionId);
+    logAudit(user.id, 'SESSION_REVOKED', `Revoked session ${sessionId}`);
+
+    // If revoking current session, clear cookie
+    if (sessionId === user.sessionId) {
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+    }
+
+    return res.json({ success: true, message: 'Session successfully revoked.' });
+  } catch (err: any) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 

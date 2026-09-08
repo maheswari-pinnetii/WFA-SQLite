@@ -9,6 +9,7 @@ import * as organizationController from '../controllers/organization.controller.
 import * as auditController from '../controllers/audit.controller.js';
 import * as backupController from '../controllers/backup.controller.js';
 import * as aiController from '../controllers/ai.controller.js';
+import * as reportController from '../controllers/report.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import {
   authRateLimiter,
@@ -54,6 +55,8 @@ router.post('/auth/mfa/verify', authRateLimiter, validateMfaCode, authController
 router.post('/auth/mfa/resend', otpResendRateLimiter, authController.resendMfa);
 router.post('/auth/logout', authenticateToken, authController.logout);
 router.post('/auth/logout-all', authenticateToken, authController.logoutAll);
+router.get('/auth/sessions', authenticateToken, authController.getActiveSessions);
+router.delete('/auth/sessions/:sessionId', authenticateToken, authController.revokeUserSession);
 router.get('/auth/me', authenticateToken, authController.getMe);
 router.post('/auth/refresh', refreshRateLimiter, authController.refresh);
 router.post('/auth/admin/unlock', authenticateToken, authorizeRoles(['ADMIN']), authController.adminUnlockUser);
@@ -119,6 +122,8 @@ router.post(
 
 // Employees Directory
 router.get('/employees', authenticateToken, enforceScope, employeeController.getEmployees);
+router.get('/employees/:id/export-data', authenticateToken, employeeController.exportEmployeeData);
+router.post('/employees/:id/anonymize-data', authenticateToken, authorizeRoles(['ADMIN']), employeeController.anonymizeEmployeeData);
 router.put('/employees/:id/status', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_UPDATE', 'EMPLOYEE_MANAGE']), employeeController.updateEmployeeStatus);
 router.get('/employees/:id', authenticateToken, enforceScope, employeeController.getEmployeeById);
 router.post('/employees', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_CREATE', 'EMPLOYEE_MANAGE']), employeeController.createEmployee);
@@ -174,9 +179,18 @@ router.get('/analytics/employee-growth', authenticateToken, enforceScope, analyt
 router.get('/analytics/attendance-trend', authenticateToken, enforceScope, analyticsController.getAttendanceTrend);
 router.get('/analytics/performance', authenticateToken, enforceScope, analyticsController.getPerformanceAnalytics);
 
-// Audit Logs
+// Compliance & Intelligence Reports Streaming (CSV / JSON)
+router.get('/reports/attendance/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportAttendanceReport);
+router.get('/reports/workforce/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), reportController.exportWorkforceReport);
+router.get('/reports/leave/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportLeaveReport);
+router.get('/reports/metrics', authenticateToken, reportController.getReportMetrics);
+
+// Audit Logs & Security Dashboard
 router.get('/audit/logs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), auditController.getAuditLogs);
 router.get('/audit/logs/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), auditController.getAuditLogDetail);
+router.get('/admin/security/dashboard', authenticateToken, authorizeRoles(['ADMIN', 'HR']), auditController.getSecurityDashboard);
+router.get('/admin/security/failed-logins', authenticateToken, authorizeRoles(['ADMIN']), auditController.getFailedLogins);
+router.get('/admin/security/integrity', authenticateToken, authorizeRoles(['ADMIN']), auditController.getDatabaseIntegrity);
 
 // User Management (Admin Only)
 router.get('/users', authenticateToken, authorizeRoles(['ADMIN']), employeeController.getUsers);

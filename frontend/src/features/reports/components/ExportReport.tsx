@@ -1,74 +1,65 @@
 import React, { useState } from 'react';
-import { Download, FileSpreadsheet, CheckCircle2 } from 'lucide-react';
+import { Download, FileSpreadsheet, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
+import { reportApi, ReportType, ReportFilterParams } from '../../../api/endpoints/report.api';
 
 interface ExportReportProps {
   title?: string;
+  subtitle?: string;
+  reportType?: ReportType;
+  filters?: ReportFilterParams;
 }
 
-export const ExportReport: React.FC<ExportReportProps> = ({ title = 'Export Analytics Report' }) => {
-  const [downloading, setDownloading] = useState(false);
+export const ExportReport: React.FC<ExportReportProps> = ({ 
+  title = 'Export Analytics Report',
+  subtitle = 'Download formatted workforce compliance data',
+  reportType = 'attendance',
+  filters = {}
+}) => {
+  const [downloadingFormat, setDownloadingFormat] = useState<'csv' | 'json' | null>(null);
   const [success, setSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleExport = (format: 'csv' | 'json') => {
-    setDownloading(true);
+  const handleExport = async (format: 'csv' | 'json') => {
+    setDownloadingFormat(format);
     setSuccess(false);
-    setTimeout(() => {
-      const mockData = [
-        { Metric: "Sprint Velocity", Target: "85%", Actual: "89.4%", Status: "PASSED" },
-        { Metric: "Attendance Adherence", Target: "95%", Actual: "96.5%", Status: "PASSED" },
-        { Metric: "Tasks Completed", Target: "50 Tasks", Actual: "55 Tasks", Status: "PASSED" },
-        { Metric: "Leave Rate", Target: "< 5%", Actual: "2.4%", Status: "PASSED" }
-      ];
+    setErrorMessage(null);
 
-      let fileContent = '';
-      let mimeType = '';
-      let fileExtension = '';
-
-      if (format === 'csv') {
-        const headers = Object.keys(mockData[0]).join(',');
-        const rows = mockData.map(row => 
-          Object.values(row).map(val => `"${String(val).replace(/"/g, '""')}"`).join(',')
-        );
-        fileContent = [headers, ...rows].join('\n');
-        mimeType = 'text/csv;charset=utf-8;';
-        fileExtension = 'csv';
-      } else {
-        fileContent = JSON.stringify(mockData, null, 2);
-        mimeType = 'application/json;charset=utf-8;';
-        fileExtension = 'json';
-      }
-
-      const blob = new Blob([fileContent], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `${title.toLowerCase().replace(/[^a-z0-9]+/g, '_')}_export.${fileExtension}`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      setDownloading(false);
+    try {
+      await reportApi.exportReport(reportType, format, filters);
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    }, 800);
+      setTimeout(() => setSuccess(false), 3500);
+    } catch (err: any) {
+      console.error('Failed to export report:', err);
+      const msg = err.response?.data?.message || err.message || 'Failed to generate report export.';
+      setErrorMessage(msg);
+      setTimeout(() => setErrorMessage(null), 5000);
+    } finally {
+      setDownloadingFormat(null);
+    }
   };
 
   return (
     <div className="glass-panel p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
+          <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
             <FileSpreadsheet size={24} />
           </div>
           <div>
-            <h4 className="text-sm font-bold">{title}</h4>
-            <p className="text-xs text-slate-400">Download formatted workforce compliance data</p>
+            <h4 className="text-sm font-bold text-slate-100">{title}</h4>
+            <p className="text-xs text-slate-400">{subtitle}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {errorMessage && (
+            <div className="flex items-center gap-1.5 text-xs font-medium text-rose-400 bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-500/20">
+              <AlertCircle size={14} />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {success ? (
             <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-lg border border-emerald-500/20">
               <CheckCircle2 size={16} />
@@ -79,7 +70,7 @@ export const ExportReport: React.FC<ExportReportProps> = ({ title = 'Export Anal
               <Button
                 variant="secondary"
                 size="sm"
-                isLoading={downloading}
+                isLoading={downloadingFormat === 'csv'}
                 icon={<Download size={14} />}
                 onClick={() => handleExport('csv')}
               >
@@ -88,7 +79,7 @@ export const ExportReport: React.FC<ExportReportProps> = ({ title = 'Export Anal
               <Button
                 variant="primary"
                 size="sm"
-                isLoading={downloading}
+                isLoading={downloadingFormat === 'json'}
                 icon={<Download size={14} />}
                 onClick={() => handleExport('json')}
               >

@@ -7,6 +7,7 @@ import { getRoleBadgeClass, formatDate } from '../../shared/utils/helpers';
 import { Search, ChevronLeft, ChevronRight, UserPlus, Filter, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Button } from '../../shared/components/Button';
 import { useDepartmentAccess } from '../../hooks/useDepartmentAccess';
+import { StatusBadge } from '../common/StatusBadge';
 
 interface EmployeeTableProps {
   locationFilter?: string;
@@ -90,20 +91,20 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   ];
 
   return (
-    <div className="glass-panel p-6 space-y-4 w-full max-w-full min-w-0 overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 shadow-sm space-y-4 w-full max-w-full min-w-0 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-extrabold text-[var(--text-primary)]">Enterprise Workforce Directory</h3>
-            <span className="badge badge-info">{employees.length.toLocaleString()} Total Records</span>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Enterprise Workforce Directory</h3>
+            <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800">{employees.length.toLocaleString()} Total Records</span>
           </div>
-          <p className="text-xs text-slate-400">Complete workforce directory with instant role controls & shift tracking</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Complete workforce directory with instant role controls & shift tracking</p>
         </div>
         <Button icon={<UserPlus size={16} />}>Onboard Employee</Button>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
         <div className="relative w-full sm:w-80">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -114,20 +115,20 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
               setPage(1);
             }}
             placeholder="Search 10,000 employees by name, code, email..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Filter size={16} className="text-slate-400 shrink-0" />
+            <Filter size={15} className="text-slate-400 shrink-0" />
             <select
               value={departmentFilter}
               onChange={(e) => {
                 setDepartmentFilter(e.target.value);
                 setPage(1);
               }}
-              className="px-3 py-2 text-xs font-bold rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] w-full sm:w-auto cursor-pointer"
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 w-full sm:w-auto cursor-pointer"
             >
               {departments.map((d) => (
                 <option key={d} value={d}>
@@ -137,7 +138,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
             <span>Rows:</span>
             <select
               value={pageSize}
@@ -145,7 +146,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              className="px-2 py-1.5 text-xs font-bold rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] cursor-pointer"
+              className="px-2 py-1 text-xs font-medium rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 cursor-pointer"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -157,9 +158,9 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
       </div>
 
       {/* Roster Table */}
-      <div className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] w-full max-w-full min-w-0">
+      <div className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 w-full max-w-full min-w-0">
         <table className="w-full text-left text-sm min-w-[1600px]">
-          <thead className="sticky top-0 z-10 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-b border-[var(--border-color)] uppercase font-bold text-[10px] tracking-wider">
+          <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 uppercase font-semibold text-[11px] tracking-wider">
             <tr>
               <th className="py-3 px-4 w-[110px]">Employee ID</th>
               <th className="py-3 px-4 w-[180px]">Employee Name</th>
@@ -273,8 +274,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                     <td className="py-3 px-4 text-[var(--text-secondary)] font-semibold">
                       {emp.location || 'HQ'}
                     </td>
-                    <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-bold">
-                      {(emp as any).attendance_status || 'Present'}
+                    <td className="py-3 px-4">
+                      <StatusBadge status={(emp as any).attendance_status || 'PRESENT'} />
                     </td>
                     <td className="py-3 px-4 font-mono text-[var(--text-secondary)] font-semibold">
                       {(emp as any).shiftTiming || (emp as any).shift || '09:00 - 18:00 (GS)'}
@@ -320,11 +321,11 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <strong className="text-[var(--text-primary)]">{filteredEmployees.length.toLocaleString()}</strong> records
           </span>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setPage(1)}
               disabled={page === 1}
-              className="p-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] hover:bg-[var(--bg-hover)] disabled:opacity-30"
+              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
               title="First Page"
             >
               <ChevronsLeft size={16} />
@@ -333,20 +334,20 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page === 1}
-              className="p-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] hover:bg-[var(--bg-hover)] disabled:opacity-30"
+              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
               title="Previous Page"
             >
               <ChevronLeft size={16} />
             </button>
 
-            <span className="font-extrabold text-[var(--text-primary)] px-3">
+            <span className="font-medium text-xs text-slate-700 dark:text-slate-300 px-3">
               Page {page.toLocaleString()} of {totalPages.toLocaleString()}
             </span>
 
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page === totalPages}
-              className="p-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] hover:bg-[var(--bg-hover)] disabled:opacity-30"
+              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
               title="Next Page"
             >
               <ChevronRight size={16} />
@@ -355,7 +356,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             <button
               onClick={() => setPage(totalPages)}
               disabled={page === totalPages}
-              className="p-1.5 rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] hover:bg-[var(--bg-hover)] disabled:opacity-30"
+              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
               title="Last Page"
             >
               <ChevronsRight size={16} />

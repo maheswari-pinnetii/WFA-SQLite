@@ -114,3 +114,27 @@ export const broadcastEvent = (event: SocketEventType | string, data: any) => {
     logger.error('socket.broadcast_error', `Failed to broadcast event ${event}: ${err.message}`);
   }
 };
+
+/**
+ * Disconnect all active sockets for a specific user.
+ * Emits AUTH_REVOKED first, then force-disconnects the sockets.
+ */
+export const disconnectUserSockets = async (userId: string, reason: string = 'Session revoked') => {
+  if (!ioInstance || !userId) return;
+  try {
+    const userRoom = ROOMS.user(userId);
+    ioInstance.to(userRoom).emit(SOCKET_EVENTS.AUTH_REVOKED, {
+      userId,
+      reason,
+      timestamp: new Date().toISOString()
+    });
+
+    const sockets = await ioInstance.in(userRoom).fetchSockets();
+    for (const s of sockets) {
+      s.disconnect(true);
+    }
+  } catch (err: any) {
+    logger.error('socket.disconnect_error', `Failed to disconnect sockets for user ${userId}: ${err.message}`);
+  }
+};
+

@@ -469,6 +469,21 @@ export class UserRepository {
   // ─── Session Revocation ─────────────────────────────────────────────────────
 
   /**
+   * Revoke a single session and its associated refresh tokens.
+   */
+  async revokeSession(sessionId: string): Promise<void> {
+    const now = new Date().toISOString();
+    await execute(
+      `UPDATE sessions SET revokedAt = ?, updatedAt = ? WHERE id = ? AND revokedAt IS NULL`,
+      [now, now, sessionId]
+    );
+    await execute(
+      `UPDATE refreshtokens SET revokedAt = ?, updatedAt = ? WHERE sessionId = ? AND revokedAt IS NULL`,
+      [now, now, sessionId]
+    );
+  }
+
+  /**
    * Revoke ALL active sessions and refresh tokens for a user.
    * Called after successful password reset or change-password to invalidate existing sessions.
    */

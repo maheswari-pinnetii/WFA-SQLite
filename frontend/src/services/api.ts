@@ -105,6 +105,10 @@ apiClient.interceptors.response.use(
         }
       } catch (refreshError) {
         console.warn('[API Client] Auto-refresh failed, proceeding with rejected session.');
+        setAccessToken(null);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('auth:session-expired', { detail: { reason: 'Session expired' } }));
+        }
       } finally {
         isRefreshing = false;
         refreshQueue = [];

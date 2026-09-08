@@ -1,6 +1,6 @@
 # Project Overview - Stackly Workforce Analytics Platform
 
-The **Stackly Workforce Analytics Platform** is a enterprise SaaS web application built for Fortune 500 organizations to monitor, analyze, and optimize human capital management, department productivity, shift attendance, and workforce performance across 10,000+ employee records.
+The **Stackly Workforce Analytics Platform** is an enterprise SaaS web application built for Fortune 500 organizations to monitor, analyze, and optimize human capital management, department productivity, shift attendance, and workforce performance across **500 verified employee records** (`EMP-001` through `EMP-500`) distributed across 3 tech hubs (Bengaluru: 250, Hyderabad: 150, Salem: 100).
 
 ---
 
@@ -12,31 +12,41 @@ The **Stackly Workforce Analytics Platform** is a enterprise SaaS web applicatio
    - Global search bar with `Ctrl + K` keyboard shortcut and live suggestions dropdown.
    - Quick Actions menu (Add Employee, Generate Report, Schedule Meeting).
    - Theme Switcher (Light / Dark / System), Language Selector, and 8-item User Profile menu.
+   - **Data-Driven Notification Bell**: Modern Lucide notification icon displaying real-time unread count, pulsing/bouncing strictly on arrival of new notifications and stopping upon review.
 
 2. **Real-Time Information Bar**:
-   - Current Date, live 12-hour Clock, Last Sync Time, **1,180 Active Users**, and **Online • 99.98% System Health** status.
+   - Current Date, live 12-hour Clock, Last Sync Time, **Active Users**, and **Online • 99.98% System Health** status with live WebSocket ping indicator.
 
 3. **Multi-Role RBAC Security**:
    - 5 Granular Security Scopes:
      - `ADMIN`: System Administrator (full access to system settings, audit logs, and user security).
      - `HR`: HR Operations Manager (workforce directory, attendance monitoring, performance scorecards).
-     - `TEAM_MANAGER`: Department Manager (team capacity radar, approval queues, project velocity).
+     - `MANAGER`: Department Manager (team capacity radar, approval queues, project velocity).
      - `TEAM_LEAD`: Team Lead (sprint matrix, task distribution, productivity scores).
      - `EMPLOYEE`: Employee Self Service (shift punch clock in/out, leave requests, personal profile).
 
-4. **8 Scorecard KPI Cards Grid**:
-   - Total Employees (`10,000`), Active Workforce (`9,450 / 94.5%`), Attendance Rate (`98.2%`), Productivity Score (`94.2/100`), Employee Satisfaction (`95.2 eNPS`), Open Requests (`142 Pending`), Performance Rating (`4.8/5.0`), Attrition Risk (`1.2% Low`).
+4. **Modern Real-Time Status & Icon Experience**:
+   - Powered by lightweight modern **Lucide Icons** (`lucide-react`) connected to real-time application and WebSocket state:
+     - **Employee Status**: Live pulse indicator (`Online`), activity badge (`Working`), idle indicator (`Away`), and muted slash (`Offline`).
+     - **Attendance**: Active check (`Check-In`), pause/coffee (`Break`), play indicator (`Resume`), completed square (`Check-Out`), and clock alert (`Late`).
+     - **Leave & Absence**: Check badge (`Present`), calendar (`Leave`), user warning (`Absent`), clock (`Pending`), and double check (`Approved`).
+     - **Geofencing**: Verified shield (`Inside Office`), alert triangle (`Outside Geofence`), and off indicator (`Location Unavailable`).
+     - **Synchronization**: Rotating sync (`Syncing`), cloud check (`Synced`), and cloud pending (`Offline Actions Pending`).
+     - **Dashboard KPIs**: Real-time live status indicator connected directly to SQLite analytical aggregates.
 
-5. **7 Recharts Visualizations**:
+5. **8 Scorecard KPI Cards Grid**:
+   - Total Headcount (`500 Staff`), Active Duty Rate, Attendance Rate, Annual Attrition, Monthly Payroll, Productivity Score, Open Vacancies, Audit Compliance.
+
+6. **7 Recharts Visualizations**:
    - Workforce Trend (Line Chart), Department Overview (Bar Chart), Attendance Analytics (Area Chart), Employee Distribution (Pie Chart), Performance Analysis (Radar Chart), Salary Analytics (Bar Chart), Attrition (Donut Chart).
 
-6. **10,000 Record Directory Table**:
-   - Instant search across 10,000 employees with instant pagination controls (`10`, `25`, `50`, `100` rows per page).
+7. **500 Record Directory Table**:
+   - Instant search across 500 employees with instant pagination controls (`10`, `25`, `50`, `100` rows per page), geographic location filters, and real-time status badges.
 
-7. **Multiple Login & Sign Up Methods**:
-   - Multi-step login flow: Step 1 (Company Email & Password) -> Step 2 (WebAuthn Passkey / Biometrics) -> Step 3 (Role Dashboard).
+8. **Multiple Login & Sign Up Methods**:
+   - Multi-step login flow: Step 1 (Company Email & Password) -> Step 2 (WebAuthn Passkey / Biometrics / TOTP MFA) -> Step 3 (Role Dashboard).
    - Dedicated side-by-side showcase at `/multiple-login-methods` (Email Login + Passwordless Biometric Passkey).
-   - Default prefilled credentials: `admin@thestackly.com` / `StacklyWFA2026!` with instant role selector chips (Admin, HR, Manager, Employee).
+   - Default prefilled credentials: `admin@thestackly.com`, `hr@thestackly.com`, `manager@thestackly.com`, `teamlead@thestackly.com`, `employee@thestackly.com` / `StacklyWFA2026!`.
    - Strict `@thestackly.com` enterprise domain verification.
    - Enterprise SSO (Google Workspace, Microsoft Entra ID) and TOTP Authenticator 2FA.
 

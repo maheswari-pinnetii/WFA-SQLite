@@ -1,6 +1,24 @@
 import { getDb, query, execute } from './connection.js';
 import { buildWhereClause, deserializeRow, serializeValue, getTableColumns } from './query.js';
 
+const SAFE_SORT_REGEX = /^[a-zA-Z0-9_]+$/;
+function buildSafeSortClause(sortObj: any): string {
+  if (!sortObj) return '';
+  if (typeof sortObj === 'string') {
+    const field = sortObj.replace('-', '');
+    if (!SAFE_SORT_REGEX.test(field)) return '';
+    const order = sortObj.startsWith('-') ? 'DESC' : 'ASC';
+    return `ORDER BY ${field} ${order}`;
+  } else if (typeof sortObj === 'object') {
+    const field = Object.keys(sortObj)[0];
+    if (field && SAFE_SORT_REGEX.test(field)) {
+      const order = sortObj[field] === -1 ? 'DESC' : 'ASC';
+      return `ORDER BY ${field} ${order}`;
+    }
+  }
+  return '';
+}
+
 export class ModelShim {
   tableName: string;
 
@@ -21,19 +39,7 @@ export class ModelShim {
       _skip: null as number | null,
       
       sort(sortObj: any) {
-        if (sortObj) {
-          if (typeof sortObj === 'string') {
-            const field = sortObj.replace('-', '');
-            const order = sortObj.startsWith('-') ? 'DESC' : 'ASC';
-            builder._sort = `ORDER BY ${field} ${order}`;
-          } else {
-            const field = Object.keys(sortObj)[0];
-            if (field) {
-              const order = sortObj[field] === -1 ? 'DESC' : 'ASC';
-              builder._sort = `ORDER BY ${field} ${order}`;
-            }
-          }
-        }
+        builder._sort = buildSafeSortClause(sortObj);
         return builder;
       },
       
@@ -82,19 +88,7 @@ export class ModelShim {
       _sort: '',
       
       sort(sortObj: any) {
-        if (sortObj) {
-          if (typeof sortObj === 'string') {
-            const field = sortObj.replace('-', '');
-            const order = sortObj.startsWith('-') ? 'DESC' : 'ASC';
-            builder._sort = `ORDER BY ${field} ${order}`;
-          } else {
-            const field = Object.keys(sortObj)[0];
-            if (field) {
-              const order = sortObj[field] === -1 ? 'DESC' : 'ASC';
-              builder._sort = `ORDER BY ${field} ${order}`;
-            }
-          }
-        }
+        builder._sort = buildSafeSortClause(sortObj);
         return builder;
       },
       

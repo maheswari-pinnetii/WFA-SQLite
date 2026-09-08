@@ -14,23 +14,23 @@ import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
 export const ManagerDashboardOverview: React.FC = () => (
-  <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-950/50 via-slate-900 to-indigo-950/40 border border-blue-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+  <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div className="flex items-center gap-4">
-      <div className="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/40 flex items-center justify-center shrink-0">
-        <Briefcase size={32} />
+      <div className="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-800/80 flex items-center justify-center shrink-0">
+        <Briefcase size={22} />
       </div>
       <div>
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-black tracking-tight text-white">Department Manager Workspace</h2>
-          <span className="badge badge-manager">ENGINEERING SCOPE</span>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Department Manager Workspace</h2>
+          <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800">ENGINEERING SCOPE</span>
         </div>
-        <p className="text-xs text-slate-300 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal">
           Resource allocation, sub-team sprint velocity, leave approvals & department throughput.
         </p>
       </div>
     </div>
     <div className="flex items-center gap-2 shrink-0">
-      <Link to="/manager/approvals" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-md">
+      <Link to="/manager/approvals" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-sm">
         <CheckCircle2 size={14} /> Leave Approvals
       </Link>
       <Link to="/manager/analytics" className="btn btn-secondary btn-sm flex items-center gap-1.5">
@@ -52,26 +52,26 @@ export const ManagerDashboardFilters: React.FC<{
   employees: Employee[];
   departmentName: string;
 }> = (props) => (
-  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-    <div className="flex items-center gap-2 text-slate-300 text-xs font-extrabold uppercase">
-      <Filter size={16} className="text-blue-400" /> Scoped Department Filters
+  <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider">
+      <Filter size={15} className="text-blue-600 dark:text-blue-400" /> Scoped Department Filters
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Date</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Date</label>
         <input
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal"
         />
       </div>
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Team</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Team</label>
         <select
           value={props.teamFilter}
           onChange={(e) => props.setTeamFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal cursor-pointer"
         >
           <option value="All">All Teams</option>
           <option value="Frontend">Frontend</option>
@@ -80,11 +80,11 @@ export const ManagerDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Employee</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Employee</label>
         <select
           value={props.employeeFilter}
           onChange={(e) => props.setEmployeeFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal cursor-pointer"
         >
           <option value="All">All Department Employees</option>
           {props.employees.filter(e => e.department === props.departmentName).map(emp => (
@@ -93,11 +93,11 @@ export const ManagerDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-[10px] text-slate-400 font-bold block mb-1">Status</label>
+        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Status</label>
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
@@ -108,30 +108,28 @@ export const ManagerDashboardFilters: React.FC<{
   </div>
 );
 
-
-
 export const ManagerSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
-  <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
-    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-      <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-        <Layers size={18} className="text-blue-500" /> Department Sprint
+  <div className="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+    <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+        <Layers size={16} className="text-blue-600 dark:text-blue-400" /> Department Sprint
       </h3>
-      <span className="badge badge-success text-[10px] font-bold">ENGINEERING SPRINT</span>
+      <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">ENGINEERING SPRINT</span>
     </div>
-    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/20">
+    <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
       <table className="w-full text-left text-xs min-w-[800px]">
-        <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-bold text-[10px]">
+        <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 uppercase font-semibold text-[11px]">
           <tr>
-            <th className="py-3 px-4">Sprint</th>
-            <th className="py-3 px-4">Task</th>
-            <th className="py-3 px-4">Assignee</th>
-            <th className="py-3 px-4">Priority</th>
-            <th className="py-3 px-4">Status</th>
-            <th className="py-3 px-4">Progress</th>
-            <th className="py-3 px-4">Due Date</th>
+            <th className="py-2.5 px-4">Sprint</th>
+            <th className="py-2.5 px-4">Task</th>
+            <th className="py-2.5 px-4">Assignee</th>
+            <th className="py-2.5 px-4">Priority</th>
+            <th className="py-2.5 px-4">Status</th>
+            <th className="py-2.5 px-4">Progress</th>
+            <th className="py-2.5 px-4">Due Date</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800/80">
+        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
           {tasks.slice(0, 5).map((task) => (
             <tr key={task.id} className="hover:bg-slate-800/40">
               <td className="py-3 px-4 font-bold text-slate-300">Sprint 24B</td>
