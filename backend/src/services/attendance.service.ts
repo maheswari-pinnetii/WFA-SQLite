@@ -1,2 +1,808 @@
-import { attendanceService } from '../modules/attendance/attendance.service.js';
-export { attendanceService, default } from '../modules/attendance/attendance.service.js';
+import mongoose from '../database/transaction.js';
+import { attendanceRepository } from '../repositories/attendance.repository.js';
+import { employeeRepository } from '../repositories/employee.repository.js';
+import { userRepository } from '../repositories/auth.repository.js';
+import { Attendance, Correction, BreakSession, AttendanceEvent, IdempotencyRecord, Employee, AuditLog, Shift, Location } from '../models/index.js';
+import { logAudit } from '../database/connection.js';
+import * as notificationService from './notification.service.js';
+import { emitToUser, emitToTeam, emitToDept, emitToOrg, emitToRole, SOCKET_EVENTS } from '../sockets/index.js';
+import { aiService } from './ai/aiService.js';
+
+const OFFICE_COORDS = { lat: 12.9716, lng: 77.5946 };
+const ALLOWED_RADIUS_METERS = 100;
+const MAX_LOCATION_ACCURACY_METERS = 100;
+
+function getDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000;
+  const phi1 = (lat1 * Math.PI) / 180;
+  const phi2 = (lat2 * Math.PI) / 180;
+  const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+  const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(deltaPhi / 2) ** 2
+    + Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) ** 2;
+  return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+}
+
+const getKolkataDate = (): string => {
+  const format = new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' });
+  const [month, day, year] = format.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+};
+
+export class AttendanceService {
+  async findIdentity(employeeId: string, orgId: string): Promise<any> {
+    let identity = await employeeRepository.findById(employeeId, orgId);
+    if (!identity) {
+      identity = await userRepository.findById(employeeId);
+    }
+    return identity;
+  }
+
+  async checkIn(reqUser: any, punchData: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : punchData.employeeId;
+    const { shiftType, workMode, latitude, longitude, accuracy, idempotencyKey } = punchData;
+
+    if (!employeeId || !shiftType || !workMode) {
+      throw new Error('Employee, shift and work mode are required.');
+    }
+
+    const identity = await this.findIdentity(employeeId, orgId);
+    if (!identity) {
+      throw new Error('Employee is outside the active organization.');
+    }
+
+    if (workMode === 'Office') {
+      if (latitude === undefined || longitude === undefined) {
+        logAudit(employeeId, 'GEOFENCE_VIOLATION', 'Office check-in rejected: missing coordinates', orgId);
+        notificationService.triggerAlarm(employeeId, identity.name, 'GEOFENCE_VIOLATION', 'Office check-in attempted without coordinates.');
+        throw new Error('Location coordinates required for Office check-in.');
+      }
+      if (accuracy !== undefined && (!Number.isFinite(Number(accuracy)) || Number(accuracy) > MAX_LOCATION_ACCURACY_METERS)) {
+        throw new Error('Location accuracy is insufficient for Office check-in.');
+      }
+      // Fetch location configurations dynamically from SQLite
+      const employeeLocationName = identity.location || 'Bengaluru';
+      const locConfig = await Location.findOne({ name: employeeLocationName, companyId: orgId });
+      
+      const targetLat = locConfig && locConfig.latitude !== null && locConfig.latitude !== undefined ? Number(locConfig.latitude) : OFFICE_COORDS.lat;
+      const targetLng = locConfig && locConfig.longitude !== null && locConfig.longitude !== undefined ? Number(locConfig.longitude) : OFFICE_COORDS.lng;
+      const allowedRadius = locConfig && locConfig.geofenceRadius !== null && locConfig.geofenceRadius !== undefined ? Number(locConfig.geofenceRadius) : ALLOWED_RADIUS_METERS;
+
+      const distance = getDistance(latitude, longitude, targetLat, targetLng);
+      if (distance > allowedRadius) {
+        logAudit(employeeId, 'GEOFENCE_VIOLATION', `Office check-in rejected: ${Math.round(distance)}m away`, orgId);
+        notificationService.triggerAlarm(employeeId, identity.name, 'GEOFENCE_VIOLATION', `Office check-in rejected: ${Math.round(distance)}m away`);
+        throw new Error(`Geofencing validation failed. You are outside the office boundary (${Math.round(distance)}m away).`);
+      }
+    }
+
+    if (idempotencyKey) {
+      const existing = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey });
+      if (existing) {
+        return { data: existing.response.data, idempotentReplay: true };
+      }
+    }
+
+    const session = await mongoose.startSession();
+    try {
+      let result: any;
+      await session.withTransaction(async () => {
+        if (idempotencyKey) {
+          const existingTx = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey }).session(session);
+          if (existingTx) {
+            result = existingTx.response;
+            return;
+          }
+        }
+
+        const activeSession = await Attendance.findOne({
+          employeeId,
+          companyId: orgId,
+          status: { $ne: 'Checked Out' }
+        }).session(session);
+
+        if (activeSession) {
+          notificationService.triggerAlarm(employeeId, identity.name, 'DUPLICATE_CHECKIN_ATTEMPT', 'Active session already exists.');
+          throw new Error('Active session already exists. Must check out first.');
+        }
+
+        const id = Math.random().toString(36).slice(2, 11);
+        const date = getKolkataDate();
+        const checkInTime = new Date().toISOString();
+
+        const record = await Attendance.create([{
+          id,
+          employeeId,
+          employeeName: identity.name,
+          department: identity.department,
+          date,
+          checkInTime,
+          checkOutTime: null,
+          breaks: [],
+          shiftType,
+          workMode,
+          status: 'Checked In',
+          latitude: latitude ?? null,
+          longitude: longitude ?? null,
+          accuracy: accuracy ?? null,
+          idempotencyKey: idempotencyKey || null,
+          team: identity.team,
+          organizationId: orgId,
+          companyId: orgId
+        }], { session });
+
+        await AttendanceEvent.create([{
+          id: Math.random().toString(36).slice(2, 11),
+          companyId: orgId,
+          employeeId,
+          attendanceRecordId: record[0]._id,
+          type: 'CHECK_IN',
+          timestamp: checkInTime
+        }], { session });
+
+        result = { success: true, data: record[0] };
+
+        if (idempotencyKey) {
+          const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+          await IdempotencyRecord.create([{
+            companyId: orgId,
+            key: idempotencyKey,
+            statusCode: 200,
+            response: result,
+            expiresAt
+          }], { session });
+        }
+      });
+
+      logAudit(employeeId, 'CHECK_IN', `Checked in using ${workMode} mode on ${shiftType} shift`, orgId);
+      notificationService.triggerGoogleCalendarNotification(employeeId, identity.name, 'Office Login Check-In', getKolkataDate());
+      
+      // Real-time Event Broadcast (only after successful commit!)
+      const checkInEvent = {
+        employeeId,
+        employeeName: identity.name,
+        department: identity.department,
+        team: identity.team,
+        status: 'Present',
+        checkInTime: result?.data?.checkInTime,
+        workMode,
+        shiftType,
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, checkInEvent);
+      if (identity.team) emitToTeam(identity.team, SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      if (identity.department) emitToDept(identity.department, SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_CHECK_IN, checkInEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'CHECK_IN', employeeId });
+
+      // Trigger debounced AI workforce analysis
+      aiService.triggerDebouncedAnalysis(orgId);
+
+      return { data: result.data, idempotentReplay: false };
+    } catch (err) {
+      if (idempotencyKey) {
+        const committedRecord = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey });
+        if (committedRecord) {
+          return { data: committedRecord.response.data, idempotentReplay: true };
+        }
+      }
+      throw err;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  async takeBreak(reqUser: any, bodyData: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : bodyData.employeeId;
+
+    const session = await mongoose.startSession();
+    try {
+      let record: any;
+      await session.withTransaction(async () => {
+        record = await Attendance.findOne({ employeeId, companyId: orgId, status: { $ne: 'Checked Out' } }).session(session);
+        if (!record) {
+          throw new Error('No active check-in session found.');
+        }
+        if (record.status === 'On Break') {
+          throw new Error('Already on break.');
+        }
+
+        const nowStr = new Date().toISOString();
+        const breakId = Math.random().toString(36).slice(2, 11);
+
+        await BreakSession.create([{
+          id: breakId,
+          companyId: orgId,
+          attendanceRecordId: record._id,
+          startTime: nowStr,
+          status: 'ACTIVE'
+        }], { session });
+
+        await AttendanceEvent.create([{
+          id: Math.random().toString(36).slice(2, 11),
+          companyId: orgId,
+          employeeId,
+          attendanceRecordId: record._id,
+          type: 'BREAK_START',
+          timestamp: nowStr
+        }], { session });
+
+        const breaksList = Array.isArray(record.breaks) ? [...record.breaks] : [];
+        breaksList.push({ start: nowStr, end: null });
+
+        record.status = 'On Break';
+        record.breaks = breaksList;
+        await record.save({ session });
+      });
+
+      logAudit(employeeId, 'BREAK_START', 'Started break', orgId);
+
+      const breakEvent = {
+        employeeId,
+        status: 'On Break',
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_BREAK_START, breakEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, breakEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_BREAK_START, breakEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_BREAK_START, breakEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'BREAK_START', employeeId });
+
+      return record;
+    } catch (err) {
+      throw err;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  async resumeWork(reqUser: any, bodyData: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : bodyData.employeeId;
+
+    const session = await mongoose.startSession();
+    try {
+      let record: any;
+      await session.withTransaction(async () => {
+        record = await Attendance.findOne({ employeeId, companyId: orgId, status: 'On Break' }).session(session);
+        if (!record) {
+          throw new Error('Employee is not on an active break.');
+        }
+
+        const nowStr = new Date().toISOString();
+
+        const activeBreak = await BreakSession.findOne({
+          attendanceRecordId: record._id,
+          companyId: orgId,
+          status: 'ACTIVE'
+        }).session(session);
+
+        if (activeBreak) {
+          activeBreak.endTime = nowStr;
+          activeBreak.status = 'COMPLETED';
+          await activeBreak.save({ session });
+        }
+
+        await AttendanceEvent.create([{
+          id: Math.random().toString(36).slice(2, 11),
+          companyId: orgId,
+          employeeId,
+          attendanceRecordId: record._id,
+          type: 'BREAK_END',
+          timestamp: nowStr
+        }], { session });
+
+        const breaksList = Array.isArray(record.breaks) ? [...record.breaks] : [];
+        const recordActiveBreak = breaksList.find((item) => item.end === null);
+        if (recordActiveBreak) {
+          recordActiveBreak.end = nowStr;
+        }
+
+        record.status = 'Working';
+        record.breaks = breaksList;
+        await record.save({ session });
+      });
+
+      logAudit(employeeId, 'BREAK_END', 'Resumed work', orgId);
+
+      const resumeEvent = {
+        employeeId,
+        status: 'Working',
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_BREAK_END, resumeEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, resumeEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_BREAK_END, resumeEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_BREAK_END, resumeEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'BREAK_END', employeeId });
+
+      return record;
+    } catch (err) {
+      throw err;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  async checkOut(reqUser: any, bodyData: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : bodyData.employeeId;
+    const { idempotencyKey } = bodyData;
+
+    if (idempotencyKey) {
+      const existing = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey });
+      if (existing) {
+        return existing.response.data;
+      }
+    }
+
+    const session = await mongoose.startSession();
+    try {
+      let result: any;
+      await session.withTransaction(async () => {
+        if (idempotencyKey) {
+          const existingTx = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey }).session(session);
+          if (existingTx) {
+            result = existingTx.response;
+            return;
+          }
+        }
+
+        const record = await Attendance.findOne({
+          employeeId,
+          companyId: orgId,
+          status: { $ne: 'Checked Out' }
+        }).session(session);
+
+        if (!record) {
+          throw new Error('Check-out-before-check-in rejection. No active session found.');
+        }
+
+        const checkOutTime = new Date().toISOString();
+
+        const activeBreak = await BreakSession.findOne({
+          attendanceRecordId: record._id,
+          companyId: orgId,
+          status: 'ACTIVE'
+        }).session(session);
+
+        if (activeBreak) {
+          activeBreak.endTime = checkOutTime;
+          activeBreak.status = 'COMPLETED';
+          await activeBreak.save({ session });
+        }
+
+        const breaksList = Array.isArray(record.breaks) ? [...record.breaks] : [];
+        const recordActiveBreak = breaksList.find((item) => item.end === null);
+        if (recordActiveBreak) {
+          recordActiveBreak.end = checkOutTime;
+        }
+
+        record.status = 'Checked Out';
+        record.checkOutTime = checkOutTime;
+        record.breaks = breaksList;
+        await record.save({ session });
+
+        await AttendanceEvent.create([{
+          id: Math.random().toString(36).slice(2, 11),
+          companyId: orgId,
+          employeeId,
+          attendanceRecordId: record._id,
+          type: 'CHECK_OUT',
+          timestamp: checkOutTime
+        }], { session });
+
+        result = { success: true, data: record };
+
+        if (idempotencyKey) {
+          const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+          await IdempotencyRecord.create([{
+            companyId: orgId,
+            key: idempotencyKey,
+            statusCode: 200,
+            response: result,
+            expiresAt
+          }], { session });
+        }
+      });
+
+      logAudit(employeeId, 'CHECK_OUT', 'Checked out from active session', orgId);
+
+      const checkOutEvent = {
+        employeeId,
+        status: 'Checked Out',
+        checkOutTime: result?.data?.checkOutTime,
+        timestamp: new Date().toISOString()
+      };
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_CHECK_OUT, checkOutEvent);
+      emitToUser(employeeId, SOCKET_EVENTS.ATTENDANCE_UPDATED, checkOutEvent);
+      emitToRole('HR', SOCKET_EVENTS.ATTENDANCE_CHECK_OUT, checkOutEvent);
+      emitToRole('ADMIN', SOCKET_EVENTS.ATTENDANCE_CHECK_OUT, checkOutEvent);
+      emitToOrg(orgId, SOCKET_EVENTS.DASHBOARD_KPI_UPDATED, { type: 'CHECK_OUT', employeeId });
+
+      aiService.triggerDebouncedAnalysis(orgId);
+
+      return result.data;
+    } catch (err) {
+      if (idempotencyKey) {
+        const committedRecord = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey });
+        if (committedRecord) {
+          return committedRecord.response.data;
+        }
+      }
+      throw err;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  async getRecords(reqUser: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const { role, id: employeeId, department, team } = reqUser;
+    const query: any = { companyId: orgId };
+
+    if (role === 'EMPLOYEE') {
+      query.employeeId = employeeId;
+    } else if (role === 'TEAM_LEAD') {
+      query.team = team;
+    } else if (role === 'MANAGER') {
+      query.department = department;
+    }
+
+    const records = await Attendance.find(query) as any[];
+
+    // Fetch all employees to check their joinDate
+    const employees = await Employee.find({ organizationId: orgId }) as any[];
+    const employeeJoinDateMap = new Map<string, string>();
+    employees.forEach(emp => {
+      if (emp.joinDate) {
+        employeeJoinDateMap.set(emp.id, emp.joinDate);
+      }
+    });
+
+    const isAfterOrOnJoinDate = (recordDateStr: string, joinDateStr?: string) => {
+      if (!joinDateStr) return true;
+      const recDate = recordDateStr.substring(0, 10);
+      const joinDate = joinDateStr.substring(0, 10);
+      return recDate >= joinDate;
+    };
+
+    return records.filter(record => {
+      const joinDate = employeeJoinDateMap.get(record.employeeId);
+      const recordDate = record.createdAt || record.date;
+      if (!recordDate) return true;
+      return isAfterOrOnJoinDate(recordDate, joinDate);
+    });
+  }
+
+  async getTodayAttendance(userId: string, orgId: string): Promise<any> {
+    const todayDate = getKolkataDate();
+    return Attendance.findOne({ employeeId: userId, date: todayDate, companyId: orgId });
+  }
+
+  async submitCorrection(reqUser: any, bodyData: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const { role, id: userId } = reqUser;
+    const employeeId = role === 'EMPLOYEE' ? userId : bodyData.employeeId;
+    const { date, requestedCheckIn, requestedCheckOut, reason } = bodyData;
+
+    if (!employeeId || !date || !requestedCheckIn || !requestedCheckOut || !reason) {
+      throw new Error('Complete correction details are required.');
+    }
+
+    const requestedDateObj = new Date(date);
+    const todayObj = new Date(getKolkataDate());
+    if (requestedDateObj > todayObj) {
+      throw new Error('Attendance corrections cannot be submitted for future dates.');
+    }
+
+    const identity = await this.findIdentity(employeeId, orgId);
+    if (!identity) {
+      throw new Error('Employee is outside the active organization.');
+    }
+
+    const id = Math.random().toString(36).slice(2, 11);
+    const createdAt = new Date().toISOString();
+
+    const correction = await Correction.create({
+      id,
+      employeeId,
+      employeeName: identity.name,
+      department: identity.department,
+      date,
+      requestedCheckIn,
+      requestedCheckOut,
+      reason,
+      status: 'Pending',
+      managerComment: null,
+      reviewedBy: null,
+      createdAt,
+      team: identity.team,
+      organizationId: orgId,
+      companyId: orgId
+    });
+
+    logAudit(employeeId, 'CORRECTION_REQUESTED', `Submitted correction request for ${date}`, orgId);
+    return { id: correction.id, status: 'Pending' };
+  }
+
+  async reviewCorrection(reqUser: any, correctionId: string, status: string, managerComment: string): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const correction = await Correction.findOne({ id: correctionId, companyId: orgId });
+    if (!correction) {
+      throw new Error('Correction request not found.');
+    }
+
+    if (reqUser.role === 'MANAGER' && correction.department !== reqUser.department) {
+      throw new Error('Correction is outside your department.');
+    }
+    if (reqUser.role === 'TEAM_LEAD' && correction.team !== reqUser.team) {
+      throw new Error('Correction is outside your team.');
+    }
+    if (correction.status !== 'Pending') {
+      throw new Error('Correction has already been reviewed.');
+    }
+
+    const reviewerName = reqUser.name;
+    correction.status = status;
+    correction.managerComment = managerComment || '';
+    correction.reviewedBy = reviewerName;
+    await correction.save();
+
+    if (status === 'Approved' || status === 'APPROVED') {
+      const parseTimeToIso = (dateStr: string, timeStr: string) => {
+        if (!timeStr) return new Date().toISOString();
+        if (timeStr.includes('T')) {
+          const d = new Date(timeStr);
+          if (!isNaN(d.getTime())) return d.toISOString();
+        }
+        const match = timeStr.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+        if (match) {
+          let hours = parseInt(match[1], 10);
+          const minutes = parseInt(match[2], 10);
+          const seconds = match[3] ? parseInt(match[3], 10) : 0;
+          const ampm = match[4]?.toUpperCase();
+          if (ampm === 'PM' && hours < 12) hours += 12;
+          if (ampm === 'AM' && hours === 12) hours = 0;
+          const paddedH = hours.toString().padStart(2, '0');
+          const paddedM = minutes.toString().padStart(2, '0');
+          const paddedS = seconds.toString().padStart(2, '0');
+          const d = new Date(`${dateStr}T${paddedH}:${paddedM}:${paddedS}Z`);
+          if (!isNaN(d.getTime())) return d.toISOString();
+        }
+        const fallback = new Date(`${dateStr} ${timeStr}`);
+        if (!isNaN(fallback.getTime())) return fallback.toISOString();
+        return new Date(`${dateStr}T09:00:00Z`).toISOString();
+      };
+
+      const checkInTime = parseTimeToIso(correction.date, correction.requestedCheckIn);
+      const checkOutTime = parseTimeToIso(correction.date, correction.requestedCheckOut);
+
+      const existingRecord = await Attendance.findOne({
+        employeeId: correction.employeeId,
+        date: correction.date,
+        companyId: orgId
+      });
+
+      if (existingRecord) {
+        existingRecord.checkInTime = checkInTime;
+        existingRecord.checkOutTime = checkOutTime;
+        existingRecord.status = 'Checked Out';
+        await existingRecord.save();
+      } else {
+        const recordId = Math.random().toString(36).slice(2, 11);
+        await Attendance.create({
+          id: recordId,
+          employeeId: correction.employeeId,
+          employeeName: correction.employeeName,
+          department: correction.department,
+          date: correction.date,
+          checkInTime,
+          checkOutTime,
+          breaks: [],
+          shiftType: 'Regular',
+          workMode: 'Office',
+          status: 'Checked Out',
+          team: correction.team,
+          organizationId: orgId,
+          companyId: orgId
+        });
+      }
+    }
+
+    logAudit(correction.employeeId, `CORRECTION_${status.toUpperCase()}`, `${reviewerName} reviewed correction request`, orgId);
+  }
+
+  async getCorrections(reqUser: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const { role, id: employeeId, department, team } = reqUser;
+    const query: any = { companyId: orgId };
+
+    if (role === 'EMPLOYEE') {
+      query.employeeId = employeeId;
+    } else if (role === 'TEAM_LEAD') {
+      query.team = team;
+    } else if (role === 'MANAGER') {
+      query.department = department;
+    }
+
+    return Correction.find(query);
+  }
+
+  async getShifts(orgId: string): Promise<any> {
+    const shifts = await Shift.find({ companyId: orgId });
+    if (shifts && shifts.length > 0) return shifts;
+    return [
+      { name: 'Regular', startTime: '09:00', endTime: '18:00', totalHours: 9, workHours: 8, breakHours: 1 },
+      { name: 'Flexible', startTime: '10:00', endTime: '19:00', totalHours: 9, workHours: 8, breakHours: 1 },
+      { name: 'Overnight', startTime: '21:00', endTime: '06:00', totalHours: 9, workHours: 8, breakHours: 1 }
+    ];
+  }
+
+  async getAuditLogs(reqUser: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const { role, id: employeeId, department, team } = reqUser;
+
+    let employeeIds: string[] | null = null;
+    if (role === 'TEAM_LEAD') {
+      const emps = await Employee.find({ team, companyId: orgId });
+      employeeIds = emps.map((e: any) => e.id);
+    } else if (role === 'MANAGER') {
+      const emps = await Employee.find({ department, companyId: orgId });
+      employeeIds = emps.map((e: any) => e.id);
+    }
+
+    const query: any = { companyId: orgId };
+    if (role === 'EMPLOYEE') {
+      query.employeeId = employeeId;
+    } else if (employeeIds) {
+      query.employeeId = { $in: employeeIds };
+    }
+
+    return AuditLog.find(query);
+  }
+
+  async getPublicHolidays(orgId: string): Promise<any[]> {
+    return [
+      {
+        id: 'hol-1',
+        name: "New Year's Day",
+        date: '2026-01-01',
+        day: 'Thursday',
+        quarter: 'Q1',
+        type: 'Mandatory',
+        isLongWeekend: false,
+        region: 'Global / All Locations',
+        description: 'Official corporate non-working day celebrating the start of the year.'
+      },
+      {
+        id: 'hol-2',
+        name: 'Martin Luther King Jr. Day',
+        date: '2026-01-19',
+        day: 'Monday',
+        quarter: 'Q1',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'US / Global HQ',
+        description: 'Federal holiday honoring civil rights leader Martin Luther King Jr.'
+      },
+      {
+        id: 'hol-3',
+        name: "Presidents' Day",
+        date: '2026-02-16',
+        day: 'Monday',
+        quarter: 'Q1',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'US / Global HQ',
+        description: 'Federal holiday honoring George Washington and American leadership.'
+      },
+      {
+        id: 'hol-4',
+        name: 'Spring Equinox / Floating Holiday 1',
+        date: '2026-03-20',
+        day: 'Friday',
+        quarter: 'Q1',
+        type: 'Floating / Optional',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Optional floating holiday for personal or cultural observances.'
+      },
+      {
+        id: 'hol-5',
+        name: 'Memorial Day',
+        date: '2026-05-25',
+        day: 'Monday',
+        quarter: 'Q2',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'National day of remembrance honoring fallen service members.'
+      },
+      {
+        id: 'hol-6',
+        name: 'Juneteenth National Independence Day',
+        date: '2026-06-19',
+        day: 'Friday',
+        quarter: 'Q2',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'US / Global HQ',
+        description: 'Commemorating the emancipation of enslaved African Americans.'
+      },
+      {
+        id: 'hol-7',
+        name: 'Independence Day (Observed)',
+        date: '2026-07-03',
+        day: 'Friday',
+        quarter: 'Q3',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Celebrating American Independence with a mandatory office shutdown.'
+      },
+      {
+        id: 'hol-8',
+        name: 'Labor Day',
+        date: '2026-09-07',
+        day: 'Monday',
+        quarter: 'Q3',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Honoring the American labor movement and national workforce.'
+      },
+      {
+        id: 'hol-9',
+        name: 'Autumn Harvest / Floating Holiday 2',
+        date: '2026-10-23',
+        day: 'Friday',
+        quarter: 'Q4',
+        type: 'Floating / Optional',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Optional floating holiday for personal or cultural observances.'
+      },
+      {
+        id: 'hol-10',
+        name: 'Thanksgiving Day',
+        date: '2026-11-26',
+        day: 'Thursday',
+        quarter: 'Q4',
+        type: 'Mandatory',
+        isLongWeekend: false,
+        region: 'Global / All Locations',
+        description: 'National holiday of gratitude and family celebration.'
+      },
+      {
+        id: 'hol-11',
+        name: 'Day After Thanksgiving (Black Friday)',
+        date: '2026-11-27',
+        day: 'Friday',
+        quarter: 'Q4',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Company-wide holiday creating a 4-Day Thanksgiving Long Weekend!'
+      },
+      {
+        id: 'hol-12',
+        name: 'Christmas Day',
+        date: '2026-12-25',
+        day: 'Friday',
+        quarter: 'Q4',
+        type: 'Mandatory',
+        isLongWeekend: true,
+        region: 'Global / All Locations',
+        description: 'Global holiday celebration (3-Day Long Weekend).'
+      }
+    ];
+  }
+}
+
+export const attendanceService = new AttendanceService();
+export default attendanceService;

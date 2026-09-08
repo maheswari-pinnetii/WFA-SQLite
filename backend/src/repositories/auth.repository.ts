@@ -1,4 +1,4 @@
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../database/sqlite-cloud.js';
 
 export interface UserRow {
   id: string;

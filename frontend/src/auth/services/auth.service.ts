@@ -1,6 +1,6 @@
 import { authApi } from '../../api/endpoints/auth.api';
 import { STORAGE_KEYS } from '../../shared/constants/constants';
-import { apiClient, setAccessToken } from '../../services/api';
+import { apiClient, setAccessToken } from '../../api/client';
 import { Role } from '../../security/roles/roles';
 
 const base64UrlToBuffer = (value: string): ArrayBuffer => {

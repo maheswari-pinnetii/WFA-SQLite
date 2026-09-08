@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, User } from '../types/auth.types';
 import { authService } from '../services/auth.service';
 import { Role } from '../../security/roles/roles';
-import { apiClient } from '../../services/api';
+import { apiClient } from '../../api/client';
 
 const savedSession = typeof window !== 'undefined' ? authService.getStoredSession() : null;
 

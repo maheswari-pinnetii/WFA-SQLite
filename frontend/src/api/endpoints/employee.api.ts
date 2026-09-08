@@ -1,5 +1,5 @@
 import { Employee } from '../../shared/types/common.types';
-import { apiClient } from '../../services/api';
+import { apiClient } from '../client';
 
 export interface GetEmployeesParams {
   page?: number;

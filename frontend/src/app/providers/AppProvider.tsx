@@ -2,10 +2,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { store } from '../store';
-import { ThemeProvider } from '../../theme/ThemeProvider';
+import { ThemeProvider } from '../../design-system/theme/ThemeProvider';
 import { setupAuthInterceptors } from '../../api/interceptors/authInterceptor';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../../api/client';
+import { queryClient } from '../../api/queryClient';
 
 import { ToastProvider } from '../../shared/context/ToastContext';
 import { AuthProvider } from '../../auth/AuthProvider';

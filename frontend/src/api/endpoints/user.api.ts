@@ -1,4 +1,4 @@
-import { apiClient } from '../../services/api';
+import { apiClient } from '../client';
 import { User } from '../../auth/types/auth.types';
 
 export const userApi = {

@@ -117,10 +117,10 @@ app.get('/health/metrics', authenticateToken as any, authorizeRoles(['ADMIN']) a
   });
 });
 
-import systemDesignRouter from './routes/systemDesign.routes.js';
+
 
 // API Routes (Canonical /api/v1 only)
-app.use('/api/v1/system-design', systemDesignRouter);
+
 app.use('/api/v1', apiRouter);
 app.use('/v1', apiRouter);
 app.use('/api', apiRouter);

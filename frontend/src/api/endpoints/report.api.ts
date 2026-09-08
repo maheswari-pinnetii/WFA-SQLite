@@ -1,4 +1,4 @@
-import { apiClient } from '../../services/api';
+import { apiClient } from '../client';
 
 export type ReportType = 'attendance' | 'workforce' | 'leave';
 export type ExportFormat = 'csv' | 'json';

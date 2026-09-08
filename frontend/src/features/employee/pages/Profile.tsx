@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { Role } from '../../../security/roles/roles';
 import { getRoleBadgeClass } from '../../../shared/utils/helpers';
-import { apiClient } from '../../../services/api';
+import { apiClient } from '../../../api/client';
 import {
   User as UserIcon,
   Mail,

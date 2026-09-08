@@ -1,4 +1,4 @@
-import { apiClient } from '../../services/api';
+import { apiClient } from '../client';
 
 const handleApiError = (error: any, fallbackMessage: string): never => {
   const message = error.response?.data?.error || error.response?.data?.message || error.message || fallbackMessage;

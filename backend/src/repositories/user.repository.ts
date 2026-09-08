@@ -1,2 +1,2 @@
-import { userRepository } from '../modules/auth/auth.repository.js';
-export { userRepository, default } from '../modules/auth/auth.repository.js';
+import { userRepository } from './auth.repository.js';
+export { userRepository, default } from './auth.repository.js';

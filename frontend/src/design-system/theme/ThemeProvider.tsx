@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { STORAGE_KEYS } from '../shared/constants/constants';
+import { STORAGE_KEYS } from '../../shared/constants/constants';
 import { lightTheme } from './lightTheme.js';
 import { darkTheme } from './darkTheme.js';
 

@@ -1,5 +1,6 @@
 import { Server as SocketServer } from 'socket.io';
 import { ROOMS } from './rooms.js';
+import { SOCKET_EVENTS } from './events.js';
 import { SocketEventType } from './events.js';
 import logger from '../config/logger.js';
 

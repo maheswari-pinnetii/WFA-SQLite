@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 import QRCode from 'qrcode';
-import { env } from '../../config/env.js';
+import { env } from '../config/env.js';
 
 const nobleCrypto = new NobleCryptoPlugin();
 const base32Plugin = new ScureBase32Plugin();

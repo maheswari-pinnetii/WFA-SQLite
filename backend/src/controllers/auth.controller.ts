@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
-import { logAudit, execute, query } from '../../database/connection.js';
-import * as authService from './auth.service.js';
-import { userRepository } from './auth.repository.js';
+import { logAudit, execute, query } from '../database/connection.js';
+import * as authService from '../services/auth.service.js';
+import { userRepository } from '../repositories/auth.repository.js';
 import bcrypt from 'bcryptjs';
-import mongoose from '../../database/transaction.js';
-import { healthCheck as dbHealthCheck } from '../../database/sqlite-cloud.js';
-import { decryptSecret, verifyTotpCode, verifyRecoveryCode } from './totp.js';
-import { env } from '../../config/env.js';
-import { validatePasswordPolicy } from './auth.service.js';
-import { disconnectUserSockets } from '../../sockets/socketEmitter.js';
-import { handleControllerError } from '../../utils/errorHandler.js';
+import mongoose from '../database/transaction.js';
+import { healthCheck as dbHealthCheck } from '../database/sqlite-cloud.js';
+import { decryptSecret, verifyTotpCode, verifyRecoveryCode } from '../utils/totp.js';
+import { env } from '../config/env.js';
+import { validatePasswordPolicy } from '../services/auth.service.js';
+import { disconnectUserSockets } from '../sockets/socketEmitter.js';
+import { handleControllerError } from '../utils/errorHandler.js';
 
 const ORGANIZATION_ID = 'org-stackly';
 const COMPANY_EMAIL_REGEX = /^[^\s@]+@thestackly\.com$/i;

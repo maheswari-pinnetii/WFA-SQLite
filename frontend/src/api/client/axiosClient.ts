@@ -1,1 +1,1 @@
-export { apiClient as axiosClient } from '../../services/api';
+export { apiClient as axiosClient } from '../client';

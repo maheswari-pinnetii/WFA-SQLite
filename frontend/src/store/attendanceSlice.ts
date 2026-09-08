@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { AttendanceRecord, CorrectionRequest, AuditLog, attendanceService } from '../services/attendance.service';
-import { apiClient } from '../services/api';
+import { apiClient } from '../api/client';
 
 interface AttendanceState {
   activeRecord: AttendanceRecord | null;

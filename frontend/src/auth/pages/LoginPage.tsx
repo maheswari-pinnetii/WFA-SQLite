@@ -7,7 +7,7 @@ import { PasswordlessLoginCard } from '../components/PasswordlessLoginCard';
 import { EmailLoginPayload } from '../../types/authFlow.types';
 import { authService } from '../services/auth.service';
 import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '../../theme/ThemeProvider';
+import { useTheme } from '../../design-system/theme/ThemeProvider';
 import '../styles/ModernAuth.css';
 
 export const LoginPage: React.FC = () => {

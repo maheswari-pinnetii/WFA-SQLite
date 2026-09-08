@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { AuthMethod, SignUpFormValues } from '../../types/authFlow.types';
 import { authService } from '../services/auth.service';
 import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '../../theme/ThemeProvider';
+import { useTheme } from '../../design-system/theme/ThemeProvider';
 import '../styles/ModernAuth.css';
 
 export const SignUpPage: React.FC = () => {
