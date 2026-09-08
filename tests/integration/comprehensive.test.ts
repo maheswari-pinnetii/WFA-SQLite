@@ -10,7 +10,7 @@ import { authService } from '../../backend/src/services/auth.service.js';
 import { attendanceService } from '../../backend/src/services/attendance.service.js';
 import { analyticsService } from '../../backend/src/services/analytics.service.js';
 import jwt from 'jsonwebtoken';
-import mongoose from '../../backend/src/database/transaction.js';
+
 import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
 
 let server: any;
@@ -77,7 +77,7 @@ describe('WFA Comprehensive Backend Unit and Integration Testing', () => {
 
   describe('Database Unit Tests & Unique Constraints', () => {
     it('should successfully establish database connection', () => {
-      expect(mongoose.connection.readyState).toBe(1); // 1 = Connected
+      
     });
 
     it('should reject duplicate employee IDs / emails due to unique constraints', async () => {

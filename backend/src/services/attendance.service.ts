@@ -1,4 +1,4 @@
-import mongoose from '../database/transaction.js';
+import { transaction } from '../database/sqlite-cloud.js';
 import { attendanceRepository } from '../repositories/attendance.repository.js';
 import { employeeRepository } from '../repositories/employee.repository.js';
 import { userRepository } from '../repositories/auth.repository.js';
@@ -84,12 +84,11 @@ export class AttendanceService {
       }
     }
 
-    const session = await mongoose.startSession();
     try {
       let result: any;
-      await session.withTransaction(async () => {
+      await transaction(async () => {
         if (idempotencyKey) {
-          const existingTx = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey }).session(session);
+          const existingTx = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey });
           if (existingTx) {
             result = existingTx.response;
             return;
@@ -100,7 +99,7 @@ export class AttendanceService {
           employeeId,
           companyId: orgId,
           status: { $ne: 'Checked Out' }
-        }).session(session);
+        });
 
         if (activeSession) {
           notificationService.triggerAlarm(employeeId, identity.name, 'DUPLICATE_CHECKIN_ATTEMPT', 'Active session already exists.');
@@ -130,7 +129,7 @@ export class AttendanceService {
           team: identity.team,
           organizationId: orgId,
           companyId: orgId
-        }], { session });
+        }]);
 
         await AttendanceEvent.create([{
           id: Math.random().toString(36).slice(2, 11),
@@ -139,7 +138,7 @@ export class AttendanceService {
           attendanceRecordId: record[0]._id,
           type: 'CHECK_IN',
           timestamp: checkInTime
-        }], { session });
+        }]);
 
         result = { success: true, data: record[0] };
 
@@ -151,7 +150,7 @@ export class AttendanceService {
             statusCode: 200,
             response: result,
             expiresAt
-          }], { session });
+          }]);
         }
       });
 
@@ -190,20 +189,17 @@ export class AttendanceService {
         }
       }
       throw err;
-    } finally {
-      await session.endSession();
-    }
+    } 
   }
 
   async takeBreak(reqUser: any, bodyData: any): Promise<any> {
     const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
     const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : bodyData.employeeId;
 
-    const session = await mongoose.startSession();
     try {
       let record: any;
-      await session.withTransaction(async () => {
-        record = await Attendance.findOne({ employeeId, companyId: orgId, status: { $ne: 'Checked Out' } }).session(session);
+      await transaction(async () => {
+        record = await Attendance.findOne({ employeeId, companyId: orgId, status: { $ne: 'Checked Out' } });
         if (!record) {
           throw new Error('No active check-in session found.');
         }
@@ -220,7 +216,7 @@ export class AttendanceService {
           attendanceRecordId: record._id,
           startTime: nowStr,
           status: 'ACTIVE'
-        }], { session });
+        }]);
 
         await AttendanceEvent.create([{
           id: Math.random().toString(36).slice(2, 11),
@@ -229,14 +225,14 @@ export class AttendanceService {
           attendanceRecordId: record._id,
           type: 'BREAK_START',
           timestamp: nowStr
-        }], { session });
+        }]);
 
         const breaksList = Array.isArray(record.breaks) ? [...record.breaks] : [];
         breaksList.push({ start: nowStr, end: null });
 
         record.status = 'On Break';
         record.breaks = breaksList;
-        await record.save({ session });
+        await record.save();
       });
 
       logAudit(employeeId, 'BREAK_START', 'Started break', orgId);
@@ -255,20 +251,17 @@ export class AttendanceService {
       return record;
     } catch (err) {
       throw err;
-    } finally {
-      await session.endSession();
-    }
+    } 
   }
 
   async resumeWork(reqUser: any, bodyData: any): Promise<any> {
     const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
     const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : bodyData.employeeId;
 
-    const session = await mongoose.startSession();
     try {
       let record: any;
-      await session.withTransaction(async () => {
-        record = await Attendance.findOne({ employeeId, companyId: orgId, status: 'On Break' }).session(session);
+      await transaction(async () => {
+        record = await Attendance.findOne({ employeeId, companyId: orgId, status: 'On Break' });
         if (!record) {
           throw new Error('Employee is not on an active break.');
         }
@@ -279,12 +272,12 @@ export class AttendanceService {
           attendanceRecordId: record._id,
           companyId: orgId,
           status: 'ACTIVE'
-        }).session(session);
+        });
 
         if (activeBreak) {
           activeBreak.endTime = nowStr;
           activeBreak.status = 'COMPLETED';
-          await activeBreak.save({ session });
+          await activeBreak.save();
         }
 
         await AttendanceEvent.create([{
@@ -294,7 +287,7 @@ export class AttendanceService {
           attendanceRecordId: record._id,
           type: 'BREAK_END',
           timestamp: nowStr
-        }], { session });
+        }]);
 
         const breaksList = Array.isArray(record.breaks) ? [...record.breaks] : [];
         const recordActiveBreak = breaksList.find((item) => item.end === null);
@@ -304,7 +297,7 @@ export class AttendanceService {
 
         record.status = 'Working';
         record.breaks = breaksList;
-        await record.save({ session });
+        await record.save();
       });
 
       logAudit(employeeId, 'BREAK_END', 'Resumed work', orgId);
@@ -323,9 +316,7 @@ export class AttendanceService {
       return record;
     } catch (err) {
       throw err;
-    } finally {
-      await session.endSession();
-    }
+    } 
   }
 
   async checkOut(reqUser: any, bodyData: any): Promise<any> {
@@ -340,12 +331,11 @@ export class AttendanceService {
       }
     }
 
-    const session = await mongoose.startSession();
     try {
       let result: any;
-      await session.withTransaction(async () => {
+      await transaction(async () => {
         if (idempotencyKey) {
-          const existingTx = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey }).session(session);
+          const existingTx = await IdempotencyRecord.findOne({ companyId: orgId, key: idempotencyKey });
           if (existingTx) {
             result = existingTx.response;
             return;
@@ -356,7 +346,7 @@ export class AttendanceService {
           employeeId,
           companyId: orgId,
           status: { $ne: 'Checked Out' }
-        }).session(session);
+        });
 
         if (!record) {
           throw new Error('Check-out-before-check-in rejection. No active session found.');
@@ -368,12 +358,12 @@ export class AttendanceService {
           attendanceRecordId: record._id,
           companyId: orgId,
           status: 'ACTIVE'
-        }).session(session);
+        });
 
         if (activeBreak) {
           activeBreak.endTime = checkOutTime;
           activeBreak.status = 'COMPLETED';
-          await activeBreak.save({ session });
+          await activeBreak.save();
         }
 
         const breaksList = Array.isArray(record.breaks) ? [...record.breaks] : [];
@@ -385,7 +375,7 @@ export class AttendanceService {
         record.status = 'Checked Out';
         record.checkOutTime = checkOutTime;
         record.breaks = breaksList;
-        await record.save({ session });
+        await record.save();
 
         await AttendanceEvent.create([{
           id: Math.random().toString(36).slice(2, 11),
@@ -394,7 +384,7 @@ export class AttendanceService {
           attendanceRecordId: record._id,
           type: 'CHECK_OUT',
           timestamp: checkOutTime
-        }], { session });
+        }]);
 
         result = { success: true, data: record };
 
@@ -406,7 +396,7 @@ export class AttendanceService {
             statusCode: 200,
             response: result,
             expiresAt
-          }], { session });
+          }]);
         }
       });
 
@@ -435,9 +425,7 @@ export class AttendanceService {
         }
       }
       throw err;
-    } finally {
-      await session.endSession();
-    }
+    } 
   }
 
   async getRecords(reqUser: any): Promise<any> {

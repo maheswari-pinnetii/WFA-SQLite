@@ -315,9 +315,9 @@ describe('E2E User Flow Tests', () => {
       organizationId: orgId
     });
 
-    const session = await mongoose.startSession();
+    
     try {
-      await session.withTransaction(async () => {
+      await (require('../../backend/src/database/sqlite-cloud.js').transaction)(async () => {
         // Perform modification
         await Attendance.updateOne(
           { _id: record._id },

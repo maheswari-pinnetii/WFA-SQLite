@@ -4,7 +4,7 @@ import { logAudit, execute, query } from '../database/connection.js';
 import * as authService from '../services/auth.service.js';
 import { userRepository } from '../repositories/auth.repository.js';
 import bcrypt from 'bcryptjs';
-import mongoose from '../database/transaction.js';
+import { transaction } from '../database/sqlite-cloud.js';
 import { healthCheck as dbHealthCheck } from '../database/sqlite-cloud.js';
 import { decryptSecret, verifyTotpCode, verifyRecoveryCode } from '../utils/totp.js';
 import { env } from '../config/env.js';
