@@ -1,5 +1,5 @@
-import { test, expect } from '../fixtures/test.fixture.js';
-import { TEST_ENV } from '../config/test-env.js';
+import { test, expect } from '../../fixtures/baseTest.js';
+import { TEST_ENV } from '../../config/test-env.js';
 
 test.describe('Authentication E2E Flow', () => {
   test('should load login screen and render corporate email input', async ({ loginPage }) => {

@@ -1,5 +1,5 @@
-import { test, expect } from '../fixtures/test.fixture.js';
-import { TEST_ENV } from '../config/test-env.js';
+import { test, expect } from '../../fixtures/baseTest.js';
+import { TEST_ENV } from '../../config/test-env.js';
 
 test.describe('Employee Dashboard E2E Tests', () => {
   test('should render employee dashboard layout cleanly without step badges', async ({ loginPage, dashboardPage, page }) => {

@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/test.fixture.js';
+import { test, expect } from '../../fixtures/baseTest.js';
 
 test.describe('Navigation & Route Guards E2E Tests', () => {
   test('should redirect unauthenticated users attempting to access protected dashboard', async ({ page }) => {

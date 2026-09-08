@@ -1,7 +1,7 @@
 import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage.js';
 import { DashboardPage } from '../pages/DashboardPage.js';
-import { resetRateLimits } from '../helpers/reset-rate-limits.js';
+import { resetRateLimits } from '../utils/reset-rate-limits.js';
 
 type CustomFixtures = {
   loginPage: LoginPage;
