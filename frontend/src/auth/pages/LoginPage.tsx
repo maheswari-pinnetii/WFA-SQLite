@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { ROLE_HOME_PATHS, Role } from '../../security/roles/roles';
 import { EmailLoginCard } from '../components/EmailLoginCard';
+import { PasswordlessLoginCard } from '../components/PasswordlessLoginCard';
 import { EmailLoginPayload } from '../../types/authFlow.types';
 import { authService } from '../services/auth.service';
 import { Moon, Sun } from 'lucide-react';
@@ -13,6 +14,7 @@ export const LoginPage: React.FC = () => {
   const { login, role, setSession, isAuthenticated, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [showPasskey, setShowPasskey] = useState(false);
 
   // Authenticate with email and password, then route to the user's dashboard.
   const [currentEmail, setCurrentEmail] = useState<string>('admin@thestackly.com');
@@ -124,24 +126,39 @@ export const LoginPage: React.FC = () => {
 
       {/* Main Multi-Step Authentication Container */}
       <main className="auth-single-container" id="auth-flow-main">
-        <button
-          type="button"
-          className="btn-outline-gray"
-          onClick={handlePasskeyLogin}
-          disabled={loading}
-        >
-          {loading ? 'Authenticating...' : 'Sign in with a passkey'}
-        </button>
-        <EmailLoginCard
-          onSubmit={handleEmailLogin}
-          onDirectLogin={handleDirectLogin}
-          isLoading={loading}
-          errorMessage={errorMessage}
-          onClearError={() => setErrorMessage(null)}
-          currentEmail={currentEmail}
-          onEmailChange={setCurrentEmail}
-          prefilledPassword="StacklyWFA2026!"
-        />
+        {showPasskey ? (
+          <PasswordlessLoginCard
+            onPasskeyLogin={handlePasskeyLogin}
+            onBack={() => setShowPasskey(false)}
+            onSkip={() => setShowPasskey(false)}
+            isLoading={loading}
+            errorMessage={errorMessage}
+            currentEmail={currentEmail}
+            onEmailChange={setCurrentEmail}
+          />
+        ) : (
+          <>
+            <button
+              type="button"
+              className="btn-outline-gray"
+              onClick={() => setShowPasskey(true)}
+              disabled={loading}
+              style={{ marginBottom: '16px', width: '100%' }}
+            >
+              Sign in with a passkey
+            </button>
+            <EmailLoginCard
+              onSubmit={handleEmailLogin}
+              onDirectLogin={handleDirectLogin}
+              isLoading={loading}
+              errorMessage={errorMessage}
+              onClearError={() => setErrorMessage(null)}
+              currentEmail={currentEmail}
+              onEmailChange={setCurrentEmail}
+              prefilledPassword="StacklyWFA2026!"
+            />
+          </>
+        )}
       </main>
 
       {/* Bottom Switch Link */}

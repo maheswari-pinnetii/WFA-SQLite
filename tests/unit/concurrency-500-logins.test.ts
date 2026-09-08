@@ -94,7 +94,7 @@ describe('High-Concurrency 500 Employee Simultaneous Login & Session Suite', () 
     for (let i = 0; i < users.length; i += BATCH_SIZE) {
       const batch = users.slice(i, i + BATCH_SIZE);
       const batchPromises = batch.map((u, idx) =>
-        loginEmployee(u.email, (i + idx) % 2 === 0 ? 'StacklyWFA2026!' : 'password123')
+        loginEmployee(u.email, 'StacklyWFA2026!')
       );
       const batchResults = await Promise.all(batchPromises);
       allResults.push(...batchResults);
@@ -117,7 +117,7 @@ describe('High-Concurrency 500 Employee Simultaneous Login & Session Suite', () 
 
     // Authenticate 100 employees in parallel
     const loginResults = await Promise.all(
-      users.map(u => loginEmployee(u.email, 'password123'))
+      users.map(u => loginEmployee(u.email, 'StacklyWFA2026!'))
     );
 
     const validTokens = loginResults.filter(r => r.success && r.token).map(r => r.token!);

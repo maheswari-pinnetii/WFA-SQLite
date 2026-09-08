@@ -159,10 +159,21 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
     let registrationChallenge = '';
     const mockCredentialId = `cred_fido2_${Date.now()}`;
 
-    it('POST /api/auth/passkey/register-options - should generate challenge and persist in passkey_challenges', async () => {
-      const res = await client.post('/api/auth/passkey/register-options', {
+    it('POST /v1/auth/passkey/register-options - should generate challenge and persist in passkey_challenges', async () => {
+      // Login testUser to get a valid JWT
+      const loginRes = await client.post('/api/v1/auth/login', { email: testUser.email, password: testUser.password });
+      let validToken = loginRes.data.data?.token || loginRes.data.token;
+      if (loginRes.data.data?.challengeId) {
+        const verifyRes = await client.post('/v1/auth/mfa/verify', { challengeId: loginRes.data.data.challengeId, otp: loginRes.data.data.otpDevHint });
+        validToken = verifyRes.data.data.token;
+      }
+      issuedToken = validToken;
+
+      const res = await client.post('/v1/auth/passkey/register-options', {
         email: testUser.email,
         fullName: testUser.fullName,
+      }, {
+        headers: { Authorization: `Bearer ${issuedToken}` }
       });
 
       expect(res.status).toBe(200);
@@ -182,7 +193,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
       expect(challengeRows[0].type).toBe('register');
     });
 
-    it('POST /api/auth/passkey/register-verify - should reject fabricated attestation data', async () => {
+    it('POST /v1/auth/passkey/register-verify - should reject fabricated attestation data', async () => {
       const mockAttestation = {
         id: mockCredentialId,
         rawId: Buffer.from(mockCredentialId).toString('base64'),
@@ -194,10 +205,12 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
         },
       };
 
-      const res = await client.post('/api/auth/passkey/register-verify', {
+      const res = await client.post('/v1/auth/passkey/register-verify', {
         email: testUser.email,
         fullName: testUser.fullName,
         attestationResponse: mockAttestation,
+      }, {
+        headers: { Authorization: `Bearer ${issuedToken}` }
       });
 
       expect(res.status).toBe(400);
@@ -211,8 +224,8 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
       expect(credRows).toHaveLength(0);
     });
 
-    it('POST /api/auth/passkey/login-options - should reject accounts without a registered passkey', async () => {
-      const res = await client.post('/api/auth/passkey/login-options', {
+    it('POST /v1/auth/passkey/login-options - should reject accounts without a registered passkey', async () => {
+      const res = await client.post('/v1/auth/passkey/login-options', {
         email: testUser.email,
       });
 
@@ -221,7 +234,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
       expect(res.data.error).toContain('No passkey');
     });
 
-    it('POST /api/auth/passkey/login-verify - should reject an unknown credential', async () => {
+    it('POST /v1/auth/passkey/login-verify - should reject an unknown credential', async () => {
       const mockAssertion = {
         id: mockCredentialId,
         rawId: Buffer.from(mockCredentialId).toString('base64'),
@@ -233,7 +246,7 @@ describe('Step 4: Auth Flow Backend & Database Integration Tests', () => {
         },
       };
 
-      const res = await client.post('/api/auth/passkey/login-verify', {
+      const res = await client.post('/v1/auth/passkey/login-verify', {
         assertionResponse: mockAssertion,
       });
 

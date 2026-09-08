@@ -3,7 +3,8 @@ import cors from 'cors';
 import apiRouter from './routes/api.routes.js';
 import authFlowRouter from './routes/authFlow.routes.js';
 import { initDb, healthCheck } from './config/db.js';
-import { configureResilience, globalRateLimiter } from './middleware/resilience.js';
+import { configureResilience } from './middleware/resilience.js';
+import { globalApiLimiter } from './middleware/rateLimiter.js';
 import { inputSanitizer } from './middleware/validateInput.js';
 import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
 import { authenticateToken, authorizeRoles } from './middleware/auth.js';
@@ -52,7 +53,7 @@ app.use(ssrfGuard);
 configureResilience(app);
 
 // Apply Global Rate Limiting
-app.use(globalRateLimiter);
+app.use(globalApiLimiter);
 
 // Liveness Health Check
 app.get('/live', (req: Request, res: Response) => {
@@ -122,6 +123,7 @@ import systemDesignRouter from './routes/systemDesign.routes.js';
 // API Routes (Canonical /api/v1 only)
 app.use('/api/v1/system-design', systemDesignRouter);
 app.use('/api/v1', apiRouter);
+app.use('/v1', apiRouter);
 
 // Database initialization
 if (process.env.NODE_ENV !== 'test') {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { EmailLoginCard } from '../../frontend/src/auth/components/EmailLoginCard';
@@ -15,26 +15,35 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
     );
   };
 
-  it('1.1 should render badge header, Stackly branding, email input, and password field', () => {
+  it('1.1 should render email input first, then transition to password field', async () => {
     renderCard({
       onSubmit: vi.fn(),
       currentEmail: 'employee@thestackly.com',
     });
 
-    expect(screen.getByText('Step 1 of 2: Password')).toBeInTheDocument();
-    expect(screen.getByText('Knowledge Factor')).toBeInTheDocument();
-    expect(screen.getAllByAltText('Stackly').length).toBeGreaterThan(0);
+    // Step 1 check
     expect(screen.getByLabelText(/Email address/i)).toHaveValue('employee@thestackly.com');
-    expect(screen.getByText('Sign in to your account')).toBeInTheDocument();
-    expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Password$/i)).not.toBeInTheDocument();
+    
+    // Proceed to Step 2
+    fireEvent.click(screen.getByRole('button', { name: /^Next$/i }));
+    
+    // Step 2 check
+    await waitFor(() => {
+      expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
+    });
+    expect(screen.getByText('Enter your password')).toBeInTheDocument();
     expect(screen.getByText('Forgot your password?')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^Next$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Sign in$/i })).toBeInTheDocument();
   });
 
-  it('1.2 should toggle password visibility when clicking eye button', () => {
-    renderCard({ onSubmit: vi.fn() });
+  it('1.2 should toggle password visibility when clicking eye button', async () => {
+    renderCard({ onSubmit: vi.fn(), currentEmail: 'test@thestackly.com' });
 
-    const passwordInput = screen.getByLabelText(/^Password$/i) as HTMLInputElement;
+    // Go to step 2
+    fireEvent.click(screen.getByRole('button', { name: /^Next$/i }));
+
+    const passwordInput = await screen.findByLabelText(/^Password$/i) as HTMLInputElement;
     const toggleBtn = screen.getByRole('button', { name: /Show password/i });
 
     expect(passwordInput.type).toBe('password');
@@ -68,29 +77,35 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
 
   it('1.4 should display validation error when password is empty', async () => {
     const onSubmitMock = vi.fn();
-    renderCard({ onSubmit: onSubmitMock, prefilledPassword: '' });
+    renderCard({ onSubmit: onSubmitMock, currentEmail: 'test@thestackly.com', prefilledPassword: '' });
 
-    const passwordInput = screen.getByLabelText(/^Password$/i);
+    // Go to Step 2
+    fireEvent.click(screen.getByRole('button', { name: /^Next$/i }));
+
+    const passwordInput = await screen.findByLabelText(/^Password$/i);
     fireEvent.change(passwordInput, { target: { value: '' } });
 
-    const submitBtn = screen.getByRole('button', { name: /^Next$/i });
+    const submitBtn = screen.getByRole('button', { name: /^Sign in$/i });
     fireEvent.click(submitBtn);
 
     expect(await screen.findByText('Please enter your password.')).toBeInTheDocument();
     expect(onSubmitMock).not.toHaveBeenCalled();
   });
 
-  it('1.5 should submit form with valid credentials', () => {
+  it('1.5 should submit form with valid credentials', async () => {
     const onSubmitMock = vi.fn();
     renderCard({
       onSubmit: onSubmitMock,
       currentEmail: 'engineer@thestackly.com',
     });
 
-    const passwordInput = screen.getByLabelText(/^Password$/i);
+    // Go to step 2
+    fireEvent.click(screen.getByRole('button', { name: /^Next$/i }));
+
+    const passwordInput = await screen.findByLabelText(/^Password$/i);
     fireEvent.change(passwordInput, { target: { value: 'ValidSecurePass2026!' } });
 
-    const submitBtn = screen.getByRole('button', { name: /^Next$/i });
+    const submitBtn = screen.getByRole('button', { name: /^Sign in$/i });
     fireEvent.click(submitBtn);
 
     expect(onSubmitMock).toHaveBeenCalledWith({
@@ -99,12 +114,14 @@ describe('Step 1: EmailLoginCard Component Unit Tests', () => {
     });
   });
 
-  it('1.6 should render error message passed from parent', () => {
+  it('1.6 should render error message passed from parent', async () => {
     renderCard({
       onSubmit: vi.fn(),
       errorMessage: 'Invalid password. 3 attempts remaining.',
+      currentEmail: 'test@thestackly.com',
     });
 
+    // Error could be visible in either step, depending on where it's triggered, but here it's passed down.
     expect(screen.getByText('Invalid password. 3 attempts remaining.')).toBeInTheDocument();
   });
 });

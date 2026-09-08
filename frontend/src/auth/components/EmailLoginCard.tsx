@@ -24,6 +24,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
   prefilledPassword = 'StacklyWFA2026!',
 }) => {
   const navigate = useNavigate();
+  const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState<string>(currentEmail || 'admin@thestackly.com');
   const [password, setPassword] = useState<string>(prefilledPassword !== undefined ? prefilledPassword : 'StacklyWFA2026!');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -56,6 +57,12 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
       setLocalError('Use your company email ending with @thestackly.com.');
       return;
     }
+
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
+
     if (!password) {
       setLocalError('Please enter your password.');
       return;
@@ -82,13 +89,16 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
       </div>
 
       {/* Top navigation row with Stackly branding */}
-      <div className="card-top-nav" style={{ position: 'relative', minHeight: '28px', marginBottom: '0.75rem' }}>
+      <div className="card-top-nav" style={{ position: 'relative', minHeight: '28px', marginBottom: '0.75rem', display: 'flex', alignItems: 'center' }}>
         <button
           type="button"
           className="back-arrow-btn"
           aria-label="Go back"
           title="Go back"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (step === 2) setStep(1);
+            else navigate(-1);
+          }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12" />
@@ -96,19 +106,28 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
           </svg>
         </button>
 
-        <div className="brand-logo-container auth-login-logo-container">
+        <div className="brand-logo-container auth-login-logo-container" style={{ margin: '0 auto' }}>
           <img src="/assets/images/logo.png" alt="Stackly" className="auth-login-logo" />
         </div>
       </div>
 
-      {/* Email Pill Badge */}
-      <div className="ms-email-pill" title="Corporate account">
-        <span>{email || currentEmail || 'admin@thestackly.com'}</span>
+      {/* Progress Indicator */}
+      <div className="auth-progress-container" style={{ marginBottom: '1.25rem' }}>
+        <div className="auth-progress-bar">
+          <div className="auth-progress-fill" style={{ width: step === 1 ? '50%' : '100%' }}></div>
+        </div>
       </div>
+
+      {/* Email Pill Badge */}
+      {step === 2 && (
+        <div className="ms-email-pill" title="Click to change email" role="button" tabIndex={0} onClick={() => setStep(1)} style={{ cursor: 'pointer' }}>
+          <span>{email || currentEmail || 'admin@thestackly.com'}</span>
+        </div>
+      )}
 
       {/* Card Heading */}
       <h2 className="card-heading centered" style={{ marginBottom: '1.25rem' }}>
-        Enter your password
+        {step === 1 ? 'Sign in' : 'Enter your password'}
       </h2>
 
       {activeError && (
@@ -125,84 +144,92 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
       {/* Form: Email & Password Inputs */}
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
         {/* Email Address Input */}
-        <div className="input-field-group">
-          <label htmlFor="login-email-input" className="overlaid-label">
-            Email address
-          </label>
-          <div className="auth-input-wrapper">
-            <input
-              id="login-email-input"
-              type="email"
-              className="auth-text-input"
-              placeholder="Enter email address"
-              pattern="[^\\s@]+@thestackly\\.com"
-              title="Use your company email ending with @thestackly.com."
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (onEmailChange) onEmailChange(e.target.value);
-                if (localError) setLocalError(null);
-                if (errorMessage && onClearError) onClearError();
-              }}
-              disabled={isLoading}
-              autoComplete="username"
-              required
-            />
+        {step === 1 && (
+          <div className="input-field-group">
+            <label htmlFor="login-email-input" className="overlaid-label">
+              Email address
+            </label>
+            <div className="auth-input-wrapper">
+              <input
+                id="login-email-input"
+                type="email"
+                className="auth-text-input"
+                placeholder="Enter email address"
+                pattern="[^\\s@]+@thestackly\\.com"
+                title="Use your company email ending with @thestackly.com."
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (onEmailChange) onEmailChange(e.target.value);
+                  if (localError) setLocalError(null);
+                  if (errorMessage && onClearError) onClearError();
+                }}
+                disabled={isLoading}
+                autoComplete="username"
+                required
+                autoFocus
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Password Input */}
-        <div className="input-field-group">
-          <label htmlFor="password-input" className="overlaid-label">
-            Password
-          </label>
-          <div className="password-input-wrapper">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              id="password-input"
-              className="password-input"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (localError) setLocalError(null);
-                if (errorMessage && onClearError) onClearError();
-              }}
-              disabled={isLoading}
-              autoComplete="current-password"
-              required
-            />
-            <button
-              type="button"
-              className="password-toggle-btn"
-              id="toggle-password-btn"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              onClick={() => setShowPassword(!showPassword)}
-              tabIndex={-1}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                {showPassword ? (
-                  <>
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </>
-                ) : (
-                  <>
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </>
-                )}
-              </svg>
-            </button>
+        {step === 2 && (
+          <div className="input-field-group">
+            <label htmlFor="password-input" className="overlaid-label">
+              Password
+            </label>
+            <div className="password-input-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password-input"
+                className="password-input"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (localError) setLocalError(null);
+                  if (errorMessage && onClearError) onClearError();
+                }}
+                disabled={isLoading}
+                autoComplete="current-password"
+                required
+                autoFocus
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                id="toggle-password-btn"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  {showPassword ? (
+                    <>
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Forgot Password Link */}
-        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link to="/forgot-password" className="forgot-password-link">
-            Forgot your password?
-          </Link>
-        </div>
+        {step === 2 && (
+          <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Link to="/forgot-password" className="forgot-password-link">
+              Forgot your password?
+            </Link>
+          </div>
+        )}
 
         {/* Action Button */}
         <div className="card-actions" style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -218,7 +245,7 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
                 <span>Verifying credentials...</span>
               </>
             ) : (
-              <span>Next</span>
+              <span>{step === 1 ? 'Next' : 'Sign in'}</span>
             )}
           </button>
 

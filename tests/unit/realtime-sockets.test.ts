@@ -7,6 +7,7 @@ import { jobScheduler } from '../../backend/src/services/jobScheduler.service.js
 describe('Real-Time Sockets & Room RBAC Authorization', () => {
   const employeeUser = {
     id: 'emp-001',
+    email: 'emp@example.com',
     role: 'EMPLOYEE',
     organizationId: 'org-stackly',
     department: 'Engineering',
@@ -15,6 +16,7 @@ describe('Real-Time Sockets & Room RBAC Authorization', () => {
 
   const hrUser = {
     id: 'hr-001',
+    email: 'hr@example.com',
     role: 'HR',
     organizationId: 'org-stackly',
     department: 'HR'
@@ -22,6 +24,7 @@ describe('Real-Time Sockets & Room RBAC Authorization', () => {
 
   const adminUser = {
     id: 'admin-001',
+    email: 'admin@example.com',
     role: 'ADMIN',
     organizationId: 'org-stackly'
   };

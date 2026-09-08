@@ -167,39 +167,34 @@ export const EmployeeQuickActionsBar: React.FC<{
     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
       <a
         href="#step-1-punch"
-        className="px-3 py-1.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+        className="px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/30 text-sm font-black flex items-center gap-2 transition-all shrink-0 cursor-pointer"
       >
-        <Clock size={14} /> Punch Clock
+        <Clock size={18} /> PUNCH CLOCK
       </a>
-      <button
-        onClick={onOpenCorrection}
-        className="px-3 py-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
-      >
-        <ClipboardList size={14} /> Request Correction
-      </button>
       <Link
         to="/employee/leave"
-        className="px-3 py-1.5 rounded-2xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+        className="px-5 py-3 rounded-2xl bg-purple-500 hover:bg-purple-400 text-white shadow-lg shadow-purple-500/30 text-sm font-black flex items-center gap-2 transition-all shrink-0 cursor-pointer"
       >
-        <Palmtree size={14} /> Apply Leave / PTO
+        <Palmtree size={18} /> APPLY PTO
       </Link>
+      <div className="h-8 w-px bg-slate-800 mx-2 hidden sm:block"></div>
+      <button
+        onClick={onOpenCorrection}
+        className="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+      >
+        <ClipboardList size={14} /> Correction
+      </button>
       <Link
         to="/employee/shifts"
-        className="px-3 py-1.5 rounded-2xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+        className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
       >
-        <Timer size={14} /> Shift Roster
+        <Timer size={14} /> Shifts
       </Link>
       <Link
         to="/employee/payslips"
-        className="px-3 py-1.5 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+        className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
       >
-        <CreditCard size={14} /> Salary & Payslips
-      </Link>
-      <Link
-        to="/employee/goals"
-        className="px-3 py-1.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
-      >
-        <Target size={14} /> OKR Goals
+        <CreditCard size={14} /> Payslips
       </Link>
     </div>
   </div>

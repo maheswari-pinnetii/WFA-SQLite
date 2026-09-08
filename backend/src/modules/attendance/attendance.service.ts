@@ -494,6 +494,12 @@ export class AttendanceService {
       throw new Error('Complete correction details are required.');
     }
 
+    const requestedDateObj = new Date(date);
+    const todayObj = new Date(getKolkataDate());
+    if (requestedDateObj > todayObj) {
+      throw new Error('Attendance corrections cannot be submitted for future dates.');
+    }
+
     const identity = await this.findIdentity(employeeId, orgId);
     if (!identity) {
       throw new Error('Employee is outside the active organization.');

@@ -3,15 +3,47 @@ dist
 dist-ssr
 *.local
 .DS_Store
+Thumbs.db
+
+# Environment secrets — never commit these
 .env
 .env.*
 !.env.example
 
 # SQLite Databases & Backups
 *.sqlite
+*.db
 *.sqlite-wal
 *.sqlite-shm
 database/sqlite/*.sqlite*
 database/backups/*
 !database/backups/.gitkeep
 
+# Build outputs
+build/
+out/
+*.tsbuildinfo
+
+# Test coverage & reports
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor & IDE
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Desktop.ini

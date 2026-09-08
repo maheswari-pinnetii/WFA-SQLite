@@ -27,6 +27,18 @@ vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
   }),
 }));
 
+// Mock nodemailer which is imported by email.service.ts
+vi.mock('nodemailer', () => ({
+  default: {
+    createTransport: vi.fn().mockReturnValue({
+      sendMail: vi.fn().mockResolvedValue(true)
+    })
+  },
+  createTransport: vi.fn().mockReturnValue({
+    sendMail: vi.fn().mockResolvedValue(true)
+  })
+}));
+
 describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
   describe('1. Backend API: Trusted Devices Endpoints', () => {
     let server: any;

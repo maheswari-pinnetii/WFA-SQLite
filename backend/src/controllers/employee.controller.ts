@@ -53,12 +53,25 @@ export const updateEmployee = async (req, res) => {
     const { id } = req.params;
     const orgId = getOrganizationId(req);
 
-    // Prevent mass assignment and BOLA by extracting only allowed fields
+    // 1. IDOR / BOLA Prevention
+    // An employee can only update their OWN profile unless they are ADMIN or HR
+    const isPrivileged = ['ADMIN', 'HR'].includes(req.user.role);
+    if (!isPrivileged && req.user.id !== id) {
+      return res.status(403).json({ success: false, message: 'Forbidden: You can only update your own profile.' });
+    }
+
+    // 2. Mass Assignment Prevention
     const { name, department, designation, avatar, team, location, performanceScore, attendanceRate } = req.body;
     
-    // Only ADMIN/HR can update performance and attendance directly via this route
-    const updateData: any = { name, department, designation, avatar, team, location };
-    if (['ADMIN', 'HR'].includes(req.user.role)) {
+    // Base update data allowed for the employee themselves
+    const updateData: any = { avatar, location };
+    
+    // Only privileged roles can update structural fields
+    if (isPrivileged) {
+      if (name !== undefined) updateData.name = name;
+      if (department !== undefined) updateData.department = department;
+      if (designation !== undefined) updateData.designation = designation;
+      if (team !== undefined) updateData.team = team;
       if (performanceScore !== undefined) updateData.performanceScore = performanceScore;
       if (attendanceRate !== undefined) updateData.attendanceRate = attendanceRate;
     }

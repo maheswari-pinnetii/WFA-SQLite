@@ -13,7 +13,20 @@ import {
   verifyTrustedDevice,
   revokeTrustedDevice,
 } from '../controllers/authFlow.controller.js';
+import {
+  forgotPassword,
+  resetPassword,
+  changePassword,
+  sendEmailVerification,
+  verifyEmail
+} from '../controllers/authSecurity.controller.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { 
+  loginRateLimiter, 
+  registerRateLimiter, 
+  passwordResetLimiter,
+  otpRateLimiter
+} from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -26,21 +39,31 @@ const router = Router();
  * @desc    Register a new user with standard credentials
  * @access  Public
  */
-router.post('/register', register);
+router.post('/register', registerRateLimiter, register);
 
 /**
  * @route   POST /api/auth/login
  * @desc    Authenticate user with email & password, returns JWT token
  * @access  Public
  */
-router.post('/login', login);
+router.post('/login', loginRateLimiter, login);
 
 /**
  * @route   GET /api/auth/me
  * @desc    Get current authenticated user profile
  * @access  Private (Bearer Token)
  */
-router.get('/me', getCurrentUser);
+router.get('/me', authenticateToken as any, getCurrentUser);
+
+// ======================================================================
+// 1.5. Security & Account Recovery Routes
+// ======================================================================
+
+router.post('/forgot-password', passwordResetLimiter, forgotPassword);
+router.post('/reset-password', passwordResetLimiter, resetPassword);
+router.post('/change-password', authenticateToken as any, changePassword);
+router.post('/send-verification', authenticateToken as any, otpRateLimiter, sendEmailVerification);
+router.post('/verify-email', otpRateLimiter, verifyEmail);
 
 // ======================================================================
 // 2. Passkey / WebAuthn FIDO2 Passwordless Routes

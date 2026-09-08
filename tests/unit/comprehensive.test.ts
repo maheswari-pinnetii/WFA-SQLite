@@ -15,7 +15,7 @@ import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
 
 let server: any;
 const PORT = 5097;
-const client = axios.create({
+let client = axios.create({
   baseURL: `http://localhost:${PORT}`,
   validateStatus: () => true
 });
@@ -25,7 +25,13 @@ beforeAll(async () => {
   await initDb();
   
   return new Promise<void>((resolve) => {
-    server = app.listen(PORT, () => {
+    server = app.listen(0, () => {
+      const address = server.address();
+      const port = typeof address === 'string' ? PORT : address.port;
+      client = axios.create({
+        baseURL: `http://localhost:${port}`,
+        validateStatus: () => true
+      });
       resolve();
     });
   });
@@ -55,8 +61,18 @@ describe('WFA Comprehensive Backend Unit and Integration Testing', () => {
     await AttendanceEvent.deleteMany({});
     await IdempotencyRecord.deleteMany({});
     await Correction.deleteMany({});
-    await Employee.deleteMany({ id: { $in: ['e1', 'e2', 'emp-comp-a', 'emp-comp-b', 'usr-tx-test', 'emp-unique-1', 'emp-unique-2'] } });
+    await Employee.deleteMany({ id: { $in: ['e1', 'e2', 'emp-comp-a', 'emp-comp-b', 'usr-tx-test', 'emp-unique-1', 'emp-unique-2', 'emp-unique-3'] } });
     await User.deleteMany({ id: { $in: ['usr-tx-test'] } });
+    
+    // Ensure test companies exist to satisfy foreign keys
+    try {
+      const { execute } = await import('../../backend/src/database/sqlite-cloud.js');
+      await execute(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('company-a', 'Company A', 'comp-a.com', 'ACTIVE', '${new Date().toISOString()}', '${new Date().toISOString()}')`);
+      await execute(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('company-b', 'Company B', 'comp-b.com', 'ACTIVE', '${new Date().toISOString()}', '${new Date().toISOString()}')`);
+      await execute(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('org-stackly', 'Stackly Enterprise HQ', 'thestackly.com', 'ACTIVE', '${new Date().toISOString()}', '${new Date().toISOString()}')`);
+    } catch (e) {
+      console.warn('Failed to insert test companies', e);
+    }
   });
 
   describe('Database Unit Tests & Unique Constraints', () => {
