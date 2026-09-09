@@ -69,7 +69,7 @@ export const handleControllerError = (
   const route = req.originalUrl || req.url || 'unknown';
 
   // Server-side: Log full internal details, stack trace, and diagnostic context
-  logger.error(`${contextName}.error`, err?.message || 'Unexpected server error', {
+  console.error("DEBUG_ERROR", err); logger.error(`${contextName}.error`, err?.message || 'Unexpected server error', {
     requestId,
     method,
     route,
@@ -86,4 +86,5 @@ export const handleControllerError = (
     message: safeMessage
   });
 };
+
 

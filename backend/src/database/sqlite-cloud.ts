@@ -104,6 +104,23 @@ const initLocalSchema = (db: BetterSqlite3.Database) => {
       );
       CREATE INDEX IF NOT EXISTS idx_security_audit_user ON security_audit_logs(userId);
 
+      CREATE TABLE IF NOT EXISTS trusted_devices (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        device_name TEXT,
+        device_fingerprint TEXT NOT NULL,
+        device_type TEXT,
+        auth_method TEXT NOT NULL,
+        ip_address TEXT,
+        user_agent TEXT,
+        trusted_until TEXT NOT NULL,
+        last_used_at TEXT,
+        status TEXT NOT NULL DEFAULT 'ACTIVE',
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_trusted_devices_user ON trusted_devices(user_id);
+
+
       CREATE TABLE IF NOT EXISTS ai_insights (
         id TEXT PRIMARY KEY,
         organization_id TEXT NOT NULL,

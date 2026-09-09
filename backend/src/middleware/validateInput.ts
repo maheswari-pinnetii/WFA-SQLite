@@ -56,10 +56,14 @@ export const preventPrototypePollution = (obj: any): any => {
 // Global input guard middleware (guards prototype pollution while keeping inputs intact for strict schema rejection)
 export const inputSanitizer = (req: Request, res: Response, next: NextFunction) => {
   if (req.body && typeof req.body === 'object') {
-    req.body = preventPrototypePollution(req.body);
+    try { req.body = preventPrototypePollution(req.body); } catch (e) {
+      Object.defineProperty(req, 'body', { value: preventPrototypePollution(req.body), writable: true, enumerable: true, configurable: true });
+    }
   }
   if (req.query && typeof req.query === 'object') {
-    req.query = preventPrototypePollution(req.query);
+    try { req.query = preventPrototypePollution(req.query); } catch (e) {
+      Object.defineProperty(req, 'query', { value: preventPrototypePollution(req.query), writable: true, enumerable: true, configurable: true });
+    }
   }
   next();
 };

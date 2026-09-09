@@ -24,7 +24,7 @@ export const tracingMiddleware = (req: Request, res: Response, next: NextFunctio
 
 const customFormat = winston.format.printf(({ level, message, timestamp, ...metadata }) => {
   let msg = `${timestamp} [${level}] [trace:${getTraceId()}]: ${message}`;
-  if (Object.keys(metadata).length > 0 && metadata.service !== 'wfa-backend') {
+  if (Object.keys(metadata).length > 0 ) {
     msg += ` ${JSON.stringify(metadata)}`;
   }
   return msg;
@@ -54,3 +54,4 @@ export const logger = winston.createLogger({
     })
   ],
 });
+

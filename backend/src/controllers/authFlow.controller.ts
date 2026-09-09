@@ -1093,3 +1093,5 @@ export const revokeTrustedDevice = async (req: any, res: Response): Promise<void
     res.status(500).json({ success: false, error: error.message || 'Failed to revoke trusted device.' });
   }
 };
+
+

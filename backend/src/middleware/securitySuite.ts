@@ -207,10 +207,14 @@ export const sanitizePrototypeKeys = (obj: any): any => {
 
 export const prototypePollutionGuard = (req: Request, res: Response, next: NextFunction) => {
   if (req.body && typeof req.body === 'object') {
-    req.body = sanitizePrototypeKeys(req.body);
+    try { req.body = sanitizePrototypeKeys(req.body); } catch (e) {
+      Object.defineProperty(req, 'body', { value: sanitizePrototypeKeys(req.body), writable: true, enumerable: true, configurable: true });
+    }
   }
   if (req.query && typeof req.query === 'object') {
-    req.query = sanitizePrototypeKeys(req.query);
+    try { req.query = sanitizePrototypeKeys(req.query); } catch (e) {
+      Object.defineProperty(req, 'query', { value: sanitizePrototypeKeys(req.query), writable: true, enumerable: true, configurable: true });
+    }
   }
   next();
 };
