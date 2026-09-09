@@ -28,7 +28,7 @@ export const createRequisition = async (req: Request, res: Response) => {
 
 export const updateRequisitionStatus = async (req: Request, res: Response) => {
   try {
-    await recruitmentService.updateRequisitionStatus(req.params.id, u(req).organizationId, req.body.status);
+    await recruitmentService.updateRequisitionStatus(req.params.id as string, u(req).organizationId, req.body.status);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -38,7 +38,7 @@ export const updateRequisitionStatus = async (req: Request, res: Response) => {
 export const listApplications = async (req: Request, res: Response) => {
   try {
     const { status } = req.query as Record<string, string>;
-    const data = await recruitmentService.getApplications(req.params.reqId, { status });
+    const data = await recruitmentService.getApplications(req.params.reqId as string, { status });
     res.json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -50,7 +50,7 @@ export const createApplication = async (req: Request, res: Response) => {
     const { candidateName, candidateEmail } = req.body;
     if (!candidateName || !candidateEmail)
       return res.status(400).json({ success: false, message: 'candidateName and candidateEmail required' });
-    const data = await recruitmentService.createApplication({ jobRequisitionId: req.params.reqId, candidateName, candidateEmail });
+    const data = await recruitmentService.createApplication({ jobRequisitionId: req.params.reqId as string, candidateName, candidateEmail });
     res.status(201).json({ success: true, data });
   } catch (err: any) {
     if (err.message.includes('already applied'))
@@ -62,7 +62,7 @@ export const createApplication = async (req: Request, res: Response) => {
 export const scheduleInterview = async (req: Request, res: Response) => {
   try {
     const { interviewerId, scheduledAt } = req.body;
-    const data = await recruitmentService.scheduleInterview({ applicationId: req.params.appId, interviewerId, scheduledAt });
+    const data = await recruitmentService.scheduleInterview({ applicationId: req.params.appId as string, interviewerId, scheduledAt });
     res.status(201).json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -72,7 +72,7 @@ export const scheduleInterview = async (req: Request, res: Response) => {
 export const submitInterviewFeedback = async (req: Request, res: Response) => {
   try {
     const { feedback, status } = req.body;
-    await recruitmentService.submitInterviewFeedback(req.params.interviewId, feedback, status);
+    await recruitmentService.submitInterviewFeedback(req.params.interviewId as string, feedback, status);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -82,7 +82,7 @@ export const submitInterviewFeedback = async (req: Request, res: Response) => {
 export const createOffer = async (req: Request, res: Response) => {
   try {
     const { salaryOffered } = req.body;
-    const data = await recruitmentService.createOffer(req.params.appId, salaryOffered);
+    const data = await recruitmentService.createOffer(req.params.appId as string, salaryOffered);
     res.status(201).json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -92,7 +92,7 @@ export const createOffer = async (req: Request, res: Response) => {
 export const respondToOffer = async (req: Request, res: Response) => {
   try {
     const { response } = req.body;
-    const data = await recruitmentService.respondToOffer(req.params.offerId, response);
+    const data = await recruitmentService.respondToOffer(req.params.offerId as string, response);
     res.json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });

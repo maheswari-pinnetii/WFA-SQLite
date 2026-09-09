@@ -30,7 +30,7 @@ export const createCycle = async (req: Request, res: Response) => {
 
 export const getGoals = async (req: Request, res: Response) => {
   try {
-    const data = await performanceService.getGoals(req.params.employeeId, req.params.cycleId);
+    const data = await performanceService.getGoals(req.params.employeeId as string, req.params.cycleId as string);
     res.json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -42,8 +42,8 @@ export const createGoal = async (req: Request, res: Response) => {
     const { title, description } = req.body;
     if (!title) return res.status(400).json({ success: false, message: 'title is required' });
     const data = await performanceService.createGoal({
-      employeeId: req.params.employeeId,
-      performanceCycleId: req.params.cycleId,
+      employeeId: req.params.employeeId as string,
+      performanceCycleId: req.params.cycleId as string,
       title,
       description
     });
@@ -57,7 +57,7 @@ export const updateGoalProgress = async (req: Request, res: Response) => {
   try {
     const { progress } = req.body;
     if (progress === undefined) return res.status(400).json({ success: false, message: 'progress is required' });
-    await performanceService.updateGoalProgress(req.params.goalId, progress);
+    await performanceService.updateGoalProgress(req.params.goalId as string, progress);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -66,7 +66,7 @@ export const updateGoalProgress = async (req: Request, res: Response) => {
 
 export const getReviews = async (req: Request, res: Response) => {
   try {
-    const data = await performanceService.getReviews(req.params.employeeId, req.params.cycleId);
+    const data = await performanceService.getReviews(req.params.employeeId as string, req.params.cycleId as string);
     res.json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -77,7 +77,7 @@ export const submitReview = async (req: Request, res: Response) => {
   try {
     const { rating, feedback } = req.body;
     if (!rating || !feedback) return res.status(400).json({ success: false, message: 'rating and feedback are required' });
-    await performanceService.submitReview(req.params.reviewId, rating, feedback);
+    await performanceService.submitReview(req.params.reviewId as string, rating, feedback);
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -86,7 +86,7 @@ export const submitReview = async (req: Request, res: Response) => {
 
 export const getCycleAnalytics = async (req: Request, res: Response) => {
   try {
-    const data = await performanceService.getCycleAnalytics(req.params.cycleId, u(req).organizationId);
+    const data = await performanceService.getCycleAnalytics(req.params.cycleId as string, u(req).organizationId);
     res.json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -119,7 +119,7 @@ export const createLeaveType = async (req: Request, res: Response) => {
 export const getLeaveBalances = async (req: Request, res: Response) => {
   try {
     const year = req.query.year ? parseInt(req.query.year as string) : undefined;
-    const data = await leaveEngineService.getLeaveBalances(req.params.employeeId, u(req).organizationId, year);
+    const data = await leaveEngineService.getLeaveBalances(req.params.employeeId as string, u(req).organizationId, year);
     res.json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
