@@ -11,6 +11,7 @@ import { LogoutPage } from '../../auth/pages/LogoutPage';
 import { SsoCallbackPage } from '../../auth/pages/SsoCallbackPage';
 import { ForgotPasswordPage } from '../../auth/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '../../auth/pages/ResetPasswordPage';
+import { VerifyEmailPage } from '../../auth/pages/VerifyEmailPage';
 import { ChangePasswordPage } from '../../auth/pages/ChangePasswordPage';
 import { Role, ROLE_HOME_PATHS } from '../../security/roles/roles';
 import { useAuth } from '../../auth/hooks/useAuth';
@@ -123,8 +124,7 @@ export const AppRoutes: React.FC = () => {
       <Route path="/logout" element={<LogoutPage />} />
       <Route path="/forgot-password" element={<GuestGuard><ForgotPasswordPage /></GuestGuard>} />
       <Route path="/reset-password" element={<GuestGuard><ResetPasswordPage /></GuestGuard>} />
-      <Route path="/verify-email" element={<GuestGuard><ResetPasswordPage /></GuestGuard>} />
-
+      <Route path="/verify-email" element={<GuestGuard><VerifyEmailPage /></GuestGuard>} />
       {/* Protected Routes Enclosed in Enterprise MainLayout */}
       <Route
         path="/*"
