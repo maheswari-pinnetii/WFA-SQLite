@@ -10,6 +10,12 @@ import * as auditController from '../controllers/audit.controller.js';
 import * as backupController from '../controllers/backup.controller.js';
 import * as aiController from '../controllers/ai.controller.js';
 import * as reportController from '../controllers/report.controller.js';
+import * as lifecycleController from '../controllers/employee-lifecycle.controller.js';
+import * as recruitmentController from '../controllers/recruitment.controller.js';
+import * as payrollController from '../controllers/payroll.controller.js';
+import * as performanceController from '../controllers/performance.controller.js';
+import * as workflowController from '../controllers/workflow.controller.js';
+import * as schedulingController from '../controllers/scheduling.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import {
   loginRateLimiter,
@@ -229,5 +235,81 @@ router.post('/ai/insights/refresh', authenticateToken, authorizeRoles(['ADMIN', 
 // Feature Flags
 router.get('/feature-flags', authenticateToken, authenticatedUserLimiter, aiController.getFeatureFlags);
 router.put('/feature-flags/:key', authenticateToken, authorizeRoles(['ADMIN']), validateFeatureFlagParam, validateFeatureFlagUpdate, aiController.updateFeatureFlag);
+
+// ─── Employee Lifecycle (Step 2) ────────────────────────────────────────────
+router.get('/employees/:id/status-history', authenticateToken, enforceScope, authenticatedUserLimiter, lifecycleController.getStatusHistory);
+router.get('/employees/:id/field-history', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, lifecycleController.getFieldHistory);
+router.post('/employees/:id/transition', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, lifecycleController.transitionStatus);
+router.get('/employees/:id/documents', authenticateToken, enforceScope, authenticatedUserLimiter, lifecycleController.getDocuments);
+router.post('/employees/:id/documents', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, lifecycleController.addDocument);
+
+// ─── Leave Engine (Step 3) ───────────────────────────────────────────────────
+router.get('/leave/types', authenticateToken, authenticatedUserLimiter, performanceController.getLeaveTypes);
+router.post('/leave/types', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.createLeaveType);
+router.get('/leave/balances/:employeeId', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.getLeaveBalances);
+router.get('/leave/holidays', authenticateToken, authenticatedUserLimiter, performanceController.getHolidays);
+router.post('/leave/holidays', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.addHoliday);
+
+// ─── Recruitment (Step 4) ───────────────────────────────────────────────────
+router.get('/recruitment/requisitions', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, recruitmentController.listRequisitions);
+router.post('/recruitment/requisitions', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, recruitmentController.createRequisition);
+router.patch('/recruitment/requisitions/:id/status', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, recruitmentController.updateRequisitionStatus);
+router.get('/recruitment/requisitions/:reqId/applications', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, recruitmentController.listApplications);
+router.post('/recruitment/requisitions/:reqId/applications', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, recruitmentController.createApplication);
+router.post('/recruitment/applications/:appId/interviews', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, recruitmentController.scheduleInterview);
+router.patch('/recruitment/interviews/:interviewId/feedback', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, recruitmentController.submitInterviewFeedback);
+router.post('/recruitment/applications/:appId/offer', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, recruitmentController.createOffer);
+router.patch('/recruitment/offers/:offerId/respond', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, recruitmentController.respondToOffer);
+router.get('/recruitment/funnel', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, recruitmentController.getRecruitmentFunnel);
+
+// ─── Performance Management (Step 5) ────────────────────────────────────────
+router.get('/performance/cycles', authenticateToken, authenticatedUserLimiter, performanceController.getCycles);
+router.post('/performance/cycles', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.createCycle);
+router.get('/performance/cycles/:cycleId/analytics', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, performanceController.getCycleAnalytics);
+router.get('/performance/cycles/:cycleId/employees/:employeeId/goals', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.getGoals);
+router.post('/performance/cycles/:cycleId/employees/:employeeId/goals', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.createGoal);
+router.patch('/performance/goals/:goalId/progress', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.updateGoalProgress);
+router.get('/performance/cycles/:cycleId/employees/:employeeId/reviews', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.getReviews);
+router.patch('/performance/reviews/:reviewId/submit', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.submitReview);
+
+// ─── Payroll (Step 6) ───────────────────────────────────────────────────────
+router.get('/payroll/salary/:employeeId', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getSalaryStructure);
+router.post('/payroll/salary/:employeeId', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.setSalaryStructure);
+router.get('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getPayrollRuns);
+router.post('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.createPayrollRun);
+router.post('/payroll/runs/:runId/generate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.generatePayslips);
+router.post('/payroll/runs/:runId/finalize', authenticateToken, authorizeRoles(['ADMIN']), authenticatedUserLimiter, payrollController.finalizePayrollRun);
+router.get('/payroll/payslips/me', authenticateToken, authenticatedUserLimiter, payrollController.getMyPayslips);
+
+// ─── Approval Workflow (Step 9) ──────────────────────────────────────────────
+router.get('/workflows/pending', authenticateToken, authenticatedUserLimiter, workflowController.getPendingApprovals);
+router.post('/workflows/requests/:requestId/action', authenticateToken, authenticatedUserLimiter, workflowController.takeApprovalAction);
+
+// ─── Scheduling & Overtime (Step 7) ──────────────────────────────────────────
+router.get('/scheduling/employees/:employeeId/schedule', authenticateToken, enforceScope, authenticatedUserLimiter, schedulingController.getSchedule);
+router.put('/scheduling/employees/:employeeId/schedule', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.setSchedule);
+router.get('/scheduling/employees/:employeeId/shifts', authenticateToken, enforceScope, authenticatedUserLimiter, schedulingController.getShiftAssignments);
+router.post('/scheduling/employees/:employeeId/shifts', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.assignShift);
+router.get('/scheduling/overtime/rules', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.getOvertimeRules);
+router.post('/scheduling/overtime/rules', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.createOvertimeRule);
+router.get('/scheduling/overtime/records', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.getOvertimeRecords);
+router.post('/scheduling/overtime/records', authenticateToken, enforceScope, authenticatedUserLimiter, schedulingController.recordOvertime);
+router.post('/scheduling/overtime/records/:recordId/approve', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.approveOvertime);
+router.post('/scheduling/overtime/records/:recordId/reject', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.rejectOvertime);
+
+// ─── Assets Management (Step 8) ──────────────────────────────────────────────
+router.get('/assets', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.listAssets);
+router.post('/assets', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.createAsset);
+router.post('/assets/:id/assign', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, schedulingController.assignAsset);
+router.post('/assets/:id/return', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, schedulingController.returnAsset);
+router.get('/assets/:id/history', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, schedulingController.getAssetHistory);
+
+// ─── Training / L&D (Step 8) ─────────────────────────────────────────────────
+router.get('/training/courses', authenticateToken, authenticatedUserLimiter, schedulingController.listCourses);
+router.post('/training/courses', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.createCourse);
+router.post('/training/courses/:courseId/enroll', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.enrollEmployee);
+router.patch('/training/enrollments/:enrollmentId/complete', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.markCourseComplete);
+router.get('/training/my-training', authenticateToken, authenticatedUserLimiter, schedulingController.getMyTraining);
+router.get('/training/mandatory-compliance', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.getMandatoryCompliance);
 
 export default router;
