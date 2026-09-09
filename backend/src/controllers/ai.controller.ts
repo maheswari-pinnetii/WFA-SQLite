@@ -50,7 +50,7 @@ export const updateFeatureFlag = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: 'enabled must be a boolean' });
     }
 
-    const updated = await featureFlagService.setFlag(key, enabled, orgId);
+    const updated = await featureFlagService.setFlag(key as string, enabled, orgId);
     return res.json({ success: true, data: updated });
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });

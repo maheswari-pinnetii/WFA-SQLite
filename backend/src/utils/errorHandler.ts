@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 // Patterns that indicate internal database, filesystem, or stack trace disclosures
 const SENSITIVE_ERROR_PATTERNS = [
@@ -86,3 +86,4 @@ export const handleControllerError = (
     message: safeMessage
   });
 };
+

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import crypto from 'crypto';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 export interface WebhookPayload {
   event: string;
@@ -101,3 +101,4 @@ export class WebhookDispatcher {
     return 'sha256=' + crypto.createHmac('sha256', secret).update(payload).digest('hex');
   }
 }
+

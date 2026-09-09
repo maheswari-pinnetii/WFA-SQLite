@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import rateLimit, { Store, IncrementResponse, ipKeyGenerator } from 'express-rate-limit';
 import { query, execute } from '../database/sqlite-cloud.js';
 import { env } from '../config/env.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 let tableInitialized = false;
 let tableInitPromise: Promise<void> | null = null;
@@ -287,3 +287,4 @@ export const globalApiLimiter = rateLimit({
     res.status(options.statusCode).json(options.message);
   }
 });
+

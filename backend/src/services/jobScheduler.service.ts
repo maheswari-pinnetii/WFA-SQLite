@@ -1,5 +1,5 @@
 import { execute, query } from '../database/sqlite-cloud.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 export type JobHandler = (payload: any) => Promise<void>;
 
@@ -111,3 +111,4 @@ class JobSchedulerService {
 }
 
 export const jobScheduler = new JobSchedulerService();
+

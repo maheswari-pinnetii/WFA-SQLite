@@ -4,7 +4,7 @@ import { statisticalEngine } from './statisticalEngine.js';
 import { CircuitBreaker } from '../../utils/circuitBreaker.js';
 import { emitToRole, emitToDept } from '../../sockets/socketEmitter.js';
 import { SOCKET_EVENTS } from '../../sockets/events.js';
-import logger from '../../config/logger.js';
+import { logger } from '../../config/logger.js'
 
 class StatisticalAIProvider implements AIProvider {
   name = 'statistical-deterministic-engine';
@@ -212,3 +212,4 @@ class AIService {
 }
 
 export const aiService = new AIService();
+

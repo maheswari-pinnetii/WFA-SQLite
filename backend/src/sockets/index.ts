@@ -6,7 +6,7 @@ import { handleDashboardEvents } from './dashboard.socket.js';
 import { socketAuthMiddleware, setupSocketUserRooms } from './socketAuth.js';
 import { isUserAuthorizedForRoom } from './rooms.js';
 import { setIO } from './socketEmitter.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 export * from './events.js';
 export * from './rooms.js';
@@ -94,5 +94,6 @@ export const initSockets = (io: SocketServer) => {
     });
   });
 };
+
 
 

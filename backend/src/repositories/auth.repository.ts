@@ -18,6 +18,8 @@ export interface UserRow {
   companyId: string;
   createdAt: string;
   updatedAt: string;
+  email_verified?: number;
+  email_verified_at?: string;
 }
 
 const userCacheByEmail = new Map<string, { user: UserRow; timestamp: number }>();

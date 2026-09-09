@@ -1,5 +1,5 @@
 import { jobScheduler } from './jobScheduler.service.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 export interface EmailMessage {
   to: string;
@@ -63,3 +63,4 @@ class EmailRetryService {
 }
 
 export const emailRetryService = new EmailRetryService();
+

@@ -1,4 +1,4 @@
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 interface CacheItem<T> {
   value: T;
@@ -73,3 +73,4 @@ class InMemoryCache {
 }
 
 export const cacheService = new InMemoryCache();
+

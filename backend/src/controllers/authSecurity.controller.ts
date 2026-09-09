@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { query, execute } from '../database/sqlite-cloud.js';
 import { sendPasswordResetEmail, sendPasswordChangedNotification, sendEmailVerificationEmail } from '../services/email.service.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 /**
  * Validates password against the complexity policy.
@@ -259,3 +259,4 @@ export const verifyEmail = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: 'An internal error occurred.' });
   }
 };
+

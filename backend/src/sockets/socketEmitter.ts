@@ -2,7 +2,7 @@ import { Server as SocketServer } from 'socket.io';
 import { ROOMS } from './rooms.js';
 import { SOCKET_EVENTS } from './events.js';
 import { SocketEventType } from './events.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 let ioInstance: SocketServer | null = null;
 
@@ -138,4 +138,5 @@ export const disconnectUserSockets = async (userId: string, reason: string = 'Se
     logger.error('socket.disconnect_error', `Failed to disconnect sockets for user ${userId}: ${err.message}`);
   }
 };
+
 

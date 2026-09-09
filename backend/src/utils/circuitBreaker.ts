@@ -1,4 +1,4 @@
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
@@ -84,3 +84,4 @@ export class CircuitBreaker {
     this.lastFailureTime = 0;
   }
 }
+

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 // -------------------------------------------------------------
 // 1. SSRF (Server-Side Request Forgery) Defense
@@ -278,3 +278,4 @@ export const requestTimeoutGuard = (timeoutMs: number = 30000) => {
     next();
   };
 };
+

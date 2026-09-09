@@ -1,7 +1,7 @@
 import { query, execute } from '../database/sqlite-cloud.js';
 import { emitToOrg } from '../sockets/socketEmitter.js';
 import { SOCKET_EVENTS } from '../sockets/events.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 export interface FeatureFlag {
   key: string;
@@ -138,3 +138,4 @@ class FeatureFlagService {
 }
 
 export const featureFlagService = new FeatureFlagService();
+

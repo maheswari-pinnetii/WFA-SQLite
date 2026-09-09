@@ -7,7 +7,7 @@ import { globalApiLimiter } from './middleware/rateLimiter.js';
 import { inputSanitizer } from './middleware/validateInput.js';
 import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
 import { authenticateToken, authorizeRoles } from './middleware/auth.js';
-import logger from './config/logger.js';
+import { logger } from './config/logger.js'
 
 const app = express();
 
@@ -154,5 +154,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 });
 
 export { app };
+
+
 
 

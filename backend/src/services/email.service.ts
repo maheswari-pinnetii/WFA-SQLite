@@ -8,7 +8,7 @@
  *  - Production startup fails if EMAIL_FROM is missing when SMTP is configured.
  */
 import crypto from 'crypto';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 // ─── HTML escape to prevent template injection ─────────────────────────────
 const escapeHtml = (unsafe: string): string => {
@@ -242,3 +242,4 @@ export const sendSecurityAlertEmail = async (
   `);
   await sendEmail(to, subject, html);
 };
+

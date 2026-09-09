@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 import { getAuthorizedRoomsForUser, SocketUserContext } from './rooms.js';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 import { User } from '../models/User.js';
 import { query } from '../database/sqlite-cloud.js';
 
@@ -102,3 +102,4 @@ export const setupSocketUserRooms = (socket: Socket) => {
     roomsJoined: roomsToJoin
   });
 };
+

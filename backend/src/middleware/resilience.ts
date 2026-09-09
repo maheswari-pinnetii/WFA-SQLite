@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import compression from 'compression';
 import crypto from 'crypto';
-import logger from '../config/logger.js';
+import { logger } from '../config/logger.js'
 
 // Request ID injector
 export const requestIdMiddleware = (req, res, next) => {
@@ -85,3 +85,4 @@ export const configureResilience = (app) => {
   app.use(compression());
   app.use(requestIdMiddleware);
 };
+
