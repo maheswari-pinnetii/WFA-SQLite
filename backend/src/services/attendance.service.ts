@@ -7,6 +7,8 @@ import { logAudit } from '../database/connection.js';
 import * as notificationService from './notification.service.js';
 import { emitToUser, emitToTeam, emitToDept, emitToOrg, emitToRole, SOCKET_EVENTS } from '../sockets/index.js';
 import { aiService } from './ai/aiService.js';
+import { assertValidTransition, normalizeStatus, toDbStatus } from '../utils/attendanceStateMachine.js';
+import { AppError, ErrorCode } from '../utils/apiError.js';
 
 const OFFICE_COORDS = { lat: 12.9716, lng: 77.5946 };
 const ALLOWED_RADIUS_METERS = 100;
@@ -39,7 +41,10 @@ export class AttendanceService {
   }
 
   async checkIn(reqUser: any, punchData: any): Promise<any> {
-    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const orgId = reqUser.companyId || reqUser.organizationId;
+    if (!orgId) {
+      throw new AppError(ErrorCode.AUTH_TENANT_MISSING, 'Your account is not associated with an organization.', 403);
+    }
     const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : punchData.employeeId;
     const { shiftType, workMode, latitude, longitude, accuracy, idempotencyKey } = punchData;
 
@@ -102,8 +107,10 @@ export class AttendanceService {
         });
 
         if (activeSession) {
+          // Enforce state machine: CHECKED_IN → CHECKED_IN is invalid
+          assertValidTransition(activeSession.status, 'CHECKED_IN');
           notificationService.triggerAlarm(employeeId, identity.name, 'DUPLICATE_CHECKIN_ATTEMPT', 'Active session already exists.');
-          throw new Error('Active session already exists. Must check out first.');
+          throw new AppError(ErrorCode.ATTENDANCE_ALREADY_CHECKED_IN, 'Active session already exists. Must check out first.', 409);
         }
 
         const id = Math.random().toString(36).slice(2, 11);
@@ -193,7 +200,10 @@ export class AttendanceService {
   }
 
   async takeBreak(reqUser: any, bodyData: any): Promise<any> {
-    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const orgId = reqUser.companyId || reqUser.organizationId;
+    if (!orgId) {
+      throw new AppError(ErrorCode.AUTH_TENANT_MISSING, 'Your account is not associated with an organization.', 403);
+    }
     const employeeId = reqUser.role === 'EMPLOYEE' ? reqUser.id : bodyData.employeeId;
 
     try {
@@ -201,11 +211,10 @@ export class AttendanceService {
       await transaction(async () => {
         record = await Attendance.findOne({ employeeId, companyId: orgId, status: { $ne: 'Checked Out' } });
         if (!record) {
-          throw new Error('No active check-in session found.');
+          throw new AppError(ErrorCode.ATTENDANCE_NOT_CHECKED_IN, 'No active check-in session found.', 409);
         }
-        if (record.status === 'On Break') {
-          throw new Error('Already on break.');
-        }
+        // Enforce state machine: CHECKED_IN → ON_BREAK
+        assertValidTransition(record.status, 'ON_BREAK');
 
         const nowStr = new Date().toISOString();
         const breakId = Math.random().toString(36).slice(2, 11);

@@ -4,6 +4,8 @@ import { User } from '../models/User.js';
 import { logAudit } from '../config/db.js';
 import { emitToUser, emitToDept, emitToTeam, emitToRole, SOCKET_EVENTS } from '../sockets/index.js';
 import { handleControllerError } from '../utils/errorHandler.js';
+import { leaveEngineService } from '../services/leave-engine.service.js';
+import { employeeLifecycleService } from '../services/employee-lifecycle.service.js';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
 
@@ -185,6 +187,31 @@ export const reviewLeaveRequest = async (req, res) => {
     request.reviewedBy = req.user.name;
     request.reviewComment = reviewComment;
     await request.save();
+
+    // ── BUG FIX 1: Deduct leave balance on APPROVED ────────────────────────────
+    if (status === 'APPROVED' && request.leaveTypeId) {
+      try {
+        const startDate = new Date(request.startDate);
+        const endDate = new Date(request.endDate);
+        // Calculate working days (simple weekday count as fallback)
+        let days = 0;
+        try {
+          days = await leaveEngineService.calculateWorkingDays(request.startDate, request.endDate, orgId);
+        } catch {
+          // Fallback: rough calendar-day count
+          days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        }
+        await leaveEngineService.deductLeaveBalance(request.employeeId, request.leaveTypeId, days, orgId);
+      } catch (balanceErr: any) {
+        // Revert approval if balance insufficient
+        request.status = 'PENDING';
+        request.reviewedBy = undefined;
+        request.reviewComment = undefined;
+        await request.save();
+        return res.status(409).json({ success: false, message: `Leave balance error: ${balanceErr.message}` });
+      }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
 
     logAudit(request.employeeId, `LEAVE_${status}`, `${req.user.name} reviewed leave request ${request.id}`, orgId);
 

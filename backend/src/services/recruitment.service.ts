@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { query, execute } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
+import { employeeLifecycleService } from './employee-lifecycle.service.js';
 
 export const recruitmentService = {
 
@@ -110,12 +111,52 @@ export const recruitmentService = {
     return { id };
   },
 
-  async respondToOffer(offerId: string, response: 'ACCEPTED' | 'REJECTED') {
+  async respondToOffer(offerId: string, response: 'ACCEPTED' | 'REJECTED', organizationId?: string) {
     await execute(`UPDATE offers SET status = ? WHERE id = ?`, [response, offerId]);
     const offer = await query(`SELECT * FROM offers WHERE id = ?`, [offerId]).then(r => r[0]) as any;
+
     if (offer && response === 'ACCEPTED') {
       await this.updateApplicationStatus(offer.applicationId, 'HIRED');
+
+      // ── BUG FIX 2: Auto-create Employee record from accepted offer ──────────
+      const application = await query(
+        `SELECT a.*, jr.title as jobTitle, jr.department, jr.organizationId
+         FROM applications a
+         JOIN job_requisitions jr ON a.jobRequisitionId = jr.id
+         WHERE a.id = ?`,
+        [offer.applicationId]
+      ).then(r => r[0]) as any;
+
+      if (application) {
+        const orgId = application.organizationId || organizationId || 'org-stackly';
+        const empId = randomUUID();
+        const now = new Date().toISOString();
+        const empCode = `EMP-${Date.now().toString(36).toUpperCase()}`;
+
+        try {
+          await execute(
+            `INSERT INTO employees (id, employeeCode, name, email, role, department, designation, status, organizationId, companyId, joinDate, createdAt, updatedAt)
+             VALUES (?, ?, ?, ?, 'EMPLOYEE', ?, ?, 'ONBOARDING', ?, ?, ?, ?, ?)`,
+            [empId, empCode, application.candidateName, application.candidateEmail,
+             application.department || null, application.jobTitle || null,
+             orgId, orgId, now.split('T')[0], now, now]
+          );
+
+          // Trigger onboarding lifecycle status
+          await employeeLifecycleService.transitionStatus(empId, 'ONBOARDING', {
+            reason: `Hired via recruitment — offer ${offerId} accepted`,
+            changedBy: 'SYSTEM',
+            organizationId: orgId
+          });
+
+          logger.info(`[Recruitment] Created employee ${empId} from accepted offer ${offerId}`);
+        } catch (empErr: any) {
+          logger.error(`[Recruitment] Failed to create employee from offer: ${empErr.message}`);
+        }
+      }
+      // ───────────────────────────────────────────────────────────────────────
     }
+
     return { offerId, status: response };
   },
 

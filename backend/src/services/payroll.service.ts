@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
-import { query, execute } from '../database/sqlite-cloud.js';
+import { query, execute, transaction } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
+import { AppError, ErrorCode } from '../utils/apiError.js';
 
 export const payrollService = {
 
@@ -73,63 +74,82 @@ export const payrollService = {
     const run = await query(`SELECT * FROM payroll_runs WHERE id = ? AND organizationId = ?`, [payrollRunId, organizationId])
       .then(r => r[0]) as any;
 
-    if (!run) throw new Error('Payroll run not found');
-    if (run.status === 'FINALIZED') throw new Error('Payroll run already finalized');
-
-    const employees = await query(
-      `SELECT id FROM employees WHERE organizationId = ? AND status = 'ACTIVE'`,
-      [organizationId]
-    ) as any[];
-
-    const payslips = [];
-
-    for (const emp of employees) {
-      const structure = await this.getSalaryStructure(emp.id, organizationId) as any;
-      if (!structure) {
-        logger.warn(`[Payroll] No salary structure for employee ${emp.id}, skipping`);
-        continue;
-      }
-
-      const components = Array.isArray(structure.components) ? structure.components : [];
-      const earnings = components
-        .filter((c: any) => c.type === 'EARNING')
-        .reduce((sum: number, c: any) => sum + c.amount, 0);
-      const deductions = components
-        .filter((c: any) => c.type === 'DEDUCTION')
-        .reduce((sum: number, c: any) => sum + c.amount, 0);
-
-      const basicPay = structure.baseSalary;
-      const totalEarnings = basicPay + earnings;
-      const totalDeductions = deductions;
-      const netPay = totalEarnings - totalDeductions;
-
-      const payslipId = randomUUID();
-      await execute(
-        `INSERT OR REPLACE INTO payslips (id, payrollRunId, employeeId, basicPay, totalEarnings, totalDeductions, netPay, status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, 'GENERATED')`,
-        [payslipId, payrollRunId, emp.id, basicPay, totalEarnings, totalDeductions, netPay]
-      );
-
-      payslips.push({ employeeId: emp.id, netPay });
+    if (!run) throw AppError.notFound('Payroll run', ErrorCode.PAYROLL_RUN_NOT_FOUND);
+    if (run.status === 'FINALIZED' || run.status === 'LOCKED') {
+      throw AppError.conflict(ErrorCode.PAYROLL_RUN_ALREADY_FINALIZED, 'This payroll run has already been finalized and cannot be re-processed.');
     }
 
-    // Mark run as PROCESSED
-    await execute(
-      `UPDATE payroll_runs SET status = 'PROCESSED' WHERE id = ?`,
-      [payrollRunId]
-    );
+    return transaction(async () => {
+      const employees = await query(
+        `SELECT id FROM employees WHERE organizationId = ? AND status = 'ACTIVE'`,
+        [organizationId]
+      ) as any[];
 
-    logger.info(`[Payroll] Generated ${payslips.length} payslips for run ${payrollRunId}`);
-    return { payrollRunId, payslipsGenerated: payslips.length, payslips };
+      const payslips = [];
+
+      for (const emp of employees) {
+        const structure = await this.getSalaryStructure(emp.id, organizationId) as any;
+        if (!structure) {
+          logger.warn(`[Payroll] No salary structure for employee ${emp.id}, skipping`);
+          continue;
+        }
+
+        const components = Array.isArray(structure.components) ? structure.components : [];
+        const earnings = components
+          .filter((c: any) => c.type === 'EARNING')
+          .reduce((sum: number, c: any) => sum + c.amount, 0);
+        const deductions = components
+          .filter((c: any) => c.type === 'DEDUCTION')
+          .reduce((sum: number, c: any) => sum + c.amount, 0);
+
+        const basicPay = structure.baseSalary;
+        const totalEarnings = basicPay + earnings;
+        const totalDeductions = deductions;
+
+        // Include approved Overtime pay
+        const approvedOTRecords = await query(
+          `SELECT SUM(hours) as totalOTHours FROM overtime_records
+           WHERE employeeId = ? AND organizationId = ? AND status = 'APPROVED'
+           AND date BETWEEN ? AND ?`,
+          [emp.id, organizationId, run.periodStart, run.periodEnd]
+        ).then(r => r[0]) as any;
+
+        let overtimePay = 0;
+        if (approvedOTRecords?.totalOTHours > 0) {
+          const hourlyRate = basicPay / 160;
+          overtimePay = approvedOTRecords.totalOTHours * hourlyRate * 1.5;
+        }
+
+        const netPay = totalEarnings + overtimePay - totalDeductions;
+
+        const payslipId = randomUUID();
+        await execute(
+          `INSERT OR REPLACE INTO payslips (id, payrollRunId, employeeId, basicPay, totalEarnings, totalDeductions, netPay, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'GENERATED')`,
+          [payslipId, payrollRunId, emp.id, basicPay, totalEarnings + overtimePay, totalDeductions, netPay]
+        );
+
+        payslips.push({ employeeId: emp.id, netPay, overtimePay });
+      }
+
+      await execute(
+        `UPDATE payroll_runs SET status = 'PROCESSED' WHERE id = ?`,
+        [payrollRunId]
+      );
+
+      logger.info(`[Payroll] Generated ${payslips.length} payslips for run ${payrollRunId}`);
+      return { payrollRunId, payslipsGenerated: payslips.length, payslips };
+    });
   },
 
-  async getPayslips(employeeId: string) {
+  async getPayslips(employeeId: string, organizationId: string) {
     return query(
       `SELECT p.*, pr.periodStart, pr.periodEnd 
        FROM payslips p 
        JOIN payroll_runs pr ON p.payrollRunId = pr.id
-       WHERE p.employeeId = ? ORDER BY pr.runDate DESC`,
-      [employeeId]
+       WHERE p.employeeId = ? AND pr.organizationId = ?
+       ORDER BY pr.runDate DESC`,
+      [employeeId, organizationId]
     );
   },
 

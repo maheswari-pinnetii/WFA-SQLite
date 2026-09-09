@@ -112,12 +112,17 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   }
 
   const origin = req.headers['origin'] || req.headers['referer'];
+
+  // Build allowed list from env var (same source as CORS config) with dev defaults
+  const envOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+    : [];
   const allowed = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
-    process.env.FRONTEND_URL
+    ...envOrigins,
   ].filter(Boolean);
 
   if (origin) {
@@ -130,13 +135,18 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
       });
       return res.status(403).json({
         success: false,
-        message: 'Forbidden: Request origin validation failed.'
+        error: {
+          code: 'AUTH_PERMISSION_DENIED',
+          message: 'Forbidden: Request origin validation failed.',
+          requestId: (res as any).locals?.requestId ?? 'unknown',
+        },
       });
     }
   }
 
   next();
 };
+
 
 // -------------------------------------------------------------
 // 5. Password Complexity Validator

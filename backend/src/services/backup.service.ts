@@ -301,6 +301,66 @@ export class BackupService {
       console.warn('[Backup Rotation] Warning during backup rotation:', err.message);
     }
   }
+
+  /**
+   * Verify a backup file without touching the live database.
+   * Opens the backup read-only, runs integrity_check, counts tables and key rows.
+   * Returns { valid, integrityResult, tableCount, recordCounts, sizeBytes }.
+   */
+  async verifyBackup(filename: string): Promise<{
+    valid: boolean;
+    integrityResult: string;
+    tableCount: number;
+    recordCounts: Record<string, number>;
+    sizeBytes: number;
+    verifiedAt: string;
+  }> {
+    const backupDir = this.ensureBackupDir();
+    const filePath = path.join(backupDir, path.basename(filename));
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Backup file not found: ${filename}`);
+    }
+
+    if (!filePath.startsWith(backupDir)) {
+      throw new Error('Path traversal detected: backup filename is invalid.');
+    }
+
+    if (!filePath.endsWith('.sqlite')) {
+      throw new Error('Only uncompressed .sqlite backups can be verified directly.');
+    }
+
+    const sizeBytes = fs.statSync(filePath).size;
+    const verifyDb = new BetterSqlite3(filePath, { readonly: true });
+
+    try {
+      // 1. Integrity check
+      const integrityRows = verifyDb.pragma('integrity_check') as any[];
+      const integrityResult: string = integrityRows?.[0]?.integrity_check ?? 'unknown';
+      const valid = integrityResult === 'ok';
+
+      // 2. Count tables
+      const tables = verifyDb.prepare(
+        `SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'`
+      ).all() as { name: string }[];
+      const tableCount = tables.length;
+
+      // 3. Count key records
+      const recordCounts: Record<string, number> = {};
+      const keyTables = ['users', 'employees', 'attendancerecords', 'payslips', 'audit_logs'];
+      for (const t of keyTables) {
+        const exists = tables.some(r => r.name === t);
+        if (exists) {
+          const row = verifyDb.prepare(`SELECT COUNT(*) as cnt FROM ${t}`).get() as any;
+          recordCounts[t] = row?.cnt ?? 0;
+        }
+      }
+
+      return { valid, integrityResult, tableCount, recordCounts, sizeBytes, verifiedAt: new Date().toISOString() };
+    } finally {
+      verifyDb.close();
+    }
+  }
 }
 
 export const backupService = new BackupService();

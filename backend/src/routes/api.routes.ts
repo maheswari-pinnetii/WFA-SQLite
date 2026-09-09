@@ -17,6 +17,7 @@ import * as performanceController from '../controllers/performance.controller.js
 import * as workflowController from '../controllers/workflow.controller.js';
 import * as schedulingController from '../controllers/scheduling.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
+import { tenantScope } from '../middleware/tenantScope.js';
 import {
   loginRateLimiter,
   registerRateLimiter,
@@ -166,12 +167,12 @@ router.get('/roles', authenticateToken, authenticatedUserLimiter, organizationCo
 router.get('/permissions', authenticateToken, authenticatedUserLimiter, organizationController.getPermissions);
 
 // Attendance Punch & Session Routes
-router.get('/attendance/today', authenticateToken, authenticatedUserLimiter, attendanceController.getTodayAttendance);
-router.post('/attendance/check-in', authenticateToken, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.checkIn);
-router.post('/attendance/break', authenticateToken, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.takeBreak);
-router.post('/attendance/resume', authenticateToken, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.resumeWork);
-router.post('/attendance/check-out', authenticateToken, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.checkOut);
-router.get('/attendance/records', authenticateToken, enforceScope, authenticatedUserLimiter, attendanceController.getRecords);
+router.get('/attendance/today', authenticateToken, tenantScope, authenticatedUserLimiter, attendanceController.getTodayAttendance);
+router.post('/attendance/check-in', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.checkIn);
+router.post('/attendance/break', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.takeBreak);
+router.post('/attendance/resume', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.resumeWork);
+router.post('/attendance/check-out', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.checkOut);
+router.get('/attendance/records', authenticateToken, tenantScope, enforceScope, authenticatedUserLimiter, attendanceController.getRecords);
 router.get('/attendance/shifts', publicApiLimiter, attendanceController.getShifts);
 router.get('/attendance/holidays', publicApiLimiter, attendanceController.getPublicHolidays);
 router.get('/attendance/audit-logs', authenticateToken, authenticatedUserLimiter, attendanceController.getAuditLogs);
@@ -227,6 +228,8 @@ router.get('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backu
 router.post('/admin/backups/restore', authenticateToken, authorizeRoles(['ADMIN']), validateBackupRestore, backupController.restoreBackup);
 router.get('/admin/backups/:filename/download', authenticateToken, authorizeRoles(['ADMIN']), validateBackupFilenameParam, backupController.downloadBackup);
 router.delete('/admin/backups/:filename', authenticateToken, authorizeRoles(['ADMIN']), validateBackupFilenameParam, backupController.deleteBackup);
+// Backup integrity verification — does NOT restore to live DB
+router.get('/admin/backups/:filename/verify', authenticateToken, authorizeRoles(['ADMIN']), validateBackupFilenameParam, backupController.verifyBackup);
 
 // AI Intelligence & Workforce Insights
 router.get('/ai/insights', authenticateToken, authenticatedUserLimiter, aiController.getAIInsights);

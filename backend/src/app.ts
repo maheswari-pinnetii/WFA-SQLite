@@ -7,7 +7,8 @@ import { globalApiLimiter } from './middleware/rateLimiter.js';
 import { inputSanitizer } from './middleware/validateInput.js';
 import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
 import { authenticateToken, authorizeRoles } from './middleware/auth.js';
-import { logger } from './config/logger.js'
+import { logger } from './config/logger.js';
+import { AppError, ErrorCode, sendError } from './utils/apiError.js';
 
 const app = express();
 
@@ -19,27 +20,41 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-const allowedOrigins: string[] = [
+// ─── CORS Configuration ───────────────────────────────────────────────────────
+// Dev defaults; override in production via ALLOWED_ORIGINS env var
+const devDefaults = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://127.0.0.1:3000',
-  'http://127.0.0.1:3001'
+  'http://127.0.0.1:3001',
 ];
-if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(process.env.FRONTEND_URL);
+
+const allowedOrigins: string[] = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+  : devDefaults;
+
+// In non-production environments also allow the dev defaults so local dev still works
+if (process.env.NODE_ENV !== 'production') {
+  for (const dev of devDefaults) {
+    if (!allowedOrigins.includes(dev)) allowedOrigins.push(dev);
+  }
 }
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'test') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow server-to-server (no origin) and test environments
+    if (!origin || process.env.NODE_ENV === 'test') {
+      return callback(null, true);
     }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    logger.warn('security.cors.rejected', `Blocked CORS request from unlisted origin: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
-  credentials: true
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-Idempotency-Key'],
+  credentials: true,
 }));
 app.use(requestTimeoutGuard(30000));
 app.use(express.json({ limit: '10mb' }));
@@ -134,23 +149,9 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
-// Global Error Handler - Never expose backend internals, file paths, or database details
-import { getSafeErrorMessage } from './utils/errorHandler.js';
-
+// Global Error Handler — standard AppError format, never leaks internals
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  logger.error('http.error', err.message || 'Internal Server Error', {
-    requestId: (req as any).requestId || 'unknown',
-    method: req.method,
-    route: req.originalUrl,
-    stack: err.stack
-  });
-  
-  const safeMessage = getSafeErrorMessage(err, 'An unexpected error occurred. Please try again later.');
-
-  res.status(err.status || 500).json({
-    success: false,
-    message: safeMessage
-  });
+  sendError(res, err, req);
 });
 
 export { app };
