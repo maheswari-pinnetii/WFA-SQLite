@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 export const HrDashboardOverview: React.FC<{ getGreeting: () => string; firstName: string }> = ({ getGreeting, firstName }) => (
   <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
     <div className="flex items-center gap-4">
-      <div className="w-11 h-11 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 border border-purple-100 dark:border-purple-800/50 flex items-center justify-center shrink-0">
+      <div className="w-11 h-11 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 flex items-center justify-center shrink-0">
         <UserCheck size={22} />
       </div>
       <div>
@@ -58,7 +58,7 @@ export const HrDashboardFilters: React.FC<{
 }> = (props) => (
   <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
     <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-medium uppercase tracking-wider">
-      <Filter size={14} className="text-purple-500" /> HR Operational Filters
+      <Filter size={14} className="text-emerald-500" /> HR Operational Filters
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
       <div>
@@ -67,7 +67,7 @@ export const HrDashboardFilters: React.FC<{
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-purple-500 font-normal"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal"
         />
       </div>
       <div>
@@ -75,7 +75,7 @@ export const HrDashboardFilters: React.FC<{
         <select
           value={props.locationFilter}
           onChange={(e) => props.setLocationFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-purple-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Locations</option>
           <option value="Bangalore">Bangalore</option>
@@ -88,7 +88,7 @@ export const HrDashboardFilters: React.FC<{
         <select
           value={props.deptFilter}
           onChange={(e) => props.setDeptFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-purple-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Departments</option>
           <option value="Engineering">Engineering</option>
@@ -101,7 +101,7 @@ export const HrDashboardFilters: React.FC<{
         <select
           value={props.teamFilter}
           onChange={(e) => props.setTeamFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-purple-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Teams</option>
           <option value="Frontend">Frontend</option>
@@ -113,7 +113,7 @@ export const HrDashboardFilters: React.FC<{
         <select
           value={props.empTypeFilter}
           onChange={(e) => props.setEmpTypeFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-purple-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Types</option>
           <option value="Full-time">Full-time</option>
@@ -125,7 +125,7 @@ export const HrDashboardFilters: React.FC<{
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-purple-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
@@ -140,7 +140,7 @@ export const HrSprintOverview: React.FC<{ hrTasks: Task[] }> = ({ hrTasks }) => 
   <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-4">
     <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
       <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
-        <Layers size={17} className="text-purple-500" /> HR Active Sprint Work
+        <Layers size={17} className="text-emerald-500" /> HR Active Sprint Work
       </h3>
       <span className="badge badge-primary text-xs font-medium">HR OPERATIONS SPRINT</span>
     </div>

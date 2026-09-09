@@ -51,7 +51,7 @@ export const PermissionsManagement: React.FC = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black tracking-tight flex items-center gap-2 text-[var(--text-primary)]">
-              <Lock className="text-indigo-400" size={24} />
+              <Lock className="text-emerald-400" size={24} />
               Granular Permission Matrix & Access Controls
             </h2>
             <p className="text-xs text-slate-400">
@@ -108,7 +108,7 @@ export const PermissionsManagement: React.FC = () => {
                   key={p}
                   className={`p-4 rounded-2xl border transition-all ${
                     granted
-                      ? 'bg-blue-600/10 border-blue-500/30 text-white'
+                      ? 'bg-emerald-600/10 border-emerald-500/30 text-white'
                       : 'bg-slate-900/40 border-slate-800 text-slate-400 opacity-60'
                   }`}
                 >

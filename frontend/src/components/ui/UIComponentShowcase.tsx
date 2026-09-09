@@ -30,7 +30,7 @@ export const UIComponentShowcase: React.FC<UIComponentShowcaseProps> = ({ classN
   return (
     <div className={`ui-component-showcase p-6 bg-slate-900 text-white rounded-xl space-y-8 ${className}`}>
       <div className="border-b border-slate-800 pb-4">
-        <h2 className="text-2xl font-bold tracking-tight text-blue-400">Enterprise UI Design System Component Showcase</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-emerald-400">Enterprise UI Design System Component Showcase</h2>
         <p className="text-slate-400 text-sm mt-1">
           Standardized UI component primitives: Cards, Sidebar, Widgets, Popover, ToggleSwitch, Text Fields, Modal, Accordion, Badge, and Progress Bar.
         </p>
@@ -66,9 +66,9 @@ export const UIComponentShowcase: React.FC<UIComponentShowcaseProps> = ({ classN
             <CardTitle className="text-lg text-white">3. Interactive Widgets</CardTitle>
           </CardHeader>
           <CardContent className="text-slate-300 text-sm">
-            <div className="p-3 bg-blue-950/40 border border-blue-800/50 rounded-lg text-xs flex justify-between items-center">
+            <div className="p-3 bg-emerald-950/40 border border-emerald-800/50 rounded-lg text-xs flex justify-between items-center">
               <span>Live Attendance Punch Widget</span>
-              <span className="px-2 py-0.5 bg-blue-500 text-white rounded text-[10px] font-semibold">ACTIVE</span>
+              <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[10px] font-semibold">ACTIVE</span>
             </div>
           </CardContent>
         </Card>
@@ -130,7 +130,7 @@ export const UIComponentShowcase: React.FC<UIComponentShowcaseProps> = ({ classN
           <CardContent>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded font-medium"
+              className="px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded font-medium"
             >
               Open Audit Modal
             </button>
@@ -144,7 +144,7 @@ export const UIComponentShowcase: React.FC<UIComponentShowcaseProps> = ({ classN
                     <p>Submit attendance correction request for HR/Manager review.</p>
                     <button
                       onClick={() => setIsModalOpen(false)}
-                      className="px-4 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-500"
+                      className="px-4 py-2 bg-emerald-600 text-white text-xs rounded hover:bg-emerald-500"
                     >
                       Close Modal
                     </button>
@@ -187,7 +187,7 @@ export const UIComponentShowcase: React.FC<UIComponentShowcaseProps> = ({ classN
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">ADMIN</Badge>
-            <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">HR OPS</Badge>
+            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">HR OPS</Badge>
             <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">SOC2 COMPLIANT</Badge>
           </CardContent>
         </Card>

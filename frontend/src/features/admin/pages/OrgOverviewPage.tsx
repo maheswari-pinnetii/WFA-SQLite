@@ -54,7 +54,7 @@ export const OrgOverviewPage: React.FC = () => {
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{entity.name}</td>
                     <td className="p-3 text-slate-300">{entity.region}</td>
                     <td className="p-3 text-emerald-400 font-bold">{entity.status}</td>
-                    <td className="p-3 font-mono font-bold text-blue-400">{entity.headcount} Employees</td>
+                    <td className="p-3 font-mono font-bold text-emerald-400">{entity.headcount} Employees</td>
                   </tr>
                 ))}
               </tbody>

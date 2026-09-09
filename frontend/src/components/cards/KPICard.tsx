@@ -26,11 +26,11 @@ export const KPICard: React.FC<KPICardProps> = ({
   onClick
 }) => {
   const accentClasses = {
-    blue: 'bg-blue-50 text-blue-600',
+    blue: 'bg-emerald-50 text-emerald-600',
     emerald: 'bg-emerald-50 text-emerald-600',
     cyan: 'bg-cyan-50 text-cyan-600',
     amber: 'bg-amber-50 text-amber-600',
-    purple: 'bg-purple-50 text-purple-600',
+    purple: 'bg-emerald-50 text-emerald-600',
     rose: 'bg-rose-50 text-rose-600',
     red: 'bg-red-50 text-red-600',
   };

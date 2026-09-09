@@ -44,7 +44,7 @@ export function AnimatedTabs({
               <span
                 className={cn(
                   'px-1.5 py-0.2 rounded-full text-[10px] font-black',
-                  isActive ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-400'
+                  isActive ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-400'
                 )}
               >
                 {tab.badge}
@@ -54,7 +54,7 @@ export function AnimatedTabs({
               <motion.div
                 layoutId="active-pill-tab"
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className="absolute inset-0 bg-blue-600 rounded-xl -z-10 shadow-md shadow-blue-500/25"
+                className="absolute inset-0 bg-emerald-600 rounded-xl -z-10 shadow-md shadow-blue-500/25"
               />
             )}
           </button>

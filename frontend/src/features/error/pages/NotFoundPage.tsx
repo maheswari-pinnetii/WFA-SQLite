@@ -16,11 +16,11 @@ export const NotFoundPage: React.FC = () => {
 
         {/* 404 Large Badge */}
         <div className="relative my-4">
-          <span className="text-8xl font-black tracking-tighter text-blue-500/20 select-none">
+          <span className="text-8xl font-black tracking-tighter text-emerald-500/20 select-none">
             404
           </span>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center border border-blue-500/30 shadow-lg">
+            <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center border border-emerald-500/30 shadow-lg">
               <FileQuestion size={36} />
             </div>
           </div>
@@ -44,7 +44,7 @@ export const NotFoundPage: React.FC = () => {
           </button>
           <Link
             to="/"
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
           >
             <Home size={16} /> Return to Dashboard
           </Link>

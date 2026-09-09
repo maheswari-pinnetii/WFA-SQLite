@@ -23,7 +23,7 @@ export const AccessControlPage: React.FC = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 text-xs font-mono font-bold">
+            <span className="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono font-bold">
               MFA Enforced • 100% Compliance
             </span>
           </div>
@@ -40,7 +40,7 @@ export const AccessControlPage: React.FC = () => {
         {/* Security Audit Log Stream */}
         <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-4">
           <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <History size={18} className="text-purple-400" /> Real-time Security Event Audit Stream
+            <History size={18} className="text-emerald-400" /> Real-time Security Event Audit Stream
           </h3>
 
           <div className="space-y-2">
@@ -60,7 +60,7 @@ export const AccessControlPage: React.FC = () => {
                 </div>
                 <div className="text-right shrink-0">
                   <span className="font-mono text-[10px] text-slate-400 block">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                  <span className="text-[10px] font-bold text-purple-400 uppercase">{log.userRole}</span>
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase">{log.userRole}</span>
                 </div>
               </div>
             ))}

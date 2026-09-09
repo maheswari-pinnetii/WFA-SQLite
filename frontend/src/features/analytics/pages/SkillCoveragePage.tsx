@@ -54,7 +54,7 @@ export const SkillCoveragePage: React.FC = () => {
                   <tr key={idx} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{cert.title}</td>
                     <td className="p-3 text-slate-300">{cert.authority}</td>
-                    <td className="p-3 font-bold text-blue-400">{cert.activeHolders} Employees</td>
+                    <td className="p-3 font-bold text-emerald-400">{cert.activeHolders} Employees</td>
                     <td className="p-3 text-emerald-400 font-bold uppercase">{cert.renewalRate}</td>
                   </tr>
                 ))}

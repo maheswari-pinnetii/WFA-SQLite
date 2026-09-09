@@ -32,7 +32,7 @@ export const SystemConfiguration: React.FC = () => {
           {/* Security & Authentication */}
           <div className="glass-panel p-6 space-y-4">
             <h3 className="text-base font-bold text-slate-100 flex items-center gap-2 border-b border-slate-800 pb-3">
-              <ShieldCheck className="text-blue-400" size={18} />
+              <ShieldCheck className="text-emerald-400" size={18} />
               Authentication & Security Controls
             </h3>
 
@@ -68,7 +68,7 @@ export const SystemConfiguration: React.FC = () => {
                 type="number"
                 value={sessionTimeout}
                 onChange={(e) => setSessionTimeout(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
               />
             </div>
           </div>

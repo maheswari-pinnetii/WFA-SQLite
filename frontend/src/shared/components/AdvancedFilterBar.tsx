@@ -26,7 +26,7 @@ export const AdvancedFilterBar: React.FC<AdvancedFilterBarProps> = ({
           onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
           placeholder={placeholder}
           style={{ paddingLeft: '2.25rem' }}
-          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-xl pl-9 pr-8 py-2 focus:outline-none focus:border-blue-500 transition-colors"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] rounded-xl pl-9 pr-8 py-2 focus:outline-none focus:border-emerald-500 transition-colors"
         />
         {searchQuery && onClear && (
           <button

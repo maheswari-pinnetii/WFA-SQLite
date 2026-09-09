@@ -88,7 +88,7 @@ export const FaqAccordion: React.FC<{ faqs?: FaqItem[]; className?: string }> = 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search help topics, MFA, attendance..."
-            className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500 placeholder-slate-400"
+            className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 placeholder-slate-400"
           />
         </div>
 
@@ -100,7 +100,7 @@ export const FaqAccordion: React.FC<{ faqs?: FaqItem[]; className?: string }> = 
               onClick={() => setActiveCategory(cat.id)}
               className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shrink-0 transition-all ${
                 activeCategory === cat.id
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-emerald-600 text-white shadow-sm'
                   : 'bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-color)]'
               }`}
             >
@@ -134,7 +134,7 @@ export const FaqAccordion: React.FC<{ faqs?: FaqItem[]; className?: string }> = 
                   <ChevronDown
                     size={16}
                     className={`text-slate-400 transition-transform duration-200 shrink-0 ${
-                      isOpen ? 'rotate-180 text-blue-400' : ''
+                      isOpen ? 'rotate-180 text-emerald-400' : ''
                     }`}
                   />
                 </button>

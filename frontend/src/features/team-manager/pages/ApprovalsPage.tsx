@@ -148,7 +148,7 @@ export const ApprovalsPage: React.FC = () => {
           onClick={() => setActiveTab('leaves')}
           className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs transition-all cursor-pointer ${
             activeTab === 'leaves'
-              ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+              ? 'bg-emerald-600 text-white shadow-lg shadow-blue-500/20'
               : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
           }`}
         >
@@ -182,7 +182,7 @@ export const ApprovalsPage: React.FC = () => {
         <div className="glass-panel p-6 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-color)]">
             <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-              <Calendar size={18} className="text-blue-400" /> Pending Leave & PTO Requests
+              <Calendar size={18} className="text-emerald-400" /> Pending Leave & PTO Requests
             </h3>
             <span className="text-xs text-slate-400 font-bold bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
               {leaveApprovals.length} Total Leave Records
@@ -202,7 +202,7 @@ export const ApprovalsPage: React.FC = () => {
                     <span className="badge badge-info text-[9px] uppercase font-black">{req.type}</span>
                   </div>
                   <p className="text-xs text-slate-300">
-                    Duration: <span className="font-bold text-blue-400">{req.duration}</span> &bull; Reason: <span className="italic">"{req.reason}"</span>
+                    Duration: <span className="font-bold text-emerald-400">{req.duration}</span> &bull; Reason: <span className="italic">"{req.reason}"</span>
                   </p>
                   <p className="text-[10px] text-slate-400">Submitted on {req.date}</p>
                 </div>

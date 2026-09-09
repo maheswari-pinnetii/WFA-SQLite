@@ -56,7 +56,7 @@ export const SecuritySettings: React.FC = () => {
         {/* Passkeys Panel */}
         <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-6">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500">
+            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
               <KeyRound size={20} />
             </div>
             <div>
@@ -68,7 +68,7 @@ export const SecuritySettings: React.FC = () => {
           <button 
             onClick={handleRegisterPasskey}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl font-bold transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-bold transition-colors disabled:opacity-50"
           >
             {loading ? 'Processing...' : 'Add a passkey'}
           </button>

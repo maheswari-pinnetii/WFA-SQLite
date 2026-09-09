@@ -69,14 +69,19 @@ export const socketAuthMiddleware = (socket: Socket, next: (err?: Error) => void
         }
       }
 
+      const orgId = appUser.organizationId || appUser.companyId;
+      if (!orgId) {
+        return next(new Error('AUTH_TENANT_MISSING: User is not associated with an organization.'));
+      }
+
       const user: SocketUserContext = {
         id: appUser.id,
         email: appUser.email,
         role: appUser.role,
         department: appUser.department,
         team: appUser.team,
-        organizationId: appUser.organizationId || appUser.companyId || 'org-stackly',
-        companyId: appUser.companyId || appUser.organizationId || 'org-stackly'
+        organizationId: orgId,
+        companyId: orgId
       };
 
       (socket as any).user = user;

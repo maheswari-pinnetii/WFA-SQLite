@@ -31,7 +31,7 @@ export const DeptHeadDashboard: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
             <span>Department Staff</span>
-            <Users size={18} className="text-blue-500" />
+            <Users size={18} className="text-emerald-500" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">142 Engineers</p>
           <p className="text-[11px] text-emerald-400 font-bold">+8 Added this Quarter</p>
@@ -49,7 +49,7 @@ export const DeptHeadDashboard: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
             <span>Sub-Teams</span>
-            <Building2 size={18} className="text-purple-400" />
+            <Building2 size={18} className="text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">6 Teams</p>
           <p className="text-[11px] text-slate-400">Frontend, Backend, AI, DevOps...</p>

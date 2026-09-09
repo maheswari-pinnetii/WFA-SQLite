@@ -48,7 +48,7 @@ export const PerformanceOverviewPage: React.FC = () => {
             <div className="p-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-2">
               <h4 className="font-bold text-sm text-[var(--text-primary)]">Core Contributors</h4>
               <p className="text-xs text-slate-400">Solid Performance & Moderate Potential</p>
-              <div className="text-2xl font-black text-blue-400">68 Employees</div>
+              <div className="text-2xl font-black text-emerald-400">68 Employees</div>
             </div>
           </div>
         </div>

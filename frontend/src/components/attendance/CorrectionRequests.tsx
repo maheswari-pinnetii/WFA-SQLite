@@ -60,7 +60,7 @@ export const CorrectionRequests: React.FC = () => {
       {/* Request Form */}
       <div className="lg:col-span-1 p-5 rounded-3xl bg-slate-900 border border-slate-800 space-y-4">
         <h3 className="text-base font-black text-white flex items-center gap-2">
-          <Calendar size={18} className="text-blue-500" /> Request Attendance Correction
+          <Calendar size={18} className="text-emerald-500" /> Request Attendance Correction
         </h3>
         <p className="text-xs text-slate-400">
           Request corrections for missing check-in/out records, network disruptions, or incorrect entries.
@@ -111,7 +111,7 @@ export const CorrectionRequests: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Send size={13} /> Submit Request
           </button>

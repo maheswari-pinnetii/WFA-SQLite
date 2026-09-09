@@ -56,7 +56,7 @@ export const SkillGapsPage: React.FC = () => {
                     <td className="p-3 text-slate-300">{item.team}</td>
                     <td className="p-3 font-bold text-rose-400">{item.gapCount} Staff</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-lg border text-[10px] uppercase font-bold ${item.priority === 'Critical' ? 'bg-red-500/15 text-red-400 border-red-500/30' : item.priority === 'High' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-blue-500/15 text-blue-400 border-blue-500/30'}`}>
+                      <span className={`px-2 py-0.5 rounded-lg border text-[10px] uppercase font-bold ${item.priority === 'Critical' ? 'bg-red-500/15 text-red-400 border-red-500/30' : item.priority === 'High' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'}`}>
                         {item.priority}
                       </span>
                     </td>

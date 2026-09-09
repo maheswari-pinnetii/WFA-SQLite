@@ -41,7 +41,7 @@ export const OrganizationPage: React.FC = () => {
         {/* Corporate Hierarchy */}
         <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-4">
           <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-            <Building2 size={18} className="text-indigo-400" /> Corporate Department Hierarchy
+            <Building2 size={18} className="text-emerald-400" /> Corporate Department Hierarchy
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -16,13 +16,13 @@ import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 export const ManagerDashboardOverview: React.FC = () => (
   <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div className="flex items-center gap-4">
-      <div className="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-800/80 flex items-center justify-center shrink-0">
+      <div className="w-11 h-11 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800/80 flex items-center justify-center shrink-0">
         <Briefcase size={22} />
       </div>
       <div>
         <div className="flex items-center gap-2">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Department Manager Workspace</h2>
-          <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800">ENGINEERING SCOPE</span>
+          <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">ENGINEERING SCOPE</span>
         </div>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal">
           Resource allocation, sub-team sprint velocity, leave approvals & department throughput.
@@ -54,7 +54,7 @@ export const ManagerDashboardFilters: React.FC<{
 }> = (props) => (
   <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
     <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider">
-      <Filter size={15} className="text-blue-600 dark:text-blue-400" /> Scoped Department Filters
+      <Filter size={15} className="text-emerald-600 dark:text-emerald-400" /> Scoped Department Filters
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       <div>
@@ -63,7 +63,7 @@ export const ManagerDashboardFilters: React.FC<{
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-normal"
         />
       </div>
       <div>
@@ -71,7 +71,7 @@ export const ManagerDashboardFilters: React.FC<{
         <select
           value={props.teamFilter}
           onChange={(e) => props.setTeamFilter(e.target.value)}
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal cursor-pointer"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Teams</option>
           <option value="Frontend">Frontend</option>
@@ -84,7 +84,7 @@ export const ManagerDashboardFilters: React.FC<{
         <select
           value={props.employeeFilter}
           onChange={(e) => props.setEmployeeFilter(e.target.value)}
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal cursor-pointer"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Department Employees</option>
           {props.employees.filter(e => e.department === props.departmentName).map(emp => (
@@ -97,7 +97,7 @@ export const ManagerDashboardFilters: React.FC<{
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 font-normal cursor-pointer"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
@@ -112,7 +112,7 @@ export const ManagerSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) =>
   <div className="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
     <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
       <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-        <Layers size={16} className="text-blue-600 dark:text-blue-400" /> Department Sprint
+        <Layers size={16} className="text-emerald-600 dark:text-emerald-400" /> Department Sprint
       </h3>
       <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">ENGINEERING SPRINT</span>
     </div>
@@ -145,7 +145,7 @@ export const ManagerSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) =>
               <td className="py-3 px-4 text-slate-300 font-bold uppercase">{task.status}</td>
               <td className="py-3 px-4">
                 <div className="w-full bg-slate-800 rounded-full h-1.5 max-w-[100px]">
-                  <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: task.status === 'COMPLETED' ? '100%' : task.status === 'IN_PROGRESS' ? '50%' : '0%' }}></div>
+                  <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: task.status === 'COMPLETED' ? '100%' : task.status === 'IN_PROGRESS' ? '50%' : '0%' }}></div>
                 </div>
               </td>
               <td className="py-3 px-4 font-mono text-slate-400">2026-09-10</td>
@@ -296,7 +296,7 @@ export const ManagerDashboardPage: React.FC = () => {
             <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
               <Clock size={18} className="text-amber-400" /> Pending Team Leave & Request Approvals Desk
             </h3>
-            <Link to="/manager/approvals" className="text-xs font-bold text-blue-400 hover:underline flex items-center gap-1">
+            <Link to="/manager/approvals" className="text-xs font-bold text-emerald-400 hover:underline flex items-center gap-1">
               Approvals Desk <ArrowRight size={12} />
             </Link>
           </div>
@@ -308,7 +308,7 @@ export const ManagerDashboardPage: React.FC = () => {
                   <span className="badge badge-info text-[9px] uppercase font-bold">{req.type}</span>
                 </div>
                 <p className="text-xs text-slate-300">
-                  <span className="font-semibold text-blue-400">{req.duration}</span> — {req.reason}
+                  <span className="font-semibold text-emerald-400">{req.duration}</span> — {req.reason}
                 </p>
                 <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-color)]">
                   {req.status === 'PENDING' ? (

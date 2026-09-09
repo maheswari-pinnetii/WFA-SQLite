@@ -28,7 +28,7 @@ export const AnalystDashboard: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
             <span>Analyzed Records</span>
-            <BarChart3 size={18} className="text-indigo-400" />
+            <BarChart3 size={18} className="text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">14,280 Logs</p>
           <p className="text-[11px] text-emerald-400 font-bold">100% Data Integrity</p>
@@ -37,10 +37,10 @@ export const AnalystDashboard: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
             <span>Predictive Model</span>
-            <Sparkles size={18} className="text-purple-400" />
+            <Sparkles size={18} className="text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">98.4% Accuracy</p>
-          <p className="text-[11px] text-purple-400 font-bold">ML Attrition Predictor Active</p>
+          <p className="text-[11px] text-emerald-400 font-bold">ML Attrition Predictor Active</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
@@ -49,7 +49,7 @@ export const AnalystDashboard: React.FC = () => {
             <FileSpreadsheet size={18} className="text-amber-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">12 Saved</p>
-          <p className="text-[11px] text-blue-400 font-bold">Scheduled Weekly Export</p>
+          <p className="text-[11px] text-emerald-400 font-bold">Scheduled Weekly Export</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">

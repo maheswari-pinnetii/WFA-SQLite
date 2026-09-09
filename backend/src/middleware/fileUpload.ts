@@ -256,3 +256,52 @@ export const validateFileUpload = (options?: {
     next();
   };
 };
+
+import multer from 'multer';
+
+// Setup multer storage
+const storage = multer.diskStorage({
+  destination: (req: Request, file: Express.Multer.File, cb) => {
+    // Determine the organization ID from the authenticated user
+    const user = (req as any).user;
+    const orgId = user?.organizationId || user?.companyId || 'org-stackly';
+    
+    // Org-scoped uploads directory
+    const dir = path.resolve(process.cwd(), `database/uploads/${orgId}`);
+    
+    // Ensure directory exists
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req: Request, file: Express.Multer.File, cb) => {
+    // Generate unique filename to prevent collisions and directory traversal
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueName = `${Date.now()}-${crypto.randomUUID()}${ext}`;
+    cb(null, uniqueName);
+  }
+});
+
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`Invalid file type: ${file.mimetype}. Only PDF, JPEG, and PNG are allowed.`));
+  }
+};
+
+export const uploadMiddleware = multer({
+  storage,
+  limits: {
+    fileSize: MAX_FILE_SIZE
+  },
+  fileFilter
+});
+
+// Simple stub for virus scanning - to be implemented with ClamAV or similar in production
+export const scanFileStub = async (filePath: string): Promise<boolean> => {
+  // In a real scenario, this would send the file to a virus scanner
+  // and return true if safe, false if infected.
+  return true; // Assume safe for now
+};

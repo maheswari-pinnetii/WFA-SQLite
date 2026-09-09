@@ -11,7 +11,7 @@ export interface MenuItemConfig {
   departmentScope?: string[];
   badge?: {
     text: string;
-    variant: 'blue' | 'purple' | 'amber' | 'emerald' | 'rose';
+    variant: 'emerald' | 'purple' | 'amber' | 'emerald' | 'rose';
   };
   children?: MenuItemConfig[];
 }

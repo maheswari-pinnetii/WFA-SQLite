@@ -48,16 +48,16 @@ export const AuditorDashboard: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
             <span>Data Rights</span>
-            <Lock size={18} className="text-purple-400" />
+            <Lock size={18} className="text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">Read Only</p>
-          <p className="text-[11px] text-blue-400 font-bold">No Modification Access</p>
+          <p className="text-[11px] text-emerald-400 font-bold">No Modification Access</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
             <span>Compliance Certs</span>
-            <FileText size={18} className="text-blue-400" />
+            <FileText size={18} className="text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">ISO 27001</p>
           <p className="text-[11px] text-emerald-400 font-bold">Verified Active</p>

@@ -23,13 +23,13 @@ export const CookieConsentBanner: React.FC = () => {
         <h3 className="text-sm font-semibold text-white mb-1">Internal Systems Policy</h3>
         <p className="text-xs text-slate-400 leading-relaxed">
           WFA-SQLite uses strictly necessary <code className="text-emerald-400 bg-emerald-400/10 px-1 py-0.5 rounded">HttpOnly</code> cookies to securely maintain your internal employee session. 
-          By continuing to use this enterprise application, you acknowledge our <a href="#" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">Privacy Policy</a> and <a href="#" className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2">Terms of Use</a>.
+          By continuing to use this enterprise application, you acknowledge our <a href="#" className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">Privacy Policy</a> and <a href="#" className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2">Terms of Use</a>.
         </p>
       </div>
       <div className="flex-shrink-0">
         <button
           onClick={handleAccept}
-          className="px-6 py-2.5 bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
+          className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
         >
           Acknowledge
         </button>

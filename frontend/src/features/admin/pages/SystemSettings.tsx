@@ -35,7 +35,7 @@ export const SystemSettings: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <h4 className="text-sm font-bold flex items-center gap-2">
-                <Shield size={16} className="text-indigo-400" />
+                <Shield size={16} className="text-emerald-400" />
                 Enforce Multi-Factor Authentication (MFA)
               </h4>
               <p className="text-xs text-slate-400">Require TOTP authenticator app for Admin & HR roles</p>

@@ -56,9 +56,9 @@ export const HRReports: React.FC = () => {
           <h3 className="text-base font-bold mb-4">Standard Regulatory & Compliance Exports</h3>
           <div className="space-y-3">
             {reportsList.map((r, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-indigo-500/50 transition-colors">
+              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:border-emerald-500/50 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400">
+                  <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400">
                     {r.type === 'attendance' && <Clock size={20} />}
                     {r.type === 'workforce' && <Users size={20} />}
                     {r.type === 'leave' && <CalendarDays size={20} />}

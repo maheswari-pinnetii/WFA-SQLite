@@ -243,7 +243,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
         </div>
 
         <div className="text-left sm:text-right font-mono">
-          <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400 tracking-tight">
+          <p className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400 tracking-tight">
             {now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">

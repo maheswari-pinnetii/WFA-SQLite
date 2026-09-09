@@ -14,7 +14,7 @@ const STEPS = [
   {
     title: 'Welcome to Stackly WFA',
     description: 'Your intelligent enterprise workforce analytics & attendance command platform.',
-    icon: <Sparkles size={32} className="text-blue-400" />,
+    icon: <Sparkles size={32} className="text-emerald-400" />,
     badge: 'Step 1 of 4: Introduction',
     features: [
       'Real-time live attendance check-ins & shift tracking',
@@ -36,7 +36,7 @@ const STEPS = [
   {
     title: 'Team & Leave Management',
     description: 'Streamlined approval workflows and real-time team availability roster.',
-    icon: <Users size={32} className="text-purple-400" />,
+    icon: <Users size={32} className="text-emerald-400" />,
     badge: 'Step 3 of 4: Collaboration',
     features: [
       'Submit PTO, sick leave, and casual leave with real-time balance',
@@ -109,7 +109,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
 
           {/* Header Badge */}
           <div className="flex items-center gap-2 mb-4">
-            <span className="px-2.5 py-0.5 text-[10px] font-black rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
               {step.badge}
             </span>
           </div>
@@ -142,7 +142,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
                 <div
                   key={idx}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    idx === currentStep ? 'w-6 bg-blue-500' : 'w-2 bg-slate-700'
+                    idx === currentStep ? 'w-6 bg-emerald-500' : 'w-2 bg-slate-700'
                   }`}
                 />
               ))}

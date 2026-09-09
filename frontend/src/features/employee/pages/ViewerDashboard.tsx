@@ -37,7 +37,7 @@ export const ViewerDashboard: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs font-bold">
             <span>Total Staff</span>
-            <BarChart3 size={18} className="text-blue-400" />
+            <BarChart3 size={18} className="text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">301 Employees</p>
           <p className="text-[11px] text-slate-400">4 Active Global Hubs</p>

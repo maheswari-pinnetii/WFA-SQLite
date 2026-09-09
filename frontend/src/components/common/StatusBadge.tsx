@@ -46,8 +46,8 @@ const statusConfig: Record<string, { bg: string; text: string; label: string; ic
   ONLINE: { bg: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40', text: 'text-emerald-700 dark:text-emerald-400', label: 'Online', icon: <Radio size={12} className="shrink-0 text-emerald-500 animate-pulse" /> },
   APPROVED: { bg: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40', text: 'text-emerald-700 dark:text-emerald-400', label: 'Approved', icon: <CheckCheck size={12} className="shrink-0 text-emerald-500" /> },
   
-  WORKING: { bg: 'bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40', text: 'text-blue-700 dark:text-blue-400', label: 'Working', icon: <Briefcase size={12} className="shrink-0 text-blue-500" /> },
-  ON_BREAK: { bg: 'bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40', text: 'text-blue-700 dark:text-blue-400', label: 'On Break', icon: <Coffee size={12} className="shrink-0 text-amber-500" /> },
+  WORKING: { bg: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40', text: 'text-emerald-700 dark:text-emerald-400', label: 'Working', icon: <Briefcase size={12} className="shrink-0 text-emerald-500" /> },
+  ON_BREAK: { bg: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40', text: 'text-emerald-700 dark:text-emerald-400', label: 'On Break', icon: <Coffee size={12} className="shrink-0 text-amber-500" /> },
   
   AWAY: { bg: 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40', text: 'text-amber-700 dark:text-amber-400', label: 'Away', icon: <Moon size={12} className="shrink-0 text-amber-500" /> },
   LATE: { bg: 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40', text: 'text-amber-700 dark:text-amber-400', label: 'Late', icon: <Clock size={12} className="shrink-0 text-amber-500" /> },
@@ -60,7 +60,7 @@ const statusConfig: Record<string, { bg: string; text: string; label: string; ic
   OFFLINE: { bg: 'bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-400', label: 'Offline', icon: <CircleSlash size={12} className="shrink-0 text-slate-400" /> },
   CHECKED_OUT: { bg: 'bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-400', label: 'Checked Out', icon: <LogOut size={12} className="shrink-0 text-slate-400" /> },
   
-  ON_LEAVE: { bg: 'bg-purple-50 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-800/40', text: 'text-purple-700 dark:text-purple-400', label: 'On Leave', icon: <Calendar size={12} className="shrink-0 text-purple-500" /> },
+  ON_LEAVE: { bg: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40', text: 'text-emerald-700 dark:text-emerald-400', label: 'On Leave', icon: <Calendar size={12} className="shrink-0 text-emerald-500" /> },
 };
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, label, className, showIcon = true }) => {

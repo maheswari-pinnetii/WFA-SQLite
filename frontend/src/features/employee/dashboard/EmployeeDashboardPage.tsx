@@ -83,7 +83,7 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <a
           href="#step-1-punch"
-          className="px-3.5 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm flex items-center gap-1.5 transition-colors"
+          className="px-3.5 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm flex items-center gap-1.5 transition-colors"
         >
           <Clock size={14} /> Check In
         </a>
@@ -209,7 +209,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
         {/* Shift Duration Formula Callout */}
         <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Clock size={15} className="text-blue-400 shrink-0" />
+            <Clock size={15} className="text-emerald-400 shrink-0" />
             <span className="text-xs font-black text-white">
               {assignedShift.totalHours}h Shift = {assignedShift.workHours}h Work + {assignedShift.breakHours}h Break
             </span>
@@ -236,7 +236,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
       <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
         <button 
           onClick={() => setShowSwapModal(true)}
-          className="text-blue-400 hover:text-blue-300 font-bold text-[11px] cursor-pointer"
+          className="text-emerald-400 hover:text-emerald-300 font-bold text-[11px] cursor-pointer"
         >
           Request Shift Change / Swap &rarr;
         </button>
@@ -251,7 +251,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Timer className="text-blue-400" size={18} /> Request Shift Change / Swap
+                <Timer className="text-emerald-400" size={18} /> Request Shift Change / Swap
               </h3>
               <button onClick={() => setShowSwapModal(false)} className="text-slate-400 hover:text-white text-xl leading-none cursor-pointer">&times;</button>
             </div>
@@ -280,7 +280,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
                     value={swapReason}
                     onChange={(e) => setSwapReason(e.target.value)}
                     placeholder="Enter reason for shift adjustment..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -372,11 +372,11 @@ export const LeaveBalanceCard: React.FC = () => {
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
             <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-              <Layers size={18} className="text-purple-400" /> Leave Balances & PTO Quota
+              <Layers size={18} className="text-emerald-400" /> Leave Balances & PTO Quota
             </h3>
             <p className="text-[11px] text-slate-400 mt-0.5">Annual paid statutory time-off entitlements</p>
           </div>
-          <span className="text-[10px] text-purple-400 font-black uppercase tracking-wider bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/30 shrink-0">
+          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 shrink-0">
             CY 2026
           </span>
         </div>
@@ -396,11 +396,11 @@ export const LeaveBalanceCard: React.FC = () => {
                   <div
                     className={`h-full rounded-full ${
                       b.color === 'blue'
-                        ? 'bg-blue-500'
+                        ? 'bg-emerald-500'
                         : b.color === 'emerald'
                         ? 'bg-emerald-500'
                         : b.color === 'purple'
-                        ? 'bg-purple-500'
+                        ? 'bg-emerald-500'
                         : 'bg-amber-500'
                     }`}
                     style={{ width: `${pct}%` }}
@@ -418,7 +418,7 @@ export const LeaveBalanceCard: React.FC = () => {
         </p>
         <Link 
           to="/employee/leave" 
-          className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
+          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
         >
           <Plus size={14} /> Apply for Leave
         </Link>
@@ -450,11 +450,11 @@ export const EmployeeTimesheetSummaryCard: React.FC = () => {
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
             <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-              <FileText size={18} className="text-indigo-400" /> Monthly Timesheet
+              <FileText size={18} className="text-emerald-400" /> Monthly Timesheet
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Cycle: September 2026</p>
           </div>
-          <span className="text-[10px] text-indigo-400 font-black uppercase tracking-wider bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30">
+          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
             {timesheetSubmitted ? '✓ Submitted' : 'Pending Lock'}
           </span>
         </div>
@@ -478,12 +478,12 @@ export const EmployeeTimesheetSummaryCard: React.FC = () => {
           </div>
           <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
             <span className="text-[10px] text-slate-400 font-bold uppercase">Days Present</span>
-            <p className="font-mono text-sm font-black text-blue-400">19 Working Days</p>
+            <p className="font-mono text-sm font-black text-emerald-400">19 Working Days</p>
             <p className="text-[10px] text-slate-400">0 Unexcused</p>
           </div>
           <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
             <span className="text-[10px] text-slate-400 font-bold uppercase">Paid PTO Taken</span>
-            <p className="font-mono text-sm font-black text-purple-400">2 Days (CL/SL)</p>
+            <p className="font-mono text-sm font-black text-emerald-400">2 Days (CL/SL)</p>
             <p className="text-[10px] text-slate-400">Manager Approved</p>
           </div>
         </div>
@@ -496,7 +496,7 @@ export const EmployeeTimesheetSummaryCard: React.FC = () => {
           onClick={handleDownloadCsv}
           className="text-xs h-8 text-slate-300 font-bold"
         >
-          <Download size={13} className="mr-1 text-indigo-400" /> Export CSV
+          <Download size={13} className="mr-1 text-emerald-400" /> Export CSV
         </Button>
         <Button
           variant={timesheetSubmitted ? 'outline' : 'default'}
@@ -517,9 +517,9 @@ export const EmployeeActivityTimelineFeed: React.FC = () => {
   const activities = [
     { time: '09:02 AM', title: 'Checked In On-Time', desc: 'Geofence: Bengaluru Tech Park (Office Mode)', type: 'checkin', icon: <Clock size={14} className="text-emerald-400" /> },
     { time: '01:05 PM', title: 'Took Lunch Break', desc: 'Break duration: 45 minutes logged', type: 'break', icon: <Coffee size={14} className="text-amber-400" /> },
-    { time: '01:50 PM', title: 'Resumed Work Session', desc: 'Active shift resumed on workstation', type: 'resume', icon: <Activity size={14} className="text-blue-400" /> },
+    { time: '01:50 PM', title: 'Resumed Work Session', desc: 'Active shift resumed on workstation', type: 'resume', icon: <Activity size={14} className="text-emerald-400" /> },
     { time: 'Yesterday', title: 'Completed Sprint Task', desc: 'TSK-104: Build CSV Payroll Attendance Export Engine', type: 'task', icon: <CheckCircle2 size={14} className="text-teal-400" /> },
-    { time: 'Aug 31', title: 'Correction Approved', desc: 'Elena Rostova (HR Operations) approved CORR-2026-001', type: 'correction', icon: <Award size={14} className="text-purple-400" /> },
+    { time: 'Aug 31', title: 'Correction Approved', desc: 'Elena Rostova (HR Operations) approved CORR-2026-001', type: 'correction', icon: <Award size={14} className="text-emerald-400" /> },
   ];
 
   return (
@@ -570,17 +570,17 @@ export const EmployeeSprintWork: React.FC<{
     <div className="flex items-center justify-between pb-3 border-b border-slate-800">
       <div>
         <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <Layers className="text-blue-400" size={20} /> Sprint Work & Active Deliverables
+          <Layers className="text-emerald-400" size={20} /> Sprint Work & Active Deliverables
         </h3>
         <p className="text-xs text-slate-400 mt-0.5">Track your assigned engineering tasks and daily progress status.</p>
       </div>
-      <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+      <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
         Sprint 24 Active
       </span>
     </div>
     {loading ? (
       <div className="flex justify-center items-center py-8">
-        <span className="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
+        <span className="inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
       </div>
     ) : tasks.length === 0 ? (
       <div className="text-center py-8 bg-slate-950/40 rounded-2xl border border-slate-800 border-dashed">
@@ -621,7 +621,7 @@ export const EmployeeSprintWork: React.FC<{
                   <select
                     value={task.status}
                     onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value as Task['status'])}
-                    className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer font-bold"
+                    className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-bold"
                   >
                     <option value="TODO">To Do</option>
                     <option value="IN_PROGRESS">In Progress</option>
@@ -682,7 +682,7 @@ export const EmployeeCorrectionRequestsCard: React.FC<{
             <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
               <Clock size={18} className="text-amber-400" /> Attendance Correction Requests
             </h3>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
               Manager & HR Review
             </span>
           </div>
@@ -717,7 +717,7 @@ export const EmployeeCorrectionRequestsCard: React.FC<{
               const isPending = statusUpper === 'PENDING';
               return (
                 <tr key={corr.id} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-blue-400">{corr.id}</td>
+                  <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{corr.id}</td>
                   <td className="py-3.5 px-4 font-bold text-white">{corr.date}</td>
                   <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
                     {corr.requestedCheckIn || '09:00 AM'} – {corr.requestedCheckOut || '06:00 PM'}
@@ -813,21 +813,21 @@ export const EmployeeAttendanceTable: React.FC<{
                     ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                     : h.status === 'Weekend'
                     ? 'bg-slate-800 text-slate-400'
-                    : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                 }`}>
                   {h.status}
                 </span>
               </td>
               <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{h.in}</td>
               <td className="py-3 px-4 font-mono text-rose-400 font-bold">{h.out}</td>
-              <td className="py-3 px-4 font-mono text-blue-400 font-bold">{h.workingTime}</td>
+              <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{h.workingTime}</td>
               <td className="py-3 px-4 font-mono text-slate-300">{h.break}</td>
               <td className="py-3 px-4 font-mono text-cyan-400 font-bold">{h.overtime}</td>
               <td className="py-3 px-4 text-slate-300 font-medium max-w-xs truncate">{h.remarks || '—'}</td>
               <td className="py-3 px-4 text-right">
                 <button 
                   onClick={() => onOpenCorrectionModal(h.rawDate)} 
-                  className="text-blue-400 hover:text-blue-300 font-extrabold text-[11px] cursor-pointer"
+                  className="text-emerald-400 hover:text-emerald-300 font-extrabold text-[11px] cursor-pointer"
                 >
                   Request Fix
                 </button>
@@ -1089,7 +1089,7 @@ export const EmployeeDashboardPage: React.FC = () => {
               onClick={() => setWorkspaceMode('all-in-one')}
               className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
                 workspaceMode === 'all-in-one'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-blue-500/20'
                   : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
               }`}
             >
@@ -1125,7 +1125,7 @@ export const EmployeeDashboardPage: React.FC = () => {
               onClick={() => setWorkspaceMode('sprint')}
               className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
                 workspaceMode === 'sprint'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-indigo-500/20'
                   : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
               }`}
             >
@@ -1451,7 +1451,7 @@ export const EmployeeDashboardPage: React.FC = () => {
                       value={correctionReason}
                       onChange={(e) => setCorrectionReason(e.target.value)}
                       placeholder="Detail why punch correction is required (e.g. badge scanner was offline, on-site client visit, etc.)..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500"
                     />
                   </div>
 

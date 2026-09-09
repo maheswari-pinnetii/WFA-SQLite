@@ -51,7 +51,7 @@ export const AttendanceCalendarView: React.FC = () => {
       {/* Header with Title & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]/60">
         <div className="flex items-center gap-2">
-          <CalendarIcon size={18} className="text-blue-400" />
+          <CalendarIcon size={18} className="text-emerald-400" />
           <h3 className="text-base font-extrabold text-[var(--text-primary)]">
             Attendance Calendar
           </h3>
@@ -108,7 +108,7 @@ export const AttendanceCalendarView: React.FC = () => {
 
           <button 
             onClick={handleGoToToday}
-            className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-bold rounded-lg text-blue-400 transition-colors cursor-pointer"
+            className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] font-bold rounded-lg text-emerald-400 transition-colors cursor-pointer"
           >
             Today
           </button>
@@ -146,14 +146,14 @@ export const AttendanceCalendarView: React.FC = () => {
             let dotColor = '';
 
             if (isToday) {
-              tileClass = 'bg-blue-600/20 border-blue-500 ring-1 ring-blue-500 text-white font-black shadow-lg shadow-blue-500/20';
-              dotColor = 'bg-blue-400';
+              tileClass = 'bg-emerald-600/20 border-emerald-500 ring-1 ring-emerald-500 text-white font-black shadow-lg shadow-blue-500/20';
+              dotColor = 'bg-emerald-400';
             } else if (isHoliday) {
               tileClass = 'bg-amber-500/10 border-amber-500/30 text-amber-300 font-bold';
               dotColor = 'bg-amber-400';
             } else if (isLeave) {
-              tileClass = 'bg-purple-500/10 border-purple-500/30 text-purple-300 font-bold';
-              dotColor = 'bg-purple-400';
+              tileClass = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 font-bold';
+              dotColor = 'bg-emerald-400';
             } else if (isWeekend) {
               tileClass = 'bg-slate-950/40 border-slate-800/40 text-slate-600 font-medium';
             } else if (isPresent) {
@@ -185,7 +185,7 @@ export const AttendanceCalendarView: React.FC = () => {
           <span className="w-2 h-2 rounded-full bg-amber-400" /> Holiday (2d)
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-purple-400" /> Leave (1d)
+          <span className="w-2 h-2 rounded-full bg-emerald-400" /> Leave (1d)
         </span>
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-slate-600" /> Weekend (8d)

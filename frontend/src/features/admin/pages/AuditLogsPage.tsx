@@ -79,11 +79,11 @@ export const AuditLogsPage: React.FC = () => {
                     <td className="py-3 px-4 text-slate-400">{log.timestamp}</td>
                     <td className="py-3 px-4 font-bold text-slate-100">{log.actor}</td>
                     <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold">
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
                         {log.role}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-bold text-indigo-300">{log.action}</td>
+                    <td className="py-3 px-4 font-bold text-emerald-300">{log.action}</td>
                     <td className="py-3 px-4 text-slate-400">{log.target}</td>
                     <td className="py-3 px-4 text-slate-400">{log.ip}</td>
                     <td className="py-3 px-4">

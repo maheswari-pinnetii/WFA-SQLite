@@ -97,7 +97,7 @@ export const AttendanceManagement: React.FC = () => {
               </span>
               <button
                 onClick={() => dispatch(clearNotifications())}
-                className="text-[10px] font-bold text-blue-400 hover:text-blue-300"
+                className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300"
               >
                 Clear All
               </button>
@@ -150,7 +150,7 @@ export const AttendanceManagement: React.FC = () => {
           <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 border-l-4 border-l-blue-500 shadow-xl space-y-1">
             <div className="flex items-center justify-between text-slate-400">
               <span className="text-xs font-bold uppercase tracking-wider">Active Remote WFH</span>
-              <Clock size={18} className="text-blue-400" />
+              <Clock size={18} className="text-emerald-400" />
             </div>
             <div className="text-2xl font-black text-white">{activeRemoteCount} Active</div>
             <p className="text-[10px] text-slate-500 font-mono">Exempt from local geofencing</p>
@@ -167,7 +167,7 @@ export const AttendanceManagement: React.FC = () => {
           <div className="lg:col-span-2 p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2">
-                <Clock size={20} className="text-blue-400" />
+                <Clock size={20} className="text-emerald-400" />
                 <h3 className="text-base font-extrabold text-white">Daily Attendance Roster</h3>
               </div>
 
@@ -180,7 +180,7 @@ export const AttendanceManagement: React.FC = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search employee or department..."
-                    className="bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder-slate-500 rounded-xl pl-8 pr-3 py-1.5 focus:outline-none focus:border-blue-500"
+                    className="bg-slate-950 border border-slate-800 text-xs text-slate-100 placeholder-slate-500 rounded-xl pl-8 pr-3 py-1.5 focus:outline-none focus:border-emerald-500"
                   />
                 </div>
 
@@ -227,12 +227,12 @@ export const AttendanceManagement: React.FC = () => {
                         <td className="py-3 px-4 font-mono text-rose-400 font-bold">
                           {formatTimeStr(log.checkOutTime)}
                         </td>
-                        <td className="py-3 px-4 font-mono text-blue-400 font-bold">
+                        <td className="py-3 px-4 font-mono text-emerald-400 font-bold">
                           {stats.workingHours} hrs
                         </td>
                         <td className="py-3 px-4">
                           <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
-                            <MapPin size={10} className="text-blue-400" /> {log.workMode}
+                            <MapPin size={10} className="text-emerald-400" /> {log.workMode}
                           </span>
                         </td>
                         <td className="py-3 px-4">
@@ -268,7 +268,7 @@ export const AttendanceManagement: React.FC = () => {
                 auditLogs.map((log) => (
                   <div key={log.id} className="p-2.5 rounded-xl bg-slate-950 text-xs border border-slate-850 space-y-1">
                     <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
-                      <span className="text-blue-400 font-mono">{log.action}</span>
+                      <span className="text-emerald-400 font-mono">{log.action}</span>
                       <span>{new Date(log.timestamp).toLocaleTimeString()}</span>
                     </div>
                     <p className="text-slate-300">{log.details}</p>

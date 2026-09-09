@@ -8,14 +8,14 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-600/20 active:scale-[0.98]',
-        primary: 'bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-600/20 active:scale-[0.98]',
+        default: 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-md shadow-blue-600/20 active:scale-[0.98]',
+        primary: 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-md shadow-blue-600/20 active:scale-[0.98]',
         destructive: 'bg-red-600 text-white hover:bg-red-500 shadow-md shadow-red-600/20 active:scale-[0.98]',
         danger: 'bg-red-600 text-white hover:bg-red-500 shadow-md shadow-red-600/20 active:scale-[0.98]',
         outline: 'border border-slate-700 bg-transparent hover:bg-slate-800/60 hover:text-white text-slate-300',
         secondary: 'bg-slate-800 text-slate-100 hover:bg-slate-700 active:scale-[0.98]',
         ghost: 'hover:bg-slate-800 hover:text-white text-slate-400',
-        link: 'text-blue-400 underline-offset-4 hover:underline',
+        link: 'text-emerald-400 underline-offset-4 hover:underline',
         gradient: 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25 hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98]',
         glass: 'bg-slate-900/60 backdrop-blur-md border border-slate-700/50 text-white hover:bg-slate-800/80 shadow-md'
       },

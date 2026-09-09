@@ -32,11 +32,11 @@ export const RecruitmentManagement: React.FC = () => {
 
         {/* Pipeline Stage Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="glass-panel p-4 border-t-4 border-blue-500">
+          <div className="glass-panel p-4 border-t-4 border-emerald-500">
             <div className="text-xs font-bold text-slate-400">Screening</div>
             <div className="text-2xl font-black text-slate-100 mt-1">12 Candidates</div>
           </div>
-          <div className="glass-panel p-4 border-t-4 border-purple-500">
+          <div className="glass-panel p-4 border-t-4 border-emerald-500">
             <div className="text-xs font-bold text-slate-400">Interviewing</div>
             <div className="text-2xl font-black text-slate-100 mt-1">8 Active</div>
           </div>
@@ -72,7 +72,7 @@ export const RecruitmentManagement: React.FC = () => {
                     <td className="py-3 px-4 text-slate-300">{cand.position}</td>
                     <td className="py-3 px-4 text-slate-400">{cand.dept}</td>
                     <td className="py-3 px-4">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                         {cand.stage}
                       </span>
                     </td>

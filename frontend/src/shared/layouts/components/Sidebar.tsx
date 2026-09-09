@@ -55,7 +55,7 @@ export interface NavigationItem {
   icon: React.ReactNode;
   badge?: {
     text: string;
-    variant: 'blue' | 'purple' | 'amber' | 'emerald' | 'rose';
+    variant: 'emerald' | 'purple' | 'amber' | 'emerald' | 'rose';
   };
 }
 
@@ -97,17 +97,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Dashboard',
         items: [
-          { label: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
         category: 'Analytics',
         items: [
-          { label: 'Workforce Analytics', path: '/admin/analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Workforce Analytics', path: '/admin/analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Attendance Analytics', path: '/hr/attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Hiring Analytics', path: '/hr/recruitment', icon: <Briefcase size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance Analytics', path: '/hr/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-purple-400" /> },
-          { label: 'Productivity Analytics', path: '/admin/productivity', icon: <Zap size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Performance Analytics', path: '/hr/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Productivity Analytics', path: '/admin/productivity', icon: <Zap size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Skills Analytics', path: '/admin/skills-gaps', icon: <Award size={18} strokeWidth={2} className="text-yellow-400" /> },
           { label: 'Risk Analytics', path: '/admin/risk', icon: <AlertTriangle size={18} strokeWidth={2} className="text-rose-400" /> },
         ],
@@ -116,15 +116,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
         category: 'Workforce',
         items: [
           { label: 'Employees', path: '/admin/employees', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Departments', path: '/admin/departments', icon: <Building2 size={18} strokeWidth={2} className="text-purple-400" /> },
+          { label: 'Departments', path: '/admin/departments', icon: <Building2 size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Teams', path: '/admin/teams', icon: <Network size={18} strokeWidth={2} className="text-teal-400" /> },
-          { label: 'Organization', path: '/admin/organization', icon: <Globe size={18} strokeWidth={2} className="text-sky-400" /> },
+          { label: 'Organization', path: '/admin/organization', icon: <Globe size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
         category: 'Attendance & Leaves',
         items: [
-          { label: 'Overview', path: '/admin/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Overview', path: '/admin/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
           { label: 'Attendance History', path: '/admin/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
@@ -138,7 +138,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Skill Overview', path: '/admin/skills-overview', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
           { label: 'Skill Gaps', path: '/admin/skills-gaps', icon: <Target size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Skill Coverage', path: '/admin/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Skill Coverage', path: '/admin/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
@@ -176,17 +176,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Dashboard',
         items: [
-          { label: 'Dashboard', path: '/hr/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Dashboard', path: '/hr/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
         category: 'Analytics',
         items: [
-          { label: 'Workforce Analytics', path: '/hr/workforce-analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Workforce Analytics', path: '/hr/workforce-analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Attendance Analytics', path: '/hr/attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Hiring Analytics', path: '/hr/recruitment', icon: <Briefcase size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance Analytics', path: '/hr/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-purple-400" /> },
-          { label: 'Productivity Analytics', path: '/hr/productivity', icon: <Zap size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Performance Analytics', path: '/hr/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Productivity Analytics', path: '/hr/productivity', icon: <Zap size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Skills Analytics', path: '/hr/skills-gaps', icon: <Award size={18} strokeWidth={2} className="text-yellow-400" /> },
           { label: 'Risk Analytics', path: '/hr/risk', icon: <AlertTriangle size={18} strokeWidth={2} className="text-rose-400" /> },
         ],
@@ -195,14 +195,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         category: 'Workforce',
         items: [
           { label: 'Employees', path: '/hr/employees', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Departments', path: '/hr/departments', icon: <Building2 size={18} strokeWidth={2} className="text-purple-400" /> },
+          { label: 'Departments', path: '/hr/departments', icon: <Building2 size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Teams', path: '/hr/teams', icon: <Network size={18} strokeWidth={2} className="text-teal-400" /> },
         ],
       },
       {
         category: 'Attendance & Leaves',
         items: [
-          { label: 'Overview', path: '/hr/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Overview', path: '/hr/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Public Holidays (2026)', path: '/employee/holidays', icon: <Calendar size={18} strokeWidth={2} className="text-amber-400" />, badge: { text: '12 Days', variant: 'amber' } },
           { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
@@ -217,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Skill Overview', path: '/hr/skills-overview', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
           { label: 'Skill Gaps', path: '/hr/skills-gaps', icon: <Target size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Skill Coverage', path: '/hr/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Skill Coverage', path: '/hr/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
@@ -259,16 +259,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Dashboard',
         items: [
-          { label: 'Dashboard', path: '/manager/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Dashboard', path: '/manager/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
         category: 'Team Analytics',
         items: [
-          { label: 'Workforce', path: '/manager/analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Workforce', path: '/manager/analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Attendance', path: '/manager/attendance-analytics', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Productivity', path: '/manager/productivity', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance', path: '/manager/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-purple-400" /> },
+          { label: 'Performance', path: '/manager/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Skill Gaps', path: '/manager/skills-gaps', icon: <Award size={18} strokeWidth={2} className="text-yellow-400" /> },
         ],
       },
@@ -282,7 +282,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Attendance',
         items: [
-          { label: 'Team Attendance', path: '/manager/team-attendance', icon: <Calendar size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Team Attendance', path: '/manager/team-attendance', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Attendance History', path: '/manager/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
           { label: 'Corrections', path: '/manager/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
           { label: 'Approvals', path: '/manager/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
@@ -293,7 +293,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Team Skills', path: '/manager/team-skills', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
           { label: 'Skill Gaps', path: '/manager/skills-gaps-view', icon: <Target size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Skill Coverage', path: '/manager/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Skill Coverage', path: '/manager/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
@@ -333,7 +333,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Dashboard',
         items: [
-          { label: 'Dashboard', path: '/team-lead/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Dashboard', path: '/team-lead/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
@@ -341,8 +341,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Attendance', path: '/team-lead/attendance-analytics', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Productivity', path: '/team-lead/productivity', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance', path: '/team-lead/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-purple-400" /> },
-          { label: 'Workforce', path: '/team-lead/workforce-analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'Performance', path: '/team-lead/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Workforce', path: '/team-lead/workforce-analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
@@ -355,7 +355,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Attendance',
         items: [
-          { label: 'Team Attendance', path: '/team-lead/team-attendance', icon: <Calendar size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'Team Attendance', path: '/team-lead/team-attendance', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Attendance History', path: '/team-lead/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
           { label: 'Corrections', path: '/team-lead/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
           { label: 'Approvals', path: '/team-lead/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
@@ -404,7 +404,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Workspace',
         items: [
-          { label: 'My Workspace', path: '/employee/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'My Workspace', path: '/employee/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
         ],
       },
       {
@@ -435,7 +435,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'Performance & Goals',
         items: [
-          { label: 'OKR Goals & Deliverables', path: '/employee/goals', icon: <Target size={18} strokeWidth={2} className="text-indigo-400" /> },
+          { label: 'OKR Goals & Deliverables', path: '/employee/goals', icon: <Target size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Performance Reviews', path: '/employee/performance', icon: <Star size={18} strokeWidth={2} className="text-amber-400" /> },
           { label: 'Skills Profile & Growth', path: '/employee/skills', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
         ],
@@ -449,7 +449,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {
         category: 'My Profile & Support',
         items: [
-          { label: 'My Profile', path: '/employee/profile', icon: <User size={18} strokeWidth={2} className="text-purple-400" /> },
+          { label: 'My Profile', path: '/employee/profile', icon: <User size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Help & Support', path: '#support', icon: <HelpCircle size={18} strokeWidth={2} className="text-slate-400" /> },
         ],
       },
@@ -477,21 +477,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       .filter((category) => category.items.length > 0);
   })();
 
-  const getBadgeStyle = (variant: 'blue' | 'purple' | 'amber' | 'emerald' | 'rose') => {
-    switch (variant) {
-      case 'blue':
-        return isDark ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-blue-50 text-blue-600 border-blue-200';
-      case 'purple':
-        return isDark ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-purple-50 text-purple-600 border-purple-200';
-      case 'amber':
-        return isDark ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-amber-50 text-amber-600 border-amber-200';
-      case 'emerald':
-        return isDark ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-50 text-emerald-600 border-emerald-200';
-      case 'rose':
-        return isDark ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-rose-50 text-rose-600 border-rose-200';
-      default:
-        return isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200';
-    }
+  const getBadgeStyle = (variant: string) => {
+    return isDark ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-emerald-50 text-emerald-600 border-emerald-200';
   };
 
   return (

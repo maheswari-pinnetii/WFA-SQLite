@@ -30,8 +30,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
 
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
-    logout();
-    navigate('/login');
+    navigate('/logout');
   };
 
   return (
@@ -47,7 +46,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
           <img
             src={user.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}
             alt={user.name}
-            className="w-9 h-9 rounded-full object-cover border-2 border-blue-500 shadow-md"
+            className="w-9 h-9 rounded-full object-cover border-2 border-emerald-500 shadow-md"
           />
           <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-900 shadow-sm" />
         </div>
@@ -58,7 +57,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
               <p className="sidebar-profile-name text-xs font-black text-white truncate">{user.name || 'David Sterling'}</p>
               <span className="sidebar-profile-status text-[9.5px] font-bold text-emerald-400">Active</span>
             </div>
-            <p className="sidebar-profile-role text-[10px] font-bold text-blue-400 truncate">{user.title || ROLE_LABELS[role] || 'Department Manager'}</p>
+            <p className="sidebar-profile-role text-[10px] font-bold text-emerald-400 truncate">{user.title || ROLE_LABELS[role] || 'Department Manager'}</p>
             <p className="sidebar-profile-dept text-[9.5px] font-medium text-slate-400 truncate">
               {user.department || 'Engineering'}
             </p>
@@ -69,7 +68,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
           <ChevronUp
             size={14}
             className={`text-slate-400 shrink-0 transition-transform duration-200 ${
-              dropdownOpen ? 'rotate-180 text-blue-400' : ''
+              dropdownOpen ? 'rotate-180 text-emerald-400' : ''
             }`}
           />
         )}
@@ -86,7 +85,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
             }}
             className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 flex items-center gap-2 font-medium text-slate-200 hover:text-white transition-colors"
           >
-            <User size={14} className="text-blue-400" /> View Profile
+            <User size={14} className="text-emerald-400" /> View Profile
           </button>
           <button
             type="button"
@@ -96,7 +95,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
             }}
             className="w-full text-left px-3 py-2 rounded-xl hover:bg-slate-800 flex items-center gap-2 font-medium text-slate-200 hover:text-white transition-colors"
           >
-            <Settings size={14} className="text-indigo-400" /> System Settings
+            <Settings size={14} className="text-emerald-400" /> System Settings
           </button>
           <div className="border-t border-slate-800 pt-1">
             <button

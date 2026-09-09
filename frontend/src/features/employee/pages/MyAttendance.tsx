@@ -84,7 +84,7 @@ export const MyAttendance: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-white">General Day Shift (GS)</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">09:00 AM – 06:00 PM</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">9 Hours Shift</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">9 Hours Shift</span>
             </div>
             <p className="text-[11px] text-slate-300 mt-0.5">
               <strong className="text-white">9 Hours Shift</strong> = <span className="text-emerald-400 font-bold">8 Hours Work</span> + <span className="text-amber-400 font-bold">1 Hour Break (60 Mins)</span> &bull; Grace window: 15 mins (up to 09:15 AM)
@@ -144,7 +144,7 @@ export const MyAttendance: React.FC = () => {
                   <td className="py-3 px-4 font-bold text-white">{h.date}</td>
                   <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{h.in}</td>
                   <td className="py-3 px-4 font-mono text-rose-400 font-bold">{h.out}</td>
-                  <td className="py-3 px-4 font-mono text-blue-400 font-bold">{h.workingTime}</td>
+                  <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{h.workingTime}</td>
                   <td className="py-3 px-4 font-mono text-slate-300">{h.break}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -153,7 +153,7 @@ export const MyAttendance: React.FC = () => {
                       {h.late}
                     </span>
                   </td>
-                  <td className="py-3 px-4 font-mono text-purple-400">{h.overtime}</td>
+                  <td className="py-3 px-4 font-mono text-emerald-400">{h.overtime}</td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                       h.status === 'Checked In' || h.status === 'Working' || h.status === 'Present'

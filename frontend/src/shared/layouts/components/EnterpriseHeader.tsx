@@ -118,8 +118,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   const handleConfirmLogout = () => {
     setShowLogoutModal(false);
     setActiveDropdown(null);
-    logout();
-    navigate('/login', { replace: true });
+    navigate('/logout');
   };
 
   // Compute Breadcrumb Trail
@@ -167,7 +166,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
 
         {/* Dynamic Breadcrumbs */}
         <div className="hidden sm:flex items-center gap-1.5 text-xs min-w-0 pl-2 border-l border-slate-200 dark:border-slate-800">
-          <Link to="/" className="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
+          <Link to="/" className="text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1">
             <Home size={14} />
           </Link>
           {breadcrumbs.map((b, idx) => (
@@ -196,8 +195,8 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
             style={{ paddingLeft: '2.25rem' }}
             className={`w-full rounded-lg pr-4 py-1.5 text-xs transition-all outline-none border ${
               isDark
-                ? 'bg-slate-900 border-slate-800 text-slate-100 placeholder-slate-500 focus:border-blue-500'
-                : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-600 focus:bg-white'
+                ? 'bg-slate-900 border-slate-800 text-slate-100 placeholder-slate-500 focus:border-emerald-500'
+                : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:bg-white'
             }`}
           />
         </div>
@@ -207,7 +206,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
           <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 shadow-lg z-50 rounded-lg space-y-2 text-slate-900 dark:text-slate-100">
             <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
               <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Search className="text-blue-500" size={13} /> Command Palette Search
+                <Search className="text-emerald-500" size={13} /> Command Palette Search
               </span>
               <button onClick={() => setSearchFocused(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X size={14} />
@@ -221,7 +220,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                   onClick={() => setSearchCategory(cat)}
                   className={`px-2.5 py-1 text-xs rounded-md font-medium capitalize transition-all cursor-pointer ${
                     searchCategory === cat
-                      ? 'bg-blue-600 text-white shadow-sm'
+                      ? 'bg-emerald-600 text-white shadow-sm'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                   }`}
                 >
@@ -241,10 +240,10 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                     className="w-full text-left p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors flex items-center justify-between group cursor-pointer"
                   >
                     <div>
-                      <p className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400">{res.title}</p>
+                      <p className="text-xs font-medium text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{res.title}</p>
                       <p className="text-[11px] text-slate-400 dark:text-slate-500 capitalize">{res.category}</p>
                     </div>
-                    <ChevronRight className="text-slate-400 group-hover:text-blue-500" size={14} />
+                    <ChevronRight className="text-slate-400 group-hover:text-emerald-500" size={14} />
                   </button>
                 ))
               )}
@@ -318,7 +317,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                 <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">Notifications ({unreadCount})</span>
                 <button
                   onClick={markAllNotificationsRead}
-                  className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-medium cursor-pointer"
+                  className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium cursor-pointer"
                 >
                   Mark All Read
                 </button>
@@ -424,7 +423,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                     <span className={`badge ${getRoleBadgeClass(role)}`}>{ROLE_LABELS[role]}</span>
                     <button
                       onClick={() => setShowPermissionsPreview(!showPermissionsPreview)}
-                      className="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <Layers size={13} /> {showPermissionsPreview ? 'Hide' : 'Permissions'}
                     </button>
@@ -437,7 +436,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                     <p className="font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Active Permissions ({permissions.length})</p>
                     <div className="flex flex-wrap gap-1">
                       {permissions.map((p, idx) => (
-                        <span key={idx} className="bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 px-1.5 py-0.5 rounded font-mono text-[9px] truncate max-w-full">
+                        <span key={idx} className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 px-1.5 py-0.5 rounded font-mono text-[9px] truncate max-w-full">
                           {p}
                         </span>
                       ))}
@@ -451,19 +450,19 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                     onClick={() => { navigate('/employee/profile'); setActiveDropdown(null); }}
                     className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
-                    <User size={15} className="text-blue-600 dark:text-blue-400 shrink-0" /> View Profile
+                    <User size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> View Profile
                   </button>
                   <button
                     onClick={() => { navigate('/admin/settings'); setActiveDropdown(null); }}
                     className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
-                    <Settings size={15} className="text-indigo-600 dark:text-indigo-400 shrink-0" /> Account Settings
+                    <Settings size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> Account Settings
                   </button>
                   <button
                     onClick={() => { navigate('/admin/users'); setActiveDropdown(null); }}
                     className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
-                    <Shield size={15} className="text-purple-600 dark:text-purple-400 shrink-0" /> Access Control Matrix
+                    <Shield size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> Access Control Matrix
                   </button>
                 </div>
 

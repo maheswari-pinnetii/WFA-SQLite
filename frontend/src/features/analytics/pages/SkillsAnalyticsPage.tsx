@@ -95,7 +95,7 @@ export const SkillsAnalyticsPage: React.FC = () => {
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{item.name}</td>
                     <td className="p-3 text-slate-300">{item.role}</td>
                     <td className="p-3 text-slate-400">{item.primarySkills}</td>
-                    <td className="p-3 font-bold text-blue-400">{item.certification}</td>
+                    <td className="p-3 font-bold text-emerald-400">{item.certification}</td>
                   </tr>
                 ))}
               </tbody>

@@ -36,7 +36,7 @@ export const LocationsManagement: React.FC = () => {
             <div key={loc.id} className="glass-panel p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-extrabold text-base text-slate-100 flex items-center gap-2">
-                  <Globe size={18} className="text-blue-400" />
+                  <Globe size={18} className="text-emerald-400" />
                   {loc.city}
                 </span>
                 <span
@@ -49,7 +49,7 @@ export const LocationsManagement: React.FC = () => {
                   {loc.status}
                 </span>
               </div>
-              <div className="text-xs text-slate-400">{loc.country} • <span className="font-mono text-indigo-400">{loc.code}</span></div>
+              <div className="text-xs text-slate-400">{loc.country} • <span className="font-mono text-emerald-400">{loc.code}</span></div>
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs font-medium text-slate-300">
                 <span className="flex items-center gap-1"><Clock size={13} className="text-slate-400" /> {loc.timezone}</span>
                 <span className="flex items-center gap-1 font-bold text-slate-200"><Users size={13} className="text-cyan-400" /> {loc.headcount} Staff</span>

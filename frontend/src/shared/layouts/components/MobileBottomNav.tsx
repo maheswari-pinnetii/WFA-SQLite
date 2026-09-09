@@ -29,7 +29,7 @@ export const MobileBottomNav: React.FC<{ onOpenMobileMenu: () => void }> = ({ on
             to={item.path}
             className={`flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl transition-all ${
               isActive
-                ? 'text-blue-400 bg-blue-500/10'
+                ? 'text-emerald-400 bg-emerald-500/10'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >

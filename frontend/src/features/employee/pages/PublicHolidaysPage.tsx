@@ -288,10 +288,10 @@ export const PublicHolidaysPage: React.FC = () => {
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between">
           <div>
             <span className="text-xs text-slate-400 font-semibold block">Floating / Optional</span>
-            <span className="text-2xl font-black text-purple-400 mt-1 block">2 Days</span>
-            <span className="text-[10px] text-purple-400/80 font-mono">Employee Choice</span>
+            <span className="text-2xl font-black text-emerald-400 mt-1 block">2 Days</span>
+            <span className="text-[10px] text-emerald-400/80 font-mono">Employee Choice</span>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-lg">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-lg">
             <Sparkles size={22} />
           </div>
         </div>
@@ -318,7 +318,7 @@ export const PublicHolidaysPage: React.FC = () => {
               onClick={() => setSelectedQuarter(q)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 selectedQuarter === q
-                  ? 'bg-indigo-600 text-white shadow-md'
+                  ? 'bg-emerald-600 text-white shadow-md'
                   : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
               }`}
             >
@@ -331,7 +331,7 @@ export const PublicHolidaysPage: React.FC = () => {
           <select
             value={selectedRegion}
             onChange={(e) => setSelectedRegion(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500"
+            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white focus:outline-none focus:border-emerald-500"
           >
             <option value="All Locations">All Hubs (Bengaluru, Salem, Hyderabad)</option>
             <option value="Bengaluru">Bengaluru Hub</option>
@@ -342,7 +342,7 @@ export const PublicHolidaysPage: React.FC = () => {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500"
+            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-white focus:outline-none focus:border-emerald-500"
           >
             <option value="ALL">All Holiday Types</option>
             <option value="Mandatory">Mandatory Fixed</option>
@@ -354,7 +354,7 @@ export const PublicHolidaysPage: React.FC = () => {
             placeholder="Search holiday name or keyword..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-3.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 min-w-[200px]"
+            className="px-3.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 min-w-[200px]"
           />
         </div>
       </div>
@@ -392,7 +392,7 @@ export const PublicHolidaysPage: React.FC = () => {
                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
                   h.type === 'Mandatory'
                     ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'
-                    : 'bg-purple-950/80 text-purple-300 border border-purple-500/30'
+                    : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'
                 }`}>
                   {h.type}
                 </span>
@@ -416,10 +416,10 @@ export const PublicHolidaysPage: React.FC = () => {
       </div>
 
       {/* 5. Policy Guidance Banner for Floating Holidays & Personal Leave */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-purple-950/40 border border-indigo-500/30 flex flex-col md:flex-row md:items-center justify-between gap-5">
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-purple-950/40 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Info size={18} className="text-indigo-400" />
+            <Info size={18} className="text-emerald-400" />
             <h3 className="text-base font-bold text-white">How to Claim Floating & Personal Leaves</h3>
           </div>
           <p className="text-xs text-slate-300 max-w-2xl">

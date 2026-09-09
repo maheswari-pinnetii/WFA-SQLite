@@ -24,7 +24,7 @@ export const TrendCard: React.FC<TrendCardProps> = ({
     <div className="p-5 rounded-3xl bg-[var(--bg-secondary)] border border-[var(--border-color)] shadow-xl space-y-3 font-sans transition-all hover:scale-[1.01]">
       <div className="flex items-center justify-between">
         <span className="text-xs font-extrabold text-[var(--text-primary)]">{title}</span>
-        <div className="p-2 rounded-2xl bg-blue-500/10 text-blue-400">
+        <div className="p-2 rounded-2xl bg-emerald-500/10 text-emerald-400">
           {icon || <TrendingUp size={18} />}
         </div>
       </div>

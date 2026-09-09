@@ -18,6 +18,7 @@ import * as workflowController from '../controllers/workflow.controller.js';
 import * as schedulingController from '../controllers/scheduling.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { tenantScope } from '../middleware/tenantScope.js';
+import { uploadMiddleware } from '../middleware/fileUpload.js';
 import {
   loginRateLimiter,
   registerRateLimiter,
@@ -238,6 +239,17 @@ router.post('/ai/insights/refresh', authenticateToken, authorizeRoles(['ADMIN', 
 // Feature Flags
 router.get('/feature-flags', authenticateToken, authenticatedUserLimiter, aiController.getFeatureFlags);
 router.put('/feature-flags/:key', authenticateToken, authorizeRoles(['ADMIN']), validateFeatureFlagParam, validateFeatureFlagUpdate, aiController.updateFeatureFlag);
+
+// ─── File Uploads ──────────────────────────────────────────────────────────
+router.post('/upload', authenticateToken, authenticatedUserLimiter, uploadMiddleware.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'No file uploaded.' });
+  }
+  const user = (req as any).user;
+  const orgId = user?.organizationId || user?.companyId || 'org-stackly';
+  const url = `/uploads/${orgId}/${req.file.filename}`;
+  res.status(201).json({ success: true, url });
+});
 
 // ─── Employee Lifecycle (Step 2) ────────────────────────────────────────────
 router.get('/employees/:id/status-history', authenticateToken, enforceScope, authenticatedUserLimiter, lifecycleController.getStatusHistory);

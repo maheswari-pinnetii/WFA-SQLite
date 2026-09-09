@@ -23,7 +23,7 @@ export const MyPerformance: React.FC = () => {
         <div className="glass-panel p-5">
           <div className="flex items-center justify-between text-slate-400 mb-1">
             <span className="text-xs font-semibold uppercase">Sprint Delivery</span>
-            <Target size={18} className="text-indigo-400" />
+            <Target size={18} className="text-emerald-400" />
           </div>
           <div className="text-2xl font-black">98.4%</div>
           <p className="text-xs text-slate-400 mt-1 font-medium">Zero SLA breaches</p>

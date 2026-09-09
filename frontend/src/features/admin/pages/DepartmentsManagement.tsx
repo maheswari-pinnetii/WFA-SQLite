@@ -19,7 +19,7 @@ export const DepartmentsManagement: React.FC = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-              <Building2 className="text-purple-400" size={24} />
+              <Building2 className="text-emerald-400" size={24} />
               Enterprise Department Management
             </h2>
             <p className="text-sm text-slate-400">
@@ -33,11 +33,11 @@ export const DepartmentsManagement: React.FC = () => {
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="glass-panel p-5 border-l-4 border-purple-500">
+          <div className="glass-panel p-5 border-l-4 border-emerald-500">
             <div className="text-xs font-semibold text-slate-400">Total Active Departments</div>
             <div className="text-2xl font-black mt-1">5 Business Units</div>
           </div>
-          <div className="glass-panel p-5 border-l-4 border-blue-500">
+          <div className="glass-panel p-5 border-l-4 border-emerald-500">
             <div className="text-xs font-semibold text-slate-400">Total Assigned Headcount</div>
             <div className="text-2xl font-black mt-1">367 Employees</div>
           </div>
@@ -65,10 +65,10 @@ export const DepartmentsManagement: React.FC = () => {
                 {departments.map((dept) => (
                   <tr key={dept.id} className="hover:bg-slate-800/20">
                     <td className="py-3 px-4 font-bold text-slate-100 flex items-center gap-2">
-                      <Building2 size={16} className="text-purple-400" />
+                      <Building2 size={16} className="text-emerald-400" />
                       {dept.name}
                     </td>
-                    <td className="py-3 px-4 font-mono text-xs text-indigo-400">{dept.code}</td>
+                    <td className="py-3 px-4 font-mono text-xs text-emerald-400">{dept.code}</td>
                     <td className="py-3 px-4 font-medium text-slate-300">{dept.head}</td>
                     <td className="py-3 px-4 font-semibold text-slate-200">{dept.headcount} Staff</td>
                     <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{dept.budget}</td>

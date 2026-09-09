@@ -35,7 +35,7 @@ export const DataTable: React.FC<DataTableProps> = ({
             <input 
               type="text" 
               placeholder={searchPlaceholder || "Search..."} 
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
               onChange={(e) => onSearch(e.target.value)}
             />
           </div>

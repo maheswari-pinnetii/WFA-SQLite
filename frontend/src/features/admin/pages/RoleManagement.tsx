@@ -34,7 +34,7 @@ export const RoleManagement: React.FC = () => {
             <tbody className="divide-y divide-slate-800/60">
               {permissions.map((perm) => (
                 <tr key={perm} className="hover:bg-slate-800/20">
-                  <td className="py-3 px-4 font-mono text-xs text-indigo-400 font-semibold">{perm}</td>
+                  <td className="py-3 px-4 font-mono text-xs text-emerald-400 font-semibold">{perm}</td>
                   {roles.map((r) => {
                     const isGranted = PERMISSION_MATRIX[r].includes(perm);
                     return (

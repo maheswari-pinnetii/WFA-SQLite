@@ -50,7 +50,7 @@ export const PayslipsPage: React.FC = () => {
                   <tr key={idx} className="hover:bg-slate-800/20">
                     <td className="py-3 px-4 font-bold text-slate-100">{p.period}</td>
                     <td className="py-3 px-4 text-slate-300">{p.basic}</td>
-                    <td className="py-3 px-4 text-indigo-400">{p.allowance}</td>
+                    <td className="py-3 px-4 text-emerald-400">{p.allowance}</td>
                     <td className="py-3 px-4 text-rose-400">-{p.deduction}</td>
                     <td className="py-3 px-4 text-emerald-400 font-extrabold">{p.net}</td>
                     <td className="py-3 px-4 font-sans">
@@ -59,7 +59,7 @@ export const PayslipsPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right font-sans">
-                      <Button variant="ghost" size="sm" className="text-blue-400 flex items-center gap-1 ml-auto">
+                      <Button variant="ghost" size="sm" className="text-emerald-400 flex items-center gap-1 ml-auto">
                         <Download size={14} /> PDF Slip
                       </Button>
                     </td>

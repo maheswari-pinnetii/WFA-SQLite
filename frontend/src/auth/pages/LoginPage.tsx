@@ -30,13 +30,6 @@ export const LoginPage: React.FC = () => {
     navigate(target, { replace: true });
   };
 
-  // A restored session should never leave the user on the login screen.
-  useEffect(() => {
-    if (isAuthenticated && user?.role) {
-      proceedToDashboard(user.role as Role);
-    }
-  }, [isAuthenticated, user?.role]);
-
   /**
    * Handle Standard Email + Password Login (Step 1)
    * Validates credentials with backend, then proceeds to Step 2 Verification

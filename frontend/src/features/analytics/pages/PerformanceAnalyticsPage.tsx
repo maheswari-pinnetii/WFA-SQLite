@@ -95,10 +95,10 @@ export const PerformanceAnalyticsPage: React.FC = () => {
                   <tr key={idx} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{item.name}</td>
                     <td className="p-3 text-slate-300">{item.role}</td>
-                    <td className="p-3 font-bold text-indigo-400">{item.score}</td>
+                    <td className="p-3 font-bold text-emerald-400">{item.score}</td>
                     <td className="p-3 text-slate-400">{item.reviewStatus}</td>
                     <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded-lg border text-[10px] uppercase ${item.rating === 'Exceptional' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : item.rating === 'Strong' ? 'bg-blue-500/15 text-blue-400 border-blue-500/30' : 'bg-red-500/15 text-red-400 border-red-500/30'}`}>
+                      <span className={`px-2 py-0.5 rounded-lg border text-[10px] uppercase ${item.rating === 'Exceptional' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : item.rating === 'Strong' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' : 'bg-red-500/15 text-red-400 border-red-500/30'}`}>
                         {item.rating}
                       </span>
                     </td>

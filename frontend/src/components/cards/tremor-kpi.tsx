@@ -48,14 +48,14 @@ export function Callout({
   children?: React.ReactNode;
 }) {
   const variantStyles = {
-    default: 'bg-blue-950/40 border-blue-800/50 text-blue-300',
+    default: 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300',
     success: 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300',
     warning: 'bg-amber-950/40 border-amber-800/50 text-amber-300',
     error: 'bg-rose-950/40 border-rose-800/50 text-rose-300',
   };
 
   const defaultIcons = {
-    default: <Info size={18} className="text-blue-400 shrink-0" />,
+    default: <Info size={18} className="text-emerald-400 shrink-0" />,
     success: <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />,
     warning: <AlertCircle size={18} className="text-amber-400 shrink-0" />,
     error: <AlertCircle size={18} className="text-rose-400 shrink-0" />,
@@ -95,11 +95,11 @@ export function ProgressBar({
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
   const colorStyles = {
-    blue: 'bg-blue-500',
+    blue: 'bg-emerald-500',
     emerald: 'bg-emerald-500',
     amber: 'bg-amber-500',
     rose: 'bg-rose-500',
-    purple: 'bg-purple-500',
+    purple: 'bg-emerald-500',
   };
 
   return (

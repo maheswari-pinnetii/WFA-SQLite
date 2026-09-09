@@ -44,7 +44,7 @@ export const TaskTrackingPage: React.FC = () => {
               <div>
                 <span className="font-mono text-[10px] text-slate-400">{t.id}</span>
                 <h4 className="font-bold text-sm text-[var(--text-primary)]">{t.title}</h4>
-                <p className="text-xs text-slate-400">Assignee: <span className="text-blue-400 font-semibold">{t.assigneeName}</span> · {t.points} points</p>
+                <p className="text-xs text-slate-400">Assignee: <span className="text-emerald-400 font-semibold">{t.assigneeName}</span> · {t.points} points</p>
               </div>
               <select value={t.status} onChange={(event) => void updateStatus(t.id, event.target.value as Task['status'])} className={`badge ${t.status === 'COMPLETED' ? 'badge-success' : 'badge-info'} text-[10px] uppercase font-bold`}>
                 <option>TODO</option><option>IN_PROGRESS</option><option>COMPLETED</option><option>BLOCKED</option>

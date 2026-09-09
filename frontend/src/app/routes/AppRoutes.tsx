@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../../security/guards/ProtectedRoute';
 import { RoleGuard } from '../../security/guards/RoleGuard';
+import { GuestGuard } from '../../security/guards/GuestGuard';
 import { MainLayout } from '../../shared/layouts/MainLayout';
 import { LoginPage } from '../../auth/pages/LoginPage';
 
@@ -116,13 +117,13 @@ export const AppRoutes: React.FC = () => {
       <Route path="/dashboard" element={<DefaultHomeRedirect />} />
 
       {/* Public Auth Routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/sso-callback" element={<SsoCallbackPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
+      <Route path="/login" element={<GuestGuard><LoginPage /></GuestGuard>} />
+      <Route path="/sso-callback" element={<GuestGuard><SsoCallbackPage /></GuestGuard>} />
+      <Route path="/signup" element={<GuestGuard><SignUpPage /></GuestGuard>} />
       <Route path="/logout" element={<LogoutPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/verify-email" element={<ResetPasswordPage />} />
+      <Route path="/forgot-password" element={<GuestGuard><ForgotPasswordPage /></GuestGuard>} />
+      <Route path="/reset-password" element={<GuestGuard><ResetPasswordPage /></GuestGuard>} />
+      <Route path="/verify-email" element={<GuestGuard><ResetPasswordPage /></GuestGuard>} />
 
       {/* Protected Routes Enclosed in Enterprise MainLayout */}
       <Route

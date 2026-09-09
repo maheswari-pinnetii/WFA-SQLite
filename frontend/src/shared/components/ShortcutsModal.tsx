@@ -19,12 +19,12 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
         {
           label: 'Global Quick Search / Command Palette',
           keys: [modSymbol, 'K'],
-          icon: <Search size={15} className="text-blue-400" />
+          icon: <Search size={15} className="text-emerald-400" />
         },
         {
           label: 'Toggle Sidebar Collapse / Expand',
           keys: [modSymbol, 'B'],
-          icon: <PanelLeft size={15} className="text-indigo-400" />
+          icon: <PanelLeft size={15} className="text-emerald-400" />
         },
         {
           label: 'Toggle Light / Dark Theme Mode',
@@ -49,7 +49,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
         {
           label: 'Open IT Support & Knowledge Base',
           keys: ['H'],
-          icon: <LifeBuoy size={15} className="text-sky-400" />
+          icon: <LifeBuoy size={15} className="text-emerald-400" />
         }
       ]
     }
@@ -64,9 +64,9 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
     >
       <div className="glass-panel w-full max-w-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[var(--border-color)] flex items-center justify-between bg-blue-600/10">
+        <div className="px-6 py-4 border-b border-[var(--border-color)] flex items-center justify-between bg-emerald-600/10">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-md">
+            <div className="p-2.5 rounded-xl bg-emerald-600 text-white shadow-md">
               <Command size={20} />
             </div>
             <div>
@@ -124,7 +124,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({ isOpen, onClose 
           <span>Press <kbd className="px-1.5 py-0.5 rounded bg-[var(--bg-secondary)] font-mono font-bold text-[10px]">Esc</kbd> to close anytime</span>
           <button
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors"
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors"
           >
             Got it
           </button>

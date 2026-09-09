@@ -96,7 +96,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Enterprise Workforce Directory</h3>
-            <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800">{employees.length.toLocaleString()} Total Records</span>
+            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">{employees.length.toLocaleString()} Total Records</span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Complete workforce directory with instant role controls & shift tracking</p>
         </div>
@@ -115,7 +115,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
               setPage(1);
             }}
             placeholder="Search 10,000 employees by name, code, email..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors"
           />
         </div>
 
@@ -286,13 +286,13 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                     <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
                       {(emp as any).checkOut || '06:35 PM'}
                     </td>
-                    <td className="py-3 px-4 font-mono font-bold text-blue-600 dark:text-blue-400">
+                    <td className="py-3 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">
                       {(emp as any).workingHours || '08h 12m'}
                     </td>
                     <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
                       {(emp as any).breakDuration || '01h 03m'}
                     </td>
-                    <td className="py-3 px-4 font-mono text-purple-600 dark:text-purple-400 font-bold">
+                    <td className="py-3 px-4 font-mono text-emerald-600 dark:text-emerald-400 font-bold">
                       {(emp as any).leaveBalance || '12 days'}
                     </td>
                     <td className="py-3 px-4 text-[var(--text-muted)]">
@@ -302,7 +302,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       {(emp as any).syncStatus || 'Synced'}
                     </td>
                     <td className="py-3 px-4">
-                      <button className="text-blue-600 dark:text-blue-400 hover:text-blue-500 font-extrabold text-[11px]">View</button>
+                      <button className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-extrabold text-[11px]">View</button>
                     </td>
                   </tr>
                 );

@@ -67,7 +67,7 @@ export const EmployeeStatusIcon: React.FC<EmployeeStatusIconProps> = ({
   if (norm === 'working') {
     return (
       <span
-        className={clsx("inline-flex items-center gap-1.5 text-blue-600 dark:text-blue-400", className)}
+        className={clsx("inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400", className)}
         title="Employee Working - Active shift task"
         aria-label="Status: Working"
       >
@@ -131,7 +131,7 @@ export const AttendanceActionIcon: React.FC<AttendanceActionIconProps> = ({
       return <span title="Take Break" aria-label="Break" className="inline-flex items-center"><Coffee size={size} className={clsx("text-amber-500 shrink-0", className)} /></span>;
     case 'RESUME':
     case 'RESUME_WORK':
-      return <span title="Resume Work" aria-label="Resume Work" className="inline-flex items-center"><Play size={size} className={clsx("text-blue-500 shrink-0", className)} /></span>;
+      return <span title="Resume Work" aria-label="Resume Work" className="inline-flex items-center"><Play size={size} className={clsx("text-emerald-500 shrink-0", className)} /></span>;
     case 'CHECK_OUT':
     case 'CHECKOUT':
       return <span title="Check-Out" aria-label="Check-Out" className="inline-flex items-center"><LogOut size={size} className={clsx("text-rose-500 shrink-0", className)} /></span>;
@@ -166,7 +166,7 @@ export const LeaveStatusIcon: React.FC<LeaveStatusIconProps> = ({
       return <span title="Present" aria-label="Present" className="inline-flex items-center"><CheckCircle2 size={size} className={clsx("text-emerald-500 shrink-0", className)} /></span>;
     case 'LEAVE':
     case 'ON_LEAVE':
-      return <span title="On Leave" aria-label="On Leave" className="inline-flex items-center"><Calendar size={size} className={clsx("text-purple-500 shrink-0", className)} /></span>;
+      return <span title="On Leave" aria-label="On Leave" className="inline-flex items-center"><Calendar size={size} className={clsx("text-emerald-500 shrink-0", className)} /></span>;
     case 'ABSENT':
       return <span title="Absent" aria-label="Absent" className="inline-flex items-center"><UserX size={size} className={clsx("text-rose-500 shrink-0", className)} /></span>;
     case 'PENDING':
@@ -276,7 +276,7 @@ export const SyncStatusIcon: React.FC<SyncStatusIconProps> = ({
   if (norm === 'SYNCING') {
     return (
       <span
-        className={clsx("inline-flex items-center gap-1.5 text-blue-500", className)}
+        className={clsx("inline-flex items-center gap-1.5 text-emerald-500", className)}
         title="Syncing data with server..."
         aria-label="Synchronization in progress"
       >

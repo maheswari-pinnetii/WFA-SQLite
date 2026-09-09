@@ -402,7 +402,7 @@ export const PayrollReports: React.FC = () => {
 
           <div className="flex items-center gap-2.5 flex-wrap">
             <Button variant="outline" size="sm" onClick={() => window.location.assign('/hr/leave')}>
-              <Palmtree size={14} className="mr-1.5 text-blue-400" /> Leave Hub
+              <Palmtree size={14} className="mr-1.5 text-emerald-400" /> Leave Hub
             </Button>
 
             {/* Payroll Period Picker */}
@@ -462,7 +462,7 @@ export const PayrollReports: React.FC = () => {
               <FileSpreadsheet size={14} className="mr-1 text-emerald-400" /> CSV
             </Button>
             <Button variant="outline" size="sm" onClick={handleExportJson} title="Export JSON">
-              <FileCode size={14} className="mr-1 text-blue-400" /> JSON
+              <FileCode size={14} className="mr-1 text-emerald-400" /> JSON
             </Button>
           </div>
         </div>
@@ -498,9 +498,9 @@ export const PayrollReports: React.FC = () => {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Gross Payroll</p>
                 <h3 className="text-2xl font-black text-white mt-1">${totals.totalGross.toLocaleString()}</h3>
-                <p className="text-[11px] text-blue-400 mt-0.5">Before tax & benefits withholdings</p>
+                <p className="text-[11px] text-emerald-400 mt-0.5">Before tax & benefits withholdings</p>
               </div>
-              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20">
+              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
                 <Layers size={22} />
               </div>
             </CardContent>
@@ -510,10 +510,10 @@ export const PayrollReports: React.FC = () => {
             <CardContent className="p-5 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Overtime Payout</p>
-                <h3 className="text-2xl font-black text-purple-400 mt-1">${totals.totalOvertime.toLocaleString()}</h3>
-                <p className="text-[11px] text-purple-300 mt-0.5">Approved extra shift hours (1.5x)</p>
+                <h3 className="text-2xl font-black text-emerald-400 mt-1">${totals.totalOvertime.toLocaleString()}</h3>
+                <p className="text-[11px] text-emerald-300 mt-0.5">Approved extra shift hours (1.5x)</p>
               </div>
-              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-2xl border border-purple-500/20">
+              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
                 <Clock size={22} />
               </div>
             </CardContent>
@@ -617,13 +617,13 @@ export const PayrollReports: React.FC = () => {
                         <td className="py-3.5 px-4 font-mono">
                           <span className="text-slate-200">{r.regularHours}h</span>
                           {r.overtimeHours > 0 && (
-                            <span className="text-purple-400 font-bold ml-1">+{r.overtimeHours}h OT</span>
+                            <span className="text-emerald-400 font-bold ml-1">+{r.overtimeHours}h OT</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-purple-400">
+                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
                           +${r.overtimePay.toFixed(0)}
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-blue-300">
+                        <td className="py-3.5 px-4 font-mono text-emerald-300">
                           +${(r.nightShiftAllowance + r.manualBonus).toFixed(0)}
                         </td>
                         <td className="py-3.5 px-4 font-mono text-rose-400 font-bold">
@@ -680,7 +680,7 @@ export const PayrollReports: React.FC = () => {
                   <tbody className="divide-y divide-slate-800/60">
                     {history.map((h) => (
                       <tr key={h.runId} className="hover:bg-slate-800/20">
-                        <td className="py-3.5 px-4 font-mono font-bold text-blue-400">{h.runId}</td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{h.runId}</td>
                         <td className="py-3.5 px-4 font-bold text-white">{h.period}</td>
                         <td className="py-3.5 px-4 font-mono text-slate-400">{h.processedAt}</td>
                         <td className="py-3.5 px-4 text-slate-300 font-semibold">{h.lockedBy}</td>
@@ -711,7 +711,7 @@ export const PayrollReports: React.FC = () => {
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900/80 space-y-2">
-                  <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
+                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
                     <Clock size={16} /> Night Shift Allowance
                   </div>
                   <p className="text-xs text-slate-400">Night shift workers receive a standard +$50/shift premium allowance.</p>
@@ -756,7 +756,7 @@ export const PayrollReports: React.FC = () => {
 
             <div className="space-y-4 mt-2">
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-1">
-                <p><span className="text-slate-400">Employee ID:</span> <span className="font-mono font-bold text-blue-400">{adjustmentModalRecord?.employeeId}</span></p>
+                <p><span className="text-slate-400">Employee ID:</span> <span className="font-mono font-bold text-emerald-400">{adjustmentModalRecord?.employeeId}</span></p>
                 <p><span className="text-slate-400">Base Salary:</span> ${adjustmentModalRecord?.baseSalary.toLocaleString()}</p>
                 <p><span className="text-slate-400">Overtime Pay:</span> ${adjustmentModalRecord?.overtimePay.toFixed(2)} ({adjustmentModalRecord?.overtimeHours}h)</p>
               </div>
@@ -789,7 +789,7 @@ export const PayrollReports: React.FC = () => {
                   value={adjustmentReason}
                   onChange={(e) => setAdjustmentReason(e.target.value)}
                   placeholder="e.g., Performance award, relocation support, asset penalty..."
-                  className="w-full p-3 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full p-3 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 resize-none"
                 />
               </div>
 

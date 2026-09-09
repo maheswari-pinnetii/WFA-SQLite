@@ -154,14 +154,14 @@ export const AttendanceCorrectionsPage: React.FC = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-sm text-white">{req.employeeName}</span>
                         <span className="text-[10px] text-slate-400 font-mono">ID: {req.employeeId}</span>
-                        <span className="text-[10px] text-blue-400 font-mono font-bold bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">
+                        <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                           {req.id}
                         </span>
                       </div>
                       
                       <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-1">
                         <p>
-                          Date: <span className="font-mono font-bold text-blue-400">{req.date}</span> &bull; Requested Time: <span className="font-bold text-emerald-400 font-mono">{req.requestedCheckIn || '09:00 AM'} – {req.requestedCheckOut || '06:00 PM'}</span>
+                          Date: <span className="font-mono font-bold text-emerald-400">{req.date}</span> &bull; Requested Time: <span className="font-bold text-emerald-400 font-mono">{req.requestedCheckIn || '09:00 AM'} – {req.requestedCheckOut || '06:00 PM'}</span>
                         </p>
                         <p className="text-slate-400 italic">"Reason: {req.reason}"</p>
                         {req.managerComment && (

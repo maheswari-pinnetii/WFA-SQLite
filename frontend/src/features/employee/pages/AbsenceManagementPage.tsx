@@ -250,7 +250,7 @@ export const AbsenceManagementPage: React.FC = () => {
             ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40' 
             : toastMessage.type === 'error'
             ? 'bg-rose-950/90 text-rose-300 border-rose-500/40'
-            : 'bg-blue-950/90 text-blue-300 border-blue-500/40'
+            : 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40'
         }`}>
           {toastMessage.type === 'success' ? <CheckCircle2 size={16} className="text-emerald-400" /> : <AlertCircle size={16} />}
           <span>{toastMessage.text}</span>
@@ -310,10 +310,10 @@ export const AbsenceManagementPage: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-between shadow-xl">
           <div className="space-y-1 min-w-0">
             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-wider whitespace-nowrap block">Leaves Taken</span>
-            <p className="text-2xl font-black text-blue-500">{totalUsedDays} <span className="text-xs font-semibold text-[var(--text-muted)]">Days</span></p>
+            <p className="text-2xl font-black text-emerald-500">{totalUsedDays} <span className="text-xs font-semibold text-[var(--text-muted)]">Days</span></p>
             <p className="text-[10px] text-[var(--text-muted)] whitespace-nowrap">Calendar year 2026</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0 ml-3">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 ml-3">
             <CalendarDays size={22} />
           </div>
         </div>
@@ -333,9 +333,9 @@ export const AbsenceManagementPage: React.FC = () => {
           <div className="space-y-1 min-w-0">
             <span className="text-[11px] text-[var(--text-muted)] font-bold uppercase tracking-wider whitespace-nowrap block">Next Holiday</span>
             <p className="text-sm font-black text-[var(--text-primary)] truncate max-w-[140px]">{nextHoliday.name}</p>
-            <p className="text-[11px] text-purple-400 font-bold whitespace-nowrap">{nextHoliday.date} ({nextHoliday.dayOfWeek})</p>
+            <p className="text-[11px] text-emerald-400 font-bold whitespace-nowrap">{nextHoliday.date} ({nextHoliday.dayOfWeek})</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center shrink-0 ml-3">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 ml-3">
             <Award size={22} />
           </div>
         </div>
@@ -497,11 +497,11 @@ export const AbsenceManagementPage: React.FC = () => {
             <div className="glass-panel p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
                 <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-                  <FileText size={18} className="text-blue-500" /> Recent Leave Activity
+                  <FileText size={18} className="text-emerald-500" /> Recent Leave Activity
                 </h3>
                 <button 
                   onClick={() => setActiveTab('history')}
-                  className="text-xs text-blue-400 hover:underline font-bold cursor-pointer"
+                  className="text-xs text-emerald-400 hover:underline font-bold cursor-pointer"
                 >
                   View All ({requests.length})
                 </button>
@@ -559,11 +559,11 @@ export const AbsenceManagementPage: React.FC = () => {
             <div className="glass-panel p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
                 <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-                  <Calendar size={18} className="text-purple-500" /> Upcoming 2026 Holidays
+                  <Calendar size={18} className="text-emerald-500" /> Upcoming 2026 Holidays
                 </h3>
                 <button 
                   onClick={() => setActiveTab('holidays')}
-                  className="text-xs text-purple-400 hover:underline font-bold cursor-pointer"
+                  className="text-xs text-emerald-400 hover:underline font-bold cursor-pointer"
                 >
                   Full Holiday Calendar
                 </button>
@@ -571,11 +571,11 @@ export const AbsenceManagementPage: React.FC = () => {
 
               <div className="space-y-3">
                 {HOLIDAYS_2026.slice(0, 3).map(h => (
-                  <div key={h.id} className="p-3.5 rounded-2xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)] flex items-center justify-between text-xs hover:border-purple-500/30 transition-all">
+                  <div key={h.id} className="p-3.5 rounded-2xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)] flex items-center justify-between text-xs hover:border-emerald-500/30 transition-all">
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2">
                         <span className="font-extrabold text-sm text-[var(--text-primary)]">{h.name}</span>
-                        <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           {h.type}
                         </span>
                       </div>
@@ -709,7 +709,7 @@ export const AbsenceManagementPage: React.FC = () => {
                       onClick={() => setFormDuration('FULL_DAY')}
                       className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                         formDuration === 'FULL_DAY'
-                          ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                          ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
                           : 'bg-[var(--bg-tertiary)]/50 border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                       }`}
                     >
@@ -721,7 +721,7 @@ export const AbsenceManagementPage: React.FC = () => {
                       onClick={() => setFormDuration('FIRST_HALF')}
                       className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                         formDuration === 'FIRST_HALF'
-                          ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                          ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
                           : 'bg-[var(--bg-tertiary)]/50 border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                       }`}
                     >
@@ -733,7 +733,7 @@ export const AbsenceManagementPage: React.FC = () => {
                       onClick={() => setFormDuration('SECOND_HALF')}
                       className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
                         formDuration === 'SECOND_HALF'
-                          ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                          ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
                           : 'bg-[var(--bg-tertiary)]/50 border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]'
                       }`}
                     >
@@ -797,11 +797,11 @@ export const AbsenceManagementPage: React.FC = () => {
 
                 {/* Contextual Box: Leave Without Pay */}
                 {formType === 'Leave Without Pay' && (
-                  <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs flex items-start gap-2.5 animate-fadeIn">
-                    <ShieldAlert size={18} className="text-indigo-400 shrink-0 mt-0.5" />
+                  <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-start gap-2.5 animate-fadeIn">
+                    <ShieldAlert size={18} className="text-emerald-400 shrink-0 mt-0.5" />
                     <div>
                       <h5 className="font-bold mb-0.5">Leave Without Pay (LWP) Advisory</h5>
-                      <p className="text-[11px] text-indigo-200/80 leading-relaxed">
+                      <p className="text-[11px] text-emerald-200/80 leading-relaxed">
                         LWP will reflect as an uncompensated absence during monthly payroll calculations.
                       </p>
                     </div>
@@ -811,7 +811,7 @@ export const AbsenceManagementPage: React.FC = () => {
                 {/* Contextual Box: Document Proof */}
                 {selectedTypeConfig.requiresDocument && selectedTypeConfig.documentNotice && (
                   <div className="p-3.5 rounded-2xl bg-[var(--bg-tertiary)]/60 border border-[var(--border-color)] text-xs text-[var(--text-muted)] flex items-center gap-2">
-                    <Info size={16} className="text-blue-400 shrink-0" />
+                    <Info size={16} className="text-emerald-400 shrink-0" />
                     <span>{selectedTypeConfig.documentNotice}</span>
                   </div>
                 )}
@@ -898,7 +898,7 @@ export const AbsenceManagementPage: React.FC = () => {
 
                   <div className="flex justify-between items-center py-1.5 border-b border-[var(--border-color)]/60">
                     <span className="text-[var(--text-muted)] font-medium">Balance After Request</span>
-                    <span className="font-mono font-bold text-blue-400">
+                    <span className="font-mono font-bold text-emerald-400">
                       {Math.max(0, (selectedTypeBalance?.available ?? selectedTypeConfig.annualQuota) - calculatedDays)} Days
                     </span>
                   </div>
@@ -915,7 +915,7 @@ export const AbsenceManagementPage: React.FC = () => {
               {/* Card 2: Approval Route Preview */}
               <div className="glass-panel p-6 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-2xl space-y-3 w-full min-w-0">
                 <h3 className="text-sm font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-                  <CheckCircle2 size={16} className="text-blue-500" /> Approval Routing Flow
+                  <CheckCircle2 size={16} className="text-emerald-500" /> Approval Routing Flow
                 </h3>
                 
                 <div className="space-y-2 text-xs">
@@ -924,11 +924,11 @@ export const AbsenceManagementPage: React.FC = () => {
                     <span>Team Lead / Shift Supervisor</span>
                   </div>
                   <div className="flex items-center gap-2.5 text-[var(--text-secondary)]">
-                    <div className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-[10px] shrink-0">2</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-[10px] shrink-0">2</div>
                     <span>Department Manager (Engineering)</span>
                   </div>
                   <div className="flex items-center gap-2.5 text-[var(--text-secondary)]">
-                    <div className="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center text-[10px] shrink-0">3</div>
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-[10px] shrink-0">3</div>
                     <span>HR Operations Sync & Attendance Update</span>
                   </div>
                 </div>
@@ -1135,7 +1135,7 @@ export const AbsenceManagementPage: React.FC = () => {
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
                         h.type === 'NATIONAL' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                         h.type === 'MANDATORY' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                        'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                        'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                       }`}>
                         {h.type}
                       </span>
@@ -1167,7 +1167,7 @@ export const AbsenceManagementPage: React.FC = () => {
             
             <div className="border-b border-[var(--border-color)] pb-4">
               <h3 className="text-xl font-black text-[var(--text-primary)] flex items-center gap-2">
-                <Info size={22} className="text-blue-500" /> Enterprise Leave Policy & Guidelines (CY 2026)
+                <Info size={22} className="text-emerald-500" /> Enterprise Leave Policy & Guidelines (CY 2026)
               </h3>
               <p className="text-xs text-[var(--text-muted)] mt-1 font-medium">
                 Comprehensive reference for leave entitlements, accrual frequencies, rollover limitations, sandwich rules, and document requirements.
@@ -1179,7 +1179,7 @@ export const AbsenceManagementPage: React.FC = () => {
               {LEAVE_POLICY_RULES.map(rule => (
                 <div key={rule.id} className="p-5 rounded-2xl bg-[var(--bg-tertiary)]/40 border border-[var(--border-color)] space-y-3">
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-mono">
                       {rule.category}
                     </span>
                     <h4 className="font-black text-sm text-[var(--text-primary)]">{rule.title}</h4>

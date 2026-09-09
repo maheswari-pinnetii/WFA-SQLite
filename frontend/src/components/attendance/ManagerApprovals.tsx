@@ -154,7 +154,7 @@ export const ManagerApprovals: React.FC = () => {
                   </div>
                   <div>
                     <span className="text-slate-500 font-medium">Req. Shift:</span>{' '}
-                    <span className="font-mono font-bold text-blue-400">
+                    <span className="font-mono font-bold text-emerald-400">
                       {req.requestedCheckIn} - {req.requestedCheckOut}
                     </span>
                   </div>

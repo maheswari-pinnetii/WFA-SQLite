@@ -66,7 +66,7 @@ export const BetaFeedbackModal: React.FC<BetaFeedbackModalProps> = ({ isOpen, on
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 text-[10px] font-black rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
                   Beta Program
                 </span>
               </div>
@@ -94,7 +94,7 @@ export const BetaFeedbackModal: React.FC<BetaFeedbackModalProps> = ({ isOpen, on
                   onClick={() => setFeedbackType('feature')}
                   className={`p-2.5 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all ${
                     feedbackType === 'feature'
-                      ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
+                      ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
                       : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700'
                   }`}
                 >
@@ -146,7 +146,7 @@ export const BetaFeedbackModal: React.FC<BetaFeedbackModalProps> = ({ isOpen, on
                       : 'Describe your idea or what you enjoyed about the workflow...'
                   }
                   required
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-white placeholder:text-slate-600 focus:border-blue-500 focus:outline-none resize-none"
+                  className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs text-white placeholder:text-slate-600 focus:border-emerald-500 focus:outline-none resize-none"
                 />
               </div>
 

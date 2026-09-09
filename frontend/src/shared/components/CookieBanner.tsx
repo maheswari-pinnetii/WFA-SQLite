@@ -54,7 +54,7 @@ export const CookieBanner: React.FC = () => {
       <div className="p-5 rounded-2xl bg-slate-900/95 border border-slate-700/80 shadow-2xl backdrop-blur-xl space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
               <Cookie size={18} />
             </div>
             <div>
@@ -84,7 +84,7 @@ export const CookieBanner: React.FC = () => {
                 <span className="font-bold text-slate-200">Strictly Necessary</span>
                 <p className="text-[10px] text-slate-400">Session auth & zero-trust tokens</p>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-500/20 text-blue-400">Always On</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400">Always On</span>
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-800">

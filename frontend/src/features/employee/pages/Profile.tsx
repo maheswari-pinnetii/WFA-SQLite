@@ -366,8 +366,7 @@ export const Profile: React.FC = () => {
   };
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    navigate('/logout');
   };
 
   return (
@@ -385,7 +384,7 @@ export const Profile: React.FC = () => {
           <img
             src={user?.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}
             alt={user?.name}
-            className="w-24 h-24 rounded-full object-cover border-4 border-blue-500 shadow-xl shrink-0"
+            className="w-24 h-24 rounded-full object-cover border-4 border-emerald-500 shadow-xl shrink-0"
           />
           <div className="text-center sm:text-left space-y-1 flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -394,12 +393,12 @@ export const Profile: React.FC = () => {
                 {user?.role}
               </span>
             </div>
-            <p className="text-xs font-semibold text-blue-500">{user?.title || 'Frontend Developer'}</p>
+            <p className="text-xs font-semibold text-emerald-500">{user?.title || 'Frontend Developer'}</p>
             <p className="text-xs text-slate-400 font-medium">{user?.department || 'Engineering Department'}</p>
           </div>
 
           <div className="text-center sm:text-right flex flex-col items-center sm:items-end gap-2 shrink-0">
-            <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/30">
+            <span className="text-[11px] font-mono font-bold px-3 py-1 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/30">
               ID: STK-1005
             </span>
             <button
@@ -425,7 +424,7 @@ export const Profile: React.FC = () => {
               onClick={() => setActiveTab(tab.id as any)}
               className={`pb-3 flex items-center gap-1.5 border-b-2 transition-all ${
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-500 font-extrabold'
+                  ? 'border-emerald-500 text-emerald-500 font-extrabold'
                   : 'border-transparent text-slate-400 hover:text-[var(--text-primary)]'
               }`}
             >
@@ -439,7 +438,7 @@ export const Profile: React.FC = () => {
           <div className="space-y-6 animate-fadeIn">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div className="p-3.5 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center gap-3">
-                <Mail size={18} className="text-blue-500 shrink-0" />
+                <Mail size={18} className="text-emerald-500 shrink-0" />
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Official Email</p>
                   <p className="font-bold text-[var(--text-primary)]">{user?.email || 'maheswari@thestackly.com'}</p>
@@ -447,7 +446,7 @@ export const Profile: React.FC = () => {
               </div>
 
               <div className="p-3.5 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center gap-3">
-                <Building2 size={18} className="text-purple-500 shrink-0" />
+                <Building2 size={18} className="text-emerald-500 shrink-0" />
                 <div>
                   <p className="text-[10px] text-slate-400 font-bold uppercase">Department</p>
                   <p className="font-bold text-[var(--text-primary)]">{user?.department || 'Engineering Department'}</p>
@@ -484,9 +483,9 @@ export const Profile: React.FC = () => {
                 <p className="text-[10px] text-emerald-400 font-bold">Present Days</p>
                 <p className="text-lg font-black text-emerald-500">22 Days</p>
               </div>
-              <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                <p className="text-[10px] text-indigo-400 font-bold">Remote WFH</p>
-                <p className="text-lg font-black text-indigo-500">4 Days</p>
+              <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
+                <p className="text-[10px] text-emerald-400 font-bold">Remote WFH</p>
+                <p className="text-lg font-black text-emerald-500">4 Days</p>
               </div>
               <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                 <p className="text-[10px] text-amber-400 font-bold">Leave Taken</p>
@@ -499,7 +498,7 @@ export const Profile: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h5 className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     Google Calendar Integration
                   </h5>
                   <p className="text-[10px] text-slate-400">Sync live shifts, leaves, and WFH schedules</p>
@@ -507,7 +506,7 @@ export const Profile: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowSettings(!showSettings)}
-                    className="p-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] text-slate-400 hover:text-blue-500 transition-colors"
+                    className="p-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] text-slate-400 hover:text-emerald-500 transition-colors"
                     title="Google API Credentials"
                   >
                     <Settings size={14} />
@@ -523,7 +522,7 @@ export const Profile: React.FC = () => {
                     <button
                       onClick={handleConnectGoogle}
                       disabled={isConnecting}
-                      className="text-[10px] font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl transition-all shadow-md shadow-blue-500/20 disabled:opacity-50"
+                      className="text-[10px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl transition-all shadow-md shadow-blue-500/20 disabled:opacity-50"
                     >
                       {isConnecting ? 'Connecting...' : 'Connect Calendar'}
                     </button>
@@ -543,7 +542,7 @@ export const Profile: React.FC = () => {
                         localStorage.setItem('google_calendar_client_id', e.target.value);
                       }}
                       placeholder="Enter your OAuth 2.0 Client ID..."
-                      className="w-full text-xs bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-2.5 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-blue-500 font-mono"
+                      className="w-full text-xs bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-2.5 py-1.5 text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 font-mono"
                     />
                   </div>
                   <p className="text-[9px] text-slate-500 leading-normal">
@@ -654,7 +653,7 @@ export const Profile: React.FC = () => {
                       bgClass = 'bg-slate-500/5 text-slate-400 border border-slate-500/10 opacity-40';
                       tooltip = 'Weekend';
                     } else if (status === 'wfh') {
-                      bgClass = 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20';
+                      bgClass = 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
                       tooltip = 'Remote (WFH)';
                     } else if (status === 'leave') {
                       bgClass = 'bg-amber-500/10 text-amber-500 border border-amber-500/20';
@@ -675,7 +674,7 @@ export const Profile: React.FC = () => {
                         <span>{day}</span>
                         {status !== 'weekend' && (
                           <span className={`w-1.5 h-1.5 rounded-full mt-0.5 ${
-                            status === 'present' ? 'bg-emerald-500' : status === 'wfh' ? 'bg-indigo-500' : 'bg-amber-500'
+                            status === 'present' ? 'bg-emerald-500' : status === 'wfh' ? 'bg-emerald-500' : 'bg-amber-500'
                           }`} />
                         )}
                       </div>
@@ -690,10 +689,10 @@ export const Profile: React.FC = () => {
         {/* Tab 3: Performance */}
         {activeTab === 'performance' && (
           <div className="space-y-4 animate-fadeIn">
-            <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-purple-400">Quarterly KPI Score</p>
-                <p className="text-2xl font-black text-purple-500">96 / 100</p>
+                <p className="text-xs font-bold text-emerald-400">Quarterly KPI Score</p>
+                <p className="text-2xl font-black text-emerald-500">96 / 100</p>
               </div>
               <span className="badge badge-success">Top 5% Performer</span>
             </div>
@@ -710,12 +709,12 @@ export const Profile: React.FC = () => {
             ].map((doc, idx) => (
               <div key={idx} className="p-3 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText size={16} className="text-blue-500" />
+                  <FileText size={16} className="text-emerald-500" />
                   <span className="font-semibold text-[var(--text-primary)]">{doc.name}</span>
                 </div>
                 <span className="text-[10px] text-slate-400 font-mono flex items-center gap-2">
                   {doc.size}
-                  <button className="p-1 hover:text-blue-500"><Download size={14} /></button>
+                  <button className="p-1 hover:text-emerald-500"><Download size={14} /></button>
                 </span>
               </div>
             ))}
@@ -726,7 +725,7 @@ export const Profile: React.FC = () => {
         {activeTab === 'security' && (
           <div className="space-y-6 text-xs animate-fadeIn text-[var(--text-primary)]">
             <h4 className="text-sm font-extrabold border-b border-[var(--border-color)] pb-2 flex items-center gap-1.5">
-              <Settings size={16} className="text-blue-500" /> Two-Factor Authentication (2FA)
+              <Settings size={16} className="text-emerald-500" /> Two-Factor Authentication (2FA)
             </h4>
 
             {securityError && (
@@ -743,8 +742,8 @@ export const Profile: React.FC = () => {
 
             {/* Recovery Codes Display Box */}
             {recoveryCodes.length > 0 && (
-              <div className="p-4 rounded-xl bg-slate-800/10 border border-blue-500/20 space-y-3">
-                <p className="font-extrabold text-blue-500 text-xs">⚠️ IMPORTANT: Store these 10 one-time recovery codes safely!</p>
+              <div className="p-4 rounded-xl bg-slate-800/10 border border-emerald-500/20 space-y-3">
+                <p className="font-extrabold text-emerald-500 text-xs">⚠️ IMPORTANT: Store these 10 one-time recovery codes safely!</p>
                 <p className="text-[10px] text-slate-400">If you lose your authenticator app access, you can use these codes to log in. Each code can be used only once.</p>
                 <div className="grid grid-cols-2 gap-2 font-mono font-bold text-center">
                   {recoveryCodes.map((code, idx) => (
@@ -759,7 +758,7 @@ export const Profile: React.FC = () => {
                     navigator.clipboard.writeText(text);
                     alert('Recovery codes copied to clipboard.');
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors cursor-pointer"
                 >
                   Copy to Clipboard
                 </button>
@@ -792,7 +791,7 @@ export const Profile: React.FC = () => {
                     <button
                       onClick={handleStartSetup}
                       disabled={securityLoading}
-                      className="px-4 py-2 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors cursor-pointer"
                     >
                       {securityLoading ? 'Loading...' : 'Enable 2FA'}
                     </button>
@@ -828,7 +827,7 @@ export const Profile: React.FC = () => {
                           <button
                             onClick={handleRegenCodes}
                             disabled={securityLoading || !regenPassword}
-                            className="px-3 py-1.5 rounded-lg bg-blue-500 text-white font-bold hover:bg-blue-600 text-xs cursor-pointer"
+                            className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-bold hover:bg-emerald-600 text-xs cursor-pointer"
                           >
                             {securityLoading ? 'Generating...' : 'Confirm'}
                           </button>
@@ -882,7 +881,7 @@ export const Profile: React.FC = () => {
                       <button
                         onClick={handleVerifyEnroll}
                         disabled={securityLoading || enrollCode.length !== 6}
-                        className="flex-1 py-2 rounded-xl bg-blue-500 text-white font-bold hover:bg-blue-600 transition-colors cursor-pointer"
+                        className="flex-1 py-2 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors cursor-pointer"
                       >
                         {securityLoading ? 'Verifying...' : 'Verify & Enable'}
                       </button>
@@ -991,7 +990,7 @@ export const Profile: React.FC = () => {
                       className="p-3 rounded-xl bg-black/25 border border-[var(--border-color)] flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-sm">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">
                           {device.auth_method === 'face' ? '👤' : device.auth_method === 'screen_lock' ? '📱' : device.auth_method === 'device_pin' ? '🔢' : device.auth_method === 'pattern' ? '🔮' : '👆'}
                         </div>
                         <div>

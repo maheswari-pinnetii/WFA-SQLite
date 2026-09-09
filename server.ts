@@ -4,7 +4,7 @@ import { Server as SocketServer } from 'socket.io';
 import { app } from './backend/src/app.js';
 import { initSockets } from './backend/src/sockets/index.js';
 import { getDb } from './backend/src/config/db.js';
-import logger from './backend/src/config/logger.js';
+import { logger } from './backend/src/config/logger.js';
 
 const PORT = process.env.PORT || 5001;
 

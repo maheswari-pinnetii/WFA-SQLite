@@ -86,14 +86,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   });
 
   const getThemeClass = (userRole: string) => {
-    switch (userRole) {
-      case 'HR': return 'earth-theme';
-      case 'EMPLOYEE': return 'arctic-theme';
-      case 'TEAM_LEAD': return 'midnight-theme';
-      case 'MANAGER': return 'indigo-theme';
-      case 'ADMIN': return 'sunset-theme';
-      default: return 'emerald-theme';
-    }
+    return 'emerald-theme';
   };
 
   const themeClass = getThemeClass(role);
@@ -138,15 +131,15 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         <div className="flex items-center gap-4 flex-wrap">
           <button
             onClick={() => setOnboardingOpen(true)}
-            className="cursor-pointer hover:text-blue-400 transition-colors"
+            className="cursor-pointer hover:text-emerald-400 transition-colors"
           >
             Product Tour
           </button>
           <button
             onClick={() => setBetaFeedbackOpen(true)}
-            className="cursor-pointer hover:text-purple-400 transition-colors flex items-center gap-1 font-semibold"
+            className="cursor-pointer hover:text-emerald-400 transition-colors flex items-center gap-1 font-semibold"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" /> Beta Feedback
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> Beta Feedback
           </button>
           <button
             onClick={() => setPrivacyModalOpen(true)}

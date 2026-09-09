@@ -326,7 +326,7 @@ export const LeaveManagement: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-              <Palmtree className="text-blue-400" size={28} />
+              <Palmtree className="text-emerald-400" size={28} />
               Absence & Leave Management Hub
             </h1>
             <p className="text-xs text-slate-400 mt-1">
@@ -342,7 +342,7 @@ export const LeaveManagement: React.FC = () => {
               {isLoading ? 'Syncing...' : 'Sync Live Data'}
             </Button>
             <Button variant="outline" size="sm" onClick={() => setIsPolicyModalOpen(true)}>
-              <Shield size={14} className="mr-1.5 text-blue-400" /> Leave Policies
+              <Shield size={14} className="mr-1.5 text-emerald-400" /> Leave Policies
             </Button>
             <MotionButton variant="gradient" size="sm" onClick={() => setIsApplyModalOpen(true)}>
               <Plus size={14} className="mr-1.5" /> Apply for Leave
@@ -386,9 +386,9 @@ export const LeaveManagement: React.FC = () => {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">On Leave Today</p>
                 <h3 className="text-2xl font-black text-white mt-1">{metrics.onLeaveToday}</h3>
-                <p className="text-[11px] text-blue-400 mt-0.5">Active coverage substitutes ready</p>
+                <p className="text-[11px] text-emerald-400 mt-0.5">Active coverage substitutes ready</p>
               </div>
-              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20">
+              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
                 <Users size={22} />
               </div>
             </CardContent>
@@ -412,9 +412,9 @@ export const LeaveManagement: React.FC = () => {
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Upcoming Holiday</p>
                 <h3 className="text-sm font-black text-white mt-1 truncate max-w-[140px]">Independence Day</h3>
-                <p className="text-[11px] text-purple-400 mt-0.5">Aug 15 (Mandatory Off)</p>
+                <p className="text-[11px] text-emerald-400 mt-0.5">Aug 15 (Mandatory Off)</p>
               </div>
-              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-2xl border border-purple-500/20">
+              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-2xl border border-emerald-500/20">
                 <Award size={22} />
               </div>
             </CardContent>
@@ -507,7 +507,7 @@ export const LeaveManagement: React.FC = () => {
                     ) : (
                       filteredRequests.map((req) => (
                         <tr key={req.id} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="py-3.5 px-4 font-mono font-bold text-blue-400">{req.id}</td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{req.id}</td>
                           <td className="py-3.5 px-4">
                             <div className="font-bold text-white">{req.employeeName}</div>
                             <div className="text-[10px] text-slate-400 flex items-center gap-1">
@@ -698,16 +698,16 @@ export const LeaveManagement: React.FC = () => {
                         }`}
                       >
                         <div className="flex items-center justify-between text-xs font-bold">
-                          <span className={dayLeaves.length > 0 ? 'text-blue-400' : 'text-slate-300'}>{dayNum}</span>
+                          <span className={dayLeaves.length > 0 ? 'text-emerald-400' : 'text-slate-300'}>{dayNum}</span>
                           {dayLeaves.length > 0 && (
-                            <span className="px-1.5 py-0.2 rounded-full bg-blue-500/20 text-[10px] text-blue-300 font-bold">
+                            <span className="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-[10px] text-emerald-300 font-bold">
                               {dayLeaves.length} off
                             </span>
                           )}
                         </div>
                         <div className="space-y-1 mt-1">
                           {dayLeaves.slice(0, 2).map((l, idx) => (
-                            <div key={idx} className="p-1 rounded bg-blue-600/20 border border-blue-500/30 text-[9px] text-blue-200 font-semibold truncate" title={`${l.employeeName} (${l.type})`}>
+                            <div key={idx} className="p-1 rounded bg-emerald-600/20 border border-emerald-500/30 text-[9px] text-emerald-200 font-semibold truncate" title={`${l.employeeName} (${l.type})`}>
                               {l.employeeName}
                             </div>
                           ))}
@@ -744,14 +744,14 @@ export const LeaveManagement: React.FC = () => {
                   <div key={idx} className="p-4 rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur-md flex items-start justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           {h.type}
                         </span>
                       </div>
                       <h4 className="font-bold text-white text-sm mt-1">{h.name}</h4>
                       <p className="text-xs font-mono text-slate-400">{h.date} &bull; {h.day}</p>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400">
+                    <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
                       <Award size={20} />
                     </div>
                   </div>
@@ -781,7 +781,7 @@ export const LeaveManagement: React.FC = () => {
                   <div key={idx} className="p-5 rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur-md space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold text-xs">
+                        <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs">
                           {p.type}
                         </span>
                         <h4 className="font-bold text-white text-sm">{p.title}</h4>
@@ -838,7 +838,7 @@ export const LeaveManagement: React.FC = () => {
                   <tbody className="divide-y divide-slate-800/60 font-sans">
                     {requests.filter(r => r.status !== 'PENDING').map((r) => (
                       <tr key={r.id} className="hover:bg-slate-800/20">
-                        <td className="py-3 px-4 font-mono font-bold text-blue-400">{r.id}</td>
+                        <td className="py-3 px-4 font-mono font-bold text-emerald-400">{r.id}</td>
                         <td className="py-3 px-4 font-bold text-white">{r.employeeName}</td>
                         <td className="py-3 px-4">{getLeaveTypeBadge(r.type)}</td>
                         <td className="py-3 px-4 font-mono text-slate-300">{r.startDate} ({r.totalDays}d)</td>
@@ -868,7 +868,7 @@ export const LeaveManagement: React.FC = () => {
                 <select
                   value={newRequest.type}
                   onChange={(e) => setNewRequest({ ...newRequest, type: e.target.value as LeaveType })}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-blue-500"
+                  className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-emerald-500"
                 >
                   <option value="CASUAL">Casual Leave (CL) — Personal matters</option>
                   <option value="SICK">Sick Leave (SL) — Medical / Health</option>
@@ -885,7 +885,7 @@ export const LeaveManagement: React.FC = () => {
                   <select
                     value={newRequest.duration}
                     onChange={(e) => setNewRequest({ ...newRequest, duration: e.target.value as LeaveDuration })}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-blue-500"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-emerald-500"
                   >
                     <option value="FULL_DAY">Full Day (1.0 Day)</option>
                     <option value="FIRST_HALF">First Half (0.5 Day)</option>
@@ -900,7 +900,7 @@ export const LeaveManagement: React.FC = () => {
                     value={newRequest.startDate}
                     onChange={(e) => setNewRequest({ ...newRequest, startDate: e.target.value })}
                     required
-                    className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-blue-500"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               </div>
@@ -914,7 +914,7 @@ export const LeaveManagement: React.FC = () => {
                     onChange={(e) => setNewRequest({ ...newRequest, endDate: e.target.value })}
                     required
                     min={newRequest.startDate}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-blue-500"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-800 bg-slate-950 text-xs font-bold text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
               )}
@@ -927,7 +927,7 @@ export const LeaveManagement: React.FC = () => {
                   onChange={(e) => setNewRequest({ ...newRequest, reason: e.target.value })}
                   placeholder="Explain why you are requesting this leave..."
                   required
-                  className="w-full p-3 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full p-3 rounded-xl border border-slate-800 bg-slate-950 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 resize-none"
                 />
               </div>
 
@@ -954,7 +954,7 @@ export const LeaveManagement: React.FC = () => {
             </DialogHeader>
             <div className="space-y-4 mt-2">
               <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-1">
-                <p><span className="text-slate-400">Request:</span> <span className="font-mono font-bold text-blue-400">{rejectModalRecord?.id}</span></p>
+                <p><span className="text-slate-400">Request:</span> <span className="font-mono font-bold text-emerald-400">{rejectModalRecord?.id}</span></p>
                 <p><span className="text-slate-400">Dates:</span> {rejectModalRecord?.startDate} to {rejectModalRecord?.endDate} ({rejectModalRecord?.totalDays}d)</p>
                 <p><span className="text-slate-400">Reason:</span> {rejectModalRecord?.reason}</p>
               </div>

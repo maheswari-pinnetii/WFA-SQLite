@@ -68,7 +68,7 @@ export const subscribeConnectionStatus = (listener: StatusListener) => {
 
 export const getConnectionStatus = (): ConnectionStatus => currentStatus;
 
-export const connectSocket = (token?: string, userId?: string, orgId: string = 'org-stackly') => {
+export const connectSocket = (token?: string, userId?: string, orgId?: string) => {
   const authToken = token || localStorage.getItem('token') || sessionStorage.getItem('token');
   if (!authToken) return;
 
@@ -80,8 +80,11 @@ export const connectSocket = (token?: string, userId?: string, orgId: string = '
     socket.emit('join-room', `user:${userId}`);
     socket.emit('join-room', `user-${userId}`); // Backward compatibility
   }
-  socket.emit('join-room', `org:${orgId}`);
-  socket.emit('join-room', `org-${orgId}`); // Backward compatibility
+  
+  if (orgId) {
+    socket.emit('join-room', `org:${orgId}`);
+    socket.emit('join-room', `org-${orgId}`); // Backward compatibility
+  }
 };
 
 export const disconnectSocket = () => {

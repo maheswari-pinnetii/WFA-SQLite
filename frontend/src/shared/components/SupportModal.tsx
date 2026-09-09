@@ -56,9 +56,9 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
     >
       <div className="glass-panel w-full max-w-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] cursor-default">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[var(--border-color)] flex items-center justify-between bg-blue-600/10">
+        <div className="px-6 py-4 border-b border-[var(--border-color)] flex items-center justify-between bg-emerald-600/10">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-md">
+            <div className="p-2.5 rounded-xl bg-emerald-600 text-white shadow-md">
               <LifeBuoy size={22} />
             </div>
             <div>
@@ -83,23 +83,23 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <a
               href="tel:+18005559321"
-              className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1 block hover:border-blue-500/80 transition-colors group cursor-pointer"
+              className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1 block hover:border-emerald-500/80 transition-colors group cursor-pointer"
             >
-              <div className="flex items-center gap-2 text-blue-400 font-bold text-xs">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
                 <Phone size={16} /> 24/7 Hotline
               </div>
-              <p className="text-sm font-black text-[var(--text-primary)] group-hover:text-blue-400 group-hover:underline">+1 (800) 555-9321</p>
+              <p className="text-sm font-black text-[var(--text-primary)] group-hover:text-emerald-400 group-hover:underline">+1 (800) 555-9321</p>
               <p className="text-[10px] text-slate-400">Instant Priority Tech Desk (Click to call)</p>
             </a>
 
             <a
               href="mailto:support@thestackly.com"
-              className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1 block hover:border-purple-500/80 transition-colors group cursor-pointer"
+              className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-1 block hover:border-emerald-500/80 transition-colors group cursor-pointer"
             >
-              <div className="flex items-center gap-2 text-purple-400 font-bold text-xs">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
                 <Mail size={16} /> Email Support
               </div>
-              <p className="text-xs font-black text-[var(--text-primary)] truncate group-hover:text-purple-400 group-hover:underline">support@thestackly.com</p>
+              <p className="text-xs font-black text-[var(--text-primary)] truncate group-hover:text-emerald-400 group-hover:underline">support@thestackly.com</p>
               <p className="text-[10px] text-slate-400">Response &lt; 15 mins (Click to email)</p>
             </a>
 
@@ -121,7 +121,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
           {/* Submit Support Ticket Section */}
           <div className="border-t border-[var(--border-color)] pt-4">
             <h3 className="text-sm font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2">
-              <MessageSquare size={18} className="text-blue-500" />
+              <MessageSquare size={18} className="text-emerald-500" />
               Submit Priority Support Ticket
             </h3>
 
@@ -147,7 +147,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                     <select
                       value={ticketCategory}
                       onChange={(e) => setTicketCategory(e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500"
                     >
                       <option>Technical Issue</option>
                       <option>Role & Permission Access Request</option>
@@ -165,7 +165,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                       value={ticketSubject}
                       onChange={(e) => setTicketSubject(e.target.value)}
                       placeholder="Brief summary of your issue..."
-                      className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500"
+                      className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500"
                     />
                   </div>
                 </div>
@@ -178,7 +178,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                     value={ticketMessage}
                     onChange={(e) => setTicketMessage(e.target.value)}
                     placeholder="Provide details about the issue or question..."
-                    className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500 resize-none"
+                    className="w-full px-3 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 resize-none"
                   />
                 </div>
               </form>
@@ -203,7 +203,7 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                 if (form) form.requestSubmit();
               }}
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
             >
               <Send size={14} />
               {isSubmitting ? 'Submitting...' : 'Send Support Ticket'}

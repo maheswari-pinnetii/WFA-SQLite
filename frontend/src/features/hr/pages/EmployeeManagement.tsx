@@ -249,25 +249,25 @@ export const EmployeeManagement: React.FC = () => {
             <form onSubmit={handleCreateEmployee} className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <label className="space-y-1 text-xs font-semibold text-slate-300">
                 Employee ID
-                <input required value={newEmployee.id} onChange={(event) => setNewEmployee({ ...newEmployee, id: event.target.value })} placeholder="EMP-1001" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+                <input required value={newEmployee.id} onChange={(event) => setNewEmployee({ ...newEmployee, id: event.target.value })} placeholder="EMP-1001" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500" />
               </label>
               <label className="space-y-1 text-xs font-semibold text-slate-300">
                 Full name
-                <input required minLength={2} value={newEmployee.name} onChange={(event) => setNewEmployee({ ...newEmployee, name: event.target.value })} placeholder="Alex Morgan" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+                <input required minLength={2} value={newEmployee.name} onChange={(event) => setNewEmployee({ ...newEmployee, name: event.target.value })} placeholder="Alex Morgan" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500" />
               </label>
               <label className="space-y-1 text-xs font-semibold text-slate-300">
                 Work email
-                <input required type="email" value={newEmployee.email} onChange={(event) => setNewEmployee({ ...newEmployee, email: event.target.value })} placeholder="alex@company.com" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500" />
+                <input required type="email" value={newEmployee.email} onChange={(event) => setNewEmployee({ ...newEmployee, email: event.target.value })} placeholder="alex@company.com" className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500" />
               </label>
               <label className="space-y-1 text-xs font-semibold text-slate-300">
                 Department
-                <select required value={newEmployee.department} onChange={(event) => setNewEmployee({ ...newEmployee, department: event.target.value })} className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500">
+                <select required value={newEmployee.department} onChange={(event) => setNewEmployee({ ...newEmployee, department: event.target.value })} className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
                   {departments.filter((department) => department !== 'ALL').map((department) => <option key={department}>{department}</option>)}
                 </select>
               </label>
               <label className="space-y-1 text-xs font-semibold text-slate-300">
                 Role
-                <select required value={newEmployee.role} onChange={(event) => setNewEmployee({ ...newEmployee, role: event.target.value })} className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-blue-500">
+                <select required value={newEmployee.role} onChange={(event) => setNewEmployee({ ...newEmployee, role: event.target.value })} className="w-full rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
                   <option value="HR">HR</option>
                   <option value="EMPLOYEE">Employee</option>
                   <option value="MANAGER">Manager</option>
@@ -292,7 +292,7 @@ export const EmployeeManagement: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search employees by name or ID (e.g. 0007)..."
-                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
 
@@ -399,7 +399,7 @@ export const EmployeeManagement: React.FC = () => {
                 </button>
                 <button
                   onClick={handleApplyFilters}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-colors"
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-colors"
                 >
                   Apply Filters
                 </button>

@@ -40,7 +40,7 @@ export const AdminDashboardOverview: React.FC<{
         <Calendar size={13} className="text-slate-400" />
         <span>{currentDateFormatted}</span>
         <span>•</span>
-        <span className="text-blue-600 dark:text-blue-400 font-medium">System Administrator</span>
+        <span className="text-emerald-600 dark:text-emerald-400 font-medium">System Administrator</span>
       </div>
       <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
         {getGreeting()}, {firstName}
@@ -77,7 +77,7 @@ export const AdminDashboardFilters: React.FC<{
 }> = (props) => (
   <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
     <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-medium uppercase tracking-wider">
-      <Filter size={14} className="text-blue-500" /> Executive Analytics Scopes
+      <Filter size={14} className="text-emerald-500" /> Executive Analytics Scopes
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
       <div>
@@ -86,7 +86,7 @@ export const AdminDashboardFilters: React.FC<{
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal"
         />
       </div>
       <div>
@@ -94,7 +94,7 @@ export const AdminDashboardFilters: React.FC<{
         <select
           value={props.locationFilter}
           onChange={(e) => props.setLocationFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Locations</option>
           <option value="Bengaluru">Bengaluru</option>
@@ -107,7 +107,7 @@ export const AdminDashboardFilters: React.FC<{
         <select
           value={props.deptFilter}
           onChange={(e) => props.setDeptFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Departments</option>
           <option value="Engineering">Engineering</option>
@@ -121,7 +121,7 @@ export const AdminDashboardFilters: React.FC<{
         <select
           value={props.teamFilter}
           onChange={(e) => props.setTeamFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Teams</option>
           <option value="Frontend">Frontend Devs</option>
@@ -134,7 +134,7 @@ export const AdminDashboardFilters: React.FC<{
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-blue-500 font-normal cursor-pointer"
+          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
@@ -190,7 +190,7 @@ export const AdminSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
   <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-4">
     <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
       <h3 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
-        <Layers size={17} className="text-blue-500" /> Active Sprint Work
+        <Layers size={17} className="text-emerald-500" /> Active Sprint Work
       </h3>
       <span className="badge badge-success text-xs font-medium">ORGANIZATION SPRINT</span>
     </div>
@@ -225,7 +225,7 @@ export const AdminSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
               </td>
               <td className="py-2.5 px-4">
                 <div className="w-full bg-[var(--bg-tertiary)] rounded-full h-1.5 max-w-[100px]">
-                  <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: task.status === 'COMPLETED' ? '100%' : task.status === 'IN_PROGRESS' ? '50%' : '0%' }}></div>
+                  <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: task.status === 'COMPLETED' ? '100%' : task.status === 'IN_PROGRESS' ? '50%' : '0%' }}></div>
                 </div>
               </td>
               <td className="py-2.5 px-4 font-mono text-[var(--text-muted)]">2026-09-10</td>

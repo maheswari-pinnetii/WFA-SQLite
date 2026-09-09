@@ -47,7 +47,7 @@ export const TeamMembersPage: React.FC = () => {
         {members.length === 0 ? <p className="text-sm text-[var(--text-muted)]">No team members are available in your scope.</p> : members.map((m, idx) => (
           <div key={idx} className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-4">
             <div className="flex items-center gap-3">
-              <img src={m.avatar} alt={m.name} className="w-12 h-12 rounded-full object-cover border-2 border-blue-500 shadow-md" />
+              <img src={m.avatar} alt={m.name} className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-md" />
               <div>
                 <h4 className="font-bold text-base text-[var(--text-primary)]">{m.name}</h4>
                 <p className="text-xs text-slate-400">{m.role}</p>
@@ -57,7 +57,7 @@ export const TeamMembersPage: React.FC = () => {
             <div className="pt-2 border-t border-[var(--border-color)] space-y-2 text-xs">
               <div className="flex justify-between">
                 <span className="text-slate-400">Current Task:</span>
-                <span className="font-semibold text-blue-400">{m.task}</span>
+                <span className="font-semibold text-emerald-400">{m.task}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-400">Sprint Velocity:</span>

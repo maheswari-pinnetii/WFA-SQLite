@@ -32,7 +32,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
       case 'rose':
         return 'badge-danger';
       case 'purple':
-        return 'bg-purple-500/10 text-purple-400 border border-purple-500/30';
+        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
       default:
         return 'badge-primary';
     }

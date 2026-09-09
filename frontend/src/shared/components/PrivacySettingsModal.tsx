@@ -67,7 +67,7 @@ export const PrivacySettingsModal: React.FC<PrivacySettingsModalProps> = ({ isOp
           </button>
 
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
+            <div className="p-2.5 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
               <ShieldCheck size={24} />
             </div>
             <div>

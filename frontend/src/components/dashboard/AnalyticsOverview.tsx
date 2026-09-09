@@ -17,9 +17,9 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({
   const { data, isLoading, error, reload: load } = useAnalyticsData();
 
   const metricCards = [
-    { label: 'Workforce', value: data?.metrics.totalWorkforce ?? '—', icon: Users, color: 'text-blue-400' },
+    { label: 'Workforce', value: data?.metrics.totalWorkforce ?? '—', icon: Users, color: 'text-emerald-400' },
     { label: 'Attendance', value: data?.metrics.attendanceRate ?? '—', icon: ShieldCheck, color: 'text-emerald-400' },
-    { label: 'Performance', value: data?.metrics.averagePerformanceScore ?? '—', icon: Gauge, color: 'text-purple-400' },
+    { label: 'Performance', value: data?.metrics.averagePerformanceScore ?? '—', icon: Gauge, color: 'text-emerald-400' },
     { label: 'Risk flags', value: data?.metrics.retentionRiskCount ?? '—', icon: Activity, color: 'text-amber-400' }
   ];
 
@@ -28,7 +28,7 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({
       <div className="rounded-3xl border border-[var(--border-color)] bg-gradient-to-r from-blue-600/20 via-[var(--bg-secondary)] to-purple-600/20 p-6 shadow-xl">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-blue-300"><TrendingUp size={12} /> Scope-aware analytics</div>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300"><TrendingUp size={12} /> Scope-aware analytics</div>
             <h2 className="text-2xl font-black tracking-tight text-[var(--text-primary)]">{title}</h2>
             <p className="mt-1 text-xs text-[var(--text-muted)]">{subtitle}</p>
           </div>
@@ -63,7 +63,7 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({
         <AnalyticsLineChart title="Performance Trend" subtitle="KPI performance versus target" data={data?.performance} xKey="name" series={[{ key: 'performance', name: 'Performance', color: '#8b5cf6' }, { key: 'target', name: 'Target', color: '#f59e0b' }]} isLoading={isLoading} error={error} onRetry={load} />
       </div>
 
-      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><BarChart3 size={14} className="text-blue-400" /> Data is filtered by the authenticated role, organization, department, team and employee scope.</div>
+      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]"><BarChart3 size={14} className="text-emerald-400" /> Data is filtered by the authenticated role, organization, department, team and employee scope.</div>
     </div>
   );
 };

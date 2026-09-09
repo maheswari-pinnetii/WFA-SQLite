@@ -17,7 +17,7 @@ export const FeedbackManagement: React.FC = () => {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-extrabold tracking-tight flex items-center gap-2">
-              <MessageSquare className="text-blue-400" size={24} />
+              <MessageSquare className="text-emerald-400" size={24} />
               Team Feedback & 1-on-1 Growth Tracker
             </h2>
             <p className="text-sm text-slate-400">

@@ -84,6 +84,19 @@ export const createLeaveRequest = async (req, res) => {
     }
 
     const orgId = getOrganizationId(req);
+
+    // Overlap validation
+    const existingLeaves = await LeaveRequest.find({ employeeId, organizationId: orgId });
+    const hasOverlap = (existingLeaves as any[]).some(l => 
+      l.status !== 'REJECTED' && 
+      l.status !== 'CANCELLED' &&
+      new Date(l.startDate) <= new Date(endDate) && 
+      new Date(l.endDate) >= new Date(startDate)
+    );
+    if (hasOverlap) {
+      return res.status(400).json({ success: false, message: 'Leave dates overlap with an existing request.' });
+    }
+
     const identity = await findIdentity(employeeId, orgId);
     if (!identity) {
       return res.status(403).json({ success: false, message: 'Employee is outside the active organization.' });
@@ -189,26 +202,35 @@ export const reviewLeaveRequest = async (req, res) => {
     await request.save();
 
     // ── BUG FIX 1: Deduct leave balance on APPROVED ────────────────────────────
-    if (status === 'APPROVED' && request.leaveTypeId) {
-      try {
-        const startDate = new Date(request.startDate);
-        const endDate = new Date(request.endDate);
-        // Calculate working days (simple weekday count as fallback)
-        let days = 0;
+    if (status === 'APPROVED') {
+      let finalLeaveTypeId = request.leaveTypeId;
+      if (!finalLeaveTypeId && request.type) {
+        const lTypes = await leaveEngineService.getLeaveTypes(orgId);
+        const matched = (lTypes as any[]).find(lt => lt.name.toUpperCase() === request.type.toUpperCase() || lt.name === request.type);
+        if (matched) finalLeaveTypeId = matched.id;
+      }
+
+      if (finalLeaveTypeId) {
         try {
-          days = await leaveEngineService.calculateWorkingDays(request.startDate, request.endDate, orgId);
-        } catch {
-          // Fallback: rough calendar-day count
-          days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          const startDate = new Date(request.startDate);
+          const endDate = new Date(request.endDate);
+          // Calculate working days (simple weekday count as fallback)
+          let days = 0;
+          try {
+            days = await leaveEngineService.calculateWorkingDays(request.startDate, request.endDate, orgId);
+          } catch {
+            // Fallback: rough calendar-day count
+            days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+          }
+          await leaveEngineService.deductLeaveBalance(request.employeeId, finalLeaveTypeId, days, orgId);
+        } catch (balanceErr: any) {
+          // Revert approval if balance insufficient
+          request.status = 'PENDING';
+          request.reviewedBy = undefined;
+          request.reviewComment = undefined;
+          await request.save();
+          return res.status(400).json({ success: false, message: `Leave balance error: ${balanceErr.message}` });
         }
-        await leaveEngineService.deductLeaveBalance(request.employeeId, request.leaveTypeId, days, orgId);
-      } catch (balanceErr: any) {
-        // Revert approval if balance insufficient
-        request.status = 'PENDING';
-        request.reviewedBy = undefined;
-        request.reviewComment = undefined;
-        await request.save();
-        return res.status(409).json({ success: false, message: `Leave balance error: ${balanceErr.message}` });
       }
     }
     // ──────────────────────────────────────────────────────────────────────────

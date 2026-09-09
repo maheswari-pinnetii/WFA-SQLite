@@ -62,8 +62,8 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
   const getRoleBadgeColor = (roleStr: string) => {
     const r = roleStr.toLowerCase();
     if (r.includes('admin')) return 'bg-rose-500/10 text-rose-400 border-rose-500/30';
-    if (r.includes('hr')) return 'bg-purple-500/10 text-purple-400 border-purple-500/30';
-    if (r.includes('manager') || r.includes('head')) return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+    if (r.includes('hr')) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+    if (r.includes('manager') || r.includes('head')) return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
     if (r.includes('lead')) return 'bg-teal-500/10 text-teal-400 border-teal-500/30';
     return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
   };
@@ -104,7 +104,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
               <Layers size={20} />
             </div>
             <div>
@@ -125,7 +125,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
         {/* Modal Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
           {/* Main KPI Summary */}
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-indigo-950/40 border border-blue-500/30 flex items-center justify-between gap-4 flex-wrap">
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-indigo-950/40 border border-emerald-500/30 flex items-center justify-between gap-4 flex-wrap">
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Aggregated Metric Total</p>
               <p className="text-3xl font-black text-white mt-1">{data.metricValue}</p>
@@ -148,7 +148,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
           {data.details && data.details.length > 0 && (
             <div className="space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Filter size={14} className="text-blue-400" /> Sub-Metric Breakdown Components
+                <Filter size={14} className="text-emerald-400" /> Sub-Metric Breakdown Components
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {data.details.map((d, idx) => (
@@ -165,7 +165,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
           <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800 space-y-3">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5 shrink-0">
-                <FileText size={14} className="text-purple-400" /> Granular Record Drill-Down List ({filteredRecords.length})
+                <FileText size={14} className="text-emerald-400" /> Granular Record Drill-Down List ({filteredRecords.length})
               </h4>
 
               {/* Search Bar */}
@@ -176,7 +176,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                   placeholder="Filter name, role, dept..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full !bg-slate-950 !border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:!border-blue-500"
+                  className="w-full !bg-slate-950 !border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:!border-emerald-500"
                 />
               </div>
             </div>
@@ -185,12 +185,12 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <div className="flex items-center gap-2">
                 <label className="text-[11px] font-bold text-slate-400 shrink-0 flex items-center gap-1">
-                  <Building2 size={13} className="text-blue-400" /> Department:
+                  <Building2 size={13} className="text-emerald-400" /> Department:
                 </label>
                 <select
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
-                  className="w-full !bg-slate-950 !border-slate-800 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:!border-blue-500 cursor-pointer"
+                  className="w-full !bg-slate-950 !border-slate-800 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:!border-emerald-500 cursor-pointer"
                 >
                   <option value="ALL">All Departments</option>
                   <option value="Engineering">Engineering</option>
@@ -203,12 +203,12 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
 
               <div className="flex items-center gap-2">
                 <label className="text-[11px] font-bold text-slate-400 shrink-0 flex items-center gap-1">
-                  <UserCheck size={13} className="text-purple-400" /> Role:
+                  <UserCheck size={13} className="text-emerald-400" /> Role:
                 </label>
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
-                  className="w-full !bg-slate-950 !border-slate-800 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:!border-blue-500 cursor-pointer"
+                  className="w-full !bg-slate-950 !border-slate-800 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:!border-emerald-500 cursor-pointer"
                 >
                   <option value="ALL">All Roles</option>
                   <option value="Admin">Admin</option>
@@ -226,7 +226,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full !bg-slate-950 !border-slate-800 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:!border-blue-500 cursor-pointer"
+                  className="w-full !bg-slate-950 !border-slate-800 text-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:!border-emerald-500 cursor-pointer"
                 >
                   <option value="ALL">All Statuses</option>
                   <option value="ACTIVE">Active</option>
@@ -239,15 +239,15 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
 
           {/* Multiselect Action Bar */}
           {selectedRecordIds.size > 0 && (
-            <div className="p-3.5 rounded-xl bg-blue-950/30 border border-blue-500/20 flex items-center justify-between text-xs animate-slideIn">
-              <div className="flex items-center gap-2 text-blue-300">
+            <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/20 flex items-center justify-between text-xs animate-slideIn">
+              <div className="flex items-center gap-2 text-emerald-300">
                 <CheckSquare size={16} />
                 <span className="font-bold">{selectedRecordIds.size} records selected</span>
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleExportSelected}
-                  className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-extrabold flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold flex items-center gap-1"
                 >
                   <Download size={13} /> Export Selected
                 </button>
@@ -269,7 +269,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                   <th className="px-4 py-2.5 w-10">
                     <button onClick={handleSelectAll} className="text-slate-400 hover:text-slate-100">
                       {selectedRecordIds.size === filteredRecords.length && filteredRecords.length > 0 ? (
-                        <CheckSquare size={16} className="text-blue-500" />
+                        <CheckSquare size={16} className="text-emerald-500" />
                       ) : (
                         <Square size={16} />
                       )}
@@ -290,13 +290,13 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                       key={r.id}
                       onClick={() => handleSelectRecord(r.id)}
                       className={`hover:bg-slate-800/50 transition-colors cursor-pointer ${
-                        selectedRecordIds.has(r.id) ? 'bg-blue-950/20' : ''
+                        selectedRecordIds.has(r.id) ? 'bg-emerald-950/20' : ''
                       }`}
                     >
                       <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => handleSelectRecord(r.id)} className="text-slate-400 hover:text-slate-100">
                           {selectedRecordIds.has(r.id) ? (
-                            <CheckSquare size={16} className="text-blue-500" />
+                            <CheckSquare size={16} className="text-emerald-500" />
                           ) : (
                             <Square size={16} />
                           )}
@@ -313,7 +313,7 @@ export const DrillDownModal: React.FC<DrillDownModalProps> = ({ isOpen, onClose,
                         <Building2 size={12} className="text-slate-500 shrink-0" />
                         <span>{r.department}</span>
                       </td>
-                      <td className="px-4 py-2.5 font-bold text-blue-400">{r.metric}</td>
+                      <td className="px-4 py-2.5 font-bold text-emerald-400">{r.metric}</td>
                       <td className="px-4 py-2.5">
                         <span className="badge badge-success text-[9px] uppercase font-bold">{r.status}</span>
                       </td>
