@@ -1,8 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './playwright/tests',
-  testMatch: '**/*.spec.ts',
+  testDir: '.',
+  testMatch: [
+    './playwright/tests/**/*.spec.ts',
+    './tests/e2e/**/*.spec.ts',
+  ],
   timeout: 30000,
   expect: {
     timeout: 5000,
@@ -24,9 +27,27 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
   projects: [
+    // Desktop browsers
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'webkit',
+      use: { ...devices['Desktop Safari'] },
+    },
+    // Mobile viewports
+    {
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'mobile-safari',
+      use: { ...devices['iPhone 12'] },
     },
   ],
 });

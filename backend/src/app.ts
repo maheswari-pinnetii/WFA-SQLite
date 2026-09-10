@@ -151,6 +151,18 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Global Error Handler — standard AppError format, never leaks internals
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  // express.json() throws a SyntaxError with status 400 for malformed JSON bodies.
+  // Intercept here before falling through to the generic 500 handler.
+  if (err instanceof SyntaxError && (err as any).status === 400 && 'body' in err) {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: 'INVALID_JSON',
+        message: 'Request body contains invalid JSON.',
+      },
+    });
+    return;
+  }
   sendError(res, err, req);
 });
 
