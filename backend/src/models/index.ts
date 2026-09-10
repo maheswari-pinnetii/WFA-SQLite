@@ -24,4 +24,12 @@ export const Company = new ModelShim('companies');
 export const Organization = Company;
 export const Role = new ModelShim('roles');
 export const Permission = new ModelShim('permissions');
-
+export const Holiday = new ModelShim('holidays');
+export const WorkConfig = new ModelShim('work_configs');
+export const EmployeeShift = new ModelShim('employee_shifts');
+export const LeaveType = new ModelShim('leave_types');
+export const LeaveBalance = new ModelShim('leave_balances');
+export const RegularizationRequest = new ModelShim('regularization_requests');
+export const SalaryStructure = new ModelShim('salary_structures');
+export const PayrollRecord = new ModelShim('payroll_records');
+export const Payslip = new ModelShim('payslips');

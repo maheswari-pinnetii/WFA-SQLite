@@ -110,6 +110,11 @@ export class EmployeeRepository {
       attendanceRate: employeeData.attendanceRate ?? 95,
       team: employeeData.team || null,
       location: employeeData.location || null,
+      managerId: employeeData.managerId || null,
+      departmentId: employeeData.departmentId || null,
+      teamId: employeeData.teamId || null,
+      locationId: employeeData.locationId || null,
+      designationId: employeeData.designationId || null,
       organizationId: employeeData.organizationId || 'org-stackly',
       companyId: employeeData.companyId || 'org-stackly',
       createdAt: timestamp,
@@ -117,12 +122,12 @@ export class EmployeeRepository {
     };
 
     await execute(`
-      INSERT INTO employees (id, employeeCode, name, email, role, department, designation, status, avatar, joinDate, performanceScore, attendanceRate, team, location, organizationId, companyId, createdAt, updatedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO employees (id, employeeCode, name, email, role, department, designation, status, avatar, joinDate, performanceScore, attendanceRate, team, location, managerId, departmentId, teamId, locationId, designationId, organizationId, companyId, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       data.id, data.employeeCode, data.name, data.email, data.role, data.department, data.designation,
       data.status, data.avatar, data.joinDate, data.performanceScore, data.attendanceRate, data.team,
-      data.location, data.organizationId, data.companyId, data.createdAt, data.updatedAt
+      data.location, data.managerId, data.departmentId, data.teamId, data.locationId, data.designationId, data.organizationId, data.companyId, data.createdAt, data.updatedAt
     ]);
 
     return this.findById(employeeData.id, data.organizationId);

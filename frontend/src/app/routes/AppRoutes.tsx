@@ -23,10 +23,14 @@ import { RoleManagement } from '../../features/admin/pages/RoleManagement';
 import { PermissionsManagement } from '../../features/admin/pages/PermissionsManagement';
 import { DepartmentsManagement } from '../../features/admin/pages/DepartmentsManagement';
 import { LocationsManagement } from '../../features/admin/pages/LocationsManagement';
+import { DesignationsManagement } from '../../features/admin/pages/DesignationsManagement';
 import { AuditLogsPage } from '../../features/admin/pages/AuditLogsPage';
 import { SystemSettings } from '../../features/admin/pages/SystemSettings';
 import { SystemConfiguration } from '../../features/admin/pages/SystemConfiguration';
 import { SecurityAdminDashboard } from '../../features/admin/pages/SecurityAdminDashboard';
+import { ShiftManagement } from '../../features/admin/pages/ShiftManagement';
+import { HolidaysManagement } from '../../features/admin/pages/HolidaysManagement';
+import { WorkConfigManagement } from '../../features/admin/pages/WorkConfigManagement';
 
 // HR Dashboards & Pages
 import { HrDashboardPage as HRDashboard } from '../../features/hr/dashboard/HrDashboardPage';
@@ -143,11 +147,17 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/admin/employees" element={<RoleGuard allowedRoles={[Role.ADMIN]}><EmployeeManagement /></RoleGuard>} />
                 <Route path="/admin/departments" element={<RoleGuard allowedRoles={[Role.ADMIN]}><DepartmentsManagement /></RoleGuard>} />
                 <Route path="/admin/locations" element={<RoleGuard allowedRoles={[Role.ADMIN]}><LocationsManagement /></RoleGuard>} />
+                <Route path="/admin/designations" element={<RoleGuard allowedRoles={[Role.ADMIN]}><DesignationsManagement /></RoleGuard>} />
                 <Route path="/admin/analytics" element={<RoleGuard allowedRoles={[Role.ADMIN]}><TeamAnalytics /></RoleGuard>} />
                 <Route path="/admin/reports" element={<RoleGuard allowedRoles={[Role.ADMIN]}><HRReports /></RoleGuard>} />
                 <Route path="/admin/audit-logs" element={<RoleGuard allowedRoles={[Role.ADMIN]}><AuditLogsPage /></RoleGuard>} />
                 <Route path="/admin/settings" element={<RoleGuard allowedRoles={[Role.ADMIN]}><SystemSettings /></RoleGuard>} />
                 <Route path="/admin/configuration" element={<RoleGuard allowedRoles={[Role.ADMIN]}><SystemConfiguration /></RoleGuard>} />
+                
+                {/* Organizational Work Rules */}
+                <Route path="/admin/shift-definitions" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><ShiftManagement /></RoleGuard>} />
+                <Route path="/admin/holidays" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><HolidaysManagement /></RoleGuard>} />
+                <Route path="/admin/work-configs" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><WorkConfigManagement /></RoleGuard>} />
                 
                 {/* Admin Analytics & Subsections */}
                 <Route path="/admin/skills-overview" element={<RoleGuard allowedRoles={[Role.ADMIN]}><SkillOverviewPage /></RoleGuard>} />

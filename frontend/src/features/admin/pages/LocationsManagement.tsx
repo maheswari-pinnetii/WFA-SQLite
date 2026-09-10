@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
-import { MapPin, Plus, Globe, Clock, Users } from 'lucide-react';
+import { MapPin, Plus, Globe, Clock, Users, Loader2 } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 
 export const LocationsManagement: React.FC = () => {
-  const [locations] = useState([
-    { id: 'loc-1', city: 'Hyderabad', country: 'India', code: 'HYD-IN', timezone: 'UTC+5:30 (IST)', headcount: 70, status: 'OPERATIONAL' },
-    { id: 'loc-2', city: 'Bengaluru', country: 'India', code: 'BLR-IN', timezone: 'UTC+5:30 (IST)', headcount: 60, status: 'OPERATIONAL' },
-    { id: 'loc-3', city: 'Chennai', country: 'India', code: 'MAA-IN', timezone: 'UTC+5:30 (IST)', headcount: 50, status: 'OPERATIONAL' },
-    { id: 'loc-4', city: 'Visakhapatnam', country: 'India', code: 'VTZ-IN', timezone: 'UTC+5:30 (IST)', headcount: 40, status: 'OPERATIONAL' },
-    { id: 'loc-5', city: 'Kochi', country: 'India', code: 'COK-IN', timezone: 'UTC+5:30 (IST)', headcount: 30, status: 'OPERATIONAL' },
-  ]);
+  const [locations, setLocations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/locations', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) setLocations(data.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch locations:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-emerald-500" size={32} /></div>;
 
   return (
     <RoleGuard allowedRoles={[Role.ADMIN]}>

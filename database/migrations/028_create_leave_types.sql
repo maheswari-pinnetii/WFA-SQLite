@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS leave_types (
+  id TEXT PRIMARY KEY,
+  companyId TEXT,
+  name TEXT NOT NULL,
+  code TEXT,
+  description TEXT,
+  isPaid INTEGER DEFAULT 1,
+  defaultDays INTEGER DEFAULT 0,
+  carryForwardLimit INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'ACTIVE',
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);

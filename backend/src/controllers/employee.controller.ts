@@ -39,6 +39,7 @@ export const createEmployee = async (req: any, res: any) => {
     const orgId = getOrganizationId(req);
     const newEmp = await employeeService.createEmployee({
       id, name, email, department, designation, avatar, joinDate, team, location,
+      managerId: body.managerId, departmentId: body.departmentId, teamId: body.teamId, locationId: body.locationId, designationId: body.designationId,
       organizationId: orgId,
       companyId: orgId
     });
@@ -60,7 +61,7 @@ export const updateEmployee = async (req: any, res: any) => {
       return res.status(403).json({ success: false, message: 'Forbidden: You can only update your own profile.' });
     }
 
-    const { name, department, designation, avatar, team, location, performanceScore, attendanceRate } = req.body;
+    const { name, department, designation, avatar, team, location, performanceScore, attendanceRate, managerId, departmentId, teamId, locationId, designationId } = req.body;
     
     const updateData: any = { avatar, location };
     
@@ -71,6 +72,11 @@ export const updateEmployee = async (req: any, res: any) => {
       if (team !== undefined) updateData.team = team;
       if (performanceScore !== undefined) updateData.performanceScore = performanceScore;
       if (attendanceRate !== undefined) updateData.attendanceRate = attendanceRate;
+      if (managerId !== undefined) updateData.managerId = managerId;
+      if (departmentId !== undefined) updateData.departmentId = departmentId;
+      if (teamId !== undefined) updateData.teamId = teamId;
+      if (locationId !== undefined) updateData.locationId = locationId;
+      if (designationId !== undefined) updateData.designationId = designationId;
     }
 
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
