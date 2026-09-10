@@ -63,11 +63,23 @@ export class LeaveService {
   }
 
   async getLeaveRequests(companyId: string, query: any) {
-    return LeaveRequest.findAll({ companyId, ...query });
+    return LeaveRequest.find({ companyId, ...query }).then((rows: any) => rows, (err: any) => { throw err; });
   }
 
   async getEmployeeLeaveRequests(companyId: string, employeeId: string) {
-    return LeaveRequest.findAll({ companyId, employeeId });
+    return LeaveRequest.find({ companyId, employeeId }).then((rows: any) => rows, (err: any) => { throw err; });
+  }
+
+  async getLeaveRequestsPaginated(companyId: string, query: any, limit: number, skip: number) {
+    const total = await LeaveRequest.countDocuments({ companyId, ...query });
+    const records = await new Promise((resolve, reject) => {
+      LeaveRequest.find({ companyId, ...query })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .then(resolve, reject);
+    });
+    return { records, total };
   }
 
   async updateLeaveRequestStatus(id: string, status: string, approverId: string, comments: string) {

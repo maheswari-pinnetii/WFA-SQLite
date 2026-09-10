@@ -258,6 +258,15 @@ router.get('/users', authenticateToken, authorizeRoles(['ADMIN']), employeeContr
 router.put('/users/:userId/role', authenticateToken, authorizeRoles(['ADMIN']), validateUserIdParam, validateUpdateUserRole, employeeController.updateUserRole);
 router.delete('/users/:userId', authenticateToken, authorizeRoles(['ADMIN']), validateUserIdParam, employeeController.deleteUser);
 
+// Notifications
+import * as notificationController from '../controllers/notification.controller.js';
+router.get('/notifications', authenticateToken, authenticatedUserLimiter, notificationController.getNotifications);
+router.put('/notifications/read-all', authenticateToken, authenticatedUserLimiter, notificationController.markAllAsRead);
+router.put('/notifications/:id/read', authenticateToken, validateIdParam, authenticatedUserLimiter, notificationController.markAsRead);
+router.get('/notifications/preferences', authenticateToken, authenticatedUserLimiter, notificationController.getPreferences);
+router.put('/notifications/preferences', authenticateToken, authenticatedUserLimiter, notificationController.updatePreferences);
+
+
 // Database Backup & Disaster Recovery (Admin Only)
 router.post('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backupController.createBackup);
 router.get('/admin/backups', authenticateToken, authorizeRoles(['ADMIN']), backupController.listBackups);

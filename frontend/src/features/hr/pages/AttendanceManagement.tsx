@@ -14,6 +14,13 @@ import { RootState, AppDispatch } from '../../../app/store';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { CorrectionRequests } from '../../../components/attendance/CorrectionRequests';
 import { ManagerApprovals } from '../../../components/attendance/ManagerApprovals';
+import { Pagination } from '../../common/Pagination';
+import { Skeleton } from '../../common/Skeleton';
+import { EmptyState } from '../../common/EmptyState';
+import { ErrorState } from '../../common/ErrorState';
+import { usePagination } from '../../../hooks/usePagination';
+import { apiClient } from '../../../api/client';
+import { useToast } from '../../common/ToastContext';
 
 export const AttendanceManagement: React.FC = () => {
   const dispatch = useDispatch();
@@ -29,10 +36,55 @@ export const AttendanceManagement: React.FC = () => {
 
   const employeeId = user?.id || 'emp-001';
 
+  const { page, pageSize, setPage, setPagination, pagination } = usePagination();
+  const { addToast } = useToast();
+  const [paginatedRecords, setPaginatedRecords] = useState<any[]>([]);
+  const [isLoadingTable, setIsLoadingTable] = useState(false);
+  const [tableError, setTableError] = useState<Error | null>(null);
+
+  // Debounced Search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      fetchTableData();
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery, statusFilter, page, pageSize]);
+
+  const fetchTableData = async () => {
+    setIsLoadingTable(true);
+    setTableError(null);
+    try {
+      const res = await apiClient.get('/v1/attendance/records', {
+        params: {
+          page,
+          limit: pageSize,
+          search: searchQuery || undefined,
+          status: statusFilter === 'ALL' ? undefined : statusFilter
+        }
+      });
+      const responseData = res.data?.data || {};
+      setPaginatedRecords(responseData.data || []);
+      if (responseData.meta) {
+        setPagination({
+          page: responseData.meta.page,
+          pageSize: responseData.meta.limit,
+          totalItems: responseData.meta.total,
+          totalPages: responseData.meta.totalPages
+        });
+      }
+    } catch (err: any) {
+      setTableError(err);
+      addToast('Failed to load attendance records', 'error');
+    } finally {
+      setIsLoadingTable(false);
+    }
+  };
+
   useEffect(() => {
     (dispatch as AppDispatch)(fetchAttendanceDataThunk(employeeId));
   }, [dispatch, employeeId]);
 
+  // Use the redux records for KPI logic, but the table uses paginatedRecords
   const allRecords = records;
 
   const filteredLogs = allRecords.filter((log) => {
@@ -198,60 +250,87 @@ export const AttendanceManagement: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-bold uppercase tracking-wider text-[10px]">
-                  <tr>
-                    <th className="py-3 px-4">Employee</th>
-                    <th className="py-3 px-4">Department</th>
-                    <th className="py-3 px-4">Check - In</th>
-                    <th className="py-3 px-4">Check - Out</th>
-                    <th className="py-3 px-4">Office Hours</th>
-                    <th className="py-3 px-4">Work Mode</th>
-                    <th className="py-3 px-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/80">
-                  {filteredLogs.map((log) => {
-                    const stats = attendanceService.calculateHours(log);
-                    return (
-                      <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3 px-4 font-bold text-white">
-                          {log.employeeName}{' '}
-                          <span className="text-[10px] font-mono text-slate-400">({log.employeeId})</span>
-                        </td>
-                        <td className="py-3 px-4 text-slate-300 font-medium">{log.department}</td>
-                        <td className="py-3 px-4 font-mono text-emerald-400 font-bold">
-                          {formatTimeStr(log.checkInTime)}
-                        </td>
-                        <td className="py-3 px-4 font-mono text-rose-400 font-bold">
-                          {formatTimeStr(log.checkOutTime)}
-                        </td>
-                        <td className="py-3 px-4 font-mono text-emerald-400 font-bold">
-                          {stats.workingHours} hrs
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
-                            <MapPin size={10} className="text-emerald-400" /> {log.workMode}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                            log.status === 'Working' || log.status === 'Checked In'
-                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                              : log.status === 'On Break'
-                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                              : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                          }`}>
-                            {log.status}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {isLoadingTable ? (
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : tableError ? (
+              <ErrorState 
+                title="Failed to Load Records" 
+                message={tableError.message} 
+                onRetry={fetchTableData} 
+              />
+            ) : paginatedRecords.length === 0 ? (
+              <EmptyState 
+                title="No attendance records" 
+                message="Adjust your filters or search query to find records." 
+                icon={<Search className="w-12 h-12 text-slate-500" />}
+              />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 font-bold uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">Employee</th>
+                      <th className="py-3 px-4">Department</th>
+                      <th className="py-3 px-4">Check - In</th>
+                      <th className="py-3 px-4">Check - Out</th>
+                      <th className="py-3 px-4">Office Hours</th>
+                      <th className="py-3 px-4">Work Mode</th>
+                      <th className="py-3 px-4">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/80">
+                    {paginatedRecords.map((log) => {
+                      const stats = attendanceService.calculateHours(log);
+                      return (
+                        <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
+                          <td className="py-3 px-4 font-bold text-white">
+                            {log.employeeName}{' '}
+                            <span className="text-[10px] font-mono text-slate-400">({log.employeeId})</span>
+                          </td>
+                          <td className="py-3 px-4 text-slate-300 font-medium">{log.department}</td>
+                          <td className="py-3 px-4 font-mono text-emerald-400 font-bold">
+                            {formatTimeStr(log.checkInTime)}
+                          </td>
+                          <td className="py-3 px-4 font-mono text-rose-400 font-bold">
+                            {formatTimeStr(log.checkOutTime)}
+                          </td>
+                          <td className="py-3 px-4 font-mono text-emerald-400 font-bold">
+                            {stats.workingHours} hrs
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+                              <MapPin size={10} className="text-emerald-400" /> {log.workMode}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase ${
+                              log.status === 'Working' || log.status === 'Checked In'
+                                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                : log.status === 'On Break'
+                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            }`}>
+                              {log.status}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            <Pagination
+              currentPage={page}
+              totalPages={pagination.totalPages}
+              onPageChange={setPage}
+            />
           </div>
 
           {/* Audit Logs Log */}

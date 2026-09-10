@@ -10,6 +10,10 @@ import { formatDate } from '../../../shared/utils/helpers';
 import { UserPlus, Search, Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 import { employeeApi } from '../../../api/endpoints/employee.api';
+import { Skeleton } from '../../common/Skeleton';
+import { EmptyState } from '../../common/EmptyState';
+import { ErrorState } from '../../common/ErrorState';
+import { useToast } from '../../common/ToastContext';
 
 export const EmployeeManagement: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -50,8 +54,12 @@ export const EmployeeManagement: React.FC = () => {
   });
   const [isLoadingData, setIsLoadingData] = useState(false);
 
+  const { addToast } = useToast();
+  const [error, setError] = useState<Error | null>(null);
+
   const fetchPaginatedEmployees = async () => {
     setIsLoadingData(true);
+    setError(null);
     try {
       const res = await employeeApi.getEmployees({
         page,
@@ -65,10 +73,24 @@ export const EmployeeManagement: React.FC = () => {
         sortBy: 'employeeCode',
         sortOrder: 'ASC'
       });
-      setEmployeesData(res.employees);
-      setPagination(res.pagination);
-    } catch (err) {
+      // Handle normalized pagination response { data, meta } from backend
+      const responseData = (res as any).data || res;
+      if (responseData && responseData.meta) {
+        setEmployeesData(responseData.data);
+        setPagination({
+          page: responseData.meta.page,
+          pageSize: responseData.meta.limit,
+          totalItems: responseData.meta.total,
+          totalPages: responseData.meta.totalPages
+        });
+      } else {
+        setEmployeesData(res.employees || []);
+        setPagination(res.pagination || { page: 1, pageSize: 25, totalItems: 0, totalPages: 1 });
+      }
+    } catch (err: any) {
       console.error("Failed to load paginated employees:", err);
+      setError(err);
+      addToast(err.message || 'Failed to load employees.', 'error');
     } finally {
       setIsLoadingData(false);
     }
@@ -81,9 +103,11 @@ export const EmployeeManagement: React.FC = () => {
   const handleStatusChange = async (id: string, status: Employee['status']) => {
     try {
       await employeeApi.updateEmployeeStatus(id, status);
+      addToast(`Employee status updated to ${status}.`, 'success');
       fetchPaginatedEmployees();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update status:", err);
+      addToast(err.message || 'Failed to update status.', 'error');
     }
   };
 
@@ -118,12 +142,13 @@ export const EmployeeManagement: React.FC = () => {
         department: newEmployee.department,
         role: newEmployee.role,
       });
-      setCreateSuccess(`${newEmployee.name.trim()} was added to the employee directory.`);
+      addToast(`${newEmployee.name.trim()} was added to the employee directory.`, 'success');
       setNewEmployee({ id: '', name: '', email: '', department: 'Human Resources', role: 'HR' });
       setShowCreateForm(false);
       await fetchPaginatedEmployees();
-    } catch (err) {
+    } catch (err: any) {
       setCreateError(err instanceof Error ? err.message : 'Unable to create employee.');
+      addToast(err instanceof Error ? err.message : 'Unable to create employee.', 'error');
     } finally {
       setIsCreating(false);
     }
@@ -411,11 +436,26 @@ export const EmployeeManagement: React.FC = () => {
         {/* Directory List Panel */}
         <div className="glass-panel p-6 space-y-4 w-full max-w-full overflow-hidden">
           {isLoadingData ? (
-            <div className="p-8 text-center text-slate-400">Loading workforce directory...</div>
-          ) : employeesData.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 font-semibold text-sm">
-              No employees found matching the selected filters.
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
             </div>
+          ) : error ? (
+            <ErrorState 
+              title="Failed to Load Employees" 
+              message={error.message || 'There was a problem loading the employee directory.'} 
+              onRetry={fetchPaginatedEmployees}
+            />
+          ) : employeesData.length === 0 ? (
+            <EmptyState 
+              title="No employees found" 
+              message="No employees match the current filters. Adjust your search criteria." 
+              icon={<Search className="w-12 h-12 text-slate-500" />}
+              action={{ label: "Clear Filters", onClick: handleClearAll }}
+            />
           ) : (
             <>
               <DataTable

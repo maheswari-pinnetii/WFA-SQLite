@@ -52,9 +52,9 @@ export const checkOut = async (req: any, res: any) => {
 
 export const getRecords = async (req: any, res: any) => {
   try {
-    const { page, limit } = getPaginationParams(req);
-    const data = await attendanceService.getRecords(req.user);
-    const paginated = buildPaginatedResponse(data.slice((page - 1) * limit, page * limit), data.length, page, limit);
+    const { page, limit, offset } = getPaginationParams(req);
+    const { records, pagination } = await attendanceService.getPaginatedRecords(req.user, req.query);
+    const paginated = buildPaginatedResponse(records, pagination.totalItems, page, limit);
     return res.status(200).json({ success: true, data: paginated });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'attendance.getRecords', 500, 'Failed to retrieve attendance records.');

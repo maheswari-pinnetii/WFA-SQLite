@@ -6,10 +6,14 @@ import { handleControllerError } from '../utils/errorHandler.js';
 
 const getOrganizationId = (req: any) => req.user?.organizationId || 'org-stackly';
 
+import { getPaginationParams, buildPaginatedResponse } from '../utils/pagination.js';
+
 export const getEmployees = async (req: any, res: any) => {
   try {
-    const data = await employeeService.getEmployees(req.user, req.query);
-    return res.json({ success: true, data });
+    const { page, limit, offset } = getPaginationParams(req);
+    const { employees, totalItems } = await employeeService.getEmployees(req.user, req.query, limit, offset);
+    const paginated = buildPaginatedResponse(employees, totalItems, page, limit);
+    return res.json({ success: true, data: paginated });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'employee.getEmployees', 500, 'Failed to retrieve employees.');
   }

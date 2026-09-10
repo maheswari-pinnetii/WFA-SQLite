@@ -125,6 +125,37 @@ export class AttendanceRepository {
     }));
   }
 
+  async count(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`SELECT COUNT(*) as count FROM attendancerecords ${clause}`, params);
+    return rows && rows.length > 0 ? (rows[0] as any).count : 0;
+  }
+
+  async findPaginated(queryData: any, sortOption: any, skip: number, limit: number) {
+    const { clause, params } = buildWhereClause(queryData);
+
+    let orderByClause = 'ORDER BY date DESC, checkInTime DESC';
+    const sortFields = Object.keys(sortOption);
+    if (sortFields.length > 0) {
+      const field = sortFields[0];
+      const direction = sortOption[field] === -1 ? 'DESC' : 'ASC';
+      orderByClause = `ORDER BY ${field} ${direction}`;
+    }
+
+    const queryParams = [...params, limit, skip];
+    const rows = await query(`
+      SELECT * FROM attendancerecords 
+      ${clause} 
+      ${orderByClause} 
+      LIMIT ? OFFSET ?
+    `, queryParams) as any[];
+
+    return rows.map(r => ({
+      ...r,
+      breaks: r.breaks ? JSON.parse(r.breaks) : []
+    }));
+  }
+
   async findTodayRecord(employeeId: string, todayDate: string, orgId: string) {
     const rows = await query(`
       SELECT * FROM attendancerecords 

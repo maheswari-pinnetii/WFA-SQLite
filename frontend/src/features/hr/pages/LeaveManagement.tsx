@@ -38,7 +38,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AnimatedTabs } from '../../../components/ui/tabs';
 import { DeltaBadge, Callout, ProgressBar } from '../../../components/cards/tremor-kpi';
 import { Avatar } from '../../../components/ui/avatar';
-import { Skeleton } from '../../../components/ui/skeleton';
+import { Skeleton } from '../../common/Skeleton';
+import { Pagination } from '../../common/Pagination';
+import { EmptyState } from '../../common/EmptyState';
+import { ErrorState } from '../../common/ErrorState';
+import { usePagination } from '../../../hooks/usePagination';
+import { useToast } from '../../common/ToastContext';
+import { ConfirmationDialog } from '../../common/ConfirmationDialog';
+import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
 
 // Types
 export type LeaveType = 'CASUAL' | 'SICK' | 'EARNED' | 'COMP_OFF' | 'MATERNITY' | 'PATERNITY' | 'LWP' | 'BEREAVEMENT';
@@ -139,7 +146,13 @@ const INITIAL_BALANCES: LeaveBalance[] = [
 export const LeaveManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'requests' | 'balances' | 'calendar' | 'policies' | 'holidays' | 'history'>('requests');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  const { addToast } = useToast();
+  const { page, pageSize, setPage, setPagination, pagination } = usePagination();
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; action: () => void; title: string; message: string; variant?: 'danger' | 'warning' | 'info' }>({
+    isOpen: false, action: () => {}, title: '', message: ''
+  });
 
   // Data states
   const [requests, setRequests] = useState<LeaveRecord[]>(INITIAL_REQUESTS);
@@ -206,6 +219,22 @@ export const LeaveManagement: React.FC = () => {
     });
   }, [balances, searchQuery, selectedDept]);
 
+  // Update pagination when filtered requests change
+  useEffect(() => {
+    setPagination({
+      page: 1,
+      pageSize,
+      totalItems: filteredRequests.length,
+      totalPages: Math.ceil(filteredRequests.length / pageSize) || 1
+    });
+    setPage(1);
+  }, [filteredRequests.length, pageSize]);
+
+  const paginatedRequests = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredRequests.slice(start, start + pageSize);
+  }, [filteredRequests, page, pageSize]);
+
   // Handle Approve / Reject
   const handleApprove = (id: string) => {
     setRequests(prev => prev.map(r => r.id === id ? {
@@ -231,16 +260,26 @@ export const LeaveManagement: React.FC = () => {
       rejectionReason: rejectionNote || 'Schedule conflict or business priority requirement.'
     } : r));
     setRejectModalRecord(null);
+    addToast(`Leave request ${rejectModalRecord.id} rejected.`, 'success');
   };
 
   // Handle Leave Cancellation / Withdrawal
   const handleCancelLeave = (id: string) => {
-    if (!window.confirm('Are you sure you want to cancel and withdraw this leave application?')) return;
-    setRequests(prev => prev.map(r => r.id === id ? {
-      ...r,
-      status: 'CANCELLED',
-      rejectionReason: 'Withdrawn by employee/manager.'
-    } : r));
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Cancel Leave Request',
+      message: 'Are you sure you want to cancel and withdraw this leave application? This action cannot be undone.',
+      variant: 'danger',
+      action: () => {
+        setRequests(prev => prev.map(r => r.id === id ? {
+          ...r,
+          status: 'CANCELLED',
+          rejectionReason: 'Withdrawn by employee/manager.'
+        } : r));
+        addToast(`Leave request ${id} cancelled.`, 'success');
+        setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+      }
+    });
   };
 
   // Handle Submit New Leave Request
@@ -496,16 +535,30 @@ export const LeaveManagement: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
-                    {filteredRequests.length === 0 ? (
+                    {isLoading ? (
                       <tr>
-                        <td colSpan={8} className="py-12 text-center text-slate-400">
-                          <AlertCircle size={32} className="mx-auto text-slate-600 mb-2" />
-                          <p className="font-bold text-sm text-slate-300">No leave requests found</p>
-                          <p className="text-xs text-slate-500">Try adjusting your search criteria or filters.</p>
+                        <td colSpan={8} className="py-4 px-4">
+                          <div className="space-y-3">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                          </div>
+                        </td>
+                      </tr>
+                    ) : error ? (
+                      <tr>
+                        <td colSpan={8} className="py-4 px-4">
+                          <ErrorState title="Failed to Load" message={error.message} onRetry={handleRefresh} />
+                        </td>
+                      </tr>
+                    ) : paginatedRequests.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} className="py-4 px-4">
+                          <EmptyState title="No leave requests found" message="Try adjusting your search criteria or filters." icon={<AlertCircle className="w-10 h-10 text-slate-500" />} />
                         </td>
                       </tr>
                     ) : (
-                      filteredRequests.map((req) => (
+                      paginatedRequests.map((req) => (
                         <tr key={req.id} className="hover:bg-slate-800/30 transition-colors">
                           <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{req.id}</td>
                           <td className="py-3.5 px-4">

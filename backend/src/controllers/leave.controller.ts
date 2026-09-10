@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { leaveService } from '../services/leave.service.js';
+import { getPaginationParams, buildPaginatedResponse } from '../utils/pagination.js';
 
 export const getLeaveTypes = async (req: Request, res: Response) => {
   try {
@@ -66,15 +67,18 @@ export const applyLeave = async (req: Request, res: Response) => {
 export const getLeaveRequests = async (req: Request, res: Response) => {
   try {
     const { companyId, role, id: employeeId } = req.user!;
+    const { page, limit, offset } = getPaginationParams(req);
     
-    // If admin/manager, get all or by query. If employee, get only theirs
+    let query: any = { ...req.query };
+    delete query.page;
+    delete query.limit;
+
     if (role === 'EMPLOYEE') {
-      const requests = await leaveService.getEmployeeLeaveRequests(companyId, employeeId);
-      return res.json({ success: true, data: requests });
+      query.employeeId = employeeId;
     }
     
-    const requests = await leaveService.getLeaveRequests(companyId, req.query);
-    res.json({ success: true, data: requests });
+    const { records, total } = await leaveService.getLeaveRequestsPaginated(companyId, query, limit, offset);
+    res.json({ success: true, data: buildPaginatedResponse(records, total, page, limit) });
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

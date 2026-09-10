@@ -450,12 +450,12 @@ export class AttendanceService {
       query.department = department;
     }
 
-    const records = await Attendance.find(query) as any[];
+    const records = await attendanceRepository.findRecords(query);
 
     // Fetch all employees to check their joinDate
-    const employees = await Employee.find({ organizationId: orgId }) as any[];
+    const employees = await employeeRepository.findPaginated({ organizationId: orgId }, {}, 0, 10000);
     const employeeJoinDateMap = new Map<string, string>();
-    employees.forEach(emp => {
+    employees.forEach((emp: any) => {
       if (emp.joinDate) {
         employeeJoinDateMap.set(emp.id, emp.joinDate);
       }
@@ -468,12 +468,65 @@ export class AttendanceService {
       return recDate >= joinDate;
     };
 
-    return records.filter(record => {
+    return records.filter((record: any) => {
       const joinDate = employeeJoinDateMap.get(record.employeeId);
       const recordDate = record.createdAt || record.date;
       if (!recordDate) return true;
       return isAfterOrOnJoinDate(recordDate, joinDate);
     });
+  }
+
+  async getPaginatedRecords(reqUser: any, queryParams: any): Promise<any> {
+    const orgId = reqUser.companyId || reqUser.organizationId || 'org-stackly';
+    const { role, id: userId, department: userDept, team: userTeam } = reqUser;
+
+    const page = Math.max(1, parseInt(queryParams.page, 10) || 1);
+    let limit = parseInt(queryParams.pageSize || queryParams.limit, 10) || 25;
+    if (limit > 100) limit = 100;
+    if (limit <= 0) limit = 25;
+    const skip = (page - 1) * limit;
+
+    const query: any = { companyId: orgId };
+
+    if (role === 'EMPLOYEE') {
+      query.employeeId = userId;
+    } else if (role === 'TEAM_LEAD') {
+      query.team = userTeam;
+    } else if (role === 'MANAGER') {
+      query.department = userDept;
+    }
+
+    if (queryParams.search) {
+      const searchRegex = new RegExp(queryParams.search, 'i');
+      query.$or = [
+        { employeeName: searchRegex },
+        { employeeId: searchRegex }
+      ];
+    }
+    
+    if (queryParams.date) query.date = queryParams.date;
+    if (queryParams.status && queryParams.status !== 'ALL') query.status = queryParams.status;
+    if (queryParams.workMode && queryParams.workMode !== 'ALL') query.workMode = queryParams.workMode;
+
+    let sortOption: any = {};
+    if (queryParams.sortBy) {
+      const sortBy = queryParams.sortBy;
+      const sortOrder = (queryParams.sortOrder || '').toUpperCase() === 'DESC' ? -1 : 1;
+      sortOption = { [sortBy]: sortOrder };
+    }
+
+    const totalItems = await attendanceRepository.count(query);
+    const records = await attendanceRepository.findPaginated(query, sortOption, skip, limit);
+
+    return {
+      records,
+      pagination: {
+        page,
+        pageSize: limit,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit)
+      }
+    };
   }
 
   async getTodayAttendance(userId: string, orgId: string): Promise<any> {
@@ -612,6 +665,26 @@ export class AttendanceService {
     }
 
     logAudit(correction.employeeId, `CORRECTION_${status.toUpperCase()}`, `${reviewerName} reviewed correction request`, orgId);
+
+    // Trigger Notification
+    const employee = await employeeRepository.findById(correction.employeeId, orgId);
+    if (employee && employee.email) {
+      const emailContent = (await import('./email.service.js')).getApprovalNotificationEmail(
+        employee.name,
+        'Attendance Correction',
+        status
+      );
+      await notificationService.createNotification(
+        correction.employeeId,
+        `Attendance Correction ${status}`,
+        `Your attendance correction for ${correction.date} was ${status} by ${reviewerName}.`,
+        'ATTENDANCE',
+        {
+          to: employee.email,
+          ...emailContent
+        }
+      );
+    }
   }
 
   async getCorrections(reqUser: any): Promise<any> {

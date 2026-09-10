@@ -27,6 +27,7 @@ import {
 import { RealtimeStatusBadge } from '../../../components/common/RealtimeStatusBadge';
 import { useRealtimeNotifications } from '../../../hooks/useRealtimeNotifications';
 import { connectSocket } from '../../../websocket/socket';
+import { NotificationCenter } from '../../../components/common/NotificationCenter';
 
 interface EnterpriseHeaderProps {
   onToggleSidebar: () => void;
@@ -44,17 +45,8 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchCategory, setSearchCategory] = useState<'all' | 'employees' | 'departments' | 'reports' | 'security'>('all');
 
-  // Notifications State
-  const [unreadCount, setUnreadCount] = useState(3);
-  const [hasNewNotification, setHasNewNotification] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: '1', title: 'Attendance Alert: 3 Late Check-Ins', subtitle: 'HR Operations', time: '5m ago', type: 'warning', path: '/hr/attendance', read: false },
-    { id: '2', title: 'Leave Request Pending Review', subtitle: 'Sarah Connor (Engineering)', time: '45m ago', type: 'info', path: '/manager/approvals', read: false },
-    { id: '3', title: 'System Security Audit Completed', subtitle: 'Compliance Stream', time: '2h ago', type: 'success', path: '/admin/audit-logs', read: false },
-  ]);
-
   // Dropdowns State
-  const [activeDropdown, setActiveDropdown] = useState<'profile' | 'role' | 'notif' | 'messages' | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<'profile' | 'role' | 'messages' | null>(null);
 
   // Scope & Modal States
   const [showPermissionsPreview, setShowPermissionsPreview] = useState(false);
@@ -67,24 +59,6 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
     }
   }, [user]);
 
-  // Real-time notifications listener - pulses only on new arrival
-  useRealtimeNotifications((newNotif: any) => {
-    setNotifications((prev) => [
-      {
-        id: newNotif.id || `notif-${Date.now()}`,
-        title: newNotif.title || 'Workforce Notification',
-        subtitle: newNotif.message || '',
-        time: 'Just now',
-        type: newNotif.type === 'WARNING' ? 'warning' : 'info',
-        path: '/hr/attendance',
-        read: false
-      },
-      ...prev
-    ]);
-    setUnreadCount((c) => c + 1);
-    setHasNewNotification(true);
-  });
-
   const searchResultsMap = [
     { title: 'Global Headcount & Department Analytics', category: 'reports', path: '/admin/analytics' },
     { title: 'User Management & Security Scopes', category: 'security', path: '/admin/users' },
@@ -96,17 +70,8 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
 
 
 
-  const toggleDropdown = (name: 'profile' | 'role' | 'notif' | 'messages') => {
-    if (name === 'notif') {
-      setHasNewNotification(false);
-    }
+  const toggleDropdown = (name: 'profile' | 'role' | 'messages') => {
     setActiveDropdown((prev) => (prev === name ? null : name));
-  };
-
-  const markAllNotificationsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setUnreadCount(0);
-    setHasNewNotification(false);
   };
 
   const handleSearchSubmit = (path: string) => {
@@ -273,82 +238,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         </button>
 
         {/* 1. Notifications Center */}
-        <div className="header-action-wrap relative">
-          <button
-            onClick={() => toggleDropdown('notif')}
-            aria-label={`View Notifications (${unreadCount} unread)`}
-            className={`p-2 rounded-lg border transition-all relative cursor-pointer ${
-              isDark
-                ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
-                : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
-            } ${hasNewNotification ? 'ring-2 ring-rose-500/40 text-rose-500' : ''}`}
-            title={hasNewNotification ? "New notification received!" : "Notifications & System Alerts"}
-          >
-            <Bell size={18} className={hasNewNotification ? "text-rose-500" : ""} />
-            {unreadCount > 0 && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: '-3px',
-                  right: '-3px',
-                  minWidth: '15px',
-                  height: '15px',
-                  padding: '0 3px',
-                  backgroundColor: '#f43f5e',
-                  color: 'white',
-                  borderRadius: '9999px',
-                  fontSize: '9px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
-                }}
-              >
-                {unreadCount}
-              </span>
-            )}
-          </button>
-
-          {/* Notifications Dropdown Panel */}
-          {activeDropdown === 'notif' && (
-            <div className="header-popover header-notifications absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 shadow-lg z-50 rounded-lg text-xs text-slate-900 dark:text-slate-100 space-y-2 font-sans">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-                <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">Notifications ({unreadCount})</span>
-                <button
-                  onClick={markAllNotificationsRead}
-                  className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium cursor-pointer"
-                >
-                  Mark All Read
-                </button>
-              </div>
-
-              <div className="space-y-1.5 max-h-72 overflow-y-auto">
-                {notifications.map((n) => (
-                  <div
-                    key={n.id}
-                    onClick={() => {
-                      setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
-                      setActiveDropdown(null);
-                      navigate(n.path);
-                    }}
-                    className={`p-2.5 rounded-md border transition-all cursor-pointer ${
-                      n.read
-                        ? 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/60 opacity-75'
-                        : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <p className="font-medium text-xs text-slate-900 dark:text-slate-100">{n.title}</p>
-                    <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                      <span>{n.subtitle}</span>
-                      <span>{n.time}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <NotificationCenter />
 
         {/* 2. Messages Icon */}
         <button

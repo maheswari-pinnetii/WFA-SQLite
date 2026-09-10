@@ -201,10 +201,26 @@ CREATE TABLE IF NOT EXISTS notifications (
   message TEXT NOT NULL,
   type TEXT,
   read INTEGER DEFAULT 0,
+  emailDeliveryStatus TEXT DEFAULT 'NONE',
+  emailError TEXT,
   createdAt TEXT,
   organizationId TEXT DEFAULT 'org-stackly',
   companyId TEXT DEFAULT 'org-stackly',
   updatedAt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS user_notification_preferences (
+  id TEXT PRIMARY KEY,
+  userId TEXT UNIQUE NOT NULL,
+  inAppEnabled INTEGER DEFAULT 1,
+  emailEnabled INTEGER DEFAULT 1,
+  notifyOnLeave INTEGER DEFAULT 1,
+  notifyOnApproval INTEGER DEFAULT 1,
+  notifyOnPayroll INTEGER DEFAULT 1,
+  notifyOnAttendance INTEGER DEFAULT 1,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS attendancerecords (

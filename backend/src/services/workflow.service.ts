@@ -75,12 +75,44 @@ export const workflowService = {
       [actionId, requestId, request.currentStepOrder, approverId, action, comments || null, now]
     );
 
+    // Helper to send notification
+    const triggerNotification = async (finalStatus: string) => {
+      try {
+        const { employeeRepository } = await import('../repositories/employee.repository.js');
+        const notificationService = await import('./notification.service.js');
+        const emailService = await import('./email.service.js');
+        
+        const employee = await employeeRepository.findById(request.requesterId, 'org-stackly');
+        if (employee && employee.email) {
+          const emailContent = emailService.getApprovalNotificationEmail(
+            employee.name,
+            request.entityType,
+            finalStatus
+          );
+          
+          await notificationService.createNotification(
+            request.requesterId,
+            `${request.entityType} Update`,
+            `Your workflow for ${request.entityType} has been ${finalStatus}.`,
+            'APPROVAL',
+            {
+              to: employee.email,
+              ...emailContent
+            }
+          );
+        }
+      } catch (err: any) {
+        logger.error(`[Workflow] Failed to send notification: ${err.message}`);
+      }
+    };
+
     if (action === 'REJECTED') {
       await execute(
         `UPDATE approval_requests SET status = 'REJECTED', updatedAt = ? WHERE id = ?`,
         [now, requestId]
       );
       logger.info(`[Workflow] Request ${requestId} REJECTED at step ${request.currentStepOrder}`);
+      await triggerNotification('REJECTED');
       return { status: 'REJECTED' };
     }
 
@@ -105,6 +137,7 @@ export const workflowService = {
         [now, requestId]
       );
       logger.info(`[Workflow] Request ${requestId} fully APPROVED`);
+      await triggerNotification('APPROVED');
       return { status: 'APPROVED' };
     }
   },

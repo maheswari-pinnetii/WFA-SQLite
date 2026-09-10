@@ -19,9 +19,11 @@ import {
   ChevronRight,
   ChevronDown,
   Eye,
-  EyeOff
+  EyeOff,
+  Bell
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { NotificationPreferences } from './NotificationPreferences';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -33,7 +35,7 @@ const YEARS = Array.from({ length: 16 }, (_, i) => (2020 + i).toString());
 export const Profile: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'performance' | 'documents' | 'security'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'performance' | 'documents' | 'security' | 'notifications'>('overview');
 
   // MFA / 2FA States
   const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: string | null }>({ enabled: false, verifiedAt: null });
@@ -418,6 +420,7 @@ export const Profile: React.FC = () => {
             { id: 'performance', label: 'Performance', icon: <TrendingUp size={14} /> },
             { id: 'documents', label: 'Documents', icon: <FileText size={14} /> },
             { id: 'security', label: 'Security', icon: <Settings size={14} /> },
+            { id: 'notifications', label: 'Notifications', icon: <Bell size={14} /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1014,7 +1017,9 @@ export const Profile: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
+        {/* Tab 6: Notifications */}
+        {activeTab === 'notifications' && (
+          <NotificationPreferences />
         )}
       </div>
     </div>

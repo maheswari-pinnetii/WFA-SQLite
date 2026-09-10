@@ -35,9 +35,10 @@ export const fetchAttendanceDataThunk = createAsyncThunk(
     let isOffline = false;
 
     try {
-      const recordsRes = await apiClient.get('/v1/attendance/records');
+      const recordsRes = await apiClient.get('/v1/attendance/records?limit=1000');
       if (recordsRes.data && recordsRes.data.success) {
-        records = recordsRes.data.data;
+        // Handle both older array format and new { data, meta } format
+        records = recordsRes.data.data.data ? recordsRes.data.data.data : recordsRes.data.data;
       }
 
       const correctionsRes = await apiClient.get('/v1/attendance/corrections');

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { payrollService } from '../services/payroll.service.js';
 import { AppError, ErrorCode, sendError } from '../utils/apiError.js';
+import { getPaginationParams, buildPaginatedResponse } from '../utils/pagination.js';
 import { logger } from '../config/logger.js';
 
 const u = (req: Request) => (req as any).user;
@@ -33,8 +34,9 @@ export const setSalaryStructure = async (req: Request, res: Response) => {
 
 export const getPayrollRuns = async (req: Request, res: Response) => {
   try {
-    const data = await payrollService.getPayrollRuns(u(req).organizationId);
-    res.json({ success: true, data });
+    const { page, limit, offset } = getPaginationParams(req);
+    const { records, total } = await payrollService.getPayrollRuns(u(req).organizationId, limit, offset);
+    res.json({ success: true, data: buildPaginatedResponse(records, total, page, limit) });
   } catch (err) {
     sendError(res, err);
   }
@@ -64,8 +66,9 @@ export const generatePayslips = async (req: Request, res: Response) => {
 
 export const getMyPayslips = async (req: Request, res: Response) => {
   try {
-    const data = await payrollService.getPayslips(u(req).id, u(req).organizationId);
-    res.json({ success: true, data });
+    const { page, limit, offset } = getPaginationParams(req);
+    const { records, total } = await payrollService.getPayslips(u(req).id, u(req).organizationId, limit, offset);
+    res.json({ success: true, data: buildPaginatedResponse(records, total, page, limit) });
   } catch (err) {
     sendError(res, err);
   }

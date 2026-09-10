@@ -51,11 +51,13 @@ export const payrollService = {
   },
 
   /** ─── PAYROLL RUNS ───────────────────────────────── */
-  async getPayrollRuns(organizationId: string) {
-    return query(
-      `SELECT * FROM payroll_runs WHERE organizationId = ? ORDER BY runDate DESC`,
-      [organizationId]
+  async getPayrollRuns(organizationId: string, limit: number, skip: number) {
+    const total = await query(`SELECT COUNT(*) as count FROM payroll_runs WHERE organizationId = ?`, [organizationId]).then(r => (r[0] as any).count);
+    const records = await query(
+      `SELECT * FROM payroll_runs WHERE organizationId = ? ORDER BY runDate DESC LIMIT ? OFFSET ?`,
+      [organizationId, limit, skip]
     );
+    return { records, total };
   },
 
   async createPayrollRun(organizationId: string, periodStart: string, periodEnd: string) {
@@ -142,15 +144,20 @@ export const payrollService = {
     });
   },
 
-  async getPayslips(employeeId: string, organizationId: string) {
-    return query(
+  async getPayslips(employeeId: string, organizationId: string, limit: number, skip: number) {
+    const total = await query(
+      `SELECT COUNT(*) as count FROM payslips p JOIN payroll_runs pr ON p.payrollRunId = pr.id WHERE p.employeeId = ? AND pr.organizationId = ?`,
+      [employeeId, organizationId]
+    ).then(r => (r[0] as any).count);
+    const records = await query(
       `SELECT p.*, pr.periodStart, pr.periodEnd 
        FROM payslips p 
        JOIN payroll_runs pr ON p.payrollRunId = pr.id
        WHERE p.employeeId = ? AND pr.organizationId = ?
-       ORDER BY pr.runDate DESC`,
-      [employeeId, organizationId]
+       ORDER BY pr.runDate DESC LIMIT ? OFFSET ?`,
+      [employeeId, organizationId, limit, skip]
     );
+    return { records, total };
   },
 
   async finalizePayrollRun(payrollRunId: string, organizationId: string) {
@@ -158,5 +165,37 @@ export const payrollService = {
       `UPDATE payroll_runs SET status = 'FINALIZED' WHERE id = ? AND organizationId = ?`,
       [payrollRunId, organizationId]
     );
+
+    try {
+      const { employeeRepository } = await import('../repositories/employee.repository.js');
+      const notificationService = await import('./notification.service.js');
+      const emailService = await import('./email.service.js');
+      
+      const payslips = await query(`SELECT p.*, r.periodStart, r.periodEnd FROM payslips p JOIN payroll_runs r ON p.payrollRunId = r.id WHERE p.payrollRunId = ?`, [payrollRunId]);
+      
+      for (const slip of payslips as any[]) {
+        const employee = await employeeRepository.findById(slip.employeeId, organizationId);
+        if (employee && employee.email) {
+          const periodStr = `${slip.periodStart} to ${slip.periodEnd}`;
+          const emailContent = emailService.getPayrollNotificationEmail(
+            employee.name,
+            periodStr
+          );
+          
+          await notificationService.createNotification(
+            slip.employeeId,
+            'Payslip Available',
+            `Your payslip for the period ${periodStr} is now available.`,
+            'PAYROLL',
+            {
+              to: employee.email,
+              ...emailContent
+            }
+          );
+        }
+      }
+    } catch (err: any) {
+      logger.error(`[Payroll] Failed to trigger notifications on finalize: ${err.message}`);
+    }
   }
 };

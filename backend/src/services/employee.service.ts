@@ -2,14 +2,8 @@ import { employeeRepository } from '../repositories/employee.repository.js';
 import { userRepository } from '../repositories/auth.repository.js';
 
 export class EmployeeService {
-  async getEmployees(reqUser: any, queryParams: any) {
+  async getEmployees(reqUser: any, queryParams: any, limit: number, skip: number) {
     const { role, id: userId, department: userDept, team: userTeam, organizationId } = reqUser;
-
-    const page = Math.max(1, parseInt(queryParams.page, 10) || 1);
-    let limit = parseInt(queryParams.pageSize || queryParams.limit, 10) || 25;
-    if (limit > 100) limit = 100;
-    if (limit <= 0) limit = 25;
-    const skip = (page - 1) * limit;
 
     const query: any = { organizationId: organizationId || 'org-stackly' };
 
@@ -66,12 +60,7 @@ export class EmployeeService {
 
     return {
       employees,
-      pagination: {
-        page,
-        pageSize: limit,
-        totalItems,
-        totalPages: Math.ceil(totalItems / limit)
-      }
+      totalItems
     };
   }
 
