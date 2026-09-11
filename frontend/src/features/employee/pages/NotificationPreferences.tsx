@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
-import api from '../../../../api/axiosInstance';
+import { apiClient as api } from '../../../api/client';
 
 interface NotificationPreference {
   id: string;

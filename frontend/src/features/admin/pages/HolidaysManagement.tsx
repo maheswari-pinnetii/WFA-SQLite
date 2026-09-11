@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../../../lib/api';
+import { apiClient as api } from '../../../api/client';
 
 interface Holiday {
   id: string;

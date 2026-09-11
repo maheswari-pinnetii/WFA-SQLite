@@ -14,13 +14,13 @@ import { RootState, AppDispatch } from '../../../app/store';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { CorrectionRequests } from '../../../components/attendance/CorrectionRequests';
 import { ManagerApprovals } from '../../../components/attendance/ManagerApprovals';
-import { Pagination } from '../../common/Pagination';
-import { Skeleton } from '../../common/Skeleton';
-import { EmptyState } from '../../common/EmptyState';
-import { ErrorState } from '../../common/ErrorState';
+import { Pagination } from '../../../components/common/Pagination';
+import { Skeleton } from '../../../components/common/Skeleton';
+import { EmptyState } from '../../../components/common/EmptyState';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { usePagination } from '../../../hooks/usePagination';
 import { apiClient } from '../../../api/client';
-import { useToast } from '../../common/ToastContext';
+import { useToast } from '../../../components/common/ToastContext';
 
 export const AttendanceManagement: React.FC = () => {
   const dispatch = useDispatch();
@@ -36,10 +36,17 @@ export const AttendanceManagement: React.FC = () => {
 
   const employeeId = user?.id || 'emp-001';
 
-  const { page, pageSize, setPage, setPagination, pagination } = usePagination();
-  const { addToast } = useToast();
+  const { params, setPage } = usePagination();
+  const { page, limit: pageSize } = params;
+  const { error: showError } = useToast();
   const [paginatedRecords, setPaginatedRecords] = useState<any[]>([]);
   const [isLoadingTable, setIsLoadingTable] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    totalItems: 0,
+    totalPages: 1,
+  });
   const [tableError, setTableError] = useState<Error | null>(null);
 
   // Debounced Search
@@ -74,7 +81,7 @@ export const AttendanceManagement: React.FC = () => {
       }
     } catch (err: any) {
       setTableError(err);
-      addToast('Failed to load attendance records', 'error');
+      showError('Failed to load attendance records', err?.message);
     } finally {
       setIsLoadingTable(false);
     }
@@ -266,7 +273,7 @@ export const AttendanceManagement: React.FC = () => {
             ) : paginatedRecords.length === 0 ? (
               <EmptyState 
                 title="No attendance records" 
-                message="Adjust your filters or search query to find records." 
+                description="Adjust your filters or search query to find records." 
                 icon={<Search className="w-12 h-12 text-slate-500" />}
               />
             ) : (

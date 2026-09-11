@@ -38,13 +38,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AnimatedTabs } from '../../../components/ui/tabs';
 import { DeltaBadge, Callout, ProgressBar } from '../../../components/cards/tremor-kpi';
 import { Avatar } from '../../../components/ui/avatar';
-import { Skeleton } from '../../common/Skeleton';
-import { Pagination } from '../../common/Pagination';
-import { EmptyState } from '../../common/EmptyState';
-import { ErrorState } from '../../common/ErrorState';
+import { Skeleton } from '../../../components/common/Skeleton';
+import { Pagination } from '../../../components/common/Pagination';
+import { EmptyState } from '../../../components/common/EmptyState';
+import { ErrorState } from '../../../components/common/ErrorState';
 import { usePagination } from '../../../hooks/usePagination';
-import { useToast } from '../../common/ToastContext';
-import { ConfirmationDialog } from '../../common/ConfirmationDialog';
+import { useToast } from '../../../components/common/ToastContext';
+import { ConfirmationDialog } from '../../../components/common/ConfirmationDialog';
 import { useUnsavedChanges } from '../../../hooks/useUnsavedChanges';
 
 // Types
@@ -149,7 +149,8 @@ export const LeaveManagement: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
 
   const { addToast } = useToast();
-  const { page, pageSize, setPage, setPagination, pagination } = usePagination();
+  const { params, setPage } = usePagination();
+  const { page, limit: pageSize } = params;
   const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; action: () => void; title: string; message: string; variant?: 'danger' | 'warning' | 'info' }>({
     isOpen: false, action: () => {}, title: '', message: ''
   });
@@ -219,16 +220,10 @@ export const LeaveManagement: React.FC = () => {
     });
   }, [balances, searchQuery, selectedDept]);
 
-  // Update pagination when filtered requests change
+  // Reset to first page when filtered requests change
   useEffect(() => {
-    setPagination({
-      page: 1,
-      pageSize,
-      totalItems: filteredRequests.length,
-      totalPages: Math.ceil(filteredRequests.length / pageSize) || 1
-    });
     setPage(1);
-  }, [filteredRequests.length, pageSize]);
+  }, [filteredRequests.length, pageSize, setPage]);
 
   const paginatedRequests = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -396,7 +391,7 @@ export const LeaveManagement: React.FC = () => {
               <AlertCircle size={20} className="text-rose-400 shrink-0" />
               <div>
                 <h4 className="text-sm font-bold text-rose-300">Unable to load leave records</h4>
-                <p className="text-xs text-slate-300">{error}</p>
+                <p className="text-xs text-slate-300">{error.message}</p>
               </div>
             </div>
             <Button variant="destructive" size="sm" onClick={handleRefresh}>
@@ -554,7 +549,7 @@ export const LeaveManagement: React.FC = () => {
                     ) : paginatedRequests.length === 0 ? (
                       <tr>
                         <td colSpan={8} className="py-4 px-4">
-                          <EmptyState title="No leave requests found" message="Try adjusting your search criteria or filters." icon={<AlertCircle className="w-10 h-10 text-slate-500" />} />
+                          <EmptyState title="No leave requests found" description="Try adjusting your search criteria or filters." icon={<AlertCircle className="w-10 h-10 text-slate-500" />} />
                         </td>
                       </tr>
                     ) : (
@@ -995,6 +990,18 @@ export const LeaveManagement: React.FC = () => {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* CONFIRMATION DIALOG */}
+        <ConfirmationDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmLabel="Confirm"
+          cancelLabel="Cancel"
+          variant={confirmDialog.variant === 'info' ? 'primary' : confirmDialog.variant}
+          onConfirm={confirmDialog.action}
+          onCancel={() => setConfirmDialog(prev => ({ ...prev, isOpen: false }))}
+        />
 
         {/* MODAL: REJECT REASON */}
         <Dialog open={!!rejectModalRecord} onOpenChange={(open) => !open && setRejectModalRecord(null)}>

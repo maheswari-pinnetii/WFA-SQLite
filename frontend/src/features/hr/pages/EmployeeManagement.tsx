@@ -10,10 +10,10 @@ import { formatDate } from '../../../shared/utils/helpers';
 import { UserPlus, Search, Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 import { employeeApi } from '../../../api/endpoints/employee.api';
-import { Skeleton } from '../../common/Skeleton';
-import { EmptyState } from '../../common/EmptyState';
-import { ErrorState } from '../../common/ErrorState';
-import { useToast } from '../../common/ToastContext';
+import { Skeleton } from '../../../components/common/Skeleton';
+import { EmptyState } from '../../../components/common/EmptyState';
+import { ErrorState } from '../../../components/common/ErrorState';
+import { useToast } from '../../../components/common/ToastContext';
 
 export const EmployeeManagement: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -54,7 +54,7 @@ export const EmployeeManagement: React.FC = () => {
   });
   const [isLoadingData, setIsLoadingData] = useState(false);
 
-  const { addToast } = useToast();
+  const { success, error: showError } = useToast();
   const [error, setError] = useState<Error | null>(null);
 
   const fetchPaginatedEmployees = async () => {
@@ -90,7 +90,7 @@ export const EmployeeManagement: React.FC = () => {
     } catch (err: any) {
       console.error("Failed to load paginated employees:", err);
       setError(err);
-      addToast(err.message || 'Failed to load employees.', 'error');
+      showError(err.message || 'Failed to load employees.');
     } finally {
       setIsLoadingData(false);
     }
@@ -103,11 +103,11 @@ export const EmployeeManagement: React.FC = () => {
   const handleStatusChange = async (id: string, status: Employee['status']) => {
     try {
       await employeeApi.updateEmployeeStatus(id, status);
-      addToast(`Employee status updated to ${status}.`, 'success');
+      success(`Employee status updated to ${status}.`);
       fetchPaginatedEmployees();
     } catch (err: any) {
       console.error("Failed to update status:", err);
-      addToast(err.message || 'Failed to update status.', 'error');
+      showError(err.message || 'Failed to update status.');
     }
   };
 
@@ -142,13 +142,13 @@ export const EmployeeManagement: React.FC = () => {
         department: newEmployee.department,
         role: newEmployee.role,
       });
-      addToast(`${newEmployee.name.trim()} was added to the employee directory.`, 'success');
+      success(`${newEmployee.name.trim()} was added to the employee directory.`);
       setNewEmployee({ id: '', name: '', email: '', department: 'Human Resources', role: 'HR' });
       setShowCreateForm(false);
       await fetchPaginatedEmployees();
     } catch (err: any) {
       setCreateError(err instanceof Error ? err.message : 'Unable to create employee.');
-      addToast(err instanceof Error ? err.message : 'Unable to create employee.', 'error');
+      showError(err instanceof Error ? err.message : 'Unable to create employee.');
     } finally {
       setIsCreating(false);
     }
@@ -452,9 +452,16 @@ export const EmployeeManagement: React.FC = () => {
           ) : employeesData.length === 0 ? (
             <EmptyState 
               title="No employees found" 
-              message="No employees match the current filters. Adjust your search criteria." 
+              description="No employees match the current filters. Adjust your search criteria." 
               icon={<Search className="w-12 h-12 text-slate-500" />}
-              action={{ label: "Clear Filters", onClick: handleClearAll }}
+              action={
+                <button
+                  onClick={handleClearAll}
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-colors"
+                >
+                  Clear Filters
+                </button>
+              }
             />
           ) : (
             <>

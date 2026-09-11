@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { Shift, Holiday, WorkConfig, EmployeeShift } from '../models/index.js';
-import { AppError, ErrorCode } from '../utils/errorHandler.js';
+import { AppError, ErrorCode } from '../utils/apiError.js';
 
 export const shiftService = {
   // ─── SHIFTS ───────────────────────────────────────────────────────────────

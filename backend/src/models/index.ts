@@ -12,6 +12,7 @@ export const Shift = new ModelShim('shifts');
 export const Department = new ModelShim('departments');
 export const Team = new ModelShim('teams');
 export const Location = new ModelShim('locations');
+export const Designation = new ModelShim('designations');
 export const AuditLog = new ModelShim('audit_logs');
 export const RefreshToken = new ModelShim('refreshtokens');
 export const Session = new ModelShim('sessions');

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import api from '../api/axiosInstance';
+import { apiClient } from '../api/client';
 
 export interface AppNotification {
   id: string;
@@ -27,7 +27,7 @@ const initialState: NotificationState = {
 export const fetchNotifications = createAsyncThunk(
   'notifications/fetchNotifications',
   async () => {
-    const response = await api.get('/notifications');
+    const response = await apiClient.get('/notifications');
     return response.data;
   }
 );
@@ -35,7 +35,7 @@ export const fetchNotifications = createAsyncThunk(
 export const markAsRead = createAsyncThunk(
   'notifications/markAsRead',
   async (id: string) => {
-    await api.put(`/notifications/${id}/read`);
+    await apiClient.put(`/notifications/${id}/read`);
     return id;
   }
 );
@@ -43,7 +43,7 @@ export const markAsRead = createAsyncThunk(
 export const markAllAsRead = createAsyncThunk(
   'notifications/markAllAsRead',
   async () => {
-    await api.put('/notifications/read-all');
+    await apiClient.put('/notifications/read-all');
     return true;
   }
 );
