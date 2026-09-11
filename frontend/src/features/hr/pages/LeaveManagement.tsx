@@ -148,7 +148,7 @@ export const LeaveManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { addToast } = useToast();
+  const { toast } = useToast();
   const { params, setPage } = usePagination();
   const { page, limit: pageSize } = params;
   const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; action: () => void; title: string; message: string; variant?: 'danger' | 'warning' | 'info' }>({
@@ -255,7 +255,8 @@ export const LeaveManagement: React.FC = () => {
       rejectionReason: rejectionNote || 'Schedule conflict or business priority requirement.'
     } : r));
     setRejectModalRecord(null);
-    addToast(`Leave request ${rejectModalRecord.id} rejected.`, 'success');
+    addToast(`Leave request rejected.`, 'success');
+    console.log(`Leave request ${rejectModalRecord.id} rejected.`);
   };
 
   // Handle Leave Cancellation / Withdrawal
@@ -1044,4 +1045,14 @@ export const LeaveManagement: React.FC = () => {
       </div>
     </RoleGuard>
   );
+};
+// ... inside LeaveManagement component
+const { toast } = useToast();
+
+const addToast = (title: string, description: string) => {
+  toast({
+    title,
+    message: description,
+    type: 'info',
+  });
 };
