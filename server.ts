@@ -3,7 +3,7 @@ import http from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { app } from './backend/src/app.js';
 import { initSockets } from './backend/src/sockets/index.js';
-import { getDb } from './backend/src/config/db.js';
+import { getDb, initDb } from './backend/src/config/db.js';
 import { logger } from './backend/src/config/logger.js';
 
 const PORT = process.env.PORT || 5001;
@@ -12,47 +12,54 @@ let server: http.Server;
 let io: SocketServer;
 
 if (process.env.NODE_ENV !== 'test') {
-  server = http.createServer(app);
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:3001'
-  ];
-  if (process.env.FRONTEND_URL) {
-    allowedOrigins.push(process.env.FRONTEND_URL);
-  }
-
-  io = new SocketServer(server, {
-    cors: {
-      origin: allowedOrigins,
-      methods: ['GET', 'POST'],
-      credentials: true
+  initDb().then(() => {
+    logger.info('database.initialization', 'Database initialized successfully.');
+    
+    server = http.createServer(app);
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001'
+    ];
+    if (process.env.FRONTEND_URL) {
+      allowedOrigins.push(process.env.FRONTEND_URL);
     }
-  });
 
-  initSockets(io);
+    io = new SocketServer(server, {
+      cors: {
+        origin: allowedOrigins,
+        methods: ['GET', 'POST'],
+        credentials: true
+      }
+    });
 
-  // Initialize delayed job scheduler & default feature flags
-  import('./backend/src/services/jobScheduler.service.js').then(({ jobScheduler }) => {
-    jobScheduler.start(10000);
-  });
-  import('./backend/src/services/featureFlag.service.js').then(({ featureFlagService }) => {
-    featureFlagService.initDefaults().catch(() => undefined);
-  });
+    initSockets(io);
 
-  server.on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      logger.error('server.port_in_use', `Port ${PORT} is already in use by another process. Please free port ${PORT} or configure a different PORT in .env.`);
-      process.exit(1);
-    } else {
-      logger.error('server.error', 'Server error occurred', { error: err.message });
-      process.exit(1);
-    }
-  });
+    // Initialize delayed job scheduler & default feature flags ONLY AFTER db is ready
+    import('./backend/src/services/jobScheduler.service.js').then(({ jobScheduler }) => {
+      jobScheduler.start(10000);
+    });
+    import('./backend/src/services/featureFlag.service.js').then(({ featureFlagService }) => {
+      featureFlagService.initDefaults().catch(() => undefined);
+    });
 
-  server.listen(PORT, () => {
-    logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${PORT}`);
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        logger.error('server.port_in_use', `Port ${PORT} is already in use by another process. Please free port ${PORT} or configure a different PORT in .env.`);
+        process.exit(1);
+      } else {
+        logger.error('server.error', 'Server error occurred', { error: err.message });
+        process.exit(1);
+      }
+    });
+
+    server.listen(PORT, () => {
+      logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${PORT}`);
+    });
+  }).catch((err) => {
+    logger.error('database.initialization.failed', 'Failed to initialize database', { error: err.message });
+    process.exit(1);
   });
 } else {
   server = http.createServer(app);

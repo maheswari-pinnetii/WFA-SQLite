@@ -140,14 +140,7 @@ app.use('/api/v1', apiRouter);
 app.use('/v1', apiRouter);
 app.use('/api', apiRouter);
 
-// Database initialization
-if (process.env.NODE_ENV !== 'test') {
-  initDb().then(() => {
-    logger.info('database.initialization', 'Database initialized successfully.');
-  }).catch((err: any) => {
-    logger.error('database.initialization.failed', 'Failed to initialize database', { error: err.message });
-  });
-}
+// Database initialization is now handled in server.ts to ensure it completes before jobs start
 
 // Global Error Handler — standard AppError format, never leaks internals
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
