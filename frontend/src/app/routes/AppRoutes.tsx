@@ -5,8 +5,6 @@ import { RoleGuard } from '../../security/guards/RoleGuard';
 import { GuestGuard } from '../../security/guards/GuestGuard';
 import { MainLayout } from '../../shared/layouts/MainLayout';
 import { AuthLayout } from '../../shared/layouts/AuthLayout';
-import ReportsPage from '../../features/hr/pages/ReportsPage';
-import SettingsPage from '../../features/hr/pages/SettingsPage';
 import PayrollProcessingPage from '../../features/hr/pages/PayrollProcessingPage';
 import { LoginPage } from '../../auth/pages/LoginPage';
 
@@ -318,7 +316,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="attendance" element={<AttendanceManagement />} />
                 <Route path="leave" element={<LeaveManagement />} />
                 <Route path="payroll" element={<PayrollProcessingPage />} />
-                <Route path="reports" element={<ReportsPage />} />
+                <Route path="reports" element={<HRReports />} />
                 <Route path="audit-logs" element={<AuditLogsPage />} />
 
                 {/* Dedicated Error Pages Routes */}
