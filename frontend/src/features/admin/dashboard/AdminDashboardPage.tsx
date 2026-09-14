@@ -334,20 +334,20 @@ export const AdminDashboardPage: React.FC = () => {
         <div className="dashboard-kpi-grid">
           <MinimalKpiCard
             title="Total Headcount"
-            value={employees.length || "500"}
+            value={analytics.data?.metrics?.totalWorkforce ?? employees.length ?? 0}
             icon={<Users size={26} />}
             iconBgColor="emerald"
             isLive={true}
             trend="+12.4% than last month"
             trendType="positive"
-            onClick={() => openDrillDown('Total Employee Headcount', employees.length || 500, 'Global workforce roster', [
-              { label: 'Full-time Permanent', value: Math.round((employees.length || 500) * 0.85) },
-              { label: 'Contractors', value: Math.round((employees.length || 500) * 0.15) },
+            onClick={() => openDrillDown('Total Employee Headcount', analytics.data?.metrics?.totalWorkforce ?? employees.length ?? 0, 'Global workforce roster', [
+              { label: 'Full-time Permanent', value: Math.round((Number(analytics.data?.metrics?.totalWorkforce ?? employees.length ?? 0)) * 0.85) },
+              { label: 'Contractors', value: Math.round((Number(analytics.data?.metrics?.totalWorkforce ?? employees.length ?? 0)) * 0.15) },
             ])}
           />
           <MinimalKpiCard
             title="Active Duty Rate"
-            value={analytics.data?.metrics?.activePresent || Math.round((employees.length || 500) * 0.96)}
+            value={analytics.data?.metrics?.activePresent ?? 0}
             icon={<ShieldCheck size={26} />}
             iconBgColor="blue"
             isLive={true}
@@ -356,7 +356,7 @@ export const AdminDashboardPage: React.FC = () => {
           />
           <MinimalKpiCard
             title="Attendance Rate"
-            value={analytics.data?.metrics?.attendanceRate || "96.5%"}
+            value={analytics.data?.metrics?.attendanceRate ?? "N/A"}
             icon={<Clock size={26} />}
             iconBgColor="amber"
             isLive={true}
@@ -367,7 +367,7 @@ export const AdminDashboardPage: React.FC = () => {
           <MinimalKpiCard title="Monthly Payroll" value="$4.8M" icon={<DollarSign size={26} />} iconBgColor="purple" trend="+4.35% budget allocation" trendType="positive" />
           <MinimalKpiCard
             title="Productivity Score"
-            value={analytics.data?.metrics?.productivityScore || "94.8%"}
+            value={analytics.data?.metrics?.productivityScore ?? "N/A"}
             icon={<Award size={26} />}
             iconBgColor="cyan"
             isLive={true}

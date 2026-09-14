@@ -18,8 +18,8 @@ export interface AuthContextType {
   // Dummy stubs to stop TS errors for components we haven't rewritten yet
   login: (email: string, password: string) => Promise<any>;
   signup: (params: any) => Promise<any>;
-  verifyMfa: (code: string) => Promise<any>;
-  resendMfa: () => Promise<any>;
+  verifyMfa: (challengeId: string, code: string) => Promise<any>;
+  resendMfa: (challengeId: string, mfaMethod?: string) => Promise<any>;
   setSession: (sessionData: any) => void;
   initializeAuth: () => void;
 }
@@ -149,8 +149,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signOut,
       login,
       signup,
-      verifyMfa: async () => undefined,
-      resendMfa: async () => undefined,
+      verifyMfa: async (challengeId: string, code: string) => {
+        const result = await authService.verifyMfa(challengeId, code);
+        setSession({ user: result.user, token: result.token });
+        return result;
+      },
+      resendMfa: async (challengeId: string, mfaMethod?: string) => authService.resendMfa(challengeId, mfaMethod),
       setSession,
       initializeAuth: () => {}
     }}>

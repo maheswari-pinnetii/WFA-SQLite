@@ -218,9 +218,9 @@ export const HrDashboardPage: React.FC = () => {
 
   const firstName = user?.name ? user.name.split(' ')[0] : 'HR';
 
-  const rawCount = analytics?.metrics?.totalWorkforce ?? 254;
-  const headCount = typeof rawCount === 'number' ? rawCount : Number(rawCount) || 254;
-  const attendanceRate = analytics?.metrics?.attendanceRate ?? '96.5%';
+  const rawCount = analytics?.metrics?.totalWorkforce ?? 0;
+  const headCount = typeof rawCount === 'number' ? rawCount : Number(rawCount) || 0;
+  const attendanceRate = analytics?.metrics?.attendanceRate ?? 'N/A';
 
   // Real-time synchronization for HR Dashboard
   useRealtimeDashboard(() => reload());

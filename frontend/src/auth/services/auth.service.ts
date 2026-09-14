@@ -288,11 +288,11 @@ export const authService = {
       try {
         const user = normalizeUser(JSON.parse(userData));
         if (!user) return null;
-        const validToken = token || `stored-token-${user.id}`;
-        setAccessToken(validToken);
+        if (!token) return null;
+        setAccessToken(token);
         return {
           user,
-          token: validToken
+          token
         };
       } catch {
         return null;

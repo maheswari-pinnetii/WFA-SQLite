@@ -130,8 +130,11 @@ export const analyticsApi = {
     try {
       return unwrap(await apiClient.get('/v1/analytics'));
     } catch (err) {
-      console.warn('[Analytics API] Live query failed or disconnected, falling back to cached enterprise analytics:', err);
-      return fallbackAnalyticsData;
+      if (import.meta.env.DEV) {
+        console.warn('[Analytics API] Live query failed or disconnected, falling back to cached enterprise analytics:', err);
+        return fallbackAnalyticsData;
+      }
+      throw err;
     }
   },
   async getShifts(): Promise<Array<{ name: 'Regular' | 'Flexible' | 'Overnight'; startTime: string; endTime: string }>> {

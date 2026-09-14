@@ -1,4 +1,5 @@
 import React from 'react';
+import { DashboardErrorBoundary } from '../../shared/components/DashboardErrorBoundary';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../../security/guards/ProtectedRoute';
 import { RoleGuard } from '../../security/guards/RoleGuard';
@@ -138,7 +139,8 @@ export const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <MainLayout>
-              <Routes>
+              <DashboardErrorBoundary dashboardName="Page">
+                <Routes>
                 {/* ========== Account Security Routes (all authenticated roles) ========== */}
                 <Route path="/change-password" element={<ChangePasswordPage />} />
 
@@ -337,7 +339,8 @@ export const AppRoutes: React.FC = () => {
 
                 {/* Default Route Fallback */}
                 <Route path="*" element={<NotFoundPage />} />
-              </Routes>
+                </Routes>
+              </DashboardErrorBoundary>
             </MainLayout>
           </ProtectedRoute>
         }
