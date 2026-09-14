@@ -29,9 +29,9 @@ const initialState: AttendanceState = {
 export const fetchAttendanceDataThunk = createAsyncThunk(
   'attendance/fetchData',
   async (employeeId: string) => {
-    let records = [];
-    let corrections = [];
-    let auditLogs = [];
+    let records: AttendanceRecord[] = [];
+    let corrections: CorrectionRequest[] = [];
+    let auditLogs: AuditLog[] = [];
     let isOffline = false;
 
     try {
@@ -54,12 +54,24 @@ export const fetchAttendanceDataThunk = createAsyncThunk(
       console.warn('Offline or unable to fetch from server, fallback to local storage cache.', err);
       isOffline = true;
       // Fallback to local storage if offline
-      records = attendanceService.getRecords();
-      corrections = attendanceService.getCorrections();
-      auditLogs = attendanceService.getAuditLogs();
+      records = await attendanceService.getRecords();
+      corrections = await attendanceService.getCorrections();
+      auditLogs = await attendanceService.getAuditLogs();
     }
 
     return { records, corrections, auditLogs, isOffline, employeeId };
+  }
+);
+
+export const syncLocalDataThunk = createAsyncThunk(
+  'attendance/syncLocalData',
+  async (employeeId: string) => {
+    const records = await attendanceService.getRecords();
+    const corrections = await attendanceService.getCorrections();
+    const auditLogs = await attendanceService.getAuditLogs();
+    const offlineQueue = await attendanceService.getOfflineQueue();
+    
+    return { records, corrections, auditLogs, offlineQueueLength: offlineQueue.length, employeeId };
   }
 );
 
@@ -69,15 +81,6 @@ const attendanceSlice = createSlice({
   reducers: {
     setOfflineState(state, action: PayloadAction<boolean>) {
       state.isOffline = action.payload;
-    },
-    syncLocalData(state, action: PayloadAction<{ employeeId: string }>) {
-      state.records = attendanceService.getRecords();
-      state.corrections = attendanceService.getCorrections();
-      state.auditLogs = attendanceService.getAuditLogs();
-      state.offlineQueueLength = attendanceService.getOfflineQueue().length;
-      
-      const active = state.records.find((r) => r.employeeId === action.payload.employeeId && r.status !== 'Checked Out');
-      state.activeRecord = active || null;
     },
     addNotification(state, action: PayloadAction<{ message: string; type: 'info' | 'warning' | 'success' }>) {
       state.notifications.unshift({
@@ -103,17 +106,26 @@ const attendanceSlice = createSlice({
         state.corrections = action.payload.corrections;
         state.auditLogs = action.payload.auditLogs;
         state.isOffline = action.payload.isOffline;
-        state.offlineQueueLength = attendanceService.getOfflineQueue().length;
         
+        // Cannot block the reducer with await, offlineQueueLength is async now, so it will be set in syncLocalDataThunk
         const active = state.records.find((r) => r.employeeId === action.payload.employeeId && r.status !== 'Checked Out');
         state.activeRecord = active || null;
       })
       .addCase(fetchAttendanceDataThunk.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.error.message || 'Failed to fetch attendance data';
+      })
+      .addCase(syncLocalDataThunk.fulfilled, (state, action) => {
+        state.records = action.payload.records;
+        state.corrections = action.payload.corrections;
+        state.auditLogs = action.payload.auditLogs;
+        state.offlineQueueLength = action.payload.offlineQueueLength;
+        
+        const active = state.records.find((r) => r.employeeId === action.payload.employeeId && r.status !== 'Checked Out');
+        state.activeRecord = active || null;
       });
   }
 });
 
-export const { setOfflineState, syncLocalData, addNotification, clearNotifications } = attendanceSlice.actions;
+export const { setOfflineState, addNotification, clearNotifications } = attendanceSlice.actions;
 export default attendanceSlice.reducer;

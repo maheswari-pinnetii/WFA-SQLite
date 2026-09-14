@@ -61,42 +61,43 @@ export function getDistance(lat1: number, lon1: number, lat2: number, lon2: numb
   return R * c; // in meters
 }
 
-class AttendanceService {
-  private recordsKey = 'wfa_attendance_records';
-  private correctionsKey = 'wfa_attendance_corrections';
-  private auditKey = 'wfa_attendance_audit';
-  private offlineQueueKey = 'wfa_attendance_offline_queue';
+import { IndexedDBWrapper } from '../utils/indexedDB';
 
-  // Server Time Simulation (never trust browser time - can offset or keep synced)
+const dbWrapper = new IndexedDBWrapper('StacklyAttendanceDB', 1, [
+  'records',
+  'corrections',
+  'auditLogs',
+  'offlineQueue'
+]);
+
+class AttendanceService {
+  // Server Time Simulation
   getServerTime(): Date {
     return new Date();
   }
 
-  getRecords(): AttendanceRecord[] {
-    const data = localStorage.getItem(this.recordsKey);
-    return data ? JSON.parse(data) : [];
+  async getRecords(): Promise<AttendanceRecord[]> {
+    return await dbWrapper.getAll<AttendanceRecord>('records') || [];
   }
 
-  saveRecords(records: AttendanceRecord[]) {
-    localStorage.setItem(this.recordsKey, JSON.stringify(records));
+  async saveRecords(records: AttendanceRecord[]): Promise<void> {
+    await dbWrapper.putAll('records', records);
   }
 
-  getCorrections(): CorrectionRequest[] {
-    const data = localStorage.getItem(this.correctionsKey);
-    return data ? JSON.parse(data) : [];
+  async getCorrections(): Promise<CorrectionRequest[]> {
+    return await dbWrapper.getAll<CorrectionRequest>('corrections') || [];
   }
 
-  saveCorrections(corrections: CorrectionRequest[]) {
-    localStorage.setItem(this.correctionsKey, JSON.stringify(corrections));
+  async saveCorrections(corrections: CorrectionRequest[]): Promise<void> {
+    await dbWrapper.putAll('corrections', corrections);
   }
 
-  getAuditLogs(): AuditLog[] {
-    const data = localStorage.getItem(this.auditKey);
-    return data ? JSON.parse(data) : [];
+  async getAuditLogs(): Promise<AuditLog[]> {
+    return await dbWrapper.getAll<AuditLog>('auditLogs') || [];
   }
 
-  logAction(employeeId: string, action: string, details: string) {
-    const logs = this.getAuditLogs();
+  async logAction(employeeId: string, action: string, details: string): Promise<void> {
+    const logs = await this.getAuditLogs();
     const newLog: AuditLog = {
       id: Math.random().toString(36).substr(2, 9),
       timestamp: this.getServerTime().toISOString(),
@@ -105,11 +106,11 @@ class AttendanceService {
       details,
     };
     logs.unshift(newLog);
-    localStorage.setItem(this.auditKey, JSON.stringify(logs));
+    await dbWrapper.putAll('auditLogs', logs);
   }
 
   // Smart validation and state machine for check-in
-  checkIn(params: {
+  async checkIn(params: {
     employeeId: string;
     employeeName: string;
     department: string;
@@ -119,9 +120,9 @@ class AttendanceService {
     longitude?: number;
     accuracy?: number;
     idempotencyKey?: string;
-  }): AttendanceRecord {
+  }): Promise<AttendanceRecord> {
     // 1. Idempotency Check
-    const records = this.getRecords();
+    const records = await this.getRecords();
     if (params.idempotencyKey) {
       const existing = records.find((r) => r.idempotencyKey === params.idempotencyKey);
       if (existing) return existing;
@@ -169,14 +170,14 @@ class AttendanceService {
     };
 
     records.push(newRecord);
-    this.saveRecords(records);
-    this.logAction(params.employeeId, 'CHECK_IN', `Checked in using ${params.workMode} mode on ${params.shiftType} shift`);
+    await this.saveRecords(records);
+    await this.logAction(params.employeeId, 'CHECK_IN', `Checked in using ${params.workMode} mode on ${params.shiftType} shift`);
 
     return newRecord;
   }
 
-  takeBreak(employeeId: string) {
-    const records = this.getRecords();
+  async takeBreak(employeeId: string): Promise<void> {
+    const records = await this.getRecords();
     const index = records.findIndex((r) => r.employeeId === employeeId && r.status !== 'Checked Out');
     if (index === -1) throw new Error('No active check-in session found.');
     
@@ -190,13 +191,12 @@ class AttendanceService {
     });
 
     records[index] = record;
-    this.saveRecords(records);
-    this.logAction(employeeId, 'BREAK_START', 'Started break');
-
+    await this.saveRecords(records);
+    await this.logAction(employeeId, 'BREAK_START', 'Started break');
   }
 
-  resumeWork(employeeId: string) {
-    const records = this.getRecords();
+  async resumeWork(employeeId: string): Promise<void> {
+    const records = await this.getRecords();
     const index = records.findIndex((r) => r.employeeId === employeeId && r.status === 'On Break');
     if (index === -1) throw new Error('Employee is not on an active break.');
 
@@ -208,13 +208,12 @@ class AttendanceService {
 
     record.status = 'Working';
     records[index] = record;
-    this.saveRecords(records);
-    this.logAction(employeeId, 'BREAK_END', 'Resumed work');
-
+    await this.saveRecords(records);
+    await this.logAction(employeeId, 'BREAK_END', 'Resumed work');
   }
 
-  checkOut(employeeId: string) {
-    const records = this.getRecords();
+  async checkOut(employeeId: string): Promise<void> {
+    const records = await this.getRecords();
     const index = records.findIndex((r) => r.employeeId === employeeId && r.status !== 'Checked Out');
     if (index === -1) throw new Error('Check-out-before-check-in rejection. No active session found.');
 
@@ -232,42 +231,40 @@ class AttendanceService {
     record.status = 'Checked Out';
 
     records[index] = record;
-    this.saveRecords(records);
-    this.logAction(employeeId, 'CHECK_OUT', 'Checked out from active session');
-
+    await this.saveRecords(records);
+    await this.logAction(employeeId, 'CHECK_OUT', 'Checked out from active session');
   }
 
   // Offline queue mechanisms
-  getOfflineQueue(): any[] {
-    const data = localStorage.getItem(this.offlineQueueKey);
-    return data ? JSON.parse(data) : [];
+  async getOfflineQueue(): Promise<any[]> {
+    return await dbWrapper.getAll<any>('offlineQueue') || [];
   }
 
-  saveOfflineQueue(queue: any[]) {
-    localStorage.setItem(this.offlineQueueKey, JSON.stringify(queue));
+  async saveOfflineQueue(queue: any[]): Promise<void> {
+    await dbWrapper.putAll('offlineQueue', queue);
   }
 
-  enqueueOfflineAction(action: any) {
-    const queue = this.getOfflineQueue();
+  async enqueueOfflineAction(action: any): Promise<void> {
+    const queue = await this.getOfflineQueue();
     queue.push(action);
-    this.saveOfflineQueue(queue);
+    await this.saveOfflineQueue(queue);
   }
 
-  syncOfflineActions(): { syncedCount: number; errors: string[] } {
-    const queue = this.getOfflineQueue();
+  async syncOfflineActions(): Promise<{ syncedCount: number; errors: string[] }> {
+    const queue = await this.getOfflineQueue();
     const errors: string[] = [];
     let syncedCount = 0;
 
     for (const action of queue) {
       try {
         if (action.type === 'CHECK_IN') {
-          this.checkIn(action.payload);
+          await this.checkIn(action.payload);
         } else if (action.type === 'BREAK_START') {
-          this.takeBreak(action.payload.employeeId);
+          await this.takeBreak(action.payload.employeeId);
         } else if (action.type === 'BREAK_END') {
-          this.resumeWork(action.payload.employeeId);
+          await this.resumeWork(action.payload.employeeId);
         } else if (action.type === 'CHECK_OUT') {
-          this.checkOut(action.payload.employeeId);
+          await this.checkOut(action.payload.employeeId);
         }
         syncedCount++;
       } catch (err: any) {
@@ -275,7 +272,7 @@ class AttendanceService {
       }
     }
 
-    this.saveOfflineQueue([]);
+    await this.saveOfflineQueue([]);
     return { syncedCount, errors };
   }
 
@@ -353,7 +350,7 @@ class AttendanceService {
   }
 
   // Corrections requests workflows
-  submitCorrectionRequest(params: {
+  async submitCorrectionRequest(params: {
     employeeId: string;
     employeeName: string;
     department: string;
@@ -361,8 +358,8 @@ class AttendanceService {
     requestedCheckIn: string;
     requestedCheckOut: string;
     reason: string;
-  }): CorrectionRequest {
-    const corrections = this.getCorrections();
+  }): Promise<CorrectionRequest> {
+    const corrections = await this.getCorrections();
     const newReq: CorrectionRequest = {
       id: Math.random().toString(36).substr(2, 9),
       employeeId: params.employeeId,
@@ -376,14 +373,14 @@ class AttendanceService {
       createdAt: this.getServerTime().toISOString(),
     };
     corrections.push(newReq);
-    this.saveCorrections(corrections);
-    this.logAction(params.employeeId, 'CORRECTION_REQUESTED', `Submitted correction request for ${params.date}`);
+    await this.saveCorrections(corrections);
+    await this.logAction(params.employeeId, 'CORRECTION_REQUESTED', `Submitted correction request for ${params.date}`);
 
     return newReq;
   }
 
-  reviewCorrectionRequest(reqId: string, status: 'Approved' | 'Rejected', comment: string, reviewerName: string) {
-    const corrections = this.getCorrections();
+  async reviewCorrectionRequest(reqId: string, status: 'Approved' | 'Rejected', comment: string, reviewerName: string): Promise<void> {
+    const corrections = await this.getCorrections();
     const index = corrections.findIndex((c) => c.id === reqId);
     if (index === -1) throw new Error('Correction request not found.');
 
@@ -393,11 +390,11 @@ class AttendanceService {
     req.reviewedBy = reviewerName;
 
     corrections[index] = req;
-    this.saveCorrections(corrections);
+    await this.saveCorrections(corrections);
 
     if (status === 'Approved') {
       // Update or create the attendance record
-      const records = this.getRecords();
+      const records = await this.getRecords();
       const existingRecordIndex = records.findIndex((r) => r.employeeId === req.employeeId && r.date === req.date);
       
       const updatedRecord: AttendanceRecord = {
@@ -419,11 +416,10 @@ class AttendanceService {
       } else {
         records.push(updatedRecord);
       }
-      this.saveRecords(records);
+      await this.saveRecords(records);
     }
 
-    this.logAction(req.employeeId, `CORRECTION_${status.toUpperCase()}`, `Manager reviewed correction request: ${status}`);
-
+    await this.logAction(req.employeeId, `CORRECTION_${status.toUpperCase()}`, `Manager reviewed correction request: ${status}`);
   }
 
   private unwrapResponse<T>(response: { data?: { success?: boolean; data?: T; message?: string } }): T {
@@ -452,7 +448,7 @@ class AttendanceService {
   }
 
   async syncOfflineActionsRemote(): Promise<{ syncedCount: number; errors: string[] }> {
-    const queue = this.getOfflineQueue();
+    const queue = await this.getOfflineQueue();
     const remaining: any[] = [];
     const errors: string[] = [];
     let syncedCount = 0;
@@ -470,7 +466,7 @@ class AttendanceService {
       }
     }
 
-    this.saveOfflineQueue(remaining);
+    await this.saveOfflineQueue(remaining);
     return { syncedCount, errors };
   }
 }
