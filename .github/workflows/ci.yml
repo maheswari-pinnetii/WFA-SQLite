@@ -12,13 +12,13 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [24.x]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -35,7 +35,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag wfa-sqlite:$(date +%s)
