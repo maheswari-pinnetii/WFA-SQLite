@@ -46,8 +46,12 @@ if (process.env.NODE_ENV !== 'test') {
 
     server.on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
-        logger.error('server.port_in_use', `Port ${PORT} is already in use by another process. Please free port ${PORT} or configure a different PORT in .env.`);
-        process.exit(1);
+        const nextPort = Number(PORT) + 1;
+        logger.error('server.port_in_use', `Port ${PORT} is already in use. Retrying on port ${nextPort}...`);
+        server.close();
+        server.listen(nextPort, () => {
+          logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${nextPort}`);
+        });
       } else {
         logger.error('server.error', 'Server error occurred', { error: err.message });
         process.exit(1);
@@ -57,6 +61,7 @@ if (process.env.NODE_ENV !== 'test') {
     server.listen(PORT, () => {
       logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${PORT}`);
     });
+
   }).catch((err) => {
     logger.error('database.initialization.failed', 'Failed to initialize database', { error: err.message });
     process.exit(1);
