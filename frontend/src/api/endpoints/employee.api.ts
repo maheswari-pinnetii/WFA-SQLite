@@ -42,6 +42,12 @@ export const employeeApi = {
     return employees.find((employee: any) => employee.id === id);
   },
 
+  getEmployee360: async (id: string): Promise<any> => {
+    const response = await apiClient.get(`/v1/employees/${id}/360`);
+    if (response.data?.success) return response.data.data;
+    throw new Error(response.data?.message || 'Unable to retrieve Employee 360 data.');
+  },
+
   createEmployee: async (employee: Partial<Employee> & { id: string; name: string; email: string; department: string }): Promise<Employee> => {
     const response = await apiClient.post('/v1/employees', employee);
     if (response.data?.success) return response.data.data;

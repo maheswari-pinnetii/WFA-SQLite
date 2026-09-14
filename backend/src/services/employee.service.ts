@@ -68,6 +68,17 @@ export class EmployeeService {
     return employeeRepository.findById(id, orgId);
   }
 
+  async getEmployee360(id: string, orgId: string, reqUser: any) {
+    const employee = await employeeRepository.findById(id, orgId);
+    if (!employee) return null;
+
+    // We can fetch attendance, leave, performance here, or rely on controller
+    // Let's rely on controller to stitch together via different services if we want,
+    // or we can do it here via raw query for simplicity, as in exportEmployeeData
+    return employee;
+  }
+
+
   async createEmployee(employeeData: any) {
     return employeeRepository.create(employeeData);
   }

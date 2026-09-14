@@ -34,14 +34,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [permissions, setPermissions] = useState<Permission[]>([]);
 
   useEffect(() => {
-    const storedSession = authService.getStoredSession();
-    if (storedSession) {
-      setSessionState(storedSession);
-      setAppUser(storedSession.user as User);
-      setRole(storedSession.user.role as Role);
-      setPermissions((storedSession.user.permissions || []) as Permission[]);
-    }
-    setLoading(false);
+    const initializeSession = async () => {
+      let storedSession = authService.getStoredSession();
+      
+      // If no stored session, try silent refresh with HttpOnly cookie
+      if (!storedSession) {
+        try {
+          const refreshResult = await authService.refreshSilent();
+          if (refreshResult?.token) {
+            // Need to fetch user data after successful refresh since refresh token only returns token
+            const userResponse = await fetch('/api/v1/auth/me', {
+              headers: { Authorization: `Bearer ${refreshResult.token}` }
+            });
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+              if (userData?.success && userData?.data) {
+                authService.setStoredSession({ user: userData.data, token: refreshResult.token });
+                storedSession = { user: userData.data, token: refreshResult.token };
+              }
+            }
+          }
+        } catch (e) {
+          // Silent refresh failed (no cookie or expired), proceed unauthenticated
+        }
+      }
+
+      if (storedSession) {
+        setSessionState(storedSession);
+        setAppUser(storedSession.user as User);
+        setRole(storedSession.user.role as Role);
+        setPermissions((storedSession.user.permissions || []) as Permission[]);
+      }
+      setLoading(false);
+    };
+
+    initializeSession();
 
     const handleSessionExpired = () => {
       setSessionState(null);
@@ -73,11 +100,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = async () => {
-    await authService.logout();
+    try {
+      await authService.logout();
+    } catch (e) {
+      console.error('Logout error', e);
+    }
     setSessionState(null);
     setAppUser(null);
     setRole(Role.EMPLOYEE);
     setPermissions([]);
+    
+    // Hard redirect to clear all in-memory states including Redux
+    if (window.location.pathname !== '/login') {
+      window.location.href = '/login';
+    }
   };
 
   const login = async (email: string, password: string) => {

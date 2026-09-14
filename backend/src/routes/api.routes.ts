@@ -154,6 +154,7 @@ router.get('/employees', authenticateToken, enforceScope, authenticatedUserLimit
 router.get('/employees/:id/export-data', authenticateToken, validateIdParam, employeeController.exportEmployeeData);
 router.post('/employees/:id/anonymize-data', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, employeeController.anonymizeEmployeeData);
 router.put('/employees/:id/status', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_UPDATE', 'EMPLOYEE_MANAGE']), validateIdParam, validateUpdateEmployeeStatus, employeeController.updateEmployeeStatus);
+router.get('/employees/:id/360', authenticateToken, enforceScope, validateIdParam, employeeController.getEmployee360);
 router.get('/employees/:id', authenticateToken, enforceScope, validateIdParam, employeeController.getEmployeeById);
 router.post('/employees', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_CREATE', 'EMPLOYEE_MANAGE']), validateCreateEmployee, employeeController.createEmployee);
 router.put('/employees/:id', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_UPDATE', 'EMPLOYEE_MANAGE']), validateIdParam, validateUpdateEmployee, employeeController.updateEmployee);

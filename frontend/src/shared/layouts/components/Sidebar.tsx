@@ -50,16 +50,21 @@ import {
   Search,
   X,
   Palmtree,
+  Wallet,
+  Settings,
+  Bell,
+  Blocks
 } from 'lucide-react';
 
 export interface NavigationItem {
   label: string;
   path: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   badge?: {
     text: string;
-    variant: 'emerald' | 'purple' | 'amber' | 'emerald' | 'rose';
+    variant: 'emerald' | 'purple' | 'amber' | 'rose' | 'blue';
   };
+  children?: NavigationItem[];
 }
 
 export interface NavigationCategory {
@@ -93,373 +98,398 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { role } = useAuth();
   const location = useLocation();
   const [navigationQuery, setNavigationQuery] = useState('');
+  
+  // Track expanded state for drill-down menus
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
 
-  // Clean Navigation Structure
+  const toggleMenu = (label: string) => {
+    setExpandedMenus(prev => ({
+      ...prev,
+      [label]: !prev[label]
+    }));
+    if (collapsed) {
+      setCollapsed(false);
+    }
+  };
+
+  // Stackly Enterprise Drill-Down Structure
   const roleCategorizedNavMap: Record<Role, NavigationCategory[]> = {
     [Role.ADMIN]: [
       {
-        category: 'Dashboard',
+        category: 'Workspace',
         items: [
           { label: 'Dashboard', path: '/admin/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
+        ]
       },
       {
-        category: 'Analytics',
+        category: 'Core Modules',
         items: [
-          { label: 'Workforce Analytics', path: '/admin/analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Attendance Analytics', path: '/hr/attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Hiring Analytics', path: '/hr/recruitment', icon: <Briefcase size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance Analytics', path: '/hr/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Productivity Analytics', path: '/admin/productivity', icon: <Zap size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Skills Analytics', path: '/admin/skills-gaps', icon: <Award size={18} strokeWidth={2} className="text-yellow-400" /> },
-          { label: 'Risk Analytics', path: '/admin/risk', icon: <AlertTriangle size={18} strokeWidth={2} className="text-rose-400" /> },
-        ],
-      },
-      {
-        category: 'Workforce',
-        items: [
-          { label: 'Employees', path: '/admin/employees', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Departments', path: '/admin/departments', icon: <Building2 size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Designations', path: '/admin/designations', icon: <Briefcase size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Locations', path: '/admin/locations', icon: <MapPin size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Organization', path: '/admin/organization', icon: <Globe size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Shift Definitions', path: '/admin/shift-definitions', icon: <Timer size={18} strokeWidth={2} className="text-teal-400" /> },
-          { label: 'Holidays', path: '/admin/holidays', icon: <Calendar size={18} strokeWidth={2} className="text-indigo-400" /> },
-          { label: 'Work Configs', path: '/admin/work-configs', icon: <Clock size={18} strokeWidth={2} className="text-blue-400" /> },
-        ],
-      },
-      {
-        category: 'Attendance & Leaves',
-        items: [
-          { label: 'Overview', path: '/admin/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
-          { label: 'Attendance History', path: '/admin/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Shift Timings', path: '/admin/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
-          { label: 'Corrections', path: '/admin/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Approvals', path: '/admin/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
-        ],
-      },
-      {
-        category: 'Skills',
-        items: [
-          { label: 'Skill Overview', path: '/admin/skills-overview', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Skill Gaps', path: '/admin/skills-gaps', icon: <Target size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Skill Coverage', path: '/admin/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
-      },
-      {
-        category: 'Performance',
-        items: [
-          { label: 'Performance Overview', path: '/admin/performance-overview', icon: <Star size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Productivity', path: '/admin/productivity-metrics', icon: <Activity size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
+          { 
+            label: 'People', path: '#people', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" />,
+            children: [
+              { label: 'Employees', path: '/admin/employees' },
+              { label: 'Employee 360', path: '/hr/employees/360' },
+              { label: 'Onboarding', path: '/admin/onboarding' },
+              { label: 'Documents', path: '/admin/documents' },
+              { label: 'Organization Chart', path: '/admin/org-chart' },
+              { label: 'Requests', path: '/admin/requests' },
+            ]
+          },
+          { 
+            label: 'Attendance', path: '#attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Overview', path: '/admin/attendance-overview' },
+              { label: 'Today', path: '/admin/attendance-today' },
+              { label: 'Records', path: '/admin/attendance-records' },
+              { label: 'Calendar', path: '/admin/attendance-calendar' },
+              { label: 'Corrections', path: '/admin/corrections' },
+              { label: 'Shifts', path: '/admin/shifts' },
+              { label: 'Geofence & Locations', path: '/admin/geofencing' },
+            ]
+          },
+          { 
+            label: 'Leave', path: '#leave', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Overview', path: '/admin/leave-overview' },
+              { label: 'Requests', path: '/admin/leave-requests' },
+              { label: 'Calendar', path: '/admin/leave-calendar' },
+              { label: 'Leave Balances', path: '/admin/leave-balances' },
+              { label: 'Holidays', path: '/admin/holidays' },
+            ]
+          },
+          { 
+            label: 'Payroll', path: '#payroll', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" />,
+            children: [
+              { label: 'Dashboard', path: '/admin/payroll/dashboard' },
+              { label: 'Payroll Runs', path: '/hr/payroll' },
+              { label: 'Salary', path: '/admin/payroll/salary' },
+              { label: 'Reimbursements', path: '/admin/payroll/reimbursements' },
+              { label: 'Tax & Compliance', path: '/admin/payroll/tax' },
+              { label: 'Payslips', path: '/admin/payroll/payslips' },
+              { label: 'Reports', path: '/hr/payroll-reports' },
+            ]
+          },
+          { 
+            label: 'Expenses', path: '#expenses', icon: <Wallet size={18} strokeWidth={2} className="text-amber-400" />,
+            children: [
+              { label: 'Dashboard', path: '/admin/expenses/dashboard' },
+              { label: 'Claims', path: '/admin/expenses/claims' },
+              { label: 'Travel', path: '/admin/expenses/travel' },
+              { label: 'Approvals', path: '/admin/expenses/approvals' },
+              { label: 'Policies', path: '/admin/expenses/policies' },
+            ]
+          },
+          { 
+            label: 'Organization', path: '#organization', icon: <Building2 size={18} strokeWidth={2} className="text-indigo-400" />,
+            children: [
+              { label: 'Overview', path: '/admin/org-overview' },
+              { label: 'Company Profile', path: '/admin/company' },
+              { label: 'Departments', path: '/admin/departments' },
+              { label: 'Teams', path: '/admin/teams' },
+              { label: 'Locations', path: '/admin/locations' },
+              { label: 'Positions', path: '/admin/designations' },
+            ]
+          },
+          { 
+            label: 'Reports', path: '#reports', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Overview', path: '/admin/analytics' },
+              { label: 'Workforce', path: '/admin/reports/workforce' },
+              { label: 'Attendance', path: '/admin/reports/attendance' },
+              { label: 'Leave', path: '/admin/reports/leave' },
+              { label: 'Payroll', path: '/admin/reports/payroll' },
+              { label: 'Compliance', path: '/admin/reports/compliance' },
+            ]
+          }
+        ]
       },
       {
         category: 'Administration',
         items: [
-          { label: 'Users & Roles', path: '/admin/users', icon: <UserCog size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Permissions', path: '/admin/permissions', icon: <Key size={18} strokeWidth={2} className="text-yellow-400" /> },
-          { label: 'Access Control', path: '/admin/access-control', icon: <ShieldCheck size={18} strokeWidth={2} className="text-green-400" /> },
-          { label: 'Geofencing', path: '/admin/geofencing', icon: <MapPin size={18} strokeWidth={2} className="text-orange-400" /> },
-          { label: 'Audit Logs', path: '/admin/audit-logs', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-rose-400" /> },
-        ],
-      },
-      {
-        category: 'Settings',
-        items: [
-          { label: 'Settings', path: '/admin/settings', icon: <Sliders size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
-      {
-        category: 'Help & Support',
-        items: [
-          { label: 'Help & Support', path: '#support', icon: <HelpCircle size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
+          { 
+            label: 'Action Center', path: '#actions', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" />,
+            badge: { text: '3 Pending', variant: 'amber' },
+            children: [
+              { label: 'My Pending Actions', path: '/admin/actions/pending' },
+              { label: 'Approvals', path: '/admin/actions/approvals' },
+              { label: 'Exceptions', path: '/admin/actions/exceptions' },
+            ]
+          },
+          { label: 'Notifications', path: '/admin/notifications', icon: <Bell size={18} strokeWidth={2} className="text-cyan-400" /> },
+          { 
+            label: 'Security', path: '#security', icon: <ShieldCheck size={18} strokeWidth={2} className="text-rose-400" />,
+            children: [
+              { label: 'Overview', path: '/admin/security/overview' },
+              { label: 'Audit Logs', path: '/admin/audit-logs' },
+              { label: 'Active Sessions', path: '/admin/security/sessions' },
+              { label: 'Roles & Permissions', path: '/admin/permissions' },
+              { label: 'Access Control', path: '/admin/access-control' },
+              { label: 'Users', path: '/admin/users' },
+            ]
+          },
+          { 
+            label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
+            children: [
+              { label: 'System', path: '/admin/settings/system' },
+              { label: 'Organization', path: '/admin/settings/org' },
+              { label: 'Integrations', path: '/admin/settings/integrations' },
+            ]
+          }
+        ]
+      }
     ],
 
     [Role.HR]: [
       {
-        category: 'Dashboard',
+        category: 'Workspace',
         items: [
           { label: 'Dashboard', path: '/hr/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
+        ]
       },
       {
-        category: 'Analytics',
+        category: 'Core Modules',
         items: [
-          { label: 'Workforce Analytics', path: '/hr/workforce-analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Attendance Analytics', path: '/hr/attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Hiring Analytics', path: '/hr/recruitment', icon: <Briefcase size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance Analytics', path: '/hr/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Productivity Analytics', path: '/hr/productivity', icon: <Zap size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Skills Analytics', path: '/hr/skills-gaps', icon: <Award size={18} strokeWidth={2} className="text-yellow-400" /> },
-          { label: 'Risk Analytics', path: '/hr/risk', icon: <AlertTriangle size={18} strokeWidth={2} className="text-rose-400" /> },
-        ],
+          { 
+            label: 'People', path: '#people', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" />,
+            children: [
+              { label: 'Employees', path: '/hr/employees' },
+              { label: 'Employee 360', path: '/hr/employees/360' },
+              { label: 'Onboarding', path: '/hr/onboarding' },
+              { label: 'Offboarding', path: '/hr/offboarding' },
+              { label: 'Documents', path: '/hr/documents' },
+              { label: 'Requests', path: '/hr/requests' },
+            ]
+          },
+          { 
+            label: 'Attendance', path: '#attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Overview', path: '/hr/attendance-overview' },
+              { label: 'Records', path: '/hr/attendance-records' },
+              { label: 'Corrections', path: '/hr/corrections' },
+              { label: 'Approvals', path: '/hr/approvals' },
+              { label: 'Shifts', path: '/hr/shifts' },
+            ]
+          },
+          { 
+            label: 'Leave', path: '#leave', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Overview', path: '/hr/leave-overview' },
+              { label: 'Requests', path: '/hr/leaves' },
+              { label: 'Calendar', path: '/hr/leave-calendar' },
+              { label: 'Balances', path: '/hr/leave-balances' },
+              { label: 'Holidays', path: '/employee/holidays' },
+            ]
+          },
+          { 
+            label: 'Payroll', path: '#payroll', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" />,
+            children: [
+              { label: 'Dashboard', path: '/hr/payroll/dashboard' },
+              { label: 'Payroll Runs', path: '/hr/payroll' },
+              { label: 'Salary', path: '/hr/payroll/salary' },
+              { label: 'Reports', path: '/hr/payroll-reports' },
+            ]
+          },
+          { 
+            label: 'Reports', path: '#reports', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Overview', path: '/hr/workforce-analytics' },
+              { label: 'Workforce', path: '/hr/reports/workforce' },
+              { label: 'Attendance', path: '/hr/reports/attendance' },
+              { label: 'Payroll', path: '/hr/reports/payroll' },
+            ]
+          }
+        ]
       },
       {
-        category: 'Workforce',
+        category: 'Administration',
         items: [
-          { label: 'Employees', path: '/hr/employees', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Departments', path: '/hr/departments', icon: <Building2 size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Teams', path: '/hr/teams', icon: <Network size={18} strokeWidth={2} className="text-teal-400" /> },
-        ],
-      },
-      {
-        category: 'Attendance & Leaves',
-        items: [
-          { label: 'Overview', path: '/hr/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Public Holidays (2026)', path: '/employee/holidays', icon: <Calendar size={18} strokeWidth={2} className="text-amber-400" />, badge: { text: '12 Days', variant: 'amber' } },
-          { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
-          { label: 'Attendance History', path: '/hr/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Shift Timings', path: '/hr/shifts', icon: <Timer size={18} strokeWidth={2} className="text-emerald-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
-          { label: 'Corrections', path: '/hr/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Approvals', path: '/hr/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
-        ],
-      },
-      {
-        category: 'Skills',
-        items: [
-          { label: 'Skill Overview', path: '/hr/skills-overview', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Skill Gaps', path: '/hr/skills-gaps', icon: <Target size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Skill Coverage', path: '/hr/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
-      },
-      {
-        category: 'Performance',
-        items: [
-          { label: 'Performance Overview', path: '/hr/performance-overview', icon: <Star size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Productivity', path: '/hr/productivity-metrics', icon: <Activity size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
-      },
-      {
-        category: 'Recruitment',
-        items: [
-          { label: 'Hiring Analytics', path: '/hr/recruitment-analytics', icon: <Briefcase size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Workforce Planning', path: '/hr/workforce-planning', icon: <Layers size={18} strokeWidth={2} className="text-teal-400" /> },
-        ],
-      },
-      {
-        category: 'Reports',
-        items: [
-          { label: 'Reports', path: '/hr/reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Audit Logs', path: '/hr/audit-logs', icon: <History size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
-      {
-        category: 'Settings',
-        items: [
-          { label: 'Settings', path: '/hr/settings', icon: <Sliders size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
-      {
-        category: 'Help & Support',
-        items: [
-          { label: 'Help & Support', path: '#support', icon: <HelpCircle size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
+          { 
+            label: 'Action Center', path: '#actions', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" />,
+            children: [
+              { label: 'Pending Approvals', path: '/hr/actions/approvals' },
+              { label: 'Exceptions', path: '/hr/actions/exceptions' },
+            ]
+          },
+          { label: 'Notifications', path: '/hr/notifications', icon: <Bell size={18} strokeWidth={2} className="text-cyan-400" /> },
+          { 
+            label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
+            children: [
+              { label: 'My Account', path: '/hr/settings/account' },
+              { label: 'Workflow Config', path: '/hr/settings/workflow' },
+            ]
+          }
+        ]
+      }
     ],
 
     [Role.MANAGER]: [
       {
-        category: 'Dashboard',
+        category: 'Workspace',
         items: [
           { label: 'Dashboard', path: '/manager/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
+        ]
       },
       {
-        category: 'Team Analytics',
+        category: 'Team Management',
         items: [
-          { label: 'Workforce', path: '/manager/analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Attendance', path: '/manager/attendance-analytics', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Productivity', path: '/manager/productivity', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance', path: '/manager/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Skill Gaps', path: '/manager/skills-gaps', icon: <Award size={18} strokeWidth={2} className="text-yellow-400" /> },
-        ],
+          { 
+            label: 'My Team', path: '#team', icon: <Network size={18} strokeWidth={2} className="text-teal-400" />,
+            children: [
+              { label: 'Team Overview', path: '/manager/team-overview' },
+              { label: 'Team Members', path: '/manager/team-members' },
+              { label: 'Employee 360', path: '/manager/team/360' },
+              { label: 'Team Activity', path: '/manager/team-activity' },
+            ]
+          },
+          { 
+            label: 'Attendance', path: '#attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Team Attendance', path: '/manager/team-attendance' },
+              { label: 'Corrections', path: '/manager/corrections' },
+              { label: 'Calendar', path: '/manager/team-calendar' },
+            ]
+          },
+          { 
+            label: 'Leave', path: '#leave', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Requests', path: '/manager/leave-requests' },
+              { label: 'Team Calendar', path: '/manager/leave-calendar' },
+              { label: 'History', path: '/manager/leave-history' },
+            ]
+          },
+          { 
+            label: 'Work', path: '#work', icon: <Blocks size={18} strokeWidth={2} className="text-indigo-400" />,
+            children: [
+              { label: 'Workload', path: '/manager/workload' },
+              { label: 'Activity', path: '/manager/activity' },
+              { label: 'Sprint Work', path: '/manager/sprint' },
+            ]
+          },
+          { 
+            label: 'Reports', path: '#reports', icon: <BarChart3 size={18} strokeWidth={2} className="text-rose-400" />,
+            children: [
+              { label: 'Analytics Overview', path: '/manager/analytics' },
+              { label: 'Team Productivity', path: '/manager/productivity' },
+            ]
+          }
+        ]
       },
       {
-        category: 'My Team',
+        category: 'Action Items',
         items: [
-          { label: 'Team Members', path: '/manager/team-members', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Team Overview', path: '/manager/team-overview', icon: <Network size={18} strokeWidth={2} className="text-teal-400" /> },
-        ],
-      },
-      {
-        category: 'Attendance',
-        items: [
-          { label: 'Team Attendance', path: '/manager/team-attendance', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Attendance History', path: '/manager/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Corrections', path: '/manager/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Approvals', path: '/manager/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
-        ],
-      },
-      {
-        category: 'Skills',
-        items: [
-          { label: 'Team Skills', path: '/manager/team-skills', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Skill Gaps', path: '/manager/skills-gaps-view', icon: <Target size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Skill Coverage', path: '/manager/skills-coverage', icon: <Map size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
-      },
-      {
-        category: 'Performance',
-        items: [
-          { label: 'Team Performance', path: '/manager/team-performance', icon: <Star size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Productivity', path: '/manager/productivity-metrics', icon: <Activity size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
-      },
-      {
-        category: 'Shifts',
-        items: [
-          { label: 'Team Shift Timings', path: '/manager/shifts', icon: <Timer size={18} strokeWidth={2} className="text-teal-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
-        ],
-      },
-      {
-        category: 'Reports',
-        items: [
-          { label: 'Reports', path: '/manager/reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-rose-400" /> },
-        ],
-      },
-      {
-        category: 'Settings',
-        items: [
-          { label: 'Settings', path: '/manager/settings', icon: <Sliders size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
-      {
-        category: 'Help & Support',
-        items: [
-          { label: 'Help & Support', path: '#support', icon: <HelpCircle size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
+          { label: 'Action Center', path: '/manager/actions', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" />, badge: { text: '2', variant: 'amber' } },
+          { label: 'Notifications', path: '/manager/notifications', icon: <Bell size={18} strokeWidth={2} className="text-cyan-400" /> },
+          { label: 'Settings', path: '/manager/settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" /> },
+        ]
+      }
     ],
 
     [Role.TEAM_LEAD]: [
       {
-        category: 'Dashboard',
+        category: 'Workspace',
         items: [
           { label: 'Dashboard', path: '/team-lead/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
+        ]
       },
       {
-        category: 'Team Analytics',
+        category: 'Team Management',
         items: [
-          { label: 'Attendance', path: '/team-lead/attendance-analytics', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Productivity', path: '/team-lead/productivity', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Performance', path: '/team-lead/performance', icon: <TrendingUp size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Workforce', path: '/team-lead/workforce-analytics', icon: <BarChart3 size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
+          { 
+            label: 'My Team', path: '#team', icon: <Network size={18} strokeWidth={2} className="text-teal-400" />,
+            children: [
+              { label: 'Team Members', path: '/team-lead/team-members' },
+              { label: 'Availability', path: '/team-lead/team-availability' },
+              { label: 'Team Calendar', path: '/team-lead/calendar' },
+            ]
+          },
+          { 
+            label: 'Attendance', path: '#attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Today', path: '/team-lead/attendance-today' },
+              { label: 'Corrections', path: '/team-lead/corrections' },
+              { label: 'History', path: '/team-lead/attendance-history' },
+            ]
+          },
+          { 
+            label: 'Leave', path: '#leave', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Requests', path: '/team-lead/leave-requests' },
+              { label: 'Calendar', path: '/team-lead/leave-calendar' },
+            ]
+          },
+        ]
       },
       {
-        category: 'My Team',
+        category: 'Action Items',
         items: [
-          { label: 'Team Members', path: '/team-lead/team-members', icon: <Users size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Team Overview', path: '/team-lead/team-overview', icon: <Network size={18} strokeWidth={2} className="text-teal-400" /> },
-        ],
-      },
-      {
-        category: 'Attendance',
-        items: [
-          { label: 'Team Attendance', path: '/team-lead/team-attendance', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Attendance History', path: '/team-lead/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Corrections', path: '/team-lead/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Approvals', path: '/team-lead/approvals', icon: <ShieldAlert size={18} strokeWidth={2} className="text-red-400" /> },
-        ],
-      },
-      {
-        category: 'Skills',
-        items: [
-          { label: 'Team Skills', path: '/team-lead/team-skills', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Skill Gaps', path: '/team-lead/skills-gaps', icon: <Target size={18} strokeWidth={2} className="text-rose-400" /> },
-        ],
-      },
-      {
-        category: 'Performance',
-        items: [
-          { label: 'Team Performance', path: '/team-lead/team-performance', icon: <Star size={18} strokeWidth={2} className="text-amber-400" /> },
-        ],
-      },
-      {
-        category: 'Shifts',
-        items: [
-          { label: 'Team Shift Timings', path: '/team-lead/shifts', icon: <Timer size={18} strokeWidth={2} className="text-teal-400" />, badge: { text: '9h Shift', variant: 'emerald' } },
-        ],
-      },
-      {
-        category: 'Reports',
-        items: [
-          { label: 'Reports', path: '/team-lead/reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-rose-400" /> },
-        ],
-      },
-      {
-        category: 'Settings',
-        items: [
-          { label: 'Settings', path: '/team-lead/settings', icon: <Sliders size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
-      {
-        category: 'Help & Support',
-        items: [
-          { label: 'Help & Support', path: '#support', icon: <HelpCircle size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
+          { label: 'Action Center', path: '/team-lead/actions', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" /> },
+          { label: 'Notifications', path: '/team-lead/notifications', icon: <Bell size={18} strokeWidth={2} className="text-cyan-400" /> },
+          { label: 'Settings', path: '/team-lead/settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" /> },
+        ]
+      }
     ],
 
     [Role.EMPLOYEE]: [
       {
         category: 'Workspace',
         items: [
-          { label: 'My Workspace', path: '/employee/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
+          { label: 'My Workday', path: '/employee/dashboard', icon: <LayoutDashboard size={18} strokeWidth={2} className="text-emerald-400" /> },
+        ]
       },
       {
-        category: 'Attendance & Leaves',
-        items: [
-          { label: 'My Attendance Logs', path: '/employee/attendance', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },
-          { label: 'Punch Corrections', path: '/employee/corrections', icon: <CheckSquare size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Leave & Absence', path: '/employee/leave', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" />, badge: { text: 'New', variant: 'emerald' } },
-        ],
-      },
-      {
-        category: 'Schedules & Holidays',
+        category: 'My Actions',
         items: [
           { 
-            label: 'Employee Shift Timings', 
-            path: '/employee/shifts', 
-            icon: <Timer size={18} strokeWidth={2} className="text-teal-400" />,
-            badge: { text: '09:00 - 18:00', variant: 'emerald' }
+            label: 'Attendance', path: '#attendance', icon: <Clock size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'Today', path: '/employee/attendance' },
+              { label: 'Calendar', path: '/employee/attendance-calendar' },
+              { label: 'Punch Corrections', path: '/employee/corrections' },
+            ]
           },
           { 
-            label: 'Public Holidays Calendar (2026)', 
-            path: '/employee/holidays', 
-            icon: <Calendar size={18} strokeWidth={2} className="text-amber-400" />,
-            badge: { text: '12 Days', variant: 'amber' }
+            label: 'Leave', path: '#leave', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" />,
+            children: [
+              { label: 'My Leave', path: '/employee/leave' },
+              { label: 'Apply Leave', path: '/employee/leave-apply' },
+              { label: 'Leave Balance', path: '/employee/leave-balance' },
+              { label: 'Public Holidays', path: '/employee/holidays' },
+            ]
           },
-        ],
+          { 
+            label: 'Payroll', path: '#payroll', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" />,
+            children: [
+              { label: 'My Payslips', path: '/employee/payslips' },
+              { label: 'Salary Structure', path: '/employee/salary' },
+              { label: 'Tax & Declarations', path: '/employee/tax' },
+            ]
+          },
+          { 
+            label: 'Expenses', path: '#expenses', icon: <Wallet size={18} strokeWidth={2} className="text-amber-400" />,
+            children: [
+              { label: 'My Claims', path: '/employee/claims' },
+              { label: 'New Claim', path: '/employee/claims/new' },
+              { label: 'History', path: '/employee/claims/history' },
+            ]
+          },
+          { label: 'Documents', path: '/employee/documents', icon: <FileText size={18} strokeWidth={2} className="text-blue-400" /> },
+          { label: 'My Requests', path: '/employee/requests', icon: <ClipboardList size={18} strokeWidth={2} className="text-cyan-400" /> },
+        ]
       },
       {
-        category: 'Performance & Goals',
+        category: 'System',
         items: [
-          { label: 'OKR Goals & Deliverables', path: '/employee/goals', icon: <Target size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Performance Reviews', path: '/employee/performance', icon: <Star size={18} strokeWidth={2} className="text-amber-400" /> },
-          { label: 'Skills Profile & Growth', path: '/employee/skills', icon: <Compass size={18} strokeWidth={2} className="text-cyan-400" /> },
-        ],
-      },
-      {
-        category: 'Payroll & Compensation',
-        items: [
-          { label: 'Salary & Monthly Payslips', path: '/employee/payslips', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-emerald-400" /> },
-        ],
-      },
-      {
-        category: 'My Profile & Support',
-        items: [
-          { label: 'My Profile', path: '/employee/profile', icon: <User size={18} strokeWidth={2} className="text-emerald-400" /> },
-          { label: 'Help & Support', path: '#support', icon: <HelpCircle size={18} strokeWidth={2} className="text-slate-400" /> },
-        ],
-      },
+          { label: 'Notifications', path: '/employee/notifications', icon: <Bell size={18} strokeWidth={2} className="text-amber-400" /> },
+          { 
+            label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
+            children: [
+              { label: 'My Profile', path: '/employee/profile' },
+              { label: 'Account', path: '/employee/account' },
+              { label: 'Security', path: '/employee/security' },
+            ]
+          }
+        ]
+      }
     ],
   };
 
@@ -475,12 +505,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!query) return currentCategories;
 
     return currentCategories
-      .map((category) => ({
-        ...category,
-        items: category.items.filter((item) =>
-          `${category.category} ${item.label}`.toLowerCase().includes(query)
-        ),
-      }))
+      .map((category) => {
+        const filteredItems = category.items.map(item => {
+          if (item.children) {
+            const filteredChildren = item.children.filter(child => 
+              child.label.toLowerCase().includes(query)
+            );
+            if (filteredChildren.length > 0 || item.label.toLowerCase().includes(query)) {
+              return { ...item, children: filteredChildren.length > 0 ? filteredChildren : item.children };
+            }
+            return null;
+          }
+          return item.label.toLowerCase().includes(query) ? item : null;
+        }).filter(Boolean) as NavigationItem[];
+
+        return {
+          ...category,
+          items: filteredItems,
+        };
+      })
       .filter((category) => category.items.length > 0);
   })();
 
@@ -507,122 +550,155 @@ export const Sidebar: React.FC<SidebarProps> = ({
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* Sidebar Navigation Items List */}
-        <nav className="sidebar-nav sidebar-nav-scroll flex-1 overflow-y-auto w-full scrollbar-thin pt-4">
+        <nav className="sidebar-nav sidebar-nav-scroll flex-1 overflow-y-auto w-full scrollbar-thin pt-4 px-3 space-y-1 pb-20">
           {visibleCategories.map((cat: NavigationCategory, groupIdx: number) => {
             return (
-              <React.Fragment key={groupIdx}>
-                {/* Subtle Divider Line Between Logical Groups */}
-                {groupIdx > 0 && !collapsed && (
-                  <div className="sidebar-group-separator" />
-                )}
-
+              <div key={groupIdx} className="mb-6">
                 {/* Section Header Title */}
-                {!collapsed && cat.category && cat.category !== 'General' && cat.category !== 'Dashboard' && cat.category !== 'Settings' && cat.category !== 'Help & Support' && (
-                  <div className="sidebar-section-label">
-                    <span />
+                {!collapsed && cat.category && (
+                  <div className="px-3 mb-2 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                     {cat.category}
                   </div>
                 )}
 
                 {/* Clean Navigation Links */}
-                {cat.items.map((item: NavigationItem) => {
-                  const active = item.path !== '#support' && (
-                    location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
-                  );
+                <div className="space-y-1">
+                  {cat.items.map((item: NavigationItem) => {
+                    const hasChildren = !!item.children && item.children.length > 0;
+                    const isExpanded = expandedMenus[item.label] || false;
+                    
+                    const active = item.path !== '#support' && !item.path.startsWith('#') && (
+                      location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)
+                    );
+                    
+                    const hasActiveChild = hasChildren && item.children?.some(child => 
+                      location.pathname === child.path || location.pathname.startsWith(`${child.path}/`)
+                    );
 
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={(event) => {
-                        if (item.path === '#support') {
-                          event.preventDefault();
-                          onOpenSupport();
-                        }
-                        setMobileOpen(false);
-                      }}
-                      title={collapsed ? item.label : undefined}
-                      aria-current={active ? 'page' : undefined}
-                      className={`sidebar-nav-link flex items-center gap-3 transition-all duration-200 group relative no-underline text-inherit ${
-                        active
-                          ? 'is-active'
-                          : ''
-                      } ${collapsed ? 'is-collapsed justify-center' : ''}`}
-                    >
-                      <span className="sidebar-icon-shell shrink-0">
-                        {item.icon}
-                      </span>
+                    const isParentActive = active || hasActiveChild;
 
-                      {!collapsed && (
-                        <>
-                          <span className="sidebar-link-label font-medium text-sm truncate flex-1 min-w-0">
-                            {item.label}
-                          </span>
-                          <ChevronRight size={14} className="sidebar-link-arrow shrink-0" />
-                        </>
-                      )}
-
-                      {/* Unread Badge Counter */}
-                      {!collapsed && item.badge && (
-                        <span
-                          className={`sidebar-badge px-1.5 py-0.5 text-xs font-medium rounded border ml-auto shrink-0 ${getBadgeStyle(
-                            item.badge.variant
-                          )}`}
+                    return (
+                      <div key={item.label} className="w-full">
+                        <Link
+                          to={hasChildren ? '#' : item.path}
+                          onClick={(event) => {
+                            if (item.path === '#support') {
+                              event.preventDefault();
+                              onOpenSupport();
+                              setMobileOpen(false);
+                            } else if (hasChildren) {
+                              event.preventDefault();
+                              toggleMenu(item.label);
+                            } else {
+                              setMobileOpen(false);
+                            }
+                          }}
+                          title={collapsed ? item.label : undefined}
+                          aria-current={active ? 'page' : undefined}
+                          className={`flex items-center gap-3 transition-all duration-200 group relative no-underline px-3 py-2 rounded-lg font-medium text-sm
+                            ${isParentActive
+                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 font-semibold'
+                              : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            } ${collapsed ? 'justify-center' : ''}`}
                         >
-                          {item.badge.text}
-                        </span>
-                      )}
+                          {item.icon && (
+                            <span className={`shrink-0 flex items-center justify-center ${
+                              isParentActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                            }`}>
+                              {item.icon}
+                            </span>
+                          )}
 
-                      {/* Collapsed Hover Tooltip */}
-                      {collapsed && (
-                        <span className="sidebar-tooltip">
-                          {item.label}
-                          {item.badge && (
-                            <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${getBadgeStyle(item.badge.variant)}`}>
+                          {!collapsed && (
+                            <>
+                              <span className="truncate flex-1 min-w-0">
+                                {item.label}
+                              </span>
+                              {hasChildren && (
+                                <span className="shrink-0 text-slate-400">
+                                  {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                </span>
+                              )}
+                            </>
+                          )}
+
+                          {/* Unread Badge Counter */}
+                          {!collapsed && item.badge && !hasChildren && (
+                            <span
+                              className={`px-1.5 py-0.5 text-xs font-medium rounded border ml-auto shrink-0 ${getBadgeStyle(
+                                item.badge.variant
+                              )}`}
+                            >
                               {item.badge.text}
                             </span>
                           )}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </React.Fragment>
+
+                          {/* Collapsed Hover Tooltip */}
+                          {collapsed && (
+                            <span className="sidebar-tooltip absolute left-full ml-4 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none z-50 whitespace-nowrap transition-opacity">
+                              {item.label}
+                              {hasChildren && <span className="ml-2 opacity-50">›</span>}
+                            </span>
+                          )}
+                        </Link>
+
+                        {/* Nested Children Rendering */}
+                        {hasChildren && isExpanded && !collapsed && (
+                          <div className="mt-1 ml-4 pl-4 border-l border-slate-200 dark:border-slate-800 flex flex-col space-y-1">
+                            {item.children?.map((child) => {
+                              const isChildActive = location.pathname === child.path || location.pathname.startsWith(`${child.path}/`);
+                              return (
+                                <Link
+                                  key={child.label}
+                                  to={child.path}
+                                  onClick={() => setMobileOpen(false)}
+                                  className={`flex items-center px-3 py-1.5 text-sm rounded-md transition-colors ${
+                                    isChildActive
+                                      ? 'text-emerald-600 font-medium dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-500/10'
+                                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                  }`}
+                                >
+                                  {child.label}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
           {visibleCategories.length === 0 && (
-            <p className="px-3 py-6 text-center text-xs font-semibold text-[var(--text-muted)]">
+            <p className="px-3 py-6 text-center text-xs font-semibold text-slate-500">
               No navigation items found.
             </p>
           )}
         </nav>
 
-        <div className={`sidebar-footer ${collapsed ? 'is-collapsed' : ''}`}>
-
-          <div className="sidebar-footer-actions">
+        {/* Footer Area */}
+        <div className={`p-4 border-t bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 flex items-center justify-between transition-all ${collapsed ? 'flex-col gap-2' : ''}`}>
             <button
               type="button"
-              className="sidebar-footer-button"
+              className={`flex items-center justify-center p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors ${collapsed ? 'w-full' : ''}`}
               onClick={toggleTheme}
               title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
             >
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
-              {!collapsed && <span>{isDark ? 'Light theme' : 'Dark theme'}</span>}
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            {!collapsed && (
-              <button
-                type="button"
-                className="sidebar-footer-button sidebar-footer-collapse"
-                onClick={() => setCollapsed(true)}
-              >
-                <PanelLeftClose size={16} />
-                <span>Collapse menu</span>
-              </button>
-            )}
-          </div>
+            
+            <button
+              type="button"
+              className={`flex items-center justify-center p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors ${collapsed ? 'w-full' : ''}`}
+              onClick={() => setCollapsed(!collapsed)}
+              title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            >
+              <PanelLeftClose size={18} className={collapsed ? 'rotate-180 transition-transform' : 'transition-transform'} />
+            </button>
         </div>
       </aside>
     </>
   );
 };
-

@@ -152,13 +152,13 @@ export const enforceScope = async (req, res, next) => {
       }
 
       if (!target) {
-        return res.status(403).json({ success: false, message: 'Access Denied: Target is outside your organization.' });
+        return res.status(404).json({ success: false, message: 'Resource not found.' });
       }
       if (target.department !== department) {
-        return res.status(403).json({ success: false, message: 'Access Denied: Scoped to your department only.' });
+        return res.status(404).json({ success: false, message: 'Resource not found.' });
       }
       if (role === 'TEAM_LEAD' && target.team !== team) {
-        return res.status(403).json({ success: false, message: 'Access Denied: Scoped to your team only.' });
+        return res.status(404).json({ success: false, message: 'Resource not found.' });
       }
       return next();
     }

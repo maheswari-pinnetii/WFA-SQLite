@@ -14,8 +14,13 @@ import { Skeleton } from '../../../components/common/Skeleton';
 import { EmptyState } from '../../../components/common/EmptyState';
 import { ErrorState } from '../../../components/common/ErrorState';
 import { useToast } from '../../../components/common/ToastContext';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../auth/hooks/useAuth';
 
 export const EmployeeManagement: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [search, setSearch] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -149,8 +154,6 @@ export const EmployeeManagement: React.FC = () => {
     } catch (err: any) {
       setCreateError(err instanceof Error ? err.message : 'Unable to create employee.');
       showError(err instanceof Error ? err.message : 'Unable to create employee.');
-    } finally {
-      setIsCreating(false);
     }
   };
 
@@ -162,81 +165,63 @@ export const EmployeeManagement: React.FC = () => {
   const columns: Column<Employee>[] = [
     {
       header: 'Employee ID',
-      cell: (emp: Employee) => {
-        return (
-          <span className="font-mono font-bold text-slate-300">
-            {emp.employeeCode || emp.code || '—'}
-          </span>
-        );
-      }
-    },
-    {
-      header: 'Employee Name',
-      cell: (emp: Employee) => (
-        <span className="font-bold text-slate-100">{emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`}</span>
+      accessor: 'employeeCode',
+      sortable: true,
+      cell: (val, row) => (
+        <button
+          onClick={() => navigate(`/hr/employees/${row.id}`)}
+          className="text-emerald-500 hover:text-emerald-400 font-medium transition-colors"
+        >
+          {val || row.id.substring(0,8)}
+        </button>
       ),
     },
-    { header: 'Department', accessorKey: 'department' },
-    { header: 'Designation', accessorKey: 'designation' },
     {
-      header: 'Employment Status',
-      cell: (emp: Employee) => {
-        const status = emp.employment_status || 'Active';
-        const colorClass = status === 'Active' ? 'text-emerald-400' :
-                           status === 'Inactive' ? 'text-slate-400' :
-                           status === 'On Leave' ? 'text-amber-400' :
-                                                   'text-rose-400';
-        return (
-          <span className={`font-semibold text-xs flex items-center gap-1.5 ${colorClass}`}>
-            <span className="text-[10px]">●</span> {status}
-          </span>
-        );
-      }
-    },
-    { header: 'Email', accessorKey: 'email' },
-    {
-      header: 'Phone',
-      cell: (emp: Employee) => emp.phone || '—'
-    },
-    {
-      header: 'Location',
-      cell: (emp: Employee) => emp.location || '—'
-    },
-    {
-      header: 'Joining Date',
-      cell: (emp: Employee) => formatDate(emp.joining_date || emp.joinDate || '2025-01-01'),
-    },
-    {
-      header: 'Manager',
-      cell: (emp: Employee) => emp.manager_name || '—'
-    },
-    {
-      header: 'Attendance Status',
-      cell: (emp: Employee) => {
-        const att = emp.attendance_status || emp.status || 'Present';
-        const colorClass = att.toUpperCase() === 'PRESENT' || att.toUpperCase() === 'REMOTE' ? 'text-emerald-400' :
-                           att.toUpperCase() === 'LATE' ? 'text-amber-400' :
-                                                          'text-rose-400';
-        return (
-          <span className={`font-semibold text-xs flex items-center gap-1.5 ${colorClass}`}>
-            <span className="text-[10px]">●</span> {att}
-          </span>
-        );
-      }
-    },
-    {
-      header: 'Actions',
-      cell: () => (
-        <div className="flex items-center gap-3 text-slate-400 cursor-pointer select-none">
-          <span className="hover:text-slate-200 transition-colors" title="View details">👁</span>
-          <span className="hover:text-slate-200 transition-colors text-lg" title="More options">⋮</span>
+      header: 'Name',
+      accessor: 'name',
+      sortable: true,
+      cell: (val, row) => (
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-slate-400 border border-slate-700">
+            {val.charAt(0)}
+          </div>
+          <span className="font-medium text-white">{val}</span>
         </div>
-      )
-    }
+      ),
+    },
+    { header: 'Email', accessor: 'email' },
+    { header: 'Department', accessor: 'department', sortable: true },
+    { header: 'Designation', accessor: 'designation', sortable: true },
+    {
+      header: 'Status',
+      accessor: 'status',
+      sortable: true,
+      cell: (val, row) => {
+        const colors = {
+          ACTIVE: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+          REMOTE: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+          ON_LEAVE: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+          OFFLINE: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
+        };
+        const activeColor = colors[val as keyof typeof colors] || colors.OFFLINE;
+        return (
+          <span className={`px-2 py-1 text-[10px] font-bold tracking-wider rounded border ${activeColor}`}>
+            {val}
+          </span>
+        );
+      },
+    },
+    { header: 'Location', accessor: 'location', sortable: true },
+    { 
+      header: 'Joined', 
+      accessor: 'joiningDate', 
+      sortable: true,
+      cell: (val) => formatDate(val)
+    },
   ];
 
-  const departments = ['ALL', 'Engineering', 'Product Management', 'Sales & Marketing', 'Human Resources', 'Customer Success', 'Finance & Operations'];
-  const designations = ['ALL', 'Senior Software Engineer', 'Product Manager', 'Account Executive', 'HR Operations Manager', 'Customer Success Director', 'Financial Analyst', 'Full Stack Developer', 'Specialist'];
+  const departments = ['ALL', 'Engineering', 'Human Resources', 'Sales', 'Marketing', 'Finance'];
+  const designations = ['ALL', 'Software Engineer', 'Senior Engineer', 'HR Manager', 'Sales Representative', 'Product Manager'];
   const statuses = ['ALL', 'ACTIVE', 'REMOTE', 'ON_LEAVE', 'OFFLINE'];
   const locations = ['ALL', 'Hyderabad', 'Visakhapatnam', 'Chennai', 'Bengaluru', 'Kochi'];
   const joiningYears = ['ALL', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];

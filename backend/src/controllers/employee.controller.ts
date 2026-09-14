@@ -32,6 +32,65 @@ export const getEmployeeById = async (req: any, res: any) => {
   }
 };
 
+export const getEmployee360 = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const orgId = getOrganizationId(req);
+    const employee = await employeeService.getEmployeeById(id, orgId);
+    
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    const isPrivileged = ['ADMIN', 'HR'].includes(req.user.role);
+    const isSelf = req.user.id === id;
+
+    // Fetch related data
+    let attendance = [];
+    try {
+      attendance = await query('SELECT id, date, checkInTime, checkOutTime, status, workMode, shiftType FROM attendancerecords WHERE employeeId = ? ORDER BY date DESC LIMIT 30', [id]);
+    } catch {}
+
+    let leaves = [];
+    try {
+      leaves = await query('SELECT id, type, startDate, endDate, status, reason FROM leaverequests WHERE employeeId = ? ORDER BY createdAt DESC LIMIT 20', [id]);
+    } catch {}
+
+    let auditLogs = [];
+    try {
+      auditLogs = await query('SELECT id, timestamp, action, details FROM audit_logs WHERE employeeId = ? ORDER BY timestamp DESC LIMIT 50', [id]);
+    } catch {}
+
+    let documents = [];
+    try {
+      documents = await query('SELECT id, type, title, url, uploadedAt FROM employee_documents WHERE employeeId = ? ORDER BY uploadedAt DESC', [id]);
+    } catch {}
+
+    let salary = null;
+    if (isPrivileged || isSelf) {
+      try {
+        const salaryRecords = await query('SELECT * FROM salaries WHERE employeeId = ? ORDER BY effectiveDate DESC LIMIT 1', [id]);
+        salary = salaryRecords.length > 0 ? salaryRecords[0] : null;
+      } catch {}
+    }
+
+    // Build the 360 payload
+    const data360 = {
+      profile: employee,
+      attendance,
+      leaves,
+      auditLogs,
+      documents,
+      salary
+    };
+
+    return res.json({ success: true, data: data360 });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getEmployee360', 500, 'Failed to retrieve Employee 360 data.');
+  }
+};
+
+
 export const createEmployee = async (req: any, res: any) => {
   try {
     const body = req.body || {};

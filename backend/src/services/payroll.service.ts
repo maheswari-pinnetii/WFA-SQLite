@@ -116,22 +116,40 @@ export const payrollService = {
           [emp.id, organizationId, run.periodStart, run.periodEnd]
         ).then(r => r[0]) as any;
 
+        // Calculate LOP (Loss of Pay) based on attendance
+        const attendance = await query(`
+          SELECT COUNT(*) as absentDays 
+          FROM attendancerecords 
+          WHERE employeeId = ? 
+            AND organizationId = ?
+            AND date >= ? 
+            AND date <= ? 
+            AND status = 'ABSENT'
+        `, [emp.id, organizationId, run.periodStart, run.periodEnd]).then(r => r[0]) as any;
+
+        const absentDays = attendance?.absentDays || 0;
+
         let overtimePay = 0;
+        const hourlyRate = basicPay / 160; // Approximate hours
+        const dailyRate = basicPay / 30; // Approximate days in month
+
         if (approvedOTRecords?.totalOTHours > 0) {
-          const hourlyRate = basicPay / 160;
           overtimePay = approvedOTRecords.totalOTHours * hourlyRate * 1.5;
         }
 
-        const netPay = totalEarnings + overtimePay - totalDeductions;
+        const lopDeduction = absentDays * dailyRate;
+        const finalDeductions = totalDeductions + lopDeduction;
+
+        const netPay = totalEarnings + overtimePay - finalDeductions;
 
         const payslipId = randomUUID();
         await execute(
           `INSERT OR REPLACE INTO payslips (id, payrollRunId, employeeId, basicPay, totalEarnings, totalDeductions, netPay, status)
            VALUES (?, ?, ?, ?, ?, ?, ?, 'GENERATED')`,
-          [payslipId, payrollRunId, emp.id, basicPay, totalEarnings + overtimePay, totalDeductions, netPay]
+          [payslipId, payrollRunId, emp.id, basicPay, totalEarnings + overtimePay, finalDeductions, netPay]
         );
 
-        payslips.push({ employeeId: emp.id, netPay, overtimePay });
+        payslips.push({ employeeId: emp.id, netPay, overtimePay, lopDeduction });
       }
 
       await execute(
