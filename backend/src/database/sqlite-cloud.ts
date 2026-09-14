@@ -62,6 +62,15 @@ export const connectDatabase = async (): Promise<any> => {
 const isConnectionError = (err: any): boolean => {
   if (!err) return false;
   const msg = (err.message || '').toLowerCase();
+  
+  // Specific SQLiteCloud connection error code
+  if (err.errorCode === '10010') return true;
+  
+  // If it's a generic SQLiteCloudError, only treat it as a connection error if the message implies a network failure
+  if (err.name === 'SQLiteCloudError' && !msg.includes('connection') && !msg.includes('unavailable') && !msg.includes('disconnected') && !msg.includes('paused') && !msg.includes('timeout')) {
+    return false; // It's a query error (like syntax error, constraint violation), not a connection error
+  }
+
   return (
     msg.includes('connection') ||
     msg.includes('unavailable') ||
@@ -77,9 +86,7 @@ const isConnectionError = (err: any): boolean => {
     msg.includes('etimedout') ||
     msg.includes('not connected') ||
     err.errorCode === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
-    err.code === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
-    err.errorCode === '10010' ||
-    err.name === 'SQLiteCloudError'
+    err.code === 'ERR_CONNECTION_NOT_ESTABLISHED'
   );
 };
 

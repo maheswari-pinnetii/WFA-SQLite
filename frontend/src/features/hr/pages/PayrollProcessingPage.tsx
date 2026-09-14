@@ -101,8 +101,8 @@ export default function PayrollProcessingPage() {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight="bold">Payroll Processing Engine</Typography>
+      <Stack direction="row" sx={{ mb: 3, justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold' }}>Payroll Processing Engine</Typography>
         <Button variant="contained" color="primary" onClick={() => setIsCreateModalOpen(true)}>
           New Payroll Run
         </Button>
@@ -127,7 +127,6 @@ export default function PayrollProcessingPage() {
               type="date"
               value={periodStart}
               onChange={(e) => setPeriodStart(e.target.value)}
-              InputLabelProps={{ shrink: true }}
               fullWidth
             />
             <TextField
@@ -135,7 +134,6 @@ export default function PayrollProcessingPage() {
               type="date"
               value={periodEnd}
               onChange={(e) => setPeriodEnd(e.target.value)}
-              InputLabelProps={{ shrink: true }}
               fullWidth
             />
           </Stack>

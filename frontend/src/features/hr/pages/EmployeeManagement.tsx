@@ -165,45 +165,46 @@ export const EmployeeManagement: React.FC = () => {
   const columns: Column<Employee>[] = [
     {
       header: 'Employee ID',
-      accessor: 'employeeCode',
+      accessorKey: 'employeeCode',
       sortable: true,
-      cell: (val, row) => (
+      cell: (item: Employee) => (
         <button
-          onClick={() => navigate(`/hr/employees/${row.id}`)}
+          onClick={() => navigate(`/hr/employees/${item.id}`)}
           className="text-emerald-500 hover:text-emerald-400 font-medium transition-colors"
         >
-          {val || row.id.substring(0,8)}
+          {item.employeeCode || item.id.substring(0,8)}
         </button>
       ),
     },
     {
       header: 'Name',
-      accessor: 'name',
+      accessorKey: 'name',
       sortable: true,
-      cell: (val, row) => (
+      cell: (item: Employee) => (
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-slate-400 border border-slate-700">
-            {val.charAt(0)}
+            {item.name ? item.name.charAt(0) : ''}
           </div>
-          <span className="font-medium text-white">{val}</span>
+          <span className="font-medium text-white">{item.name}</span>
         </div>
       ),
     },
-    { header: 'Email', accessor: 'email' },
-    { header: 'Department', accessor: 'department', sortable: true },
-    { header: 'Designation', accessor: 'designation', sortable: true },
+    { header: 'Email', accessorKey: 'email' },
+    { header: 'Department', accessorKey: 'department', sortable: true },
+    { header: 'Designation', accessorKey: 'designation', sortable: true },
     {
       header: 'Status',
-      accessor: 'status',
+      accessorKey: 'status',
       sortable: true,
-      cell: (val, row) => {
-        const colors = {
+      cell: (item: Employee) => {
+        const val = item.status;
+        const colors: Record<string, string> = {
           ACTIVE: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
           REMOTE: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
           ON_LEAVE: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
           OFFLINE: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
         };
-        const activeColor = colors[val as keyof typeof colors] || colors.OFFLINE;
+        const activeColor = colors[val] || colors.OFFLINE;
         return (
           <span className={`px-2 py-1 text-[10px] font-bold tracking-wider rounded border ${activeColor}`}>
             {val}
@@ -211,12 +212,12 @@ export const EmployeeManagement: React.FC = () => {
         );
       },
     },
-    { header: 'Location', accessor: 'location', sortable: true },
+    { header: 'Location', accessorKey: 'location', sortable: true },
     { 
       header: 'Joined', 
-      accessor: 'joiningDate', 
+      accessorKey: 'joiningDate', 
       sortable: true,
-      cell: (val) => formatDate(val)
+      cell: (item: Employee) => <>{formatDate(item.joinDate || item.joining_date || '')}</>
     },
   ];
 

@@ -1,4 +1,4 @@
-import api from '../config';
+import { apiClient as api } from '../client';
 
 export interface SalaryComponent {
   componentName: string;
