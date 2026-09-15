@@ -39,7 +39,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
   const { canAccessDepartment } = useDepartmentAccess();
 
-  const filteredEmployees = employees.filter((emp) => {
+  const safeEmployees = Array.isArray(employees) ? employees : (employees as any)?.employees || [];
+  const filteredEmployees = safeEmployees.filter((emp: any) => {
     const deptId = (emp as any).departmentId || emp.department || '';
     const hasDbacAccess = canAccessDepartment(deptId) || canAccessDepartment(emp.department);
 
@@ -96,7 +97,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Enterprise Workforce Directory</h3>
-            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">{employees.length.toLocaleString()} Total Records</span>
+            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">{safeEmployees.length.toLocaleString()} Total Records</span>
           </div>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Complete workforce directory with instant role controls & shift tracking</p>
         </div>
