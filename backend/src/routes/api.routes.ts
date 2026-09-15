@@ -16,6 +16,7 @@ import * as payrollController from '../controllers/payroll.controller.js';
 import * as complianceController from '../controllers/compliance.controller.js';
 import * as performanceController from '../controllers/performance.controller.js';
 import * as workflowController from '../controllers/workflow.controller.js';
+import * as expenseController from '../controllers/expense.controller.js';
 import * as schedulingController from '../controllers/scheduling.controller.js';
 import * as attendanceP2 from '../controllers/attendance-phase2.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
@@ -389,6 +390,10 @@ router.post('/compliance/config', authenticateToken, authorizeRoles(['ADMIN', 'H
 // ─── Approval Workflow (Step 9) ──────────────────────────────────────────────
 router.get('/workflows/pending', authenticateToken, authenticatedUserLimiter, workflowController.getPendingApprovals);
 router.post('/workflows/requests/:requestId/action', authenticateToken, authenticatedUserLimiter, workflowController.takeApprovalAction);
+
+// ─── Expenses (Phase 8) ──────────────────────────────────────────────────
+router.post('/expenses', authenticateToken, authenticatedUserLimiter, expenseController.submitExpense);
+router.get('/expenses/me', authenticateToken, authenticatedUserLimiter, expenseController.getMyExpenses);
 
 // ─── Scheduling & Overtime (Step 7) ──────────────────────────────────────────
 router.get('/scheduling/employees/:employeeId/schedule', authenticateToken, enforceScope, authenticatedUserLimiter, schedulingController.getSchedule);

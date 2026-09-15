@@ -3,6 +3,7 @@ import BetterSqlite3 from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { workflowService } from '../services/workflow.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,6 +27,7 @@ export const connectDatabase = async (): Promise<any> => {
       const testDb = new SQLiteCloudDatabase(cloudUrl);
       // Run test query immediately to check if server is paused/down
       await testDb.sql('SELECT 1 as active');
+
       console.log('[Database] Successfully connected to SQLite Cloud.');
       cloudDb = testDb;
       return cloudDb;
@@ -270,7 +272,22 @@ const initLocalSchema = (db: BetterSqlite3.Database) => {
         FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
       );
 
-
+      -- Phase 8: Expenses
+      CREATE TABLE IF NOT EXISTS expense_claims (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT NOT NULL,
+        category TEXT,
+        amount REAL NOT NULL,
+        currency TEXT DEFAULT 'INR',
+        claimDate TEXT,
+        description TEXT,
+        receiptUrl TEXT,
+        status TEXT DEFAULT 'PENDING',
+        approvalRequestId TEXT,
+        payrollRunId TEXT,
+        createdAt TEXT,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
       -- Phase 3: Leave Policy & Recruitment
       CREATE TABLE IF NOT EXISTS leave_types (
         id TEXT PRIMARY KEY, organizationId TEXT DEFAULT 'org-stackly', name TEXT NOT NULL, description TEXT, defaultDays INTEGER NOT NULL, isPaid INTEGER DEFAULT 1

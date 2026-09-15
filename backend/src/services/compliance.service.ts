@@ -1,4 +1,4 @@
-import { getDb } from '../database/sqlite-cloud';
+import { query, execute } from '../database/sqlite-cloud.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface StatutoryConfig {
@@ -25,12 +25,10 @@ export class ComplianceService {
    * Initialize default statutory configurations if they don't exist.
    */
   static async initializeDefaults() {
-    const db = await getDb();
-    
     // Check if PF config exists
-    const pfConfig = await db.get(`SELECT id FROM statutory_config WHERE configKey = 'pf_employee_rate'`);
-    if (!pfConfig) {
-      await db.run(`INSERT INTO statutory_config (id, configKey, financialYear, value, effectiveFrom) VALUES 
+    const pfConfig = await query(`SELECT id FROM statutory_config WHERE configKey = 'pf_employee_rate' LIMIT 1`);
+    if (!pfConfig || pfConfig.length === 0) {
+      await execute(`INSERT INTO statutory_config (id, configKey, financialYear, value, effectiveFrom) VALUES 
         (?, 'pf_employee_rate', '2024-25', 0.12, '2024-04-01'),
         (?, 'pf_employer_rate', '2024-25', 0.12, '2024-04-01'),
         (?, 'pf_wage_limit', '2024-25', 15000, '2024-04-01'),
@@ -42,14 +40,13 @@ export class ComplianceService {
   }
 
   static async getConfigurations(financialYear: string = '2024-25'): Promise<StatutoryConfig[]> {
-    const db = await getDb();
-    return db.all(`SELECT * FROM statutory_config WHERE financialYear = ?`, [financialYear]);
+    const result = await query(`SELECT * FROM statutory_config WHERE financialYear = ?`, [financialYear]);
+    return result as StatutoryConfig[];
   }
 
   static async setConfiguration(data: Omit<StatutoryConfig, 'id'>) {
-    const db = await getDb();
     const id = uuidv4();
-    await db.run(`
+    await execute(`
       INSERT INTO statutory_config (id, configKey, financialYear, stateCode, value, effectiveFrom)
       VALUES (?, ?, ?, ?, ?, ?)
     `, [id, data.configKey, data.financialYear, data.stateCode, data.value, data.effectiveFrom]);

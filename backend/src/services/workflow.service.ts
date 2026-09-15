@@ -80,6 +80,16 @@ export const workflowService = {
         `UPDATE approval_requests SET status = 'REJECTED', updatedAt = ? WHERE id = ?`,
         [now, requestId]
       );
+      
+      // Update entity status
+      if (request.entityType === 'EXPENSE') {
+        await execute(`UPDATE expense_claims SET status = 'REJECTED' WHERE id = ?`, [request.entityId]);
+      } else if (request.entityType === 'LEAVE') {
+        await execute(`UPDATE leave_requests SET status = 'REJECTED' WHERE id = ?`, [request.entityId]);
+      } else if (request.entityType === 'ATTENDANCE_CORRECTION') {
+        await execute(`UPDATE attendance_corrections SET status = 'REJECTED' WHERE id = ?`, [request.entityId]);
+      }
+
       logger.info(`[Workflow] Request ${requestId} REJECTED at step ${request.currentStepOrder}`);
       return { status: 'REJECTED' };
     }
@@ -104,6 +114,16 @@ export const workflowService = {
         `UPDATE approval_requests SET status = 'APPROVED', updatedAt = ? WHERE id = ?`,
         [now, requestId]
       );
+      
+      // Update entity status
+      if (request.entityType === 'EXPENSE') {
+        await execute(`UPDATE expense_claims SET status = 'APPROVED' WHERE id = ?`, [request.entityId]);
+      } else if (request.entityType === 'LEAVE') {
+        await execute(`UPDATE leave_requests SET status = 'APPROVED' WHERE id = ?`, [request.entityId]);
+      } else if (request.entityType === 'ATTENDANCE_CORRECTION') {
+        await execute(`UPDATE attendance_corrections SET status = 'APPROVED' WHERE id = ?`, [request.entityId]);
+      }
+
       logger.info(`[Workflow] Request ${requestId} fully APPROVED`);
       return { status: 'APPROVED' };
     }
@@ -124,5 +144,31 @@ export const workflowService = {
       [approverId, role]
     );
     return requests;
+  },
+
+  /**
+   * Seed default workflows.
+   */
+  async seedWorkflows() {
+    const existing = await query(`SELECT COUNT(*) as count FROM approval_workflows`).then(res => res[0].count);
+    if (existing > 0) return;
+
+    const expenseWfId = randomUUID();
+    const leaveWfId = randomUUID();
+    const corrWfId = randomUUID();
+
+    await execute(`INSERT INTO approval_workflows (id, name, entityType) VALUES 
+      (?, 'Standard Expense Approval', 'EXPENSE'),
+      (?, 'Standard Leave Approval', 'LEAVE'),
+      (?, 'Standard Attendance Correction', 'ATTENDANCE_CORRECTION')
+    `, [expenseWfId, leaveWfId, corrWfId]);
+
+    await execute(`INSERT INTO approval_steps (id, workflowId, stepOrder, approverRole) VALUES 
+      (?, ?, 1, 'MANAGER'),
+      (?, ?, 1, 'MANAGER'),
+      (?, ?, 1, 'MANAGER')
+    `, [randomUUID(), expenseWfId, randomUUID(), leaveWfId, randomUUID(), corrWfId]);
+
+    logger.info(`[Workflow] Seeded default workflows`);
   }
 };

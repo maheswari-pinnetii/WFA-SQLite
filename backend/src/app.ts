@@ -3,7 +3,9 @@ import cors from 'cors';
 import apiRouter from './routes/api.routes.js';
 import { initDb, healthCheck } from './config/db.js';
 import { configureResilience } from './middleware/resilience.js';
+
 import { globalApiLimiter } from './middleware/rateLimiter.js';
+import { workflowService } from './services/workflow.service.js';
 import { inputSanitizer } from './middleware/validateInput.js';
 import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
 import { authenticateToken, authorizeRoles } from './middleware/auth.js';
@@ -142,8 +144,9 @@ app.use('/api', apiRouter);
 
 // Database initialization
 if (process.env.NODE_ENV !== 'test') {
-  initDb().then(() => {
+  initDb().then(async () => {
     logger.info('database.initialization', 'Database initialized successfully.');
+    await workflowService.seedWorkflows();
   }).catch((err: any) => {
     logger.error('database.initialization.failed', 'Failed to initialize database', { error: err.message });
   });

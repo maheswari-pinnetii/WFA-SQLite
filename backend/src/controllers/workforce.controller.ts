@@ -327,10 +327,10 @@ export const getLeavePolicies = async (req, res) => {
   try {
     const orgId = getOrganizationId(req);
     const policies = await query(
-      SELECT lp.*, lt.name as leaveTypeName 
+      `SELECT lp.*, lt.name as leaveTypeName 
        FROM leave_policies lp
        JOIN leave_types lt ON lp.leaveTypeId = lt.id
-       WHERE lp.organizationId = ?,
+       WHERE lp.organizationId = ?`,
       [orgId]
     );
     return res.json({ success: true, data: policies });
@@ -350,10 +350,10 @@ export const createLeavePolicy = async (req, res) => {
 
     const id = randomUUID();
     await execute(
-      INSERT INTO leave_policies (
+      `INSERT INTO leave_policies (
         id, organizationId, name, description, leaveTypeId, 
         accrualRate, accrualFrequency, maxCarryForward, isProRata
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?),
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, orgId, name, description || '', leaveTypeId, accrualRate, accrualFrequency || 'MONTHLY', maxCarryForward || 0, isProRata === false ? 0 : 1]
     );
 

@@ -98,6 +98,9 @@ const INITIAL_PAYROLL_DATA: EmployeePayrollRecord[] = [
     manualBonus: 1000,
     manualDeduction: 0,
     grossPay: 17037.5,
+    pfAmount: 0,
+    esiAmount: 0,
+    ptAmount: 0,
     taxWithheld: 3407.5,
     netPay: 13630.0
   },
@@ -120,6 +123,9 @@ const INITIAL_PAYROLL_DATA: EmployeePayrollRecord[] = [
     manualBonus: 500,
     manualDeduction: 0,
     grossPay: 11133.33,
+    pfAmount: 0,
+    esiAmount: 0,
+    ptAmount: 0,
     taxWithheld: 2226.67,
     netPay: 8906.66
   },
@@ -142,6 +148,9 @@ const INITIAL_PAYROLL_DATA: EmployeePayrollRecord[] = [
     manualBonus: 1500,
     manualDeduction: 0,
     grossPay: 18300,
+    pfAmount: 0,
+    esiAmount: 0,
+    ptAmount: 0,
     taxWithheld: 3660,
     netPay: 14640
   },
@@ -164,6 +173,9 @@ const INITIAL_PAYROLL_DATA: EmployeePayrollRecord[] = [
     manualBonus: 0,
     manualDeduction: 0,
     grossPay: 12029.17,
+    pfAmount: 0,
+    esiAmount: 0,
+    ptAmount: 0,
     taxWithheld: 2405.83,
     netPay: 9623.34
   },
@@ -186,6 +198,9 @@ const INITIAL_PAYROLL_DATA: EmployeePayrollRecord[] = [
     manualBonus: 750,
     manualDeduction: 0,
     grossPay: 15650,
+    pfAmount: 0,
+    esiAmount: 0,
+    ptAmount: 0,
     taxWithheld: 3130,
     netPay: 12520
   },
@@ -208,6 +223,9 @@ const INITIAL_PAYROLL_DATA: EmployeePayrollRecord[] = [
     manualBonus: 300,
     manualDeduction: 0,
     grossPay: 11493.75,
+    pfAmount: 0,
+    esiAmount: 0,
+    ptAmount: 0,
     taxWithheld: 2298.75,
     netPay: 9195.0
   }

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ComplianceService } from '../services/compliance.service';
+import { ComplianceService } from '../services/compliance.service.js';
 
 export const getComplianceConfigs = async (req: Request, res: Response) => {
   try {
