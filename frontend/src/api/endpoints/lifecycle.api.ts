@@ -1,4 +1,4 @@
-import apiClient from '../apiClient';
+import { apiClient } from '../client';
 
 export const lifecycleApi = {
   transitionStatus: async (employeeId: string, status: string, reason?: string, effectiveDate?: string) => {

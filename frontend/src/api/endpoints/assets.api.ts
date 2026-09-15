@@ -1,4 +1,4 @@
-import apiClient from '../apiClient';
+import { apiClient } from '../client';
 
 export const assetsApi = {
   getAssets: async (filters?: any) => {

@@ -751,14 +751,29 @@ export const EmployeeProfilePage: React.FC = () => {
       {activeTab === 'documents' && (
         <div className="card p-6 flex flex-col gap-4">
           <SectionTitle>Documents</SectionTitle>
+          <div className="flex gap-2">
+            <input 
+              placeholder="Document Type (e.g., ID Proof)" 
+              value={newDocument.documentType} 
+              onChange={e => setNewDocument(p => ({ ...p, documentType: e.target.value }))}
+              className="bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-primary)]" 
+            />
+            <input 
+              placeholder="Document URL" 
+              value={newDocument.documentUrl} 
+              onChange={e => setNewDocument(p => ({ ...p, documentUrl: e.target.value }))}
+              className="bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-primary)]" 
+            />
+            <button onClick={handleAddDocument} disabled={saving} className="btn btn-sm btn-primary text-xs">Upload</button>
+          </div>
+
           {(employee.documents || []).length === 0 ? (
             <div className="text-center py-10">
               <p className="text-4xl mb-3">📄</p>
               <p className="text-sm text-[var(--text-muted)]">No documents uploaded yet.</p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">Document management module coming in Phase 12.</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 mt-4">
               {(employee.documents || []).map((d: any) => (
                 <div key={d.id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)]">
                   <div className="flex items-center gap-3">
@@ -776,25 +791,120 @@ export const EmployeeProfilePage: React.FC = () => {
         </div>
       )}
 
-      {/* ─────────── TAB: History ─────────── */}
-      {activeTab === 'history' && (
+      {/* ─────────── TAB: Assets ─────────── */}
+      {activeTab === 'assets' && (
         <div className="card p-6 flex flex-col gap-4">
-          <SectionTitle>Employment History</SectionTitle>
-          {(employee.statusHistory || []).length === 0 ? (
-            <p className="text-sm text-[var(--text-muted)] text-center py-8">No status history available.</p>
+          <div className="flex justify-between items-center">
+            <SectionTitle>Assigned Assets</SectionTitle>
+            <button onClick={() => { fetchAvailableAssets(); setIsAssignAssetModalOpen(true); }} className="btn btn-sm btn-primary text-xs">Assign Asset</button>
+          </div>
+          
+          {employeeAssets.length === 0 ? (
+            <div className="text-center py-10">
+              <p className="text-4xl mb-3">💻</p>
+              <p className="text-sm text-[var(--text-muted)]">No assets currently assigned to this employee.</p>
+            </div>
           ) : (
-            <div className="relative pl-6 flex flex-col gap-4">
-              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-[var(--border-color)]" />
-              {(employee.statusHistory || []).map((h: any, i: number) => (
-                <div key={h.id || i} className="relative">
-                  <div className="absolute -left-4 top-1 w-3 h-3 rounded-full border-2 border-[var(--role-primary)] bg-[var(--bg-card)]" />
-                  <p className="text-xs text-[var(--text-muted)]">{new Date(h.effectiveDate).toLocaleDateString('en-IN')}</p>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">{h.status}</p>
-                  {h.reason && <p className="text-xs text-[var(--text-muted)]">{h.reason}</p>}
-                </div>
-              ))}
+            <div className="overflow-x-auto mt-4">
+              <table className="w-full text-left text-sm">
+                <thead className="text-[var(--text-muted)] bg-[var(--bg-tertiary)]">
+                  <tr>
+                    <th className="py-2 px-3 font-medium">Tag</th>
+                    <th className="py-2 px-3 font-medium">Type</th>
+                    <th className="py-2 px-3 font-medium">Status</th>
+                    <th className="py-2 px-3 font-medium text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-color)]">
+                  {employeeAssets.map(asset => (
+                    <tr key={asset.id} className="hover:bg-[var(--bg-tertiary)]">
+                      <td className="py-2 px-3 font-medium text-[var(--text-primary)]">{asset.assetTag}</td>
+                      <td className="py-2 px-3 text-[var(--text-muted)]">{asset.assetType}</td>
+                      <td className="py-2 px-3 text-[var(--text-muted)]">{asset.status}</td>
+                      <td className="py-2 px-3 text-right">
+                        {asset.status === 'ASSIGNED' && (
+                          <button onClick={() => handleReturnAsset(asset.id)} className="text-rose-500 text-xs hover:underline">Return</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
+
+          {/* Assign Asset Modal */}
+          {isAssignAssetModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+              <div className="bg-[var(--bg-card)] border border-[var(--border-color)] p-6 rounded-xl w-full max-w-sm">
+                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-4">Assign Asset</h3>
+                <div className="space-y-4">
+                  <select 
+                    className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-md p-2 text-[var(--text-primary)]"
+                    value={selectedAssetId}
+                    onChange={(e) => setSelectedAssetId(e.target.value)}
+                  >
+                    <option value="">Select an available asset...</option>
+                    {allAssets.map(a => <option key={a.id} value={a.id}>{a.assetTag} - {a.assetType}</option>)}
+                  </select>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <button onClick={() => setIsAssignAssetModalOpen(false)} className="btn btn-sm text-xs">Cancel</button>
+                    <button onClick={handleAssignAsset} disabled={!selectedAssetId} className="btn btn-sm btn-primary text-xs">Assign</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─────────── TAB: History & Onboarding ─────────── */}
+      {activeTab === 'history' && (
+        <div className="card p-6 flex flex-col gap-6">
+          
+          <div className="bg-[var(--bg-tertiary)] p-4 rounded-xl border border-[var(--border-color)]">
+            <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">Transition Status / Onboarding</h4>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select 
+                className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg p-2 text-sm text-[var(--text-primary)]"
+                value={transitionStatus.status}
+                onChange={e => setTransitionStatus(p => ({ ...p, status: e.target.value }))}
+              >
+                <option value="ONBOARDING">ONBOARDING</option>
+                <option value="PROBATION">PROBATION</option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
+                <option value="RESIGNED">RESIGNED</option>
+                <option value="TERMINATED">TERMINATED</option>
+              </select>
+              <input 
+                placeholder="Reason (Optional)" 
+                value={transitionStatus.reason} 
+                onChange={e => setTransitionStatus(p => ({ ...p, reason: e.target.value }))}
+                className="flex-1 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg p-2 text-sm text-[var(--text-primary)]" 
+              />
+              <button onClick={handleTransitionStatus} disabled={saving} className="btn btn-sm btn-primary text-xs">Update Status</button>
+            </div>
+          </div>
+
+          <div>
+            <SectionTitle>Employment History</SectionTitle>
+            {(employee.statusHistory || []).length === 0 ? (
+              <p className="text-sm text-[var(--text-muted)] text-center py-8">No status history available.</p>
+            ) : (
+              <div className="relative pl-6 flex flex-col gap-4 mt-4">
+                <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-[var(--border-color)]" />
+                {(employee.statusHistory || []).map((h: any, i: number) => (
+                  <div key={h.id || i} className="relative">
+                    <div className="absolute -left-4 top-1 w-3 h-3 rounded-full border-2 border-[var(--role-primary)] bg-[var(--bg-card)]" />
+                    <p className="text-xs text-[var(--text-muted)]">{new Date(h.effectiveDate).toLocaleDateString('en-IN')}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{h.status}</p>
+                    {h.reason && <p className="text-xs text-[var(--text-muted)]">{h.reason}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
