@@ -1,62 +1,162 @@
 import React, { useEffect, useState } from 'react';
-import { DashboardErrorBoundary } from '../../../shared/components/DashboardErrorBoundary';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
-import { DashboardShell, DashboardHeader, DashboardToolbar, KPIGrid, KPICard, TableCard } from '../../../shared/components/dashboard';
+import { KPICard } from '../../../components/cards/KPICard';
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { Employee } from '../../../shared/types/common.types';
-import { Briefcase, Users, CheckCircle2, XCircle, Clock, Zap, Star, FileText, AlertTriangle, ArrowRight, Filter, Layers, CalendarClock, CalendarOff, ClipboardList, CheckSquare, Activity, Award, FileSpreadsheet } from 'lucide-react';
+import { Briefcase, Users, CheckCircle2, XCircle, Clock, Zap, Star, FileText, AlertTriangle, ArrowRight, Filter, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
+export const ManagerDashboardOverview: React.FC = () => (
+  <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-950/50 via-slate-900 to-indigo-950/40 border border-blue-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+    <div className="flex items-center gap-4">
+      <div className="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/40 flex items-center justify-center shrink-0">
+        <Briefcase size={32} />
+      </div>
+      <div>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tight text-white">Department Manager Workspace</h2>
+          <span className="badge badge-manager">ENGINEERING SCOPE</span>
+        </div>
+        <p className="text-xs text-slate-300 mt-1">
+          Resource allocation, sub-team sprint velocity, leave approvals & department throughput.
+        </p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 shrink-0">
+      <Link to="/manager/approvals" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-md">
+        <CheckCircle2 size={14} /> Leave Approvals
+      </Link>
+      <Link to="/manager/analytics" className="btn btn-secondary btn-sm flex items-center gap-1.5">
+        <Zap size={14} /> Team Analytics
+      </Link>
+    </div>
+  </div>
+);
+
+export const ManagerDashboardFilters: React.FC<{
+  dateFilter: string;
+  setDateFilter: (val: string) => void;
+  teamFilter: string;
+  setTeamFilter: (val: string) => void;
+  employeeFilter: string;
+  setEmployeeFilter: (val: string) => void;
+  statusFilter: string;
+  setStatusFilter: (val: string) => void;
+  employees: Employee[];
+  departmentName: string;
+}> = (props) => (
+  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+    <div className="flex items-center gap-2 text-slate-300 text-xs font-extrabold uppercase">
+      <Filter size={16} className="text-blue-400" /> Scoped Department Filters
+    </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div>
+        <label className="text-[10px] text-slate-400 font-bold block mb-1">Date</label>
+        <input
+          type="date"
+          value={props.dateFilter}
+          onChange={(e) => props.setDateFilter(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold"
+        />
+      </div>
+      <div>
+        <label className="text-[10px] text-slate-400 font-bold block mb-1">Team</label>
+        <select
+          value={props.teamFilter}
+          onChange={(e) => props.setTeamFilter(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+        >
+          <option value="All">All Teams</option>
+          <option value="Frontend">Frontend</option>
+          <option value="Backend">Backend</option>
+          <option value="QA">QA</option>
+        </select>
+      </div>
+      <div>
+        <label className="text-[10px] text-slate-400 font-bold block mb-1">Employee</label>
+        <select
+          value={props.employeeFilter}
+          onChange={(e) => props.setEmployeeFilter(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+        >
+          <option value="All">All Department Employees</option>
+          {props.employees.filter(e => e.department === props.departmentName).map(emp => (
+            <option key={emp.id} value={emp.id}>{emp.name}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="text-[10px] text-slate-400 font-bold block mb-1">Status</label>
+        <select
+          value={props.statusFilter}
+          onChange={(e) => props.setStatusFilter(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 font-semibold cursor-pointer"
+        >
+          <option value="All">All Statuses</option>
+          <option value="Active">Active</option>
+          <option value="On Leave">On Leave</option>
+        </select>
+      </div>
+    </div>
+  </div>
+);
+
+
+
 export const ManagerSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
-  <TableCard title="Department Sprint" subtitle="ENGINEERING SPRINT">
-    <table className="w-full text-left text-xs min-w-[800px]">
-      <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-semibold text-xs">
-        <tr>
-          <th className="py-3 px-4">Sprint</th>
-          <th className="py-3 px-4">Task</th>
-          <th className="py-3 px-4">Assignee</th>
-          <th className="py-3 px-4">Priority</th>
-          <th className="py-3 px-4">Status</th>
-          <th className="py-3 px-4">Progress</th>
-          <th className="py-3 px-4">Due Date</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-        {tasks.slice(0, 5).map((task) => (
-          <tr key={task.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-            <td className="py-3 px-4 font-medium text-slate-600 dark:text-slate-400">Sprint 24B</td>
-            <td className="py-3 px-4 text-slate-900 dark:text-white font-medium max-w-[200px] truncate">{task.title}</td>
-            <td className="py-3 px-4 text-slate-500">{task.assigneeName || 'Unassigned'}</td>
-            <td className="py-3 px-4">
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                task.priority === 'CRITICAL' || task.priority === 'HIGH'
-                  ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30'
-                  : task.priority === 'MEDIUM'
-                  ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
-                  : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
-              }`}>
-                {task.priority}
-              </span>
-            </td>
-            <td className="py-3 px-4 text-slate-900 dark:text-white font-medium uppercase text-[11px]">{task.status}</td>
-            <td className="py-3 px-4">
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 max-w-[100px]">
-                <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: task.status === 'COMPLETED' ? '100%' : task.status === 'IN_PROGRESS' ? '50%' : '0%' }}></div>
-              </div>
-            </td>
-            <td className="py-3 px-4 font-mono text-slate-500">2026-09-10</td>
+  <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
+    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+        <Layers size={18} className="text-blue-500" /> Department Sprint
+      </h3>
+      <span className="badge badge-success text-[10px] font-bold">ENGINEERING SPRINT</span>
+    </div>
+    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/20">
+      <table className="w-full text-left text-xs min-w-[800px]">
+        <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-bold text-[10px]">
+          <tr>
+            <th className="py-3 px-4">Sprint</th>
+            <th className="py-3 px-4">Task</th>
+            <th className="py-3 px-4">Assignee</th>
+            <th className="py-3 px-4">Priority</th>
+            <th className="py-3 px-4">Status</th>
+            <th className="py-3 px-4">Progress</th>
+            <th className="py-3 px-4">Due Date</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </TableCard>
+        </thead>
+        <tbody className="divide-y divide-slate-800/80">
+          {tasks.slice(0, 5).map((task) => (
+            <tr key={task.id} className="hover:bg-slate-800/40">
+              <td className="py-3 px-4 font-bold text-slate-300">Sprint 24B</td>
+              <td className="py-3 px-4 text-white font-medium max-w-[200px] truncate">{task.title}</td>
+              <td className="py-3 px-4 text-slate-400">{task.assigneeName || 'Unassigned'}</td>
+              <td className="py-3 px-4">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  task.priority === 'CRITICAL' || task.priority === 'HIGH' ? 'bg-rose-500/10 text-rose-400' : 'bg-slate-800 text-slate-300'
+                }`}>
+                  {task.priority}
+                </span>
+              </td>
+              <td className="py-3 px-4 text-slate-300 font-bold uppercase">{task.status}</td>
+              <td className="py-3 px-4">
+                <div className="w-full bg-slate-800 rounded-full h-1.5 max-w-[100px]">
+                  <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: task.status === 'COMPLETED' ? '100%' : task.status === 'IN_PROGRESS' ? '50%' : '0%' }}></div>
+                </div>
+              </td>
+              <td className="py-3 px-4 font-mono text-slate-400">2026-09-10</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
 );
 
 export const ManagerDashboardPage: React.FC = () => {
@@ -131,142 +231,116 @@ export const ManagerDashboardPage: React.FC = () => {
   const pendingApprovalsCount = approvals.filter(a => a.status === 'PENDING').length;
 
   return (
-    <DashboardErrorBoundary dashboardName="Manager Dashboard">
-      <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]} requiredPermission={Permission.TEAM_ANALYTICS_VIEW}>
-        <DashboardHeader
-            breadcrumbs={[
-              { label: 'Home', href: '/' },
-              { label: 'Manager', href: '/manager/dashboard' },
-              { label: 'Dashboard' }
-            ]}
-            title="Department Manager Workspace"
-            badge={<span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400">ENGINEERING SCOPE</span>}
-            description="Resource allocation, sub-team sprint velocity, leave approvals & department throughput."
-            lastUpdated={new Date().toLocaleTimeString()}
-            onRefresh={analytics.reload}
-            isRefreshing={analytics.isLoading}
-            primaryAction={
-              <Link to="/manager/approvals" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
-                <CheckCircle2 size={16} /> Leave Approvals
-              </Link>
-            }
-            secondaryAction={
-              <Link to="/manager/analytics" className="px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
-                <Zap size={16} /> Team Analytics
-              </Link>
-            }
+    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]} requiredPermission={Permission.TEAM_ANALYTICS_VIEW}>
+      <div className="space-y-6 animate-fadeIn font-sans pb-10">
+        <ManagerDashboardOverview />
+
+        <ManagerDashboardFilters
+          dateFilter={dateFilter}
+          setDateFilter={setDateFilter}
+          teamFilter={teamFilter}
+          setTeamFilter={setTeamFilter}
+          employeeFilter={employeeFilter}
+          setEmployeeFilter={setEmployeeFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          employees={employees}
+          departmentName={departmentName}
+        />
+
+        {/* KPI metrics */}
+        <div className="dashboard-kpi-grid">
+          <KPICard
+            title="Department Staff"
+            value={`${employees.filter(e => e.department === departmentName).length} Engineers`}
+            change={8.3}
+            trend="up"
+            subtitle="Authorized department rosters"
+            icon={<Users size={20} />}
+            accentColor="blue"
+            onClick={() => openDrillDown('Department Roster Breakdown', 'Engineers', 'Active engineering staff', [
+              { label: 'Engineering Total', value: employees.filter(e => e.department === departmentName).length }
+            ])}
           />
+          <KPICard title="Active Employees" value="18 Online" change={0.0} trend="neutral" subtitle="Checked in today" icon={<Users size={20} />} accentColor="cyan" />
+          <KPICard title="Present Today" value="16 Staff" change={2.0} trend="up" subtitle="Office presence" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
+          <KPICard title="Absent Today" value="2 Staff" change={0} trend="neutral" subtitle="Unexcused absence" icon={<XCircle size={20} />} accentColor="rose" />
+          <KPICard title="Late Today" value="3 Staff" change={1.0} trend="up" subtitle="Checked in after 9:15" icon={<Clock size={20} />} accentColor="amber" />
+          <KPICard title="On Leave" value="1 Staff" change={-1.0} trend="down" subtitle="Approved PTO today" icon={<AlertTriangle size={20} />} accentColor="blue" />
+          <KPICard title="Attendance %" value="98.2%" change={1.2} trend="up" subtitle="Active shift rate" icon={<Star size={20} />} accentColor="cyan" />
+          <KPICard title="Pending Approvals" value={`${pendingApprovalsCount} Requests`} change={0.0} trend="neutral" subtitle="Requires manager action" icon={<FileText size={20} />} accentColor="rose" />
+        </div>
 
-          <DashboardToolbar
-            dateFilter={dateFilter}
-            onDateFilterChange={setDateFilter}
-            teamFilter={teamFilter}
-            onTeamFilterChange={setTeamFilter}
-            teamOptions={[
-              { value: 'Frontend', label: 'Frontend' },
-              { value: 'Backend', label: 'Backend' },
-              { value: 'QA', label: 'QA' }
-            ]}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            statusOptions={[
-              { value: 'Active', label: 'Active' },
-              { value: 'On Leave', label: 'On Leave' }
-            ]}
-          />
+        {/* Primary Analytics Grid */}
+        <div className="dashboard-chart-grid">
+          <AnalyticsLineChart title="Department Growth & Hiring" subtitle="Staff additions inside department" data={analytics.data?.growthData} xKey="name" series={[{ key: 'headcount', name: 'Headcount', color: '#3b82f6' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          <AnalyticsBarChart title="Team Attendance Overview" subtitle="Attendance metrics by team" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+        </div>
 
-          {/* KPI metrics (10 KPIs) */}
-          <KPIGrid>
-            <KPICard title="Team Members" value={analytics.data?.metrics?.teamMembers ?? 0} icon={<Users size={20} />} color="info" trend="neutral" subtitle="Total direct reports" />
-            <KPICard title="Present Today" value={analytics.data?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
-            <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="Weekly average" />
-            <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Currently on leave" />
-            
-            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<FileSpreadsheet size={20} />} color="info" subtitle="In progress" />
-            <KPICard title="Completed Tasks" value={analytics.data?.metrics?.completedTasks ?? 0} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="5.4%" subtitle="This sprint" />
-            <KPICard title="Overdue Tasks" value={analytics.data?.metrics?.overdueTasks ?? 0} icon={<Clock size={20} />} color="danger" subtitle="Requires attention" />
-            <KPICard title="Sprint Progress" value={analytics.data?.metrics?.sprintProgress ?? '0%'} icon={<Activity size={20} />} color="info" subtitle="Team capacity" />
-            
-            <KPICard title="Pending Approvals" value={pendingApprovalsCount} icon={<Filter size={20} />} color="warning" subtitle="Action required" />
-            <KPICard title="Team Performance" value={analytics.data?.metrics?.teamPerformance ?? '0%'} icon={<Award size={20} />} color="emerald" subtitle="Average score" />
-          </KPIGrid>
+        {/* Secondary Analytics Grid */}
+        <div className="dashboard-chart-grid !mt-4">
+          <AnalyticsDonutChart title="Employment Status Mix" subtitle="Department active duty rate" data={analytics.data?.employmentStatus} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          <AnalyticsDonutChart title="Department Distribution" subtitle="Staff distribution in department" data={analytics.data?.departmentDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          <AnalyticsBarChart title="Productivity & Performance" subtitle="Team productivity score index" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity', color: '#8b5cf6' }]} layout="vertical" isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          <AnalyticsDonutChart title="Retention Risks" subtitle="Retention risk distribution" data={analytics.data?.riskDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} colors={['#ef4444', '#f59e0b', '#10b981']} />
+        </div>
 
-          {/* Leave Requests Approvals Desk */}
-          <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 mb-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Clock size={18} className="text-amber-500" /> Pending Team Leave Approvals
-              </h3>
-              <Link to="/manager/approvals" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                Approvals Desk <ArrowRight size={12} />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {approvals.length === 0 ? <p className="text-sm text-slate-500 md:col-span-3">No leave requests are waiting in your department.</p> : approvals.map((req) => (
-                <div key={req.id} className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-slate-900 dark:text-white">{req.employee}</span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">{req.type}</span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    <span className="font-semibold text-slate-900 dark:text-slate-300">{req.duration}</span> — {req.reason}
-                  </p>
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                    {req.status === 'PENDING' ? (
-                      <>
-                        <button
-                          onClick={() => void handleAction(req.id, 'APPROVED')}
-                          className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors"
-                        >
-                          <CheckCircle2 size={14} /> Approve
-                        </button>
-                        <button
-                          onClick={() => void handleAction(req.id, 'REJECTED')}
-                          className="px-3 py-1.5 rounded bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center gap-1.5 transition-colors"
-                        >
-                          <XCircle size={14} /> Reject
-                        </button>
-                      </>
-                    ) : (
-                      <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'}`}>
-                        {req.status}
-                      </span>
-                    )}
-                  </div>
+        <EmployeeTable
+          deptFilter={departmentName}
+          teamFilter={teamFilter}
+          statusFilter={statusFilter}
+        />
+        <ManagerSprintOverview tasks={tasks} />
+
+        {/* Leave Requests Approvals Desk */}
+        <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Clock size={18} className="text-amber-400" /> Pending Team Leave & Request Approvals Desk
+            </h3>
+            <Link to="/manager/approvals" className="text-xs font-bold text-blue-400 hover:underline flex items-center gap-1">
+              Approvals Desk <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {approvals.length === 0 ? <p className="text-sm text-[var(--text-muted)] md:col-span-3">No leave requests are waiting in your department.</p> : approvals.map((req) => (
+              <div key={req.id} className="p-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-[var(--text-primary)]">{req.employee}</span>
+                  <span className="badge badge-info text-[9px] uppercase font-bold">{req.type}</span>
                 </div>
-              ))}
-            </div>
+                <p className="text-xs text-slate-300">
+                  <span className="font-semibold text-blue-400">{req.duration}</span> — {req.reason}
+                </p>
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-color)]">
+                  {req.status === 'PENDING' ? (
+                    <>
+                      <button
+                        onClick={() => void handleAction(req.id, 'APPROVED')}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                      >
+                        <CheckCircle2 size={14} /> Approve
+                      </button>
+                      <button
+                        onClick={() => void handleAction(req.id, 'REJECTED')}
+                        className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition-all"
+                      >
+                        <XCircle size={14} /> Reject
+                      </button>
+                    </>
+                  ) : (
+                    <span className={`badge ${req.status === 'APPROVED' ? 'badge-success' : 'badge-danger'} text-xs font-bold uppercase`}>
+                      {req.status}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-
-          {/* Primary Analytics Grid (6 Charts) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-            <AnalyticsLineChart title="Team Attendance Trend" subtitle="Daily attendance overview" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsLineChart title="Task Completion Trend" subtitle="Completed vs total assigned tasks" data={analytics.data?.taskCompletionTrend} xKey="name" series={[{ key: 'completed', name: 'Completed', color: '#8b5cf6' }, { key: 'total', name: 'Total', color: '#3b82f6' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-            <AnalyticsBarChart title="Workload by Team Member" subtitle="Current assigned task load" layout="horizontal" data={analytics.data?.workloadByMember} xKey="name" series={[{ key: 'tasks', name: 'Tasks', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsDonutChart title="Task Status Distribution" subtitle="Sprint task breakdown" data={analytics.data?.taskStatusDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-            <AnalyticsBarChart title="Leave / Availability" subtitle="Scheduled absence breakdown" data={analytics.data?.leaveTrend} xKey="name" series={[{ key: 'sick', name: 'Sick', color: '#ef4444' }, { key: 'vacation', name: 'Vacation', color: '#3b82f6' }, { key: 'other', name: 'Other', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsBarChart title="Department Performance" subtitle="Team productivity score index" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity', color: '#8b5cf6' }]} layout="vertical" isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          </div>
-
-
-
-          <ManagerSprintOverview tasks={tasks} />
-          <div className="mt-6">
-            <EmployeeTable
-              deptFilter={departmentName}
-              teamFilter={teamFilter}
-              statusFilter={statusFilter}
-            />
-          </div>
+        </div>
 
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />
-      </RoleGuard>
-    </DashboardErrorBoundary>
+      </div>
+    </RoleGuard>
   );
 };

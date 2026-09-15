@@ -2,55 +2,137 @@ import React, { useEffect, useState } from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
-import { DashboardShell, DashboardHeader, DashboardToolbar, KPIGrid, KPICard, TableCard } from '../../../shared/components/dashboard';
+import { KPICard } from '../../../components/cards/KPICard';
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
-import { DashboardErrorBoundary } from '../../../shared/components/DashboardErrorBoundary';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
-import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Calendar, AlertTriangle, Target, FileText, TrendingUp, Star, ArrowRight, Filter, Layers, CalendarClock, CalendarOff, ClipboardList, ListTodo, XCircle, Activity, FileSpreadsheet } from 'lucide-react';
+import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Star, FileText, AlertTriangle, ArrowRight, Filter, Layers, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
-// Filters have been moved inline to DashboardToolbar
+export const TeamLeadDashboardOverview: React.FC = () => (
+  <div className="p-6 rounded-2xl bg-gradient-to-r from-teal-950/50 via-slate-900 to-cyan-950/40 border border-teal-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xl">
+    <div className="flex items-center gap-4">
+      <div className="w-14 h-14 rounded-2xl bg-teal-500/20 text-teal-400 border border-teal-500/40 flex items-center justify-center shrink-0">
+        <GitPullRequest size={32} />
+      </div>
+      <div>
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-black tracking-tight text-white">Team Lead Operational Command</h2>
+          <span className="badge badge-lead">FRONTEND SQUAD</span>
+        </div>
+        <p className="text-xs text-slate-300 mt-1">
+          Direct reports tracking, sprint task velocity, daily attendance tracking & developer feedback.
+        </p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 shrink-0">
+      <Link to="/team-lead/tasks" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-md">
+        <Flame size={14} /> Sprint Tasks
+      </Link>
+      <Link to="/team-lead/members" className="btn btn-secondary btn-sm flex items-center gap-1.5">
+        <Users size={14} /> Team Roster
+      </Link>
+    </div>
+  </div>
+);
+
+export const TeamLeadDashboardFilters: React.FC<{
+  dateFilter: string;
+  setDateFilter: (val: string) => void;
+  employeeFilter: string;
+  setEmployeeFilter: (val: string) => void;
+  statusFilter: string;
+  setStatusFilter: (val: string) => void;
+  directReports: Employee[];
+}> = (props) => (
+  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
+    <div className="flex items-center gap-2 text-slate-300 text-xs font-extrabold uppercase">
+      <Filter size={16} className="text-teal-400" /> Scoped Team Filters
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div>
+        <label className="text-[10px] text-slate-400 font-bold block mb-1">Date</label>
+        <input
+          type="date"
+          value={props.dateFilter}
+          onChange={(e) => props.setDateFilter(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-teal-500 font-semibold"
+        />
+      </div>
+      <div>
+        <label className="text-[10px] text-slate-400 font-bold block mb-1">Employee</label>
+        <select
+          value={props.employeeFilter}
+          onChange={(e) => props.setEmployeeFilter(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-teal-500 font-semibold cursor-pointer"
+        >
+          <option value="All">All Team Members</option>
+          {props.directReports.map(emp => (
+            <option key={emp.id} value={emp.id}>{emp.name}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <label className="text-[10px] text-slate-400 font-bold block mb-1">Status</label>
+        <select
+          value={props.statusFilter}
+          onChange={(e) => props.setStatusFilter(e.target.value)}
+          className="w-full bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-1 focus:ring-teal-500 font-semibold cursor-pointer"
+        >
+          <option value="All">All Statuses</option>
+          <option value="Active">Active</option>
+          <option value="On Leave">On Leave</option>
+        </select>
+      </div>
+    </div>
+  </div>
+);
+
+
 
 export const TeamLeadSprintBoard: React.FC<{ sprintTasks: Task[] }> = ({ sprintTasks }) => (
-  <TableCard title="Team Sprint" subtitle="FRONTEND SPRINT">
-    <table className="w-full text-left text-xs min-w-[800px]">
-      <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-semibold text-xs">
-        <tr>
-          <th className="py-3 px-4">Task</th>
-          <th className="py-3 px-4">Assignee</th>
-          <th className="py-3 px-4">Priority</th>
-          <th className="py-3 px-4">Status</th>
-          <th className="py-3 px-4">Due Date</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-        {sprintTasks.slice(0, 6).map((task) => (
-          <tr key={task.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-            <td className="py-3 px-4 text-slate-900 dark:text-white font-medium max-w-[250px] truncate">{task.title}</td>
-            <td className="py-3 px-4 text-slate-500">{task.assigneeName || 'Unassigned'}</td>
-            <td className="py-3 px-4">
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                task.priority === 'CRITICAL' || task.priority === 'HIGH'
-                  ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30'
-                  : task.priority === 'MEDIUM'
-                  ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
-                  : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
-              }`}>
-                {task.priority}
-              </span>
-            </td>
-            <td className="py-3 px-4 text-slate-900 dark:text-white font-medium uppercase text-[11px]">{task.status}</td>
-            <td className="py-3 px-4 font-mono text-slate-500">2026-09-10</td>
+  <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-4">
+    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+      <h3 className="text-base font-extrabold text-white flex items-center gap-2">
+        <Layers size={18} className="text-rose-400" /> Team Sprint
+      </h3>
+      <span className="badge badge-success text-[10px] font-bold">FRONTEND SPRINT</span>
+    </div>
+    <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/20">
+      <table className="w-full text-left text-xs min-w-[800px]">
+        <thead className="bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-bold text-[10px]">
+          <tr>
+            <th className="py-3 px-4">Task</th>
+            <th className="py-3 px-4">Assignee</th>
+            <th className="py-3 px-4">Priority</th>
+            <th className="py-3 px-4">Status</th>
+            <th className="py-3 px-4">Due Date</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </TableCard>
+        </thead>
+        <tbody className="divide-y divide-slate-800/80">
+          {sprintTasks.slice(0, 6).map((task) => (
+            <tr key={task.id} className="hover:bg-slate-800/40">
+              <td className="py-3 px-4 text-white font-medium max-w-[250px] truncate">{task.title}</td>
+              <td className="py-3 px-4 text-slate-400">{task.assigneeName || 'Unassigned'}</td>
+              <td className="py-3 px-4">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  task.priority === 'CRITICAL' || task.priority === 'HIGH' ? 'bg-rose-500/10 text-rose-400' : 'bg-slate-800 text-slate-300'
+                }`}>
+                  {task.priority}
+                </span>
+              </td>
+              <td className="py-3 px-4 text-slate-300 font-bold uppercase">{task.status}</td>
+              <td className="py-3 px-4 font-mono text-slate-400">2026-09-10</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
 );
 
 export const TeamLeadDashboardPage: React.FC = () => {
@@ -93,84 +175,66 @@ export const TeamLeadDashboardPage: React.FC = () => {
     });
   };
 
+
+
   return (
-    <DashboardErrorBoundary dashboardName="Team Lead Dashboard">
-      <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]} requiredPermission={Permission.TEAM_ANALYTICS_VIEW}>
-        <DashboardHeader
-            breadcrumbs={[
-              { label: 'Home', href: '/' },
-              { label: 'Team Lead', href: '/team-lead/dashboard' },
-              { label: 'Dashboard' }
-            ]}
-            title="Team Lead Operational Command"
-            badge={<span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 dark:bg-teal-500/20 dark:text-teal-400">FRONTEND SQUAD</span>}
-            description="Direct reports tracking, sprint task velocity, daily attendance tracking & developer feedback."
-            lastUpdated={new Date().toLocaleTimeString()}
-            onRefresh={analytics.reload}
-            isRefreshing={analytics.isLoading}
-            primaryAction={
-              <Link to="/team-lead/tasks" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
-                <Flame size={16} /> Sprint Tasks
-              </Link>
-            }
-            secondaryAction={
-              <Link to="/team-lead/members" className="px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
-                <Users size={16} /> Team Roster
-              </Link>
-            }
+    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]} requiredPermission={Permission.PRODUCTIVITY_VIEW}>
+      <div className="space-y-6 animate-fadeIn font-sans pb-10">
+        <TeamLeadDashboardOverview />
+
+        <TeamLeadDashboardFilters
+          dateFilter={dateFilter}
+          setDateFilter={setDateFilter}
+          employeeFilter={employeeFilter}
+          setEmployeeFilter={setEmployeeFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          directReports={directReports}
+        />
+
+        {/* KPI metrics */}
+        <div className="dashboard-kpi-grid">
+          <KPICard
+            title="Team Members"
+            value={`${directReports.length} Developers`}
+            change={0.0}
+            trend="neutral"
+            subtitle="Frontend Core Squad"
+            icon={<Users size={20} />}
+            accentColor="cyan"
+            onClick={() => openDrillDown('Team Roster', `${directReports.length} Developers`, 'Active squad members', [
+              { label: 'Frontend Developers', value: directReports.length }
+            ])}
           />
+          <KPICard title="Present" value={`${directReports.filter(e => e.status === 'Active').length} Present`} change={5.2} trend="up" subtitle="On duty today" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
+          <KPICard title="Absent" value="0 Absent" change={0.0} trend="neutral" subtitle="No unexcused absences" icon={<AlertTriangle size={20} />} accentColor="rose" />
+          <KPICard title="Late" value="1 Late" change={-1.5} trend="down" subtitle="Checked in after shift target" icon={<Clock size={20} />} accentColor="amber" />
+          <KPICard title="On Leave" value="0 On Leave" change={0.0} trend="neutral" subtitle="Approved team PTO" icon={<Calendar size={20} />} accentColor="blue" />
+          <KPICard title="Working Hours" value="45 hrs today" change={8.0} trend="up" subtitle="Total squad contribution" icon={<Clock size={20} />} accentColor="rose" />
+          <KPICard title="Tasks Pending" value={`${sprintTasks.filter(t => t.status !== 'COMPLETED').length} Pending`} change={2.0} trend="up" subtitle="Sprint tasks in backlog" icon={<FileText size={20} />} accentColor="blue" />
+          <KPICard title="Tasks Completed" value={`${sprintTasks.filter(t => t.status === 'COMPLETED').length} Closed`} change={100} trend="up" subtitle="Closed sprint targets" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
+        </div>
 
-          <DashboardToolbar
-            dateFilter={dateFilter}
-            onDateFilterChange={setDateFilter}
-            statusFilter={statusFilter}
-            onStatusFilterChange={setStatusFilter}
-            statusOptions={[
-              { value: 'Active', label: 'Active' },
-              { value: 'On Leave', label: 'On Leave' }
-            ]}
-          />
+        {/* Primary Analytics Grid */}
+        <div className="dashboard-chart-grid">
+          <AnalyticsBarChart title="Squad Daily Attendance" subtitle="Weekdays breakdown inside squad" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#0ea5e9' }, { key: 'absent', name: 'Absent', color: '#f43f5e' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          <AnalyticsBarChart title="Squad Task Velocity" subtitle="Productivity by sprint task status" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity Rate', color: '#10b981' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+        </div>
 
-          {/* KPI metrics (10 KPIs) */}
-          <KPIGrid>
-            <KPICard title="Team Members" value={analytics.data?.metrics?.teamMembers ?? 0} subtitle="Active team roster" icon={<Users size={20} />} color="info" />
-            <KPICard title="Present Today" value={analytics.data?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
-            <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="Weekly average" />
-            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<FileSpreadsheet size={20} />} color="info" subtitle="In progress" />
-            
-            <KPICard title="Completed Today" value={analytics.data?.metrics?.completedToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="5.4%" subtitle="Daily velocity" />
-            <KPICard title="In Progress" value={analytics.data?.metrics?.inProgress ?? 0} icon={<Activity size={20} />} color="info" subtitle="Current focus" />
-            <KPICard title="Blocked Tasks" value={analytics.data?.metrics?.blockedTasks ?? 0} subtitle="Require your intervention" icon={<XCircle size={20} />} color="danger" />
-            <KPICard title="Sprint Completion" value={analytics.data?.metrics?.sprintCompletion ?? '0%'} icon={<Activity size={20} />} color="info" subtitle="Team capacity" />
-            
-            <KPICard title="Overdue Tasks" value={analytics.data?.metrics?.overdueTasks ?? 0} icon={<Clock size={20} />} color="danger" subtitle="Action required" />
-            <KPICard title="Pending Reviews" value={analytics.data?.metrics?.pendingReviews ?? 0} subtitle="Awaiting review" icon={<Filter size={20} />} color="warning" />
-          </KPIGrid>
+        {/* Secondary Analytics Grid */}
+        <div className="dashboard-chart-grid !mt-4">
+          <AnalyticsDonutChart title="Employment Status Mix" subtitle="Squad duty allocation" data={analytics.data?.employmentStatus} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          <AnalyticsLineChart title="Squad Performance History" subtitle="Individual metrics trend" data={analytics.data?.performance} xKey="name" series={[{ key: 'performance', name: 'Performance', color: '#6366f1' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+        </div>
 
-          {/* Primary Analytics Grid (6 Charts) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-            <AnalyticsLineChart title="Sprint Progress" subtitle="Completed vs remaining effort" data={analytics.data?.sprintProgress} xKey="name" series={[{ key: 'completed', name: 'Completed', color: '#10b981' }, { key: 'remaining', name: 'Remaining', color: '#ef4444' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsLineChart title="Task Completion Trend" subtitle="Daily completion velocity" data={analytics.data?.taskCompletionTrend} xKey="name" series={[{ key: 'completed', name: 'Completed', color: '#8b5cf6' }, { key: 'total', name: 'Total', color: '#3b82f6' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-            <AnalyticsDonutChart title="Task Status Distribution" subtitle="Sprint task breakdown" data={analytics.data?.taskStatusDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsBarChart title="Team Workload" subtitle="Active tasks per member" layout="horizontal" data={analytics.data?.workloadByMember} xKey="name" series={[{ key: 'tasks', name: 'Tasks', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-            <AnalyticsBarChart title="Blocked Work" subtitle="Blocked vs open tasks by category" data={analytics.data?.blockedWork} xKey="name" series={[{ key: 'blocked', name: 'Blocked', color: '#ef4444' }, { key: 'open', name: 'Open', color: '#10b981' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsBarChart title="Leave / Availability" subtitle="Scheduled absence breakdown" data={analytics.data?.leaveTrend} xKey="name" series={[{ key: 'sick', name: 'Sick', color: '#ef4444' }, { key: 'vacation', name: 'Vacation', color: '#3b82f6' }, { key: 'other', name: 'Other', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          </div>
-
-          <EmployeeTable
-            teamFilter={teamName}
-            statusFilter={statusFilter}
-          />
-          <TeamLeadSprintBoard sprintTasks={sprintTasks} />
+        <EmployeeTable
+          teamFilter={teamName}
+          statusFilter={statusFilter}
+        />
+        <TeamLeadSprintBoard sprintTasks={sprintTasks} />
 
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />
-      </RoleGuard>
-    </DashboardErrorBoundary>
+      </div>
+    </RoleGuard>
   );
 };

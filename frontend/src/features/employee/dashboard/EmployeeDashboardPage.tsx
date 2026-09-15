@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { DashboardErrorBoundary } from '../../../shared/components/DashboardErrorBoundary';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
@@ -8,34 +7,34 @@ import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWid
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api/attendanceApi';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
-import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
-import { DashboardShell, DashboardHeader, KPIGrid, KPICard, TableCard } from '../../../shared/components/dashboard';
-import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
+import { AnalyticsBarChart, AnalyticsDonutChart } from '../../../components/charts/AnalyticsCharts';
 import {
   Clock,
   Calendar,
   FileText,
   Compass,
   CheckCircle2,
+  AlertCircle,
   Plus,
   Layers,
   ClipboardList,
   Briefcase,
   Award,
+  Filter,
   RefreshCw,
   Zap,
   History,
   Timer,
   Download,
+  Users,
+  Palmtree,
+  Target,
+  CreditCard,
   Activity,
   Coffee,
   Check,
-  LayoutDashboard,
-  AlertTriangle,
-  CalendarClock,
-  CalendarDays,
-  CalendarOff,
-  FileSpreadsheet
+  Sparkles,
+  LayoutDashboard
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
@@ -44,14 +43,25 @@ import { AbsenceManagementPage } from '../pages/AbsenceManagementPage';
 
 // Helper: Step-by-Step Section Header
 export const StepSectionHeader: React.FC<{
-  stepNumber?: string;
+  stepNumber: string;
   title: string;
   subtitle: string;
   tagColor?: string;
   badge?: string;
-}> = ({ title, subtitle, badge }) => (
+}> = ({ stepNumber, title, subtitle, tagColor = 'blue', badge }) => (
   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-4 pb-2 border-b border-[var(--border-color)]/60">
     <div className="flex items-center gap-3">
+      <span className={`px-2.5 py-1 rounded-xl text-[11px] font-black uppercase tracking-wider ${
+        tagColor === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' :
+        tagColor === 'purple' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/30' :
+        tagColor === 'amber' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' :
+        tagColor === 'indigo' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/30' :
+        tagColor === 'cyan' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30' :
+        tagColor === 'rose' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30' :
+        'bg-blue-500/10 text-blue-400 border border-blue-500/30'
+      }`}>
+        {stepNumber}
+      </span>
       <div>
         <h2 className="text-base font-extrabold text-[var(--text-primary)] tracking-tight">
           {title}
@@ -67,10 +77,268 @@ export const StepSectionHeader: React.FC<{
   </div>
 );
 
+// Helper: Sticky Step-by-Step Navigator
+export const StepNavigatorBar: React.FC = () => {
+  const steps = [
+    { id: 'step-1-punch', label: '1. Check-In', icon: '📍' },
+    { id: 'step-2-kpis', label: '2. Metrics & KPIs', icon: '📊' },
+    { id: 'step-3-schedule', label: '3. Shift & Calendar', icon: '📅' },
+    { id: 'step-4-leaves', label: '4. Holidays & Leaves', icon: '🏖️' },
+    { id: 'step-5-kudos', label: '5. Kudos & Praise', icon: '👏' },
+    { id: 'step-6-analytics', label: '6. Shift Analytics', icon: '📈' },
+    { id: 'step-7-team', label: '7. Team Presence', icon: '👥' },
+    { id: 'step-8-tasks', label: '8. Sprint Tasks', icon: '⚡' },
+    { id: 'step-9-logs', label: '9. Logs & Corrections', icon: '📝' },
+  ];
 
-// EmployeeDashboardOverview and EmployeeKpiGrid have been replaced with shared components
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
+  return (
+    <div className="p-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-md sticky top-16 z-30 shadow-xl overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-2 min-w-max">
+        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 flex items-center gap-1.5 shrink-0">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          Quick Step Jump:
+        </span>
+        {steps.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => scrollToSection(s.id)}
+            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800/80 hover:border-blue-500/40 text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+          >
+            <span>{s.icon}</span>
+            <span>{s.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
+// 1. Employee Dashboard Overview / My Workspace Header
+export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => (
+  <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-teal-950/50 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xl">
+    <div className="flex items-center gap-4">
+      <img
+        src={user?.avatar || "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150"}
+        alt={user?.name || "Employee"}
+        className="w-14 h-14 rounded-2xl object-cover border-2 border-emerald-500 shadow-md shrink-0"
+      />
+      <div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h2 className="text-2xl font-black tracking-tight text-white">Welcome back, {user?.name || "Alex Mercer"}!</h2>
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase">
+            MY WORKSPACE
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+            ACTIVE SHIFT
+          </span>
+        </div>
+        <p className="text-xs text-slate-300 mt-1">
+          {user?.title || "Senior Software Engineer"} &bull; {user?.department || "Engineering & Technology"} &bull; Shift: <span className="text-emerald-400 font-bold">General Day Shift (09:00 AM - 06:00 PM)</span>
+        </p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+      <a href="#step-1-punch" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-emerald-600/20 cursor-pointer">
+        <Clock size={14} /> Punch Station
+      </a>
+      <Link to="/employee/profile" className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center gap-1.5 transition-all border border-slate-700">
+        <Compass size={14} className="text-emerald-400" /> My Profile
+      </Link>
+    </div>
+  </div>
+);
+
+// 1a. Employee Quick Actions Command Bar
+export const EmployeeQuickActionsBar: React.FC<{
+  onOpenCorrection: () => void;
+}> = ({ onOpenCorrection }) => (
+  <div className="p-4 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl flex items-center justify-between gap-3 overflow-x-auto">
+    <div className="flex items-center gap-2.5 shrink-0">
+      <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider">Quick Actions:</span>
+    </div>
+    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+      <a
+        href="#step-1-punch"
+        className="px-3 py-1.5 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+      >
+        <Clock size={14} /> Punch Clock
+      </a>
+      <button
+        onClick={onOpenCorrection}
+        className="px-3 py-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer"
+      >
+        <ClipboardList size={14} /> Request Correction
+      </button>
+      <Link
+        to="/employee/leave"
+        className="px-3 py-1.5 rounded-2xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <Palmtree size={14} /> Apply Leave / PTO
+      </Link>
+      <Link
+        to="/employee/shifts"
+        className="px-3 py-1.5 rounded-2xl bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <Timer size={14} /> Shift Roster
+      </Link>
+      <Link
+        to="/employee/payslips"
+        className="px-3 py-1.5 rounded-2xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <CreditCard size={14} /> Salary & Payslips
+      </Link>
+      <Link
+        to="/employee/goals"
+        className="px-3 py-1.5 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center gap-1.5 transition-all shrink-0"
+      >
+        <Target size={14} /> OKR Goals
+      </Link>
+    </div>
+  </div>
+);
+
+// 2. Employee Dashboard Filters
+export const EmployeeDashboardFilters: React.FC<{
+  dateFilter: string;
+  setDateFilter: (val: string) => void;
+  statusFilter: string;
+  setStatusFilter: (val: string) => void;
+  onRefresh: () => void;
+  isLoading: boolean;
+}> = ({ dateFilter, setDateFilter, statusFilter, setStatusFilter, onRefresh, isLoading }) => (
+  <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+    <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-2 text-slate-300 text-xs font-bold uppercase tracking-wider">
+        <Filter size={15} className="text-emerald-400" /> Filters:
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-slate-400 font-medium">Date:</span>
+        <input
+          type="date"
+          value={dateFilter}
+          onChange={(e) => setDateFilter(e.target.value)}
+          className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-slate-400 font-medium">Status:</span>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
+        >
+          <option value="All">All Attendance Logs</option>
+          <option value="Present">Present Only</option>
+          <option value="Absent">Absent Only</option>
+          <option value="Leave">Leave / PTO</option>
+          <option value="Weekend">Weekends</option>
+        </select>
+      </div>
+    </div>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onRefresh}
+      disabled={isLoading}
+      className="text-xs h-8 text-slate-300"
+    >
+      <RefreshCw size={13} className={`mr-1.5 text-emerald-400 ${isLoading ? 'animate-spin' : ''}`} />
+      {isLoading ? 'Syncing...' : 'Live Refresh'}
+    </Button>
+  </div>
+);
+
+// 3. Employee KPI Cards
+export const EmployeeKpiGrid: React.FC<{
+  hoursToday: string;
+  hoursThisWeek: string;
+  attendanceRate: string;
+  overtimeHours: string;
+  leaveBalance: string;
+  leavesUsed: string;
+  pendingTasksCount: number;
+  timesheetStatus: string;
+}> = (props) => (
+  <div className="dashboard-kpi-grid">
+    <MinimalKpiCard title="Hours Today" value={props.hoursToday} icon={<Clock size={26} />} iconBgColor="blue" trend="Active Shift Elapsed" />
+    <MinimalKpiCard title="Hours This Week" value={props.hoursThisWeek} icon={<Briefcase size={26} />} iconBgColor="emerald" trend="Standard 40h Goal" />
+    <MinimalKpiCard title="Attendance Rate" value={props.attendanceRate} icon={<Calendar size={26} />} iconBgColor="teal" trend="Lifetime Adherence" />
+    <MinimalKpiCard title="Overtime Hours" value={props.overtimeHours} icon={<Timer size={26} />} iconBgColor="cyan" trend="Approved OT (1.5x)" />
+    <MinimalKpiCard title="Leave Balance" value={props.leaveBalance} icon={<Layers size={26} />} iconBgColor="purple" trend="Available PTO Days" />
+    <MinimalKpiCard title="Leaves Used" value={props.leavesUsed} icon={<FileText size={26} />} iconBgColor="rose" trend="This Calendar Year" />
+    <MinimalKpiCard title="Sprint Tasks Active" value={props.pendingTasksCount} icon={<Zap size={26} />} iconBgColor="amber" trend="In Sprint Backlog" />
+    <MinimalKpiCard title="Timesheet Status" value={props.timesheetStatus} icon={<CheckCircle2 size={26} />} iconBgColor="indigo" trend="Daily Attendance Lock" />
+  </div>
+);
+
+// 3b. 7-Day Upcoming Shift Roster Schedule Card
+export const EmployeeUpcomingRosterCard: React.FC = () => {
+  const roster = [
+    { day: 'Mon', date: 'Sep 01', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Today (Active)', isToday: true, isOff: false },
+    { day: 'Tue', date: 'Sep 02', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Wed', date: 'Sep 03', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Thu', date: 'Sep 04', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Fri', date: 'Sep 05', shift: 'General Shift (GS)', time: '09:00 - 18:00', type: 'Scheduled', isToday: false, isOff: false },
+    { day: 'Sat', date: 'Sep 06', shift: 'Weekend Off', time: 'Rest Day', type: 'Weekend', isToday: false, isOff: true },
+    { day: 'Sun', date: 'Sep 07', shift: 'Weekend Off', time: 'Rest Day', type: 'Weekend', isToday: false, isOff: true },
+  ];
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+        <div>
+          <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+            <Calendar size={18} className="text-teal-400" /> 7-Day Shift Roster Schedule
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">Standard 9.0h Shift (8.0h Net Work + 1.0h Break)</p>
+        </div>
+        <span className="text-[10px] text-teal-400 font-black uppercase tracking-wider bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/30">
+          40.0h Target
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2.5 text-center text-xs">
+        {roster.map((r, i) => (
+          <div
+            key={i}
+            className={`p-3 rounded-2xl border transition-all ${
+              r.isToday
+                ? 'bg-emerald-950/60 border-emerald-500/50 shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-500/30'
+                : r.isOff
+                ? 'bg-slate-950/40 border-slate-800 text-slate-500'
+                : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800/40'
+            }`}
+          >
+            <span className={`text-[10px] font-black uppercase ${r.isToday ? 'text-emerald-400' : 'text-slate-400'}`}>
+              {r.day}
+            </span>
+            <p className="font-bold text-xs text-white mt-0.5">{r.date}</p>
+            <p className={`font-mono text-[11px] font-bold mt-1 ${r.isToday ? 'text-emerald-300 font-extrabold' : r.isOff ? 'text-slate-500' : 'text-teal-400'}`}>
+              {r.time}
+            </p>
+            <span className={`inline-block mt-2 px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+              r.isToday
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                : r.isOff
+                ? 'bg-slate-800 text-slate-500'
+                : 'bg-slate-800 text-slate-300'
+            }`}>
+              {r.type}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 // 3c. Employee Shift Timings & Schedule Card
 export const EmployeeShiftScheduleCard: React.FC = () => {
@@ -111,7 +379,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-full space-y-4">
+    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -150,7 +418,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
         {/* Shift Duration Formula Callout */}
         <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Clock size={15} className="text-emerald-400 shrink-0" />
+            <Clock size={15} className="text-blue-400 shrink-0" />
             <span className="text-xs font-black text-white">
               {assignedShift.totalHours}h Shift = {assignedShift.workHours}h Work + {assignedShift.breakHours}h Break
             </span>
@@ -177,7 +445,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
       <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
         <button 
           onClick={() => setShowSwapModal(true)}
-          className="text-emerald-400 hover:text-emerald-300 font-bold text-[11px] cursor-pointer"
+          className="text-blue-400 hover:text-blue-300 font-bold text-[11px] cursor-pointer"
         >
           Request Shift Change / Swap &rarr;
         </button>
@@ -192,7 +460,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
           <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Timer className="text-emerald-400" size={18} /> Request Shift Change / Swap
+                <Timer className="text-blue-400" size={18} /> Request Shift Change / Swap
               </h3>
               <button onClick={() => setShowSwapModal(false)} className="text-slate-400 hover:text-white text-xl leading-none cursor-pointer">&times;</button>
             </div>
@@ -221,7 +489,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
                     value={swapReason}
                     onChange={(e) => setSwapReason(e.target.value)}
                     placeholder="Enter reason for shift adjustment..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -253,7 +521,7 @@ export const PublicHolidaysCard: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-full space-y-4">
+    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -308,16 +576,16 @@ export const LeaveBalanceCard: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-full space-y-4">
+    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
             <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-              <Layers size={18} className="text-emerald-400" /> Leave Balances & PTO Quota
+              <Layers size={18} className="text-purple-400" /> Leave Balances & PTO Quota
             </h3>
             <p className="text-[11px] text-slate-400 mt-0.5">Annual paid statutory time-off entitlements</p>
           </div>
-          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 shrink-0">
+          <span className="text-[10px] text-purple-400 font-black uppercase tracking-wider bg-purple-500/10 px-2.5 py-1 rounded-full border border-purple-500/30 shrink-0">
             CY 2026
           </span>
         </div>
@@ -337,11 +605,11 @@ export const LeaveBalanceCard: React.FC = () => {
                   <div
                     className={`h-full rounded-full ${
                       b.color === 'blue'
-                        ? 'bg-emerald-500'
+                        ? 'bg-blue-500'
                         : b.color === 'emerald'
                         ? 'bg-emerald-500'
                         : b.color === 'purple'
-                        ? 'bg-emerald-500'
+                        ? 'bg-purple-500'
                         : 'bg-amber-500'
                     }`}
                     style={{ width: `${pct}%` }}
@@ -359,7 +627,7 @@ export const LeaveBalanceCard: React.FC = () => {
         </p>
         <Link 
           to="/employee/leave" 
-          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
+          className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shrink-0 cursor-pointer"
         >
           <Plus size={14} /> Apply for Leave
         </Link>
@@ -368,8 +636,310 @@ export const LeaveBalanceCard: React.FC = () => {
   );
 };
 
+// 5. Leadership Accolades & Kudos Showcase
+export const EmployeeManagerKudosCard: React.FC = () => {
+  const [reactions, setReactions] = useState<{ [key: string]: { claps: number; hearts: number; rockets: number } }>({
+    'kudos-1': { claps: 14, hearts: 8, rockets: 19 },
+    'kudos-2': { claps: 22, hearts: 12, rockets: 7 },
+    'kudos-3': { claps: 16, hearts: 15, rockets: 10 }
+  });
+  const [acknowledged, setAcknowledged] = useState<{ [key: string]: boolean }>({});
+  const [thankYouModalKudos, setThankYouModalKudos] = useState<any | null>(null);
+  const [thankYouMsg, setThankYouMsg] = useState('');
+  const [toastMsg, setToastMsg] = useState('');
 
+  const appreciations = [
+    {
+      id: 'kudos-1',
+      author: 'David Sterling',
+      role: 'Engineering Manager',
+      department: 'Platform Infra',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      badge: 'Sprint MVP & Architecture Excellence',
+      badgeColor: 'emerald',
+      date: 'Aug 30, 2026',
+      quote: 'Alex delivered the zero-trust biometric geofence engine 3 days ahead of schedule with 100% test coverage. Exceptional technical leadership and dedication during sprint 24!',
+      points: '+150 Recognition Points'
+    },
+    {
+      id: 'kudos-2',
+      author: 'Marcus Vance',
+      role: 'Team Lead',
+      department: 'Mobile Core',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      badge: 'Shift Reliability & Punctuality Champion',
+      badgeColor: 'teal',
+      date: 'Aug 26, 2026',
+      quote: 'Maintained 99.8% on-time arrival and shift adherence for 3 consecutive months. Always steps in to cover emergency deployments and assists peers across time zones!',
+      points: '+100 Recognition Points'
+    },
+    {
+      id: 'kudos-3',
+      author: 'Elena Rostova',
+      role: 'HR Operations & People Lead',
+      department: 'People Operations',
+      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+      badge: 'Team Culture & Mentorship Hero',
+      badgeColor: 'purple',
+      date: 'Aug 18, 2026',
+      quote: 'Recognized for mentoring 3 newly onboarded developers and leading weekly architecture retrospectives. Thank you for building a positive, high-performing team culture!',
+      points: '+120 Recognition Points'
+    }
+  ];
 
+  const handleReact = (id: string, type: 'claps' | 'hearts' | 'rockets') => {
+    setReactions(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        [type]: (prev[id]?.[type] || 0) + 1
+      }
+    }));
+  };
+
+  const handleSendThankYou = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!thankYouModalKudos) return;
+    setToastMsg(`Thank you note sent to ${thankYouModalKudos.author}! 💌`);
+    setAcknowledged(prev => ({ ...prev, [thankYouModalKudos.id]: true }));
+    setThankYouModalKudos(null);
+    setThankYouMsg('');
+    setTimeout(() => setToastMsg(''), 3500);
+  };
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]/60">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sparkles size={20} className="text-amber-400 animate-pulse" />
+            <h3 className="text-base font-extrabold text-[var(--text-primary)]">
+              Leadership Appreciations & Kudos
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30">
+              Kudos & Recognition
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Praise, spot awards, and performance accolades awarded by your leadership team.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <span className="text-xs font-bold text-white block">370 Total Points</span>
+            <span className="text-[10px] text-emerald-400 font-semibold font-mono">Top 5% in Engineering</span>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-300 font-black text-sm shadow-md">
+            🏆 3
+          </div>
+        </div>
+      </div>
+
+      {toastMsg && (
+        <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+          <CheckCircle2 size={16} /> {toastMsg}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+        {appreciations.map((item) => {
+          const count = reactions[item.id] || { claps: 0, hearts: 0, rockets: 0 };
+          const isAcked = acknowledged[item.id];
+
+          return (
+            <div
+              key={item.id}
+              className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700/80 transition-all flex flex-col justify-between space-y-3 relative overflow-hidden group shadow-lg"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <img
+                      src={item.avatar}
+                      alt={item.author}
+                      className="w-9 h-9 rounded-xl object-cover border border-slate-700 shrink-0"
+                    />
+                    <div>
+                      <h4 className="text-xs font-bold text-white leading-tight">{item.author}</h4>
+                      <p className="text-[10px] text-slate-400">{item.role}</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">{item.date}</span>
+                </div>
+
+                <div className={`p-2 rounded-xl text-xs font-bold flex items-center justify-between ${
+                  item.badgeColor === 'emerald'
+                    ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/30'
+                    : item.badgeColor === 'teal'
+                    ? 'bg-teal-950/60 text-teal-300 border border-teal-500/30'
+                    : 'bg-purple-950/60 text-purple-300 border border-purple-500/30'
+                }`}>
+                  <span className="truncate pr-1 text-[11px] font-extrabold flex items-center gap-1.5">
+                    <Award size={13} /> {item.badge}
+                  </span>
+                  <span className="text-[9px] font-mono shrink-0 bg-black/30 px-1.5 py-0.5 rounded">
+                    {item.points}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-300 italic leading-relaxed bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/60">
+                  "{item.quote}"
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleReact(item.id, 'claps')}
+                    title="Send Claps"
+                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
+                  >
+                    👏 {count.claps}
+                  </button>
+                  <button
+                    onClick={() => handleReact(item.id, 'hearts')}
+                    title="Send Heart"
+                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-rose-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
+                  >
+                    ❤️ {count.hearts}
+                  </button>
+                  <button
+                    onClick={() => handleReact(item.id, 'rockets')}
+                    title="Send Rocket"
+                    className="px-2 py-1 rounded-lg bg-slate-950 hover:bg-slate-800 text-amber-300 text-[11px] font-semibold flex items-center gap-1 border border-slate-800 transition-all cursor-pointer"
+                  >
+                    🚀 {count.rockets}
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setThankYouModalKudos(item)}
+                  disabled={isAcked}
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
+                    isAcked
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 cursor-default'
+                      : 'bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30'
+                  }`}
+                >
+                  {isAcked ? '✓ Replied' : 'Reply 💌'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Thank You Reply Modal */}
+      {thankYouModalKudos && (
+        <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <Sparkles className="text-amber-400" size={18} />
+                <h3 className="text-sm font-bold text-white">
+                  Reply to {thankYouModalKudos.author}
+                </h3>
+              </div>
+              <button
+                onClick={() => setThankYouModalKudos(null)}
+                className="text-slate-400 hover:text-white text-xl leading-none font-bold cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSendThankYou} className="space-y-3 text-xs">
+              <p className="text-slate-300">
+                Send a personalized acknowledgment or thank you note to <strong className="text-white">{thankYouModalKudos.author} ({thankYouModalKudos.role})</strong>:
+              </p>
+
+              <textarea
+                required
+                rows={3}
+                value={thankYouMsg}
+                onChange={(e) => setThankYouMsg(e.target.value)}
+                placeholder="Thank you so much! Really appreciate the recognition and support..."
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500"
+              />
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <Button variant="outline" size="sm" type="button" onClick={() => setThankYouModalKudos(null)}>
+                  Cancel
+                </Button>
+                <Button size="sm" type="submit">
+                  Send Thank You Note 💌
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 7. Team Live Presence Card
+export const EmployeeTeamLivePresenceCard: React.FC = () => {
+  const teamMembers = [
+    { name: 'Marcus Vance', role: 'Team Lead', status: 'On-Duty (Office)', mode: 'Bengaluru Campus', color: 'emerald', time: 'In at 08:55 AM' },
+    { name: 'David Sterling', role: 'Engineering Manager', status: 'On-Duty (Office)', mode: 'Bengaluru Campus', color: 'emerald', time: 'In at 08:45 AM' },
+    { name: 'Sarah Connor', role: 'Senior Platform Engineer', status: 'Remote Active', mode: 'Hyderabad Hub', color: 'blue', time: 'In at 09:00 AM' },
+    { name: 'Elena Rostova', role: 'HR Lead', status: 'On Break', mode: 'Salem Hub', color: 'amber', time: 'Break 35m' },
+    { name: 'Vikram Sharma', role: 'Frontend Engineer', status: 'On Leave (CL)', mode: 'Paid PTO', color: 'purple', time: 'Returns Tomorrow' },
+  ];
+
+  return (
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
+          <div>
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <Users size={18} className="text-blue-400" /> Team Live Presence
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">Engineering & Product Core Team</p>
+          </div>
+          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 4 / 5 Active
+          </span>
+        </div>
+
+        <div className="space-y-2">
+          {teamMembers.map((m, i) => (
+            <div key={i} className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:bg-slate-800/40 transition-colors">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                  m.color === 'emerald' ? 'bg-emerald-400 shadow-sm shadow-emerald-400' :
+                  m.color === 'blue' ? 'bg-blue-400' :
+                  m.color === 'amber' ? 'bg-amber-400 animate-pulse' : 'bg-purple-400'
+                }`} />
+                <div>
+                  <h4 className="text-xs font-bold text-white leading-tight">{m.name}</h4>
+                  <p className="text-[10px] text-slate-400">{m.role} &bull; {m.mode}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                  m.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                  m.color === 'blue' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                  m.color === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                }`}>
+                  {m.status}
+                </span>
+                <p className="text-[9px] text-slate-500 font-mono mt-0.5">{m.time}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span className="text-[11px] text-slate-400">Geofenced Hubs Active</span>
+        <span className="text-blue-400 font-bold text-[11px]">Sync: Real-Time</span>
+      </div>
+    </div>
+  );
+};
 
 // 7b. Monthly Timesheet Summary Card
 export const EmployeeTimesheetSummaryCard: React.FC = () => {
@@ -386,16 +956,16 @@ export const EmployeeTimesheetSummaryCard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 flex flex-col justify-between h-full">
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
             <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-              <FileText size={18} className="text-emerald-400" /> Monthly Timesheet
+              <FileText size={18} className="text-indigo-400" /> Monthly Timesheet
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">Cycle: September 2026</p>
           </div>
-          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+          <span className="text-[10px] text-indigo-400 font-black uppercase tracking-wider bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30">
             {timesheetSubmitted ? '✓ Submitted' : 'Pending Lock'}
           </span>
         </div>
@@ -419,12 +989,12 @@ export const EmployeeTimesheetSummaryCard: React.FC = () => {
           </div>
           <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
             <span className="text-[10px] text-slate-400 font-bold uppercase">Days Present</span>
-            <p className="font-mono text-sm font-black text-emerald-400">19 Working Days</p>
+            <p className="font-mono text-sm font-black text-blue-400">19 Working Days</p>
             <p className="text-[10px] text-slate-400">0 Unexcused</p>
           </div>
           <div className="p-3 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-0.5">
             <span className="text-[10px] text-slate-400 font-bold uppercase">Paid PTO Taken</span>
-            <p className="font-mono text-sm font-black text-emerald-400">2 Days (CL/SL)</p>
+            <p className="font-mono text-sm font-black text-purple-400">2 Days (CL/SL)</p>
             <p className="text-[10px] text-slate-400">Manager Approved</p>
           </div>
         </div>
@@ -437,7 +1007,7 @@ export const EmployeeTimesheetSummaryCard: React.FC = () => {
           onClick={handleDownloadCsv}
           className="text-xs h-8 text-slate-300 font-bold"
         >
-          <Download size={13} className="mr-1 text-emerald-400" /> Export CSV
+          <Download size={13} className="mr-1 text-indigo-400" /> Export CSV
         </Button>
         <Button
           variant={timesheetSubmitted ? 'outline' : 'default'}
@@ -458,13 +1028,13 @@ export const EmployeeActivityTimelineFeed: React.FC = () => {
   const activities = [
     { time: '09:02 AM', title: 'Checked In On-Time', desc: 'Geofence: Bengaluru Tech Park (Office Mode)', type: 'checkin', icon: <Clock size={14} className="text-emerald-400" /> },
     { time: '01:05 PM', title: 'Took Lunch Break', desc: 'Break duration: 45 minutes logged', type: 'break', icon: <Coffee size={14} className="text-amber-400" /> },
-    { time: '01:50 PM', title: 'Resumed Work Session', desc: 'Active shift resumed on workstation', type: 'resume', icon: <Activity size={14} className="text-emerald-400" /> },
+    { time: '01:50 PM', title: 'Resumed Work Session', desc: 'Active shift resumed on workstation', type: 'resume', icon: <Activity size={14} className="text-blue-400" /> },
     { time: 'Yesterday', title: 'Completed Sprint Task', desc: 'TSK-104: Build CSV Payroll Attendance Export Engine', type: 'task', icon: <CheckCircle2 size={14} className="text-teal-400" /> },
-    { time: 'Aug 31', title: 'Correction Approved', desc: 'Elena Rostova (HR Operations) approved CORR-2026-001', type: 'correction', icon: <Award size={14} className="text-emerald-400" /> },
+    { time: 'Aug 31', title: 'Correction Approved', desc: 'Elena Rostova (HR Operations) approved CORR-2026-001', type: 'correction', icon: <Award size={14} className="text-purple-400" /> },
   ];
 
   return (
-    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 flex flex-col justify-between h-full">
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
       <div className="space-y-3">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -494,83 +1064,90 @@ export const EmployeeActivityTimelineFeed: React.FC = () => {
         </div>
       </div>
 
-      <div className="pt-3 border-t border-slate-800">
-        <p className="text-[11px] text-slate-500">Showing recent activity from your shift history</p>
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+        <span className="text-[11px] text-slate-400">ISO 27001 Audit Compliant</span>
+        <span className="text-emerald-400 font-bold text-[11px]">Encrypted & Verified</span>
       </div>
     </div>
   );
 };
 
+// 8. Sprint Work Table
 export const EmployeeSprintWork: React.FC<{
   tasks: Task[];
   loading: boolean;
   handleUpdateTaskStatus: (id: string, stat: Task['status']) => void;
 }> = ({ tasks, loading, handleUpdateTaskStatus }) => (
-  <TableCard
-    title="Sprint Work & Active Deliverables"
-    subtitle="Track your assigned engineering tasks and daily progress status."
-    action={
-      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-wider">
+  <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+      <div>
+        <h3 className="text-base font-bold text-white flex items-center gap-2">
+          <Layers className="text-blue-400" size={20} /> Sprint Work & Active Deliverables
+        </h3>
+        <p className="text-xs text-slate-400 mt-0.5">Track your assigned engineering tasks and daily progress status.</p>
+      </div>
+      <span className="text-xs text-blue-400 font-bold bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
         Sprint 24 Active
       </span>
-    }
-  >
+    </div>
     {loading ? (
       <div className="flex justify-center items-center py-8">
-        <span className="inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
+        <span className="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></span>
       </div>
     ) : tasks.length === 0 ? (
-      <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/40">
-        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">No active tasks in current sprint backlog</p>
+      <div className="text-center py-8 bg-slate-950/40 rounded-2xl border border-slate-800 border-dashed">
+        <p className="text-xs text-slate-400 font-medium">No active tasks in current sprint backlog</p>
       </div>
     ) : (
-      <table className="w-full text-left text-xs min-w-[650px]">
-        <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-semibold text-xs">
-          <tr>
-            <th className="py-3 px-4">Task Title</th>
-            <th className="py-3 px-4 text-center">Estimate</th>
-            <th className="py-3 px-4">Priority</th>
-            <th className="py-3 px-4">Sprint Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-          {tasks.map(task => (
-            <tr key={task.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-              <td className="py-3 px-4 font-medium text-slate-900 dark:text-white max-w-sm truncate">{task.title}</td>
-              <td className="py-3 px-4 text-center">
-                <span className="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-300 font-mono text-xs px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-800 font-medium">
-                  {task.points} SP
-                </span>
-              </td>
-              <td className="py-3 px-4">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  task.priority === 'CRITICAL' || task.priority === 'HIGH'
-                    ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30'
-                    : task.priority === 'MEDIUM'
-                    ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
-                    : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
-                }`}>
-                  {task.priority}
-                </span>
-              </td>
-              <td className="py-3 px-4">
-                <select
-                  value={task.status}
-                  onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value as Task['status'])}
-                  className="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-medium"
-                >
-                  <option value="TODO">To Do</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="BLOCKED">Blocked</option>
-                  <option value="COMPLETED">Completed</option>
-                </select>
-              </td>
+      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/30">
+        <table className="w-full text-left text-xs min-w-[650px]">
+          <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <tr>
+              <th className="py-3 px-4">Task Title</th>
+              <th className="py-3 px-4 text-center">Estimate</th>
+              <th className="py-3 px-4">Priority</th>
+              <th className="py-3 px-4">Sprint Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-slate-800/60">
+            {tasks.map(task => (
+              <tr key={task.id} className="hover:bg-slate-800/30 transition-colors">
+                <td className="py-3 px-4 font-semibold text-white max-w-sm truncate">{task.title}</td>
+                <td className="py-3 px-4 text-center">
+                  <span className="bg-slate-950 text-slate-300 font-mono text-xs px-2.5 py-0.5 rounded-full border border-slate-800 font-bold">
+                    {task.points} SP
+                  </span>
+                </td>
+                <td className="py-3 px-4">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    task.priority === 'CRITICAL' || task.priority === 'HIGH'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                      : task.priority === 'MEDIUM'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  }`}>
+                    {task.priority}
+                  </span>
+                </td>
+                <td className="py-3 px-4">
+                  <select
+                    value={task.status}
+                    onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value as Task['status'])}
+                    className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 cursor-pointer font-bold"
+                  >
+                    <option value="TODO">To Do</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="BLOCKED">Blocked</option>
+                    <option value="COMPLETED">Completed</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     )}
-  </TableCard>
+  </div>
 );
 
 // 9. Attendance Corrections Card
@@ -610,76 +1187,84 @@ export const EmployeeCorrectionRequestsCard: React.FC<{
   }, []);
 
   return (
-    <TableCard
-      title="Attendance Correction Requests"
-      subtitle="Submit punch correction requests for missed check-ins, forgotten check-outs, or system geofence errors."
-      action={
-        <div className="flex items-center gap-3">
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 uppercase tracking-wider">
-            Manager & HR Review
-          </span>
-          <button
-            onClick={() => onRequestNew()}
-            className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
-          >
-            <Plus size={14} /> Submit Correction
-          </button>
+    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+              <Clock size={18} className="text-amber-400" /> Attendance Correction Requests
+            </h3>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              Manager & HR Review
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Submit punch correction requests for missed check-ins, forgotten check-outs, or system geofence errors.
+          </p>
         </div>
-      }
-    >
-      <table className="w-full text-left text-xs min-w-[700px]">
-        <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-semibold text-xs">
-          <tr>
-            <th className="py-3 px-4">Request ID</th>
-            <th className="py-3 px-4">Date</th>
-            <th className="py-3 px-4">Requested Timings</th>
-            <th className="py-3 px-4">Reason / Justification</th>
-            <th className="py-3 px-4 text-center">Approval Status</th>
-            <th className="py-3 px-4">Reviewer Feedback</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-          {corrections.map((corr) => {
-            const statusUpper = corr.status.toUpperCase();
-            const isApproved = statusUpper === 'APPROVED';
-            const isPending = statusUpper === 'PENDING';
-            return (
-              <tr key={corr.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-                <td className="py-3 px-4 font-mono font-medium text-emerald-600 dark:text-emerald-400">{corr.id}</td>
-                <td className="py-3 px-4 font-medium text-slate-900 dark:text-white">{corr.date}</td>
-                <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">
-                  {corr.requestedCheckIn || '09:00 AM'} – {corr.requestedCheckOut || '06:00 PM'}
-                </td>
-                <td className="py-3 px-4 text-slate-600 dark:text-slate-400 max-w-xs truncate" title={corr.reason}>
-                  {corr.reason}
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <span className={`px-2 py-0.5 rounded text-[11px] font-medium uppercase ${
-                    isApproved 
-                      ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/40' 
-                      : isPending 
-                      ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/40 animate-pulse'
-                      : 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/40'
-                  }`}>
-                    {isPending ? '⏳ PENDING REVIEW' : isApproved ? '✓ APPROVED' : '✗ REJECTED'}
-                  </span>
-                </td>
-                <td className="py-3 px-4 text-slate-500 dark:text-slate-400 text-xs">
-                  {corr.managerComment || (isPending ? 'Pending review by Manager & HR' : '—')}
+        <button
+          onClick={() => onRequestNew()}
+          className="px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-black text-xs shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+        >
+          <Plus size={14} /> Submit Correction Request
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-tertiary)]/20">
+        <table className="w-full text-left text-xs min-w-[700px]">
+          <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+            <tr>
+              <th className="py-3 px-4">Request ID</th>
+              <th className="py-3 px-4">Date</th>
+              <th className="py-3 px-4">Requested Timings</th>
+              <th className="py-3 px-4">Reason / Justification</th>
+              <th className="py-3 px-4 text-center">Approval Status</th>
+              <th className="py-3 px-4">Reviewer Feedback</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800/60">
+            {corrections.map((corr) => {
+              const statusUpper = corr.status.toUpperCase();
+              const isApproved = statusUpper === 'APPROVED';
+              const isPending = statusUpper === 'PENDING';
+              return (
+                <tr key={corr.id} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="py-3.5 px-4 font-mono font-bold text-blue-400">{corr.id}</td>
+                  <td className="py-3.5 px-4 font-bold text-white">{corr.date}</td>
+                  <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
+                    {corr.requestedCheckIn || '09:00 AM'} – {corr.requestedCheckOut || '06:00 PM'}
+                  </td>
+                  <td className="py-3.5 px-4 text-slate-300 max-w-xs truncate" title={corr.reason}>
+                    {corr.reason}
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
+                      isApproved 
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' 
+                        : isPending 
+                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'
+                        : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                    }`}>
+                      {isPending ? '⏳ PENDING REVIEW' : isApproved ? '✓ APPROVED' : '✗ REJECTED'}
+                    </span>
+                  </td>
+                  <td className="py-3.5 px-4 text-slate-400 text-[11px]">
+                    {corr.managerComment || (isPending ? 'Pending review by Manager & HR' : '—')}
+                  </td>
+                </tr>
+              );
+            })}
+            {corrections.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-6 text-center text-slate-500 font-semibold">
+                  No attendance correction requests submitted yet.
                 </td>
               </tr>
-            );
-          })}
-          {corrections.length === 0 && (
-            <tr>
-              <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
-                No attendance correction requests submitted yet.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </TableCard>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 
@@ -690,16 +1275,20 @@ export const EmployeeAttendanceTable: React.FC<{
   setStatusFilter: (s: string) => void;
   onOpenCorrectionModal: (date: string) => void;
 }> = ({ filteredHistory, statusFilter, setStatusFilter, onOpenCorrectionModal }) => (
-  <TableCard
-    title="Attendance History Logs"
-    subtitle="Chronological record of shifts, check-in/out timestamps, breaks, and overtime."
-    action={
+  <div className="glass-panel p-6 shadow-2xl space-y-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-color)]">
+      <div>
+        <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
+          <History size={18} className="text-emerald-500" /> Attendance History Logs
+        </h3>
+        <p className="text-xs text-slate-400 mt-0.5">Chronological record of shifts, check-in/out timestamps, breaks, and overtime.</p>
+      </div>
       <div className="flex items-center gap-3">
-        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Filter:</span>
+        <span className="text-xs text-[var(--text-muted)] font-semibold">Filter:</span>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-medium"
+          className="bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
         >
           <option value="All">All Statuses</option>
           <option value="Present">Present</option>
@@ -708,11 +1297,10 @@ export const EmployeeAttendanceTable: React.FC<{
           <option value="Weekend">Weekend</option>
         </select>
       </div>
-    }
-  >
-    <div className="max-h-[420px] overflow-y-auto">
+    </div>
+    <div className="overflow-x-auto overflow-y-auto max-h-[420px] rounded-xl border border-[var(--border-color)] bg-[var(--bg-tertiary)]/20 w-full max-w-full min-w-0">
       <table className="w-full text-left text-xs min-w-[850px]">
-        <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 uppercase font-semibold text-xs tracking-wider">
+        <thead className="sticky top-0 z-10 bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-bold text-[10px] tracking-wider">
           <tr>
             <th className="py-3 px-4 w-[140px]">Date</th>
             <th className="py-3 px-4 w-[110px]">Status</th>
@@ -725,41 +1313,35 @@ export const EmployeeAttendanceTable: React.FC<{
             <th className="py-3 px-4 w-[100px] text-right">Action</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+        <tbody className="divide-y divide-slate-800/70">
           {filteredHistory.map((h, i) => (
-            <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-              <td className="py-3 px-4 font-medium text-slate-900 dark:text-white">{h.date}</td>
+            <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+              <td className="py-3 px-4 font-bold text-white">{h.date}</td>
               <td className="py-3 px-4">
-                <span className={`px-2 py-0.5 rounded text-[11px] font-medium uppercase ${
+                <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase ${
                   h.status === 'Present' || h.status === 'Checked In' || h.status === 'Working'
-                    ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                     : h.status === 'Absent'
-                    ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30'
+                    ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
                     : h.status === 'Weekend'
-                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                    : 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30'
+                    ? 'bg-slate-800 text-slate-400'
+                    : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                 }`}>
                   {h.status}
                 </span>
               </td>
-              <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">{h.in}</td>
-              <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">{h.out}</td>
-              <td className="py-3 px-4 font-mono font-medium text-slate-700 dark:text-slate-200">{h.workingTime}</td>
-              <td className="py-3 px-4 font-mono text-slate-500">{h.break}</td>
-              <td className="py-3 px-4 font-mono">
-                {h.overtime && h.overtime !== '0.00 hrs' && h.overtime !== '0h 0m' ? (
-                  <span className="text-amber-600 dark:text-amber-400 font-medium">{h.overtime}</span>
-                ) : (
-                  <span className="text-slate-400">—</span>
-                )}
-              </td>
-              <td className="py-3 px-4 text-slate-500 dark:text-slate-400 max-w-[120px] truncate" title={h.remarks}>{h.remarks || '—'}</td>
+              <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{h.in}</td>
+              <td className="py-3 px-4 font-mono text-rose-400 font-bold">{h.out}</td>
+              <td className="py-3 px-4 font-mono text-blue-400 font-bold">{h.workingTime}</td>
+              <td className="py-3 px-4 font-mono text-slate-300">{h.break}</td>
+              <td className="py-3 px-4 font-mono text-cyan-400 font-bold">{h.overtime}</td>
+              <td className="py-3 px-4 text-slate-300 font-medium max-w-xs truncate">{h.remarks || '—'}</td>
               <td className="py-3 px-4 text-right">
-                <button
-                  onClick={() => onOpenCorrectionModal(h.rawDate)}
-                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 hover:underline transition-colors cursor-pointer"
+                <button 
+                  onClick={() => onOpenCorrectionModal(h.rawDate)} 
+                  className="text-blue-400 hover:text-blue-300 font-extrabold text-[11px] cursor-pointer"
                 >
-                  Correct
+                  Request Fix
                 </button>
               </td>
             </tr>
@@ -774,13 +1356,12 @@ export const EmployeeAttendanceTable: React.FC<{
         </tbody>
       </table>
     </div>
-  </TableCard>
+  </div>
 );
 
 // Main Employee Dashboard Component
 export const EmployeeDashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const analytics = useAnalyticsData();
   const [workspaceMode, setWorkspaceMode] = useState<'all-in-one' | 'absence' | 'attendance' | 'sprint'>('all-in-one');
 
   const [tasks, setTasks] = useState<Task[]>([
@@ -1010,89 +1591,70 @@ export const EmployeeDashboardPage: React.FC = () => {
   ];
 
   return (
-    <DashboardErrorBoundary dashboardName="Employee Dashboard">
-      <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]} requiredPermission={Permission.DASHBOARD_VIEW}>
-          <DashboardHeader
-            breadcrumbs={[
-              { label: 'Home', href: '/' },
-              { label: 'Employee', href: '/employee/dashboard' },
-              { label: 'Dashboard' }
-            ]}
-            title={user?.name || 'My Workspace'}
-            description={[user?.role, user?.department].filter(Boolean).join(' · ')}
-            badge={<span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">EMPLOYEE</span>}
-            lastUpdated={new Date().toLocaleTimeString()}
-            onRefresh={loadDashboardData}
-            isRefreshing={loading}
-            primaryAction={
-              <a href="#step-1-punch" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
-                <Clock size={16} /> Check In
-              </a>
-            }
-            secondaryAction={
-              <div className="flex items-center gap-2">
-                <Link to="/employee/leave" className="px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
-                  <Calendar size={16} /> Apply Leave
-                </Link>
-                <Link to="/employee/profile" className="px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
-                  <Compass size={16} /> Profile
-                </Link>
-              </div>
-            }
-          />
-          
-          {/* Workspace Mode Switcher Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => setWorkspaceMode('all-in-one')}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                  workspaceMode === 'all-in-one'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                <LayoutDashboard size={15} />
-                Overview
-              </button>
+    <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]} requiredPermission={Permission.PROFILE_VIEW}>
+      <div className="space-y-8 animate-fadeIn font-sans pb-12 max-w-7xl mx-auto">
+        
+        {/* Workspace Mode Switcher Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-color)] pb-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setWorkspaceMode('all-in-one')}
+              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                workspaceMode === 'all-in-one'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+              }`}
+            >
+              <LayoutDashboard size={15} />
+              Full 9-Step Daily Workspace
+            </button>
 
-              <button
-                onClick={() => setWorkspaceMode('absence')}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                  workspaceMode === 'absence'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                <Calendar size={15} />
-                Absence & Leave
-              </button>
+            <button
+              onClick={() => setWorkspaceMode('absence')}
+              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                workspaceMode === 'absence'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+              }`}
+            >
+              <Palmtree size={15} className="text-emerald-400" />
+              Absence & Leave Suite
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
+                Full Suite
+              </span>
+            </button>
 
-              <button
-                onClick={() => setWorkspaceMode('attendance')}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                  workspaceMode === 'attendance'
-                    ? 'bg-teal-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                <Clock size={15} />
-                Time Clock & Heatmap
-              </button>
+            <button
+              onClick={() => setWorkspaceMode('attendance')}
+              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                workspaceMode === 'attendance'
+                  ? 'bg-teal-600 text-white shadow-lg shadow-teal-500/20'
+                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+              }`}
+            >
+              <Clock size={15} className="text-teal-400" />
+              Time Clock & Heatmap
+            </button>
 
-              <button
-                onClick={() => setWorkspaceMode('sprint')}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                  workspaceMode === 'sprint'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                }`}
-              >
-                <Layers size={15} />
-                Sprint Tasks
-              </button>
-            </div>
+            <button
+              onClick={() => setWorkspaceMode('sprint')}
+              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                workspaceMode === 'sprint'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
+              }`}
+            >
+              <Target size={15} className="text-indigo-400" />
+              Sprint Tasks & Deliverables
+            </button>
           </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-400 font-semibold hidden md:inline">
+              Hub: <strong className="text-white font-mono">Bengaluru Campus</strong>
+            </span>
+          </div>
+        </div>
 
         {/* MODE: ABSENCE & LEAVE SUITE */}
         {workspaceMode === 'absence' && (
@@ -1134,12 +1696,16 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* MODE: SPRINT TASKS & DELIVERABLES */}
         {workspaceMode === 'sprint' && (
           <div className="space-y-6 animate-fadeIn">
-            <KPIGrid>
-              <KPICard title="Hours Today" value={hoursToday} icon={<Clock size={24} />} color="info" trend="neutral" subtitle="Active Shift Elapsed" />
-              <KPICard title="Hours This Week" value={hoursThisWeek} icon={<CalendarClock size={24} />} color="emerald" trend="neutral" subtitle="Standard 40h Goal" />
-              <KPICard title="Attendance Rate" value={attendanceRate} icon={<CalendarClock size={24} />} color="success" trend="up" subtitle="Lifetime Adherence" />
-              <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={24} />} color="warning" trend="neutral" subtitle="Approved OT (1.5x)" />
-            </KPIGrid>
+            <EmployeeKpiGrid
+              hoursToday={hoursToday}
+              hoursThisWeek={hoursThisWeek}
+              attendanceRate={attendanceRate}
+              overtimeHours={overtimeHours}
+              leaveBalance="14 Days"
+              leavesUsed="4 Days"
+              pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
+              timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
+            />
             <EmployeeSprintWork
               tasks={tasks}
               loading={loading}
@@ -1151,51 +1717,63 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* MODE: ALL-IN-ONE 9-STEP WORKFLOW */}
         {workspaceMode === 'all-in-one' && (
           <div className="space-y-8 animate-fadeIn">
+            {/* Step-by-Step Quick Navigator */}
+            <StepNavigatorBar />
 
-            {/* STEP 1: Check-In Station */}
+            {/* STEP 1: Daily Work Station & Live Check-In */}
             <section id="step-1-punch" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Work Station & Check-In"
-                subtitle="Geofenced attendance check-in and your shift status for today"
+                stepNumber="Step 01"
+                title="Daily Work Station & Check-In"
+                subtitle="Profile identity, quick actions, and geofenced attendance check-in station"
                 tagColor="blue"
                 badge="Live Sync"
               />
+              <EmployeeDashboardOverview user={user} />
+              <EmployeeQuickActionsBar onOpenCorrection={() => handleOpenCorrection()} />
               <LiveCheckInWidget />
             </section>
 
             {/* STEP 2: Productivity & Attendance KPIs */}
             <section id="step-2-kpis" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Productivity & Adherence"
+                stepNumber="Step 02"
+                title="Productivity & Adherence KPIs"
                 subtitle="Hours logged today, weekly progress, lifetime adherence, and overtime tracking"
                 tagColor="emerald"
                 badge="Target: 40h/wk"
               />
-            <KPIGrid>
-              <KPICard title="Today's Attendance" value={analytics.data?.metrics?.presentToday ? 'Present' : 'Not Logged'} icon={<CheckCircle2 size={20} />} color={analytics.data?.metrics?.presentToday ? 'success' : 'neutral'} subtitle="Daily check-in status" />
-              <KPICard title="Working Hours" value={hoursThisWeek} icon={<Clock size={20} />} color="info" subtitle="Logged this week" />
-              <KPICard title="Attendance This Month" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Monthly adherence" />
-              <KPICard title="Leave Balance" value="12 Days" icon={<Calendar size={20} />} color="emerald" subtitle="Available PTO" />
-              
-              <KPICard title="Pending Leave" value={analytics.data?.metrics?.pendingLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Awaiting review" />
-              <KPICard title="Tasks Assigned" value={tasks.filter(t => t.status === 'TODO' || t.status === 'IN_PROGRESS').length} icon={<FileSpreadsheet size={20} />} color="info" subtitle="Active workload" />
-              <KPICard title="Tasks Completed" value={tasks.filter(t => t.status === 'COMPLETED').length} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="2.4%" subtitle="This sprint" />
-              <KPICard title="Tasks In Progress" value={tasks.filter(t => t.status === 'IN_PROGRESS').length} icon={<Activity size={20} />} color="info" subtitle="Current focus" />
-              
-              <KPICard title="Overdue Tasks" value={analytics.data?.metrics?.overdueTasks ?? 0} icon={<Clock size={20} />} color="danger" subtitle="Action required" />
-              <KPICard title="Sprint Progress" value={analytics.data?.metrics?.sprintProgress ?? '0%'} icon={<Activity size={20} />} color="info" subtitle="Sprint completion" />
-            </KPIGrid>
+              <EmployeeDashboardFilters
+                dateFilter={dateFilter}
+                setDateFilter={setDateFilter}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                onRefresh={loadDashboardData}
+                isLoading={loading}
+              />
+              <EmployeeKpiGrid
+                hoursToday={hoursToday}
+                hoursThisWeek={hoursThisWeek}
+                attendanceRate={attendanceRate}
+                overtimeHours={overtimeHours}
+                leaveBalance="14 Days"
+                leavesUsed="4 Days"
+                pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
+                timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
+              />
             </section>
 
             {/* STEP 3: Shift Schedule & Monthly Attendance Calendar */}
             <section id="step-3-schedule" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Shift Schedule & Attendance Calendar"
-                subtitle="Assigned work timings and monthly attendance heatmap"
+                stepNumber="Step 03"
+                title="Shift Schedule & Monthly Attendance Calendar"
+                subtitle="Assigned work timings, 7-day upcoming roster, and monthly attendance day heat tiles"
                 tagColor="cyan"
                 badge="Auto-Rotated"
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch min-w-0">
+              <EmployeeUpcomingRosterCard />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
                 <div className="w-full h-full">
                   <EmployeeShiftScheduleCard />
                 </div>
@@ -1208,12 +1786,13 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 4: Corporate Public Holidays & Leave Entitlements */}
             <section id="step-4-leaves" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
+                stepNumber="Step 04"
                 title="Public Holidays & Leave Entitlements"
                 subtitle="2026 gazetted holidays for Bengaluru, Salem, Hyderabad, and remaining PTO quotas"
                 tagColor="purple"
                 badge="10 Paid Holidays"
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch min-w-0">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
                 <div className="w-full h-full">
                   <PublicHolidaysCard />
                 </div>
@@ -1223,97 +1802,61 @@ export const EmployeeDashboardPage: React.FC = () => {
               </div>
             </section>
 
-
-
-            {/* STEP 5: Shift Adherence & Performance Analytics */}
-            <section id="step-5-analytics" className="space-y-5 scroll-mt-24">
+            {/* STEP 5: Leadership Appreciations & Recognition */}
+            <section id="step-5-kudos" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Shift Adherence & Performance Analytics"
-                subtitle="Weekly regular vs overtime hours and monthly attendance distribution"
-                tagColor="indigo"
-                badge="Current Month"
+                stepNumber="Step 05"
+                title="Leadership Appreciations & Kudos"
+                subtitle="Direct accolades from your Department Manager and Team Lead with live reactions"
+                tagColor="amber"
+                badge="Recognition Stream"
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-                <AnalyticsLineChart
-                  title="Attendance & Punctuality"
-                  subtitle="Weekly check-ins vs schedule"
-                  data={analytics.data?.personalAttendanceTrend}
-                  xKey="name"
-                  series={[{ key: 'present', name: 'Attendance', color: '#10b981' }]}
-                  isLoading={analytics.isLoading}
-                  error={analytics.error}
-                  onRetry={analytics.reload}
-                />
-                <AnalyticsBarChart
-                  title="Leave Usage"
-                  subtitle="PTO utilization over time"
-                  data={analytics.data?.personalLeaveHistory}
-                  xKey="name"
-                  series={[{ key: 'days', name: 'Leave Taken', color: '#3b82f6' }]}
-                  isLoading={analytics.isLoading}
-                  error={analytics.error}
-                  onRetry={analytics.reload}
-                />
-              </div>
+              <EmployeeManagerKudosCard />
+            </section>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
-                <AnalyticsLineChart
-                  title="Task Completion Velocity"
-                  subtitle="Tasks finished per week"
-                  data={analytics.data?.personalTaskCompletion}
-                  xKey="name"
-                  series={[{ key: 'completed', name: 'Tasks Completed', color: '#8b5cf6' }]}
-                  isLoading={analytics.isLoading}
-                  error={analytics.error}
-                  onRetry={analytics.reload}
-                />
-                <AnalyticsDonutChart
-                  title="Sprint Burndown"
-                  subtitle="Points completed across sprints"
-                  data={analytics.data?.personalSprintBurndown}
-                  nameKey="name"
-                  valueKey="points"
-                  isLoading={analytics.isLoading}
-                  error={analytics.error}
-                  onRetry={analytics.reload}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
+            {/* STEP 6: Shift Adherence & Performance Analytics */}
+            <section id="step-6-analytics" className="space-y-5 scroll-mt-24">
+              <StepSectionHeader
+                stepNumber="Step 06"
+                title="Shift Adherence & Performance Analytics"
+                subtitle="Weekly regular vs overtime hours and monthly attendance distribution breakdowns"
+                tagColor="indigo"
+                badge="Visual Intelligence"
+              />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <AnalyticsBarChart
-                  title="Weekly Overtime"
-                  subtitle="Logged OT vs standard hours"
-                  data={analytics.data?.personalOvertime}
-                  xKey="name"
+                  title="Weekly Shift Hours & Overtime"
+                  subtitle="Daily logged hours against standard 8-hour shift"
+                  data={weeklyHoursData}
+                  xKey="day"
                   series={[
-                    { key: 'hours', name: 'Overtime', color: '#F59E0B' }
+                    { key: 'regular', name: 'Regular Hours (8h)', color: '#3B82F6' },
+                    { key: 'overtime', name: 'Overtime (1.5x)', color: '#10B981' }
                   ]}
-                  isLoading={analytics.isLoading}
-                  error={analytics.error}
-                  onRetry={analytics.reload}
                 />
                 <AnalyticsDonutChart
-                  title="Task Status"
-                  subtitle="Current sprint breakdown"
-                  data={analytics.data?.taskStatusDistribution}
+                  title="Monthly Attendance Distribution"
+                  subtitle="Adherence, on-time arrivals, and PTO quota breakdown"
+                  data={shiftDistributionData}
                   nameKey="name"
                   valueKey="value"
-                  isLoading={analytics.isLoading}
-                  error={analytics.error}
-                  onRetry={analytics.reload}
                 />
               </div>
             </section>
 
-            {/* STEP 6: Monthly Timesheet & Activity */}
-            <section id="step-6-timesheet" className="space-y-5 scroll-mt-24">
+            {/* STEP 7: Team Live Presence & Timesheet Submissions */}
+            <section id="step-7-team" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
-                title="Monthly Timesheet & Activity Log"
-                subtitle="Timesheet submission status and recent shift activity timeline"
+                stepNumber="Step 07"
+                title="Team Live Presence & Timesheet Lock"
+                subtitle="Colleague status across Bengaluru, Salem, & Hyderabad, plus monthly timesheet lock"
                 tagColor="emerald"
-                badge="Current Month"
+                badge="Cross-Hub Roster"
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+                <div className="w-full h-full">
+                  <EmployeeTeamLivePresenceCard />
+                </div>
                 <div className="w-full h-full">
                   <EmployeeTimesheetSummaryCard />
                 </div>
@@ -1326,6 +1869,7 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 8: Sprint Deliverables & Task Board */}
             <section id="step-8-tasks" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
+                stepNumber="Step 08"
                 title="Sprint Deliverables & Task Board"
                 subtitle="Track assigned deliverables, update task states, and review sprint completion"
                 tagColor="cyan"
@@ -1341,6 +1885,7 @@ export const EmployeeDashboardPage: React.FC = () => {
             {/* STEP 9: Detailed Attendance Logs & Correction Workflow */}
             <section id="step-9-logs" className="space-y-5 scroll-mt-24">
               <StepSectionHeader
+                stepNumber="Step 09"
                 title="Audit Logs & Attendance Corrections"
                 subtitle="Historical check-in records, audit verification, and punch correction requests"
                 tagColor="rose"
@@ -1357,117 +1902,117 @@ export const EmployeeDashboardPage: React.FC = () => {
           </div>
         )}
 
-          {/* Correction Request Modal ... */ }
-          {isCorrectionModalOpen && (
-            // ... (keep this intact since it's just a modal)
-            <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full space-y-4 animate-scaleUp">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <Clock className="text-amber-500" size={20} />
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      Submit Attendance Correction Request
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => setIsCorrectionModalOpen(false)}
-                    className="text-slate-400 hover:text-slate-900 dark:hover:text-white text-xl leading-none font-bold cursor-pointer"
-                  >
-                    &times;
-                  </button>
+        {/* Correction Request Modal */}
+        {isCorrectionModalOpen && (
+          <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-lg w-full space-y-4 animate-scaleUp">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                <div className="flex items-center gap-2">
+                  <Clock className="text-amber-400" size={20} />
+                  <h3 className="text-base font-bold text-white">
+                    Submit Attendance Correction Request
+                  </h3>
                 </div>
+                <button
+                  onClick={() => setIsCorrectionModalOpen(false)}
+                  className="text-slate-400 hover:text-white text-xl leading-none font-bold cursor-pointer"
+                >
+                  &times;
+                </button>
+              </div>
 
-                {correctionSuccessMsg ? (
-                  <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
-                    <CheckCircle2 size={20} />
-                    {correctionSuccessMsg}
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmitCorrection} className="space-y-3.5 text-xs">
-                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                      Submit your punch adjustment details. Once submitted, your Department Manager or HR Operations team will audit and accept the correction.
-                    </p>
+              {correctionSuccessMsg ? (
+                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                  <CheckCircle2 size={20} />
+                  {correctionSuccessMsg}
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitCorrection} className="space-y-3.5 text-xs">
+                  <p className="text-slate-300 leading-relaxed">
+                    Submit your punch adjustment details. Once submitted, your Department Manager or HR Operations team will audit and accept the correction.
+                  </p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Date of Attendance</label>
-                        <input
-                          type="date"
-                          required
-                          value={correctionDate}
-                          onChange={(e) => setCorrectionDate(e.target.value)}
-                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Correction Category</label>
-                        <select
-                          value={correctionType}
-                          onChange={(e) => setCorrectionType(e.target.value)}
-                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white cursor-pointer font-medium"
-                        >
-                          <option>Missed Morning Check-In</option>
-                          <option>Missed Evening Check-Out</option>
-                          <option>Incorrect Duration / Working Hours</option>
-                          <option>Marked Absent Mistakenly</option>
-                          <option>Geofence / Location Signal Issue</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Requested Check-In</label>
-                        <input
-                          type="text"
-                          required
-                          value={requestedIn}
-                          onChange={(e) => setRequestedIn(e.target.value)}
-                          placeholder="e.g. 09:00 AM"
-                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Requested Check-Out</label>
-                        <input
-                          type="text"
-                          required
-                          value={requestedOut}
-                          onChange={(e) => setRequestedOut(e.target.value)}
-                          placeholder="e.g. 06:00 PM"
-                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
-                        />
-                      </div>
-                    </div>
-
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Reason / Explanation for HR & Manager</label>
-                      <textarea
+                      <label className="text-slate-300 font-semibold block mb-1">Date of Attendance</label>
+                      <input
+                        type="date"
                         required
-                        rows={3}
-                        value={correctionReason}
-                        onChange={(e) => setCorrectionReason(e.target.value)}
-                        placeholder="Detail why punch correction is required (e.g. badge scanner was offline, on-site client visit, etc.)..."
-                        className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                        value={correctionDate}
+                        onChange={(e) => setCorrectionDate(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
                       />
                     </div>
 
-                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
-                      <Button variant="outline" size="sm" type="button" onClick={() => setIsCorrectionModalOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button size="sm" type="submit" disabled={correctionSubmitting}>
-                        {correctionSubmitting ? 'Submitting...' : 'Submit to Manager/HR'}
-                      </Button>
+                    <div>
+                      <label className="text-slate-300 font-semibold block mb-1">Correction Category</label>
+                      <select
+                        value={correctionType}
+                        onChange={(e) => setCorrectionType(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white cursor-pointer font-medium"
+                      >
+                        <option>Missed Morning Check-In</option>
+                        <option>Missed Evening Check-Out</option>
+                        <option>Incorrect Duration / Working Hours</option>
+                        <option>Marked Absent Mistakenly</option>
+                        <option>Geofence / Location Signal Issue</option>
+                      </select>
                     </div>
-                  </form>
-                )}
-              </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-slate-300 font-semibold block mb-1">Requested Check-In</label>
+                      <input
+                        type="text"
+                        required
+                        value={requestedIn}
+                        onChange={(e) => setRequestedIn(e.target.value)}
+                        placeholder="e.g. 09:00 AM"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-slate-300 font-semibold block mb-1">Requested Check-Out</label>
+                      <input
+                        type="text"
+                        required
+                        value={requestedOut}
+                        onChange={(e) => setRequestedOut(e.target.value)}
+                        placeholder="e.g. 06:00 PM"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-slate-300 font-semibold block mb-1">Reason / Explanation for HR & Manager</label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={correctionReason}
+                      onChange={(e) => setCorrectionReason(e.target.value)}
+                      placeholder="Detail why punch correction is required (e.g. badge scanner was offline, on-site client visit, etc.)..."
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                    <Button variant="outline" size="sm" type="button" onClick={() => setIsCorrectionModalOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" type="submit" disabled={correctionSubmitting}>
+                      {correctionSubmitting ? 'Submitting...' : 'Submit to Manager/HR'}
+                    </Button>
+                  </div>
+                </form>
+              )}
             </div>
-          )}
-      </RoleGuard>
-    </DashboardErrorBoundary>
+          </div>
+        )}
+
+      </div>
+    </RoleGuard>
   );
 };
