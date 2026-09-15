@@ -13,6 +13,8 @@ export const HRReports: React.FC = () => {
     { name: 'Monthly Payroll & Work Hours Audit', date: 'Current Month', type: 'attendance', desc: 'Raw attendance timestamps, hours worked, and break minutes' },
     { name: 'Equal Opportunity & Headcount Directory', date: 'Current Quarter', type: 'workforce', desc: 'Active headcount, departments, teams, and locations' },
     { name: 'Leave Applications & Absences Ledger', date: 'Year to Date', type: 'leave', desc: 'Approved, pending, and rejected employee leave records' },
+    { name: 'Payroll Register (Muster Roll)', date: 'Current Month', type: 'payroll', desc: 'Earnings, deductions, net pay across all employees' },
+    { name: 'Statutory Compliance (Form 16/PF/ESI)', date: 'Current Month', type: 'statutory', desc: 'Provident Fund, ESI, Professional Tax, TDS compliance' }
   ];
 
   const handleDownloadArchived = async (type: ReportType, name: string) => {
@@ -34,7 +36,7 @@ export const HRReports: React.FC = () => {
           <p className="text-sm text-slate-400">Export verified workforce data, compliance audit trails, and payroll datasets from SQLite</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
           <ExportReport 
             title="Attendance & Hours Report" 
             subtitle="Punches, shifts, breaks, and durations"
@@ -50,6 +52,16 @@ export const HRReports: React.FC = () => {
             subtitle="Approved and pending leave requests"
             reportType="leave" 
           />
+          <ExportReport 
+            title="Payroll Register" 
+            subtitle="Detailed monthly salary disbursements"
+            reportType="payroll" 
+          />
+          <ExportReport 
+            title="Statutory Compliance" 
+            subtitle="PF, ESI, PT, and TDS deductions"
+            reportType="statutory" 
+          />
         </div>
 
         <div className="glass-panel p-6">
@@ -62,6 +74,8 @@ export const HRReports: React.FC = () => {
                     {r.type === 'attendance' && <Clock size={20} />}
                     {r.type === 'workforce' && <Users size={20} />}
                     {r.type === 'leave' && <CalendarDays size={20} />}
+                    {r.type === 'payroll' && <FileText size={20} />}
+                    {r.type === 'statutory' && <FileText size={20} />}
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-slate-200">{r.name}</h4>

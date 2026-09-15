@@ -531,20 +531,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   --dashboard-accent-soft:  rgba(217, 119, 6, 0.12);
 }
 
-/* ---- Role-aware sidebar background ---- */
-[data-role='ADMIN']     .app-sidebar { background: linear-gradient(180deg, #1E0938 0%, #13042A 100%) !important; border-right-color: rgba(124, 58, 237, 0.22) !important; }
-[data-role='HR']        .app-sidebar { background: linear-gradient(180deg, #2D0414 0%, #1A0209 100%) !important; border-right-color: rgba(225, 29, 72, 0.22) !important; }
-[data-role='MANAGER']   .app-sidebar { background: linear-gradient(180deg, #0B1E4A 0%, #071228 100%) !important; border-right-color: rgba(37, 99, 235, 0.22) !important; }
-[data-role='TEAM_LEAD'] .app-sidebar { background: linear-gradient(180deg, #012F21 0%, #010F0B 100%) !important; border-right-color: rgba(5, 150, 105, 0.22) !important; }
-[data-role='EMPLOYEE']  .app-sidebar { background: linear-gradient(180deg, #271700 0%, #160C00 100%) !important; border-right-color: rgba(217, 119, 6, 0.22) !important; }
-
-/* ---- Role-aware sidebar radial accent glow ---- */
-[data-role='ADMIN']     .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(124, 58, 237, 0.22), transparent 68%); }
-[data-role='HR']        .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(225, 29, 72, 0.22), transparent 68%); }
-[data-role='MANAGER']   .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.22), transparent 68%); }
-[data-role='TEAM_LEAD'] .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(5, 150, 105, 0.22), transparent 68%); }
-[data-role='EMPLOYEE']  .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(217, 119, 6, 0.22), transparent 68%); }
-
 /* ---- Role-aware active nav link ---- */
 .sidebar-nav-link.is-active {
   background: linear-gradient(135deg, var(--role-primary) 0%, var(--role-hover) 100%) !important;

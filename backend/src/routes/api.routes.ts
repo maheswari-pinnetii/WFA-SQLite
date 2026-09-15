@@ -295,6 +295,8 @@ router.get('/analytics/performance', authenticateToken, enforceScope, authentica
 router.get('/reports/attendance/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportAttendanceReport);
 router.get('/reports/workforce/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), reportController.exportWorkforceReport);
 router.get('/reports/leave/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportLeaveReport);
+router.get('/reports/payroll/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportPayrollReport);
+router.get('/reports/statutory/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportStatutoryReport);
 router.get('/reports/metrics', authenticateToken, authenticatedUserLimiter, reportController.getReportMetrics);
 
 // Audit Logs & Security Dashboard

@@ -499,7 +499,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Role-aware workspace navigation */}
       <aside
         aria-label="Primary navigation"
-        className={`app-sidebar ${roleAccent.className} border-r flex flex-col shrink-0 fixed md:sticky left-0 z-30 transition-all duration-300 ease-in-out font-sans ${
+        className={`app-sidebar ${roleAccent.className} border-r flex flex-col shrink-0 fixed md:sticky left-0 md:top-0 h-[100dvh] md:h-[calc(100vh-var(--header-height))] z-30 transition-all duration-300 ease-in-out font-sans ${
           collapsed ? 'sidebar-is-collapsed w-[76px]' : 'sidebar-is-expanded w-[280px]'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
