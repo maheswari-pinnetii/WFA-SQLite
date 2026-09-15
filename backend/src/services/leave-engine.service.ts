@@ -127,5 +127,77 @@ export const leaveEngineService = {
       cursor.setDate(cursor.getDate() + 1);
     }
     return count;
+  },
+
+  /** ─── LEAVE REQUESTS ────────────────────────────── */
+  async getLeaveRequests(filters: { employeeId?: string; organizationId: string; status?: string }) {
+    let sql = `SELECT lr.*, e.name as employeeName, lt.name as leaveTypeName 
+               FROM leave_requests lr
+               JOIN employees e ON lr.employeeId = e.id
+               JOIN leave_types lt ON lr.leaveTypeId = lt.id
+               WHERE lr.organizationId = ?`;
+    const params: any[] = [filters.organizationId];
+
+    if (filters.employeeId) {
+      sql += ` AND lr.employeeId = ?`;
+      params.push(filters.employeeId);
+    }
+    if (filters.status) {
+      sql += ` AND lr.status = ?`;
+      params.push(filters.status);
+    }
+    
+    sql += ` ORDER BY lr.createdAt DESC`;
+    return query(sql, params);
+  },
+
+  async createLeaveRequest(data: {
+    organizationId: string;
+    employeeId: string;
+    leaveTypeId: string;
+    startDate: string;
+    endDate: string;
+    isHalfDay?: boolean;
+    halfDayPeriod?: string;
+    reason?: string;
+  }) {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    await execute(
+      `INSERT INTO leave_requests (
+        id, organizationId, employeeId, leaveTypeId, 
+        startDate, endDate, isHalfDay, halfDayPeriod, 
+        status, reason, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?)`,
+      [
+        id, data.organizationId, data.employeeId, data.leaveTypeId,
+        data.startDate, data.endDate, data.isHalfDay ? 1 : 0, data.halfDayPeriod || null,
+        data.reason || null, now, now
+      ]
+    );
+    return this.getLeaveRequest(id, data.organizationId);
+  },
+
+  async getLeaveRequest(id: string, organizationId: string) {
+    const rows = await query(
+      `SELECT lr.*, e.name as employeeName, lt.name as leaveTypeName 
+       FROM leave_requests lr
+       JOIN employees e ON lr.employeeId = e.id
+       JOIN leave_types lt ON lr.leaveTypeId = lt.id
+       WHERE lr.id = ? AND lr.organizationId = ?`,
+      [id, organizationId]
+    );
+    return rows[0];
+  },
+
+  async updateLeaveRequestStatus(id: string, organizationId: string, status: string, approvedBy: string) {
+    const now = new Date().toISOString();
+    await execute(
+      `UPDATE leave_requests 
+       SET status = ?, approvedBy = ?, approvedAt = ?, updatedAt = ? 
+       WHERE id = ? AND organizationId = ?`,
+      [status, approvedBy, now, now, id, organizationId]
+    );
+    return this.getLeaveRequest(id, organizationId);
   }
 };

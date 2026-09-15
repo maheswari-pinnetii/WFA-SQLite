@@ -10,6 +10,8 @@ export interface LeaveRequest {
   startDate: string;
   endDate: string;
   reason: string;
+  isHalfDay?: boolean;
+  halfDayPeriod?: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   reviewedBy?: string;
   reviewComment?: string;

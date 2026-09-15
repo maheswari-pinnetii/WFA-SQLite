@@ -31,6 +31,7 @@ import { SecurityAdminDashboard } from '../../features/admin/pages/SecurityAdmin
 // HR Dashboards & Pages
 import { HrDashboardPage as HRDashboard } from '../../features/hr/dashboard/HrDashboardPage';
 import { EmployeeManagement } from '../../features/hr/pages/EmployeeManagement';
+import { EmployeeProfilePage } from '../../features/hr/pages/EmployeeProfilePage';
 import { AttendanceManagement } from '../../features/hr/pages/AttendanceManagement';
 import { RecruitmentManagement } from '../../features/hr/pages/RecruitmentManagement';
 import { LeaveManagement } from '../../features/hr/pages/LeaveManagement';
@@ -84,6 +85,10 @@ import { SkillOverviewPage } from '../../features/analytics/pages/SkillOverviewP
 import { SkillGapsPage } from '../../features/analytics/pages/SkillGapsPage';
 import { SkillCoveragePage } from '../../features/analytics/pages/SkillCoveragePage';
 import { LandingPage } from '../../pages/LandingPage';
+import { AttendanceOverviewPage } from '../../features/hr/pages/AttendanceOverviewPage';
+import { MonthlyAttendancePage } from '../../features/hr/pages/MonthlyAttendancePage';
+import { ShiftManagementPage } from '../../features/hr/pages/ShiftManagementPage';
+import { LeavePoliciesPage } from '../../features/hr/pages/LeavePoliciesPage';
 
 const DefaultHomeRedirect: React.FC = () => {
   const { role, isAuthenticated } = useAuth();
@@ -164,15 +169,16 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/admin/skills-analytics" element={<RoleGuard allowedRoles={[Role.ADMIN]}><SkillsAnalyticsPage /></RoleGuard>} />
                 <Route path="/admin/teams" element={<RoleGuard allowedRoles={[Role.ADMIN]}><TeamsPage /></RoleGuard>} />
                 <Route path="/admin/organization" element={<RoleGuard allowedRoles={[Role.ADMIN]}><OrganizationPage /></RoleGuard>} />
-                <Route path="/admin/attendance-overview" element={<RoleGuard allowedRoles={[Role.ADMIN]}><OrgOverviewPage /></RoleGuard>} />
+                <Route path="/admin/attendance-overview" element={<RoleGuard allowedRoles={[Role.ADMIN]}><AttendanceOverviewPage /></RoleGuard>} />
                 <Route path="/admin/attendance-history" element={<RoleGuard allowedRoles={[Role.ADMIN]}><AttendanceHistoryPage /></RoleGuard>} />
-                <Route path="/admin/shifts" element={<RoleGuard allowedRoles={[Role.ADMIN]}><ShiftsPage /></RoleGuard>} />
+                <Route path="/admin/shifts" element={<RoleGuard allowedRoles={[Role.ADMIN]}><ShiftManagementPage /></RoleGuard>} />
                 <Route path="/admin/corrections" element={<RoleGuard allowedRoles={[Role.ADMIN]}><AttendanceCorrectionsPage /></RoleGuard>} />
                 <Route path="/admin/approvals" element={<RoleGuard allowedRoles={[Role.ADMIN]}><ApprovalsPage /></RoleGuard>} />
 
                 {/* ==================== 2. HR ROUTES ==================== */}
                 <Route path="/hr/dashboard" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><HRDashboard /></RoleGuard>} />
                 <Route path="/hr/employees" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><EmployeeManagement /></RoleGuard>} />
+                <Route path="/hr/employees/:id" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]}><EmployeeProfilePage /></RoleGuard>} />
                 <Route path="/hr/recruitment" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><RecruitmentManagement /></RoleGuard>} />
                 <Route path="/hr/attendance" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><AttendanceManagement /></RoleGuard>} />
                 <Route path="/hr/leave" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]}><LeaveManagement /></RoleGuard>} />
@@ -192,6 +198,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/hr/departments" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><DepartmentsManagement /></RoleGuard>} />
 
                 {/* HR Analytics & Attendance Subsections */}
+                <Route path="/hr/leave-policies" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><LeavePoliciesPage /></RoleGuard>} />
                 <Route path="/hr/productivity" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><ProductivityAnalyticsPage /></RoleGuard>} />
                 <Route path="/hr/productivity-metrics" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><ProductivityAnalyticsPage /></RoleGuard>} />
                 <Route path="/hr/skills-overview" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><SkillOverviewPage /></RoleGuard>} />
@@ -199,9 +206,9 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/hr/skills-coverage" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><SkillCoveragePage /></RoleGuard>} />
                 <Route path="/hr/risk" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><RiskAnalyticsPage /></RoleGuard>} />
                 <Route path="/hr/teams" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><TeamsPage /></RoleGuard>} />
-                <Route path="/hr/attendance-overview" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><OrgOverviewPage /></RoleGuard>} />
+                <Route path="/hr/attendance-overview" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><AttendanceOverviewPage /></RoleGuard>} />
                 <Route path="/hr/attendance-history" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><AttendanceHistoryPage /></RoleGuard>} />
-                <Route path="/hr/shifts" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><ShiftsPage /></RoleGuard>} />
+                <Route path="/hr/shifts" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><ShiftManagementPage /></RoleGuard>} />
                 <Route path="/hr/corrections" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><AttendanceCorrectionsPage /></RoleGuard>} />
                 <Route path="/hr/approvals" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><ApprovalsPage /></RoleGuard>} />
                 <Route path="/hr/performance-overview" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><PerformanceOverviewPage /></RoleGuard>} />
@@ -238,13 +245,13 @@ export const AppRoutes: React.FC = () => {
                 {/* ==================== 4. TEAM LEAD ROUTES (SPEC SECTION 16) ==================== */}
                 <Route path="/team/dashboard" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><TeamLeadDashboard /></RoleGuard>} />
                 <Route path="/team/members" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><TeamMembersPage /></RoleGuard>} />
-                <Route path="/team/attendance" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><MyAttendance /></RoleGuard>} />
+                <Route path="/team/attendance" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><MonthlyAttendancePage /></RoleGuard>} />
                 <Route path="/team/goals" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><TaskTrackingPage /></RoleGuard>} />
                 <Route path="/team/analytics" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><Productivity /></RoleGuard>} />
 
                 <Route path="/team-lead/dashboard" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><TeamLeadDashboard /></RoleGuard>} />
                 <Route path="/team-lead/tasks" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><TaskTrackingPage /></RoleGuard>} />
-                <Route path="/team-lead/attendance" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><MyAttendance /></RoleGuard>} />
+                <Route path="/team-lead/attendance" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><MonthlyAttendancePage /></RoleGuard>} />
                 <Route path="/team-lead/productivity" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><Productivity /></RoleGuard>} />
                 <Route path="/team-lead/performance" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><TeamMembersPage /></RoleGuard>} />
                 <Route path="/team-lead/feedback" element={<RoleGuard allowedRoles={[Role.TEAM_LEAD, Role.ADMIN]}><FeedbackManagement /></RoleGuard>} />
@@ -266,7 +273,7 @@ export const AppRoutes: React.FC = () => {
                 {/* ==================== 5. EMPLOYEE ROUTES (SPEC SECTION 16) ==================== */}
                 <Route path="/me/dashboard" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeDashboard /></RoleGuard>} />
                 <Route path="/me/profile" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
-                <Route path="/me/attendance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyAttendance /></RoleGuard>} />
+                <Route path="/me/attendance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MonthlyAttendancePage /></RoleGuard>} />
                 <Route path="/me/leave" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
                 <Route path="/me/absence" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><AbsenceManagementPage /></RoleGuard>} />
                 <Route path="/me/requests" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
@@ -275,7 +282,7 @@ export const AppRoutes: React.FC = () => {
 
                 <Route path="/employee/dashboard" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeDashboard /></RoleGuard>} />
                 <Route path="/employee/profile" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
-                <Route path="/employee/attendance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyAttendance /></RoleGuard>} />
+                <Route path="/employee/attendance" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MonthlyAttendancePage /></RoleGuard>} />
                 <Route path="/employee/attendance-today" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyAttendance /></RoleGuard>} />
                 <Route path="/employee/check-in-out" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyAttendance /></RoleGuard>} />
                 <Route path="/employee/break" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyAttendance /></RoleGuard>} />

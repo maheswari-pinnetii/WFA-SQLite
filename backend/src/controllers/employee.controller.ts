@@ -289,3 +289,231 @@ export const anonymizeEmployeeData = async (req: any, res: any) => {
     return handleControllerError(err, req, res, 'employee.anonymizeEmployeeData', 500, 'Failed to anonymize employee data.');
   }
 };
+
+// ─── PHASE 1: Employee Master Sub-resources ───────────────────────────────────
+import * as empMaster from '../services/employee-master.service.js';
+
+export const getFullProfile = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const orgId = getOrganizationId(req);
+    const canViewAll = ['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD'].includes(req.user.role);
+    if (!canViewAll && req.user.id !== id) {
+      return res.status(403).json({ success: false, message: 'Forbidden.' });
+    }
+    const profile = await empMaster.getFullEmployeeProfile(id, orgId);
+    if (!profile) return res.status(404).json({ success: false, message: 'Employee not found.' });
+    return res.json({ success: true, data: profile });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getFullProfile', 500, 'Failed to retrieve employee profile.');
+  }
+};
+
+// Bank Details
+export const getBankDetails = async (req: any, res: any) => {
+  try {
+    const canView = ['ADMIN', 'HR'].includes(req.user.role) || req.user.id === req.params.id;
+    if (!canView) return res.status(403).json({ success: false, message: 'Forbidden.' });
+    const data = await empMaster.getBankDetails(req.params.id, getOrganizationId(req));
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getBankDetails', 500, 'Failed to retrieve bank details.');
+  }
+};
+
+export const upsertBankDetails = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const orgId = getOrganizationId(req);
+    const { accountHolderName, accountNumber, ifscCode, bankName } = req.body;
+    if (!accountHolderName || !accountNumber || !ifscCode || !bankName) {
+      return res.status(400).json({ success: false, message: 'accountHolderName, accountNumber, ifscCode, bankName are required.' });
+    }
+    const data = await empMaster.upsertBankDetails(id, orgId, req.body);
+    logAudit(req.user.id, 'BANK_DETAILS_UPDATED', `Updated bank details for employee ${id}`, orgId);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.upsertBankDetails', 500, 'Failed to update bank details.');
+  }
+};
+
+// Tax Info
+export const getTaxInfo = async (req: any, res: any) => {
+  try {
+    const canView = ['ADMIN', 'HR'].includes(req.user.role) || req.user.id === req.params.id;
+    if (!canView) return res.status(403).json({ success: false, message: 'Forbidden.' });
+    const data = await empMaster.getTaxInfo(req.params.id, getOrganizationId(req));
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getTaxInfo', 500, 'Failed to retrieve tax info.');
+  }
+};
+
+export const upsertTaxInfo = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const orgId = getOrganizationId(req);
+    const data = await empMaster.upsertTaxInfo(id, orgId, req.body);
+    logAudit(req.user.id, 'TAX_INFO_UPDATED', `Updated tax info for employee ${id}`, orgId);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.upsertTaxInfo', 500, 'Failed to update tax info.');
+  }
+};
+
+// Emergency Contacts
+export const getEmergencyContacts = async (req: any, res: any) => {
+  try {
+    const canView = ['ADMIN', 'HR'].includes(req.user.role) || req.user.id === req.params.id;
+    if (!canView) return res.status(403).json({ success: false, message: 'Forbidden.' });
+    const data = await empMaster.getEmergencyContacts(req.params.id, getOrganizationId(req));
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getEmergencyContacts', 500, 'Failed to retrieve emergency contacts.');
+  }
+};
+
+export const addEmergencyContact = async (req: any, res: any) => {
+  try {
+    const { name, relationship, phone } = req.body;
+    if (!name || !relationship || !phone) return res.status(400).json({ success: false, message: 'name, relationship, phone are required.' });
+    const data = await empMaster.addEmergencyContact(req.params.id, getOrganizationId(req), req.body);
+    return res.status(201).json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.addEmergencyContact', 500, 'Failed to add emergency contact.');
+  }
+};
+
+export const updateEmergencyContact = async (req: any, res: any) => {
+  try {
+    const data = await empMaster.updateEmergencyContact(req.params.contactId, getOrganizationId(req), req.body);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.updateEmergencyContact', 500, 'Failed to update emergency contact.');
+  }
+};
+
+export const deleteEmergencyContact = async (req: any, res: any) => {
+  try {
+    await empMaster.deleteEmergencyContact(req.params.contactId, getOrganizationId(req));
+    return res.json({ success: true, message: 'Emergency contact removed.' });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.deleteEmergencyContact', 500, 'Failed to delete emergency contact.');
+  }
+};
+
+// Skills
+export const getSkills = async (req: any, res: any) => {
+  try {
+    const data = await empMaster.getSkills(req.params.id, getOrganizationId(req));
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getSkills', 500, 'Failed to retrieve skills.');
+  }
+};
+
+export const addSkill = async (req: any, res: any) => {
+  try {
+    if (!req.body.skillName) return res.status(400).json({ success: false, message: 'skillName is required.' });
+    const data = await empMaster.addSkill(req.params.id, getOrganizationId(req), req.body);
+    return res.status(201).json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.addSkill', 500, 'Failed to add skill.');
+  }
+};
+
+export const updateSkill = async (req: any, res: any) => {
+  try {
+    const data = await empMaster.updateSkill(req.params.skillId, getOrganizationId(req), req.body);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.updateSkill', 500, 'Failed to update skill.');
+  }
+};
+
+export const deleteSkill = async (req: any, res: any) => {
+  try {
+    await empMaster.deleteSkill(req.params.skillId, getOrganizationId(req));
+    return res.json({ success: true, message: 'Skill removed.' });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.deleteSkill', 500, 'Failed to delete skill.');
+  }
+};
+
+// Education
+export const getEducation = async (req: any, res: any) => {
+  try {
+    const data = await empMaster.getEducation(req.params.id, getOrganizationId(req));
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getEducation', 500, 'Failed to retrieve education.');
+  }
+};
+
+export const addEducation = async (req: any, res: any) => {
+  try {
+    const { degree, institutionName } = req.body;
+    if (!degree || !institutionName) return res.status(400).json({ success: false, message: 'degree and institutionName are required.' });
+    const data = await empMaster.addEducation(req.params.id, getOrganizationId(req), req.body);
+    return res.status(201).json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.addEducation', 500, 'Failed to add education.');
+  }
+};
+
+export const updateEducation = async (req: any, res: any) => {
+  try {
+    const data = await empMaster.updateEducation(req.params.eduId, getOrganizationId(req), req.body);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.updateEducation', 500, 'Failed to update education.');
+  }
+};
+
+export const deleteEducation = async (req: any, res: any) => {
+  try {
+    await empMaster.deleteEducation(req.params.eduId, getOrganizationId(req));
+    return res.json({ success: true, message: 'Education entry removed.' });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.deleteEducation', 500, 'Failed to delete education.');
+  }
+};
+
+// Experience
+export const getExperience = async (req: any, res: any) => {
+  try {
+    const data = await empMaster.getExperience(req.params.id, getOrganizationId(req));
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getExperience', 500, 'Failed to retrieve experience.');
+  }
+};
+
+export const addExperience = async (req: any, res: any) => {
+  try {
+    const { companyName, startDate } = req.body;
+    if (!companyName || !startDate) return res.status(400).json({ success: false, message: 'companyName and startDate are required.' });
+    const data = await empMaster.addExperience(req.params.id, getOrganizationId(req), req.body);
+    return res.status(201).json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.addExperience', 500, 'Failed to add experience.');
+  }
+};
+
+export const updateExperience = async (req: any, res: any) => {
+  try {
+    const data = await empMaster.updateExperience(req.params.expId, getOrganizationId(req), req.body);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.updateExperience', 500, 'Failed to update experience.');
+  }
+};
+
+export const deleteExperience = async (req: any, res: any) => {
+  try {
+    await empMaster.deleteExperience(req.params.expId, getOrganizationId(req));
+    return res.json({ success: true, message: 'Experience entry removed.' });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.deleteExperience', 500, 'Failed to delete experience.');
+  }
+};

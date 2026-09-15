@@ -229,9 +229,47 @@ const initLocalSchema = (db: BetterSqlite3.Database) => {
       );
       CREATE TABLE IF NOT EXISTS payslips (
         id TEXT PRIMARY KEY, payrollRunId TEXT NOT NULL, employeeId TEXT NOT NULL, basicPay REAL NOT NULL, totalEarnings REAL NOT NULL,
-        totalDeductions REAL NOT NULL, netPay REAL NOT NULL, status TEXT DEFAULT 'GENERATED',
+        totalDeductions REAL NOT NULL, pfAmount REAL DEFAULT 0, esiAmount REAL DEFAULT 0, ptAmount REAL DEFAULT 0, tdsAmount REAL DEFAULT 0, netPay REAL NOT NULL, status TEXT DEFAULT 'GENERATED',
         FOREIGN KEY (payrollRunId) REFERENCES payroll_runs(id) ON DELETE CASCADE, FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
       );
+
+      -- Phase 5: Indian Compliance
+      CREATE TABLE IF NOT EXISTS tax_slabs (
+        id TEXT PRIMARY KEY,
+        financialYear TEXT NOT NULL,
+        regime TEXT NOT NULL,
+        incomeFrom REAL,
+        incomeTo REAL,
+        rate REAL,
+        surchargeRate REAL DEFAULT 0,
+        organizationId TEXT DEFAULT 'org-stackly',
+        createdAt TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS statutory_config (
+        id TEXT PRIMARY KEY,
+        configKey TEXT NOT NULL,
+        financialYear TEXT,
+        stateCode TEXT,
+        value REAL,
+        effectiveFrom TEXT,
+        organizationId TEXT DEFAULT 'org-stackly',
+        createdAt TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS investment_declarations (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT,
+        financialYear TEXT,
+        section TEXT,
+        declaredAmount REAL,
+        actualAmount REAL,
+        proofDocumentId TEXT,
+        status TEXT DEFAULT 'PENDING',
+        createdAt TEXT,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+
 
       -- Phase 3: Leave Policy & Recruitment
       CREATE TABLE IF NOT EXISTS leave_types (
@@ -240,6 +278,32 @@ const initLocalSchema = (db: BetterSqlite3.Database) => {
       CREATE TABLE IF NOT EXISTS leave_balances (
         id TEXT PRIMARY KEY, employeeId TEXT NOT NULL, leaveTypeId TEXT NOT NULL, year INTEGER NOT NULL, allocated INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0,
         organizationId TEXT DEFAULT 'org-stackly', FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE, FOREIGN KEY (leaveTypeId) REFERENCES leave_types(id) ON DELETE CASCADE
+      );
+      CREATE TABLE IF NOT EXISTS leave_policies (
+        id TEXT PRIMARY KEY, organizationId TEXT DEFAULT 'org-stackly', 
+        name TEXT NOT NULL, description TEXT, leaveTypeId TEXT NOT NULL,
+        accrualRate REAL NOT NULL, accrualFrequency TEXT DEFAULT 'MONTHLY',
+        maxCarryForward INTEGER DEFAULT 0, isProRata INTEGER DEFAULT 1,
+        FOREIGN KEY (leaveTypeId) REFERENCES leave_types(id) ON DELETE CASCADE
+      );
+      CREATE TABLE IF NOT EXISTS leave_requests (
+        id TEXT PRIMARY KEY, organizationId TEXT DEFAULT 'org-stackly',
+        employeeId TEXT NOT NULL, leaveTypeId TEXT NOT NULL,
+        startDate TEXT NOT NULL, endDate TEXT NOT NULL,
+        isHalfDay INTEGER DEFAULT 0, halfDayPeriod TEXT,
+        status TEXT DEFAULT 'PENDING', reason TEXT,
+        approvedBy TEXT, approvedAt TEXT,
+        createdAt TEXT NOT NULL, updatedAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE,
+        FOREIGN KEY (leaveTypeId) REFERENCES leave_types(id) ON DELETE CASCADE
+      );
+      CREATE TABLE IF NOT EXISTS leave_accruals (
+        id TEXT PRIMARY KEY, organizationId TEXT DEFAULT 'org-stackly',
+        employeeId TEXT NOT NULL, leaveTypeId TEXT NOT NULL,
+        amount REAL NOT NULL, reason TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE,
+        FOREIGN KEY (leaveTypeId) REFERENCES leave_types(id) ON DELETE CASCADE
       );
       CREATE TABLE IF NOT EXISTS holidays (
         id TEXT PRIMARY KEY, organizationId TEXT DEFAULT 'org-stackly', name TEXT NOT NULL, date TEXT NOT NULL, type TEXT DEFAULT 'PUBLIC'
@@ -329,6 +393,274 @@ const initLocalSchema = (db: BetterSqlite3.Database) => {
       );
       CREATE INDEX IF NOT EXISTS idx_training_enrollments_emp ON training_enrollments(employeeId);
       CREATE INDEX IF NOT EXISTS idx_training_enrollments_course ON training_enrollments(courseId, status);
+
+      -- ============================================================
+      -- PHASE 1: ORGANIZATION STRUCTURE
+      -- ============================================================
+      CREATE TABLE IF NOT EXISTS org_locations (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        name TEXT NOT NULL,
+        code TEXT,
+        address TEXT,
+        city TEXT,
+        state TEXT,
+        country TEXT DEFAULT 'India',
+        pincode TEXT,
+        timezone TEXT DEFAULT 'Asia/Kolkata',
+        isHeadquarters INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'ACTIVE',
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_org_locations_org ON org_locations(organizationId, status);
+
+      CREATE TABLE IF NOT EXISTS designations (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        title TEXT NOT NULL,
+        code TEXT,
+        departmentId TEXT,
+        jobLevelId TEXT,
+        description TEXT,
+        status TEXT DEFAULT 'ACTIVE',
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_designations_org ON designations(organizationId, status);
+
+      CREATE TABLE IF NOT EXISTS job_levels (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        name TEXT NOT NULL,
+        code TEXT NOT NULL,
+        band TEXT,
+        minCtc REAL,
+        maxCtc REAL,
+        description TEXT,
+        status TEXT DEFAULT 'ACTIVE',
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS cost_centers (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        name TEXT NOT NULL,
+        code TEXT NOT NULL UNIQUE,
+        description TEXT,
+        headId TEXT,
+        parentId TEXT,
+        status TEXT DEFAULT 'ACTIVE',
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS org_policies (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        policyType TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        config TEXT NOT NULL DEFAULT '{}',
+        effectiveFrom TEXT,
+        status TEXT DEFAULT 'ACTIVE',
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_org_policies_type ON org_policies(organizationId, policyType, status);
+
+      -- ============================================================
+      -- PHASE 1: EMPLOYEE MASTER EXTENSION TABLES
+      -- ============================================================
+      CREATE TABLE IF NOT EXISTS employee_bank_details (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT NOT NULL UNIQUE,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        accountHolderName TEXT NOT NULL,
+        accountNumber TEXT NOT NULL,
+        ifscCode TEXT NOT NULL,
+        bankName TEXT NOT NULL,
+        branchName TEXT,
+        accountType TEXT DEFAULT 'SAVINGS',
+        isPrimary INTEGER DEFAULT 1,
+        isVerified INTEGER DEFAULT 0,
+        verifiedAt TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS employee_tax_info (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT NOT NULL UNIQUE,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        panNumber TEXT,
+        aadhaarReference TEXT,
+        taxRegime TEXT DEFAULT 'new',
+        pfAccountNumber TEXT,
+        esiNumber TEXT,
+        ptExempt INTEGER DEFAULT 0,
+        ptExemptReason TEXT,
+        financialYear TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS employee_emergency_contacts (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT NOT NULL,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        name TEXT NOT NULL,
+        relationship TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        alternatePhone TEXT,
+        address TEXT,
+        isPrimary INTEGER DEFAULT 0,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_emp_emergency_contacts ON employee_emergency_contacts(employeeId);
+
+      CREATE TABLE IF NOT EXISTS employee_skills (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT NOT NULL,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        skillName TEXT NOT NULL,
+        category TEXT,
+        proficiencyLevel TEXT DEFAULT 'INTERMEDIATE',
+        yearsOfExperience REAL,
+        certificationId TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_emp_skills ON employee_skills(employeeId);
+
+      CREATE TABLE IF NOT EXISTS employee_education (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT NOT NULL,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        degree TEXT NOT NULL,
+        fieldOfStudy TEXT,
+        institutionName TEXT NOT NULL,
+        boardOrUniversity TEXT,
+        startYear INTEGER,
+        endYear INTEGER,
+        grade TEXT,
+        percentage REAL,
+        isPrimary INTEGER DEFAULT 0,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_emp_education ON employee_education(employeeId);
+
+      CREATE TABLE IF NOT EXISTS employee_experience (
+        id TEXT PRIMARY KEY,
+        employeeId TEXT NOT NULL,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        companyName TEXT NOT NULL,
+        designation TEXT,
+        department TEXT,
+        startDate TEXT NOT NULL,
+        endDate TEXT,
+        isCurrent INTEGER DEFAULT 0,
+        location TEXT,
+        responsibilities TEXT,
+        reasonForLeaving TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_emp_experience ON employee_experience(employeeId);
+
+      -- ============================================================
+      -- PHASE 2: ATTENDANCE EVENTS & SCHEDULING
+      -- ============================================================
+
+      -- Full event-sourced attendance punch log
+      CREATE TABLE IF NOT EXISTS attendance_events (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        employeeId TEXT NOT NULL,
+        eventType TEXT NOT NULL,
+        eventTimestamp TEXT NOT NULL,
+        latitude REAL,
+        longitude REAL,
+        accuracy REAL,
+        ipAddress TEXT,
+        deviceId TEXT,
+        shiftId TEXT,
+        isLate INTEGER DEFAULT 0,
+        isEarlyCheckout INTEGER DEFAULT 0,
+        source TEXT DEFAULT 'web',
+        notes TEXT,
+        createdAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_att_events_emp_date ON attendance_events(employeeId, eventTimestamp);
+      CREATE INDEX IF NOT EXISTS idx_att_events_org_date ON attendance_events(organizationId, eventTimestamp);
+
+      -- Monthly attendance summary — fed into payroll for LOP
+      CREATE TABLE IF NOT EXISTS attendance_monthly_summary (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        employeeId TEXT NOT NULL,
+        month TEXT NOT NULL,
+        presentDays INTEGER DEFAULT 0,
+        absentDays INTEGER DEFAULT 0,
+        lateDays INTEGER DEFAULT 0,
+        halfDays INTEGER DEFAULT 0,
+        lopDays REAL DEFAULT 0,
+        totalHours REAL DEFAULT 0,
+        overtimeHours REAL DEFAULT 0,
+        workingDays INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'DRAFT',
+        computedAt TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        UNIQUE(employeeId, month),
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_att_monthly_emp ON attendance_monthly_summary(employeeId, month);
+      CREATE INDEX IF NOT EXISTS idx_att_monthly_org ON attendance_monthly_summary(organizationId, month);
+
+      -- Shifts definition table
+      CREATE TABLE IF NOT EXISTS shifts (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        name TEXT NOT NULL,
+        shiftType TEXT DEFAULT 'fixed',
+        startTime TEXT NOT NULL,
+        endTime TEXT NOT NULL,
+        breakDurationMinutes INTEGER DEFAULT 60,
+        gracePeriodMinutes INTEGER DEFAULT 15,
+        workHoursPerDay REAL DEFAULT 8,
+        weekOffDays TEXT DEFAULT '["Saturday","Sunday"]',
+        isFlexible INTEGER DEFAULT 0,
+        isActive INTEGER DEFAULT 1,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_shifts_org ON shifts(organizationId, isActive);
+
+      -- Employee shift assignments
+      CREATE TABLE IF NOT EXISTS employee_shift_assignments (
+        id TEXT PRIMARY KEY,
+        organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+        employeeId TEXT NOT NULL,
+        shiftId TEXT NOT NULL,
+        effectiveFrom TEXT NOT NULL,
+        effectiveTo TEXT,
+        assignedBy TEXT,
+        createdAt TEXT NOT NULL,
+        FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE,
+        FOREIGN KEY (shiftId) REFERENCES shifts(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_shift_assign_emp ON employee_shift_assignments(employeeId, effectiveFrom);
     `);
   } catch (err: any) {
     console.warn('[Database] Warning: Failed to execute initLocalSchema:', err?.message || err);

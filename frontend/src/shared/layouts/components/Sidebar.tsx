@@ -47,6 +47,7 @@ import {
   Search,
   X,
   Palmtree,
+  Settings
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -204,6 +205,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Overview', path: '/hr/attendance-overview', icon: <Calendar size={18} strokeWidth={2} className="text-emerald-400" /> },
           { label: 'Leave Management', path: '/hr/leaves', icon: <Palmtree size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'Leave Policies', path: '/hr/leave-policies', icon: <Settings size={18} strokeWidth={2} className="text-rose-400" /> },
           { label: 'Public Holidays (2026)', path: '/employee/holidays', icon: <Calendar size={18} strokeWidth={2} className="text-amber-400" />, badge: { text: '12 Days', variant: 'amber' } },
           { label: 'Payroll Integration', path: '/hr/payroll-reports', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-teal-400" /> },
           { label: 'Attendance History', path: '/hr/attendance-history', icon: <History size={18} strokeWidth={2} className="text-rose-400" /> },

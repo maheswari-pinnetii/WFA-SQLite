@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { query, execute, transaction } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
 import { AppError, ErrorCode } from '../utils/apiError.js';
+import { ComplianceService } from './compliance.service.js';
 
 export const payrollService = {
 
@@ -94,15 +95,38 @@ export const payrollService = {
           continue;
         }
 
+        // Calculate Calendar Days for the Period
+        const start = new Date(run.periodStart);
+        const end = new Date(run.periodEnd);
+        const totalDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        const monthString = run.periodStart.substring(0, 7); // e.g. "2026-09"
+
+        // Fetch LOP Days from Attendance Summary
+        const attendanceSummary = await query(
+          `SELECT lop_days FROM attendance_monthly_summary 
+           WHERE employee_id = ? AND month = ?`,
+          [emp.id, monthString]
+        ).then(r => r[0]) as any;
+
+        const lopDays = attendanceSummary?.lop_days || 0;
+        const prorationFactor = Math.max(0, (totalDays - lopDays) / totalDays);
+
         const components = Array.isArray(structure.components) ? structure.components : [];
-        const earnings = components
+        
+        // Prorate Earnings (Basic and Allowances)
+        const rawEarnings = components
           .filter((c: any) => c.type === 'EARNING')
           .reduce((sum: number, c: any) => sum + c.amount, 0);
+        
+        const earnings = rawEarnings * prorationFactor;
+
+        // Deductions generally aren't prorated by LOP in basic scenarios (unless it's PF, but that's phase 5)
         const deductions = components
           .filter((c: any) => c.type === 'DEDUCTION')
           .reduce((sum: number, c: any) => sum + c.amount, 0);
 
-        const basicPay = structure.baseSalary;
+        const rawBasicPay = structure.baseSalary;
+        const basicPay = rawBasicPay * prorationFactor;
         const totalEarnings = basicPay + earnings;
         const totalDeductions = deductions;
 
@@ -116,20 +140,28 @@ export const payrollService = {
 
         let overtimePay = 0;
         if (approvedOTRecords?.totalOTHours > 0) {
-          const hourlyRate = basicPay / 160;
+          const hourlyRate = rawBasicPay / 160;
           overtimePay = approvedOTRecords.totalOTHours * hourlyRate * 1.5;
         }
 
-        const netPay = totalEarnings + overtimePay - totalDeductions;
+        // Calculate Statutory Compliance (PF, ESI, PT, TDS)
+        const { employeePF } = await ComplianceService.calculatePF(basicPay);
+        const { employeeESI } = await ComplianceService.calculateESI(totalEarnings + overtimePay);
+        const pt = await ComplianceService.calculatePT(totalEarnings + overtimePay);
+        const tds = await ComplianceService.calculateTDS(totalEarnings + overtimePay);
+
+        const statutoryDeductions = employeePF + employeeESI + pt + tds;
+        const totalDeductionsFinal = totalDeductions + statutoryDeductions;
+        const netPay = totalEarnings + overtimePay - totalDeductionsFinal;
 
         const payslipId = randomUUID();
         await execute(
-          `INSERT OR REPLACE INTO payslips (id, payrollRunId, employeeId, basicPay, totalEarnings, totalDeductions, netPay, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'GENERATED')`,
-          [payslipId, payrollRunId, emp.id, basicPay, totalEarnings + overtimePay, totalDeductions, netPay]
+          `INSERT OR REPLACE INTO payslips (id, payrollRunId, employeeId, basicPay, totalEarnings, totalDeductions, pfAmount, esiAmount, ptAmount, tdsAmount, netPay, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'GENERATED')`,
+          [payslipId, payrollRunId, emp.id, basicPay, totalEarnings + overtimePay, totalDeductionsFinal, employeePF, employeeESI, pt, tds, netPay]
         );
 
-        payslips.push({ employeeId: emp.id, netPay, overtimePay });
+        payslips.push({ employeeId: emp.id, netPay, overtimePay, lopDays, statutoryDeductions });
       }
 
       await execute(
@@ -150,6 +182,17 @@ export const payrollService = {
        WHERE p.employeeId = ? AND pr.organizationId = ?
        ORDER BY pr.runDate DESC`,
       [employeeId, organizationId]
+    );
+  },
+
+  async getRunPayslips(runId: string, organizationId: string) {
+    return query(
+      `SELECT p.*, e.firstName, e.lastName, e.department
+       FROM payslips p 
+       JOIN employees e ON p.employeeId = e.id
+       JOIN payroll_runs pr ON p.payrollRunId = pr.id
+       WHERE p.payrollRunId = ? AND pr.organizationId = ?`,
+      [runId, organizationId]
     );
   },
 

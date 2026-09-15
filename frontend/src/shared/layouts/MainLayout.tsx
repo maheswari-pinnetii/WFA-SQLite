@@ -85,14 +85,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   });
 
-  const getThemeClass = (userRole: string) => {
-    return 'emerald-theme';
-  };
-
-  const themeClass = getThemeClass(role);
 
   return (
-    <div data-role={role} className={`app-shell ${themeClass} h-screen min-h-screen flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
+    <div data-role={role} className={`app-shell h-screen min-h-screen flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
       {/* Accessibility Skip-to-content Link */}
       <a href="#main-content" className="skip-link">
         Skip to main content

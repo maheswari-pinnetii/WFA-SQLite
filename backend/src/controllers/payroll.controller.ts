@@ -62,6 +62,15 @@ export const generatePayslips = async (req: Request, res: Response) => {
   }
 };
 
+export const getRunPayslips = async (req: Request, res: Response) => {
+  try {
+    const data = await payrollService.getRunPayslips(req.params.runId as string, u(req).organizationId);
+    res.json({ success: true, data });
+  } catch (err) {
+    sendError(res, err);
+  }
+};
+
 export const getMyPayslips = async (req: Request, res: Response) => {
   try {
     const data = await payrollService.getPayslips(u(req).id, u(req).organizationId);

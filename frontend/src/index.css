@@ -1,12 +1,12 @@
 :root {
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   
-  --header-height: 4rem; /* 64px, matching Tailwind h-16 */
+  --header-height: 4rem;
   --footer-height: 52px;
   --sidebar-width-expanded: 250px;
   --sidebar-width-collapsed: 72px;
 
-  /* Stackly Enterprise Light Theme */
+  /* Stackly Enterprise — Neutral Light Base */
   --bg-primary: #F8FAFC;
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #F1F5F9;
@@ -19,20 +19,30 @@
   --text-primary: #0F172A;
   --text-secondary: #475569;
   --text-muted: #64748B;
-  
+
+  /* Role-aware accent system — overridden per [data-role] */
+  --role-primary:       #0F172A;
+  --role-hover:         #1E293B;
+  --role-light:         #F1F5F9;
+  --role-bg:            #F8FAFC;
+  --role-text:          #0F172A;
+  --role-shadow:        rgba(15, 23, 42, 0.18);
+  --role-border:        rgba(15, 23, 42, 0.2);
+
+  /* Neutral semantic palette */
   --stackly-blue: #2563EB;
   --stackly-blue-hover: #1D4ED8;
   --stackly-navy: #1E3A8A;
   --accent-cyan: #0284C7;
   --accent-teal: #0D9488;
-  
+
   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 [data-theme='dark'] {
-  /* Stackly Enterprise Dark Navy Theme */
+  /* Stackly Enterprise — Dark Slate Base */
   --bg-primary: #0F172A;
   --bg-secondary: #1E293B;
   --bg-tertiary: #334155;
@@ -105,8 +115,8 @@ input[type="password"]:focus,
 input[type="search"]:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--stackly-blue);
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25);
+  border-color: var(--role-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--role-primary) 22%, transparent);
 }
 
 /* Hide default browser password reveal and clear indicators */
@@ -302,12 +312,14 @@ input::-webkit-credentials-auto-fill-button {
 .btn-lg { padding: 0.625rem 1.25rem; font-size: 0.9375rem; font-weight: 500; border-radius: 8px; }
 
 .btn-primary {
-  background: var(--stackly-blue);
+  background: var(--role-primary);
   color: #ffffff;
   border-color: transparent;
 }
 .btn-primary:hover {
-  background: var(--stackly-blue-hover);
+  background: var(--role-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--role-primary) 35%, transparent);
 }
 
 .btn-danger {
@@ -358,9 +370,9 @@ input::-webkit-credentials-auto-fill-button {
 }
 
 .nav-link-active {
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #064E3B 0%, #059669 100%);
   color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.35);
 }
 
 /* Stackly Role Badges */
@@ -389,7 +401,8 @@ input::-webkit-credentials-auto-fill-button {
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: #6EE7B7; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #34d399; }
 
 /* --------------------------------------------------------------------------
    Stackly visual refresh
@@ -433,13 +446,135 @@ body {
 
 button, input, select, textarea { font: inherit; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 2px solid rgba(37, 99, 235, 0.4);
+  outline: 2px solid color-mix(in srgb, var(--role-primary) 60%, transparent);
   outline-offset: 2px;
 }
 
 .app-shell {
   background: var(--bg-primary) !important;
 }
+
+/* ==========================================================================
+   ROLE IDENTITY SYSTEM
+   Each [data-role] block sets --role-* custom properties.
+   Sidebar active, btn-primary, dashboard hero, badges, KPI accents all
+   consume these tokens automatically — keeping the rest of the UI neutral.
+   ========================================================================== */
+
+/* 👑 Admin — Purple: Authority, control, system */
+[data-role='ADMIN'] {
+  --role-primary:  #7C3AED;
+  --role-hover:    #6D28D9;
+  --role-light:    #F3E8FF;
+  --role-bg:       #FAF5FF;
+  --role-text:     #581C87;
+  --role-shadow:   rgba(124, 58, 237, 0.22);
+  --role-border:   rgba(124, 58, 237, 0.28);
+  --dashboard-accent:       #7C3AED;
+  --dashboard-accent-strong: #6D28D9;
+  --dashboard-accent-soft:  rgba(124, 58, 237, 0.12);
+}
+
+/* 👩‍💼 HR — Rose: People, care, engagement */
+[data-role='HR'] {
+  --role-primary:  #E11D48;
+  --role-hover:    #BE123C;
+  --role-light:    #FFE4E6;
+  --role-bg:       #FFF1F2;
+  --role-text:     #881337;
+  --role-shadow:   rgba(225, 29, 72, 0.22);
+  --role-border:   rgba(225, 29, 72, 0.28);
+  --dashboard-accent:       #E11D48;
+  --dashboard-accent-strong: #BE123C;
+  --dashboard-accent-soft:  rgba(225, 29, 72, 0.10);
+}
+
+/* 📊 Manager — Blue: Leadership, analytics */
+[data-role='MANAGER'] {
+  --role-primary:  #2563EB;
+  --role-hover:    #1D4ED8;
+  --role-light:    #DBEAFE;
+  --role-bg:       #EFF6FF;
+  --role-text:     #1E3A8A;
+  --role-shadow:   rgba(37, 99, 235, 0.22);
+  --role-border:   rgba(37, 99, 235, 0.28);
+  --dashboard-accent:       #2563EB;
+  --dashboard-accent-strong: #1D4ED8;
+  --dashboard-accent-soft:  rgba(37, 99, 235, 0.12);
+}
+
+/* 🎯 Team Lead — Emerald: Growth, teamwork, execution */
+[data-role='TEAM_LEAD'] {
+  --role-primary:  #059669;
+  --role-hover:    #047857;
+  --role-light:    #D1FAE5;
+  --role-bg:       #ECFDF5;
+  --role-text:     #064E3B;
+  --role-shadow:   rgba(5, 150, 105, 0.22);
+  --role-border:   rgba(5, 150, 105, 0.28);
+  --dashboard-accent:       #059669;
+  --dashboard-accent-strong: #047857;
+  --dashboard-accent-soft:  rgba(5, 150, 105, 0.12);
+}
+
+/* 👤 Employee — Amber: Productivity, activity, recognition */
+[data-role='EMPLOYEE'] {
+  --role-primary:  #D97706;
+  --role-hover:    #B45309;
+  --role-light:    #FEF3C7;
+  --role-bg:       #FFFBEB;
+  --role-text:     #78350F;
+  --role-shadow:   rgba(217, 119, 6, 0.22);
+  --role-border:   rgba(217, 119, 6, 0.28);
+  --dashboard-accent:       #D97706;
+  --dashboard-accent-strong: #B45309;
+  --dashboard-accent-soft:  rgba(217, 119, 6, 0.12);
+}
+
+/* ---- Role-aware sidebar background ---- */
+[data-role='ADMIN']     .app-sidebar { background: linear-gradient(180deg, #1E0938 0%, #13042A 100%) !important; border-right-color: rgba(124, 58, 237, 0.22) !important; }
+[data-role='HR']        .app-sidebar { background: linear-gradient(180deg, #2D0414 0%, #1A0209 100%) !important; border-right-color: rgba(225, 29, 72, 0.22) !important; }
+[data-role='MANAGER']   .app-sidebar { background: linear-gradient(180deg, #0B1E4A 0%, #071228 100%) !important; border-right-color: rgba(37, 99, 235, 0.22) !important; }
+[data-role='TEAM_LEAD'] .app-sidebar { background: linear-gradient(180deg, #012F21 0%, #010F0B 100%) !important; border-right-color: rgba(5, 150, 105, 0.22) !important; }
+[data-role='EMPLOYEE']  .app-sidebar { background: linear-gradient(180deg, #271700 0%, #160C00 100%) !important; border-right-color: rgba(217, 119, 6, 0.22) !important; }
+
+/* ---- Role-aware sidebar radial accent glow ---- */
+[data-role='ADMIN']     .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(124, 58, 237, 0.22), transparent 68%); }
+[data-role='HR']        .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(225, 29, 72, 0.22), transparent 68%); }
+[data-role='MANAGER']   .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.22), transparent 68%); }
+[data-role='TEAM_LEAD'] .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(5, 150, 105, 0.22), transparent 68%); }
+[data-role='EMPLOYEE']  .app-sidebar::before { background: radial-gradient(circle at 20% 0%, rgba(217, 119, 6, 0.22), transparent 68%); }
+
+/* ---- Role-aware active nav link ---- */
+.sidebar-nav-link.is-active {
+  background: linear-gradient(135deg, var(--role-primary) 0%, var(--role-hover) 100%) !important;
+  border-color: color-mix(in srgb, var(--role-primary) 60%, transparent) !important;
+  box-shadow: 0 4px 16px var(--role-shadow) !important;
+  color: #ffffff !important;
+}
+
+/* ---- Role-aware sidebar nav hover ---- */
+.sidebar-nav-link:hover {
+  border-color: color-mix(in srgb, var(--role-primary) 50%, transparent) !important;
+  background: color-mix(in srgb, var(--role-primary) 14%, transparent) !important;
+}
+
+/* ---- Role-aware dashboard hero ---- */
+[data-role='ADMIN']     .dashboard-hero { background: linear-gradient(135deg, #1E0938 0%, #4C1D95 52%, #7C3AED 100%) !important; }
+[data-role='HR']        .dashboard-hero { background: linear-gradient(135deg, #4C0519 0%, #9F1239 52%, #E11D48 100%) !important; }
+[data-role='MANAGER']   .dashboard-hero { background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 52%, #2563EB 100%) !important; }
+[data-role='TEAM_LEAD'] .dashboard-hero { background: linear-gradient(135deg, #064E3B 0%, #047857 52%, #059669 100%) !important; }
+[data-role='EMPLOYEE']  .dashboard-hero { background: linear-gradient(135deg, #451A03 0%, #92400E 52%, #D97706 100%) !important; }
+
+/* ---- Role badges — keep existing color system but wire to role context ---- */
+[data-role='ADMIN']     .badge-admin    { background: rgba(124, 58, 237, 0.12); color: #7C3AED; border-color: rgba(124, 58, 237, 0.3); }
+[data-role='HR']        .badge-hr       { background: rgba(225, 29, 72, 0.12); color: #E11D48; border-color: rgba(225, 29, 72, 0.3); }
+[data-role='MANAGER']   .badge-manager  { background: rgba(37, 99, 235, 0.12); color: #2563EB; border-color: rgba(37, 99, 235, 0.3); }
+[data-role='TEAM_LEAD'] .badge-lead     { background: rgba(5, 150, 105, 0.12); color: #059669; border-color: rgba(5, 150, 105, 0.3); }
+[data-role='EMPLOYEE']  .badge-employee { background: rgba(217, 119, 6, 0.12); color: #D97706; border-color: rgba(217, 119, 6, 0.3); }
+
+/* ---- KPI card accent icon shell ---- */
+.kpi-icon-shell { color: var(--role-primary) !important; background: color-mix(in srgb, var(--role-primary) 10%, transparent) !important; }
 
 .app-header {
   height: var(--header-height) !important;
@@ -650,9 +785,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   width: 220px !important;
   min-width: 220px !important;
   background:
-    radial-gradient(circle at 15% 0%, rgba(37, 99, 235, 0.12), transparent 16rem),
-    linear-gradient(180deg, #0b1628 0%, #07101d 100%) !important;
-  border-right-color: rgba(148, 163, 184, 0.16) !important;
+    radial-gradient(circle at 15% 0%, rgba(16, 185, 129, 0.18), transparent 16rem),
+    linear-gradient(180deg, #022C22 0%, #011a15 100%) !important;
+  border-right-color: rgba(52, 211, 153, 0.16) !important;
 }
 .app-sidebar[class*="w-[64px]"] {
   width: 64px !important;
@@ -668,17 +803,17 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   min-height: 5.15rem;
   padding: 0.8rem !important;
   background:
-    linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(52, 211, 153, 0.045)),
-    rgba(5, 15, 29, 0.72) !important;
-  border: 1px solid rgba(191, 219, 254, 0.42) !important;
+    linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(52, 211, 153, 0.06)),
+    rgba(1, 26, 21, 0.82) !important;
+  border: 1px solid rgba(52, 211, 153, 0.42) !important;
   border-radius: 1rem !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 25px rgba(2, 8, 23, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 25px rgba(1, 26, 21, 0.22);
 }
 .sidebar-profile-trigger:hover {
-  border-color: rgba(52, 211, 153, 0.58) !important;
+  border-color: rgba(52, 211, 153, 0.65) !important;
   background:
-    linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(52, 211, 153, 0.08)),
-    rgba(5, 15, 29, 0.82) !important;
+    linear-gradient(135deg, rgba(16, 185, 129, 0.26), rgba(52, 211, 153, 0.10)),
+    rgba(1, 26, 21, 0.92) !important;
 }
 .sidebar-profile-trigger img { border-color: #34d399 !important; }
 .sidebar-profile-trigger .text-white { color: #f3f8ff !important; }
@@ -710,21 +845,21 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .sidebar-nav { padding: 0 0.9rem !important; }
 .sidebar-nav-link {
   min-height: 3.05rem;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border: 1px solid rgba(52, 211, 153, 0.15) !important;
   border-radius: 1rem !important;
-  background: rgba(7, 16, 29, 0.34);
-  color: #9eb0c7 !important;
+  background: rgba(1, 26, 21, 0.40);
+  color: #6EE7B7 !important;
 }
 .sidebar-nav-link:hover {
-  border-color: rgba(96, 165, 250, 0.48) !important;
-  background: rgba(37, 99, 235, 0.11) !important;
-  color: #edf5ff !important;
+  border-color: rgba(52, 211, 153, 0.5) !important;
+  background: rgba(16, 185, 129, 0.14) !important;
+  color: #ECFDF5 !important;
   transform: translateX(2px);
 }
 .sidebar-nav-link[class*="from-blue-600"] {
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
-  border-color: rgba(147, 197, 253, 0.52) !important;
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  border-color: rgba(52, 211, 153, 0.52) !important;
+  box-shadow: 0 12px 24px rgba(5, 150, 105, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
   color: #ffffff !important;
 }
 .sidebar-nav-link[class*="from-blue-600"]::before {
@@ -773,19 +908,19 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .sidebar-upgrade {
   padding: 1rem !important;
   background:
-    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.18), transparent 9rem),
-    rgba(7, 16, 29, 0.76) !important;
-  border-color: rgba(148, 163, 184, 0.3) !important;
+    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.22), transparent 9rem),
+    rgba(1, 26, 21, 0.82) !important;
+  border-color: rgba(52, 211, 153, 0.3) !important;
   border-radius: 1rem !important;
 }
-.sidebar-upgrade .text-white { color: #eef6ff !important; }
-.sidebar-upgrade .text-slate-400 { color: #8fa3bd !important; }
+.sidebar-upgrade .text-white { color: #ECFDF5 !important; }
+.sidebar-upgrade .text-slate-400 { color: #6EE7B7 !important; }
 .sidebar-upgrade button {
   min-height: 2.55rem;
-  background: linear-gradient(135deg, #2563eb, #4f46e5) !important;
+  background: linear-gradient(135deg, #059669, #047857) !important;
   border: 0 !important;
   color: #ffffff !important;
-  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.28) !important;
+  box-shadow: 0 10px 20px rgba(5, 150, 105, 0.32) !important;
 }
 .sidebar-upgrade button:hover { filter: brightness(1.1); transform: translateY(-1px); }
 
@@ -1058,23 +1193,26 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   min-width: var(--sidebar-width-collapsed) !important;
 }
 .app-sidebar {
-  --sidebar-accent: #60a5fa;
-  --sidebar-accent-strong: #2563eb;
-  --sidebar-accent-soft: rgba(96, 165, 250, 0.14);
-  --sidebar-ink: #dbeafe;
+  --sidebar-accent: #34d399;
+  --sidebar-accent-strong: #059669;
+  --sidebar-accent-soft: rgba(52, 211, 153, 0.15);
+  --sidebar-ink: #d1fae5;
   overflow: hidden;
   background: var(--surface) !important;
   border-right: 1px solid var(--line) !important;
-  box-shadow: 18px 0 48px rgba(2, 8, 23, 0.12) !important;
+  box-shadow: 18px 0 48px rgba(1, 26, 21, 0.18) !important;
   margin: 0 !important;
   margin-top: 0 !important;
   margin-right: 0 !important;
   padding-right: 0 !important;
   box-sizing: border-box !important;
   flex-shrink: 0;
-  height: 100% !important;
-  min-height: 100% !important;
-  align-self: stretch !important;
+  /* Sticky: overrides height 100% set above */
+  position: sticky !important;
+  top: 0 !important;
+  height: calc(100vh - var(--header-height)) !important;
+  min-height: calc(100vh - var(--header-height)) !important;
+  align-self: flex-start !important;
 }
 .app-sidebar * {
   box-sizing: border-box;
@@ -1105,8 +1243,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-sidebar.sidebar-accent-emerald { --sidebar-accent: #34d399; --sidebar-accent-strong: #059669; --sidebar-accent-soft: rgba(52, 211, 153, 0.15); --sidebar-ink: #d1fae5; }
 
 [data-theme='light'] .app-sidebar {
-  background: var(--bg-primary) !important;
-  box-shadow: 14px 0 35px rgba(15, 23, 42, 0.08) !important;
+  background: linear-gradient(180deg, #022C22 0%, #011a15 100%) !important;
+  box-shadow: 14px 0 35px rgba(1, 26, 21, 0.12) !important;
 }
 [data-theme='dark'] .app-sidebar {
   background: var(--bg-primary) !important;
@@ -1259,9 +1397,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 .sidebar-nav-link.is-active {
   color: #ffffff !important;
-  border-color: #2563eb !important;
-  background: #2563eb !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  border-color: #059669 !important;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4) !important;
   border-radius: 6px !important;
   width: calc(100% - 8px) !important;
   margin: 2px auto !important;

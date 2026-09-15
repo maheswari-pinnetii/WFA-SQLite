@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { AppDispatch } from '../../../app/store';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
@@ -12,6 +13,7 @@ import { Button } from '../../../shared/components/Button';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 
 export const EmployeeManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -201,10 +203,15 @@ export const EmployeeManagement: React.FC = () => {
     },
     {
       header: 'Actions',
-      cell: () => (
-        <div className="flex items-center gap-3 text-slate-400 cursor-pointer select-none">
-          <span className="hover:text-slate-200 transition-colors" title="View details">👁</span>
-          <span className="hover:text-slate-200 transition-colors text-lg" title="More options">⋮</span>
+      cell: (emp: Employee) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(`/hr/employees/${emp.id}`)}
+            className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
+            style={{ background: 'var(--role-light)', color: 'var(--role-primary)' }}
+            title="View full profile">
+            View Profile
+          </button>
         </div>
       )
     }

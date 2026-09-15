@@ -212,6 +212,41 @@ export const initDb = async (): Promise<void> => {
           try { await execute('ALTER TABLE mfachallenges ADD COLUMN last_resend_at TEXT'); } catch (e) {}
         }
 
+        // ============================================================
+        // PHASE 1: EMPLOYEE MASTER FIELD MIGRATIONS
+        // ============================================================
+        const empCols: [string, string][] = [
+          ['grade',              'TEXT'],
+          ['jobLevelId',         'TEXT'],
+          ['costCenterId',       'TEXT'],
+          ['locationId',         'TEXT'],
+          ['workMode',           "TEXT DEFAULT 'office'"],
+          ['shiftId',            'TEXT'],
+          ['taxRegime',          "TEXT DEFAULT 'new'"],
+          ['pfAccountNumber',    'TEXT'],
+          ['esiNumber',          'TEXT'],
+          ['panReference',       'TEXT'],
+          ['aadhaarReference',   'TEXT'],
+          ['designationId',      'TEXT'],
+          ['dateOfBirth',        'TEXT'],
+          ['gender',             'TEXT'],
+          ['bloodGroup',         'TEXT'],
+          ['personalEmail',      'TEXT'],
+          ['alternatePhone',     'TEXT'],
+          ['permanentAddress',   'TEXT'],
+          ['currentAddress',     'TEXT'],
+          ['confirmationDate',   'TEXT'],
+          ['probationEndDate',   'TEXT'],
+          ['noticePeriodDays',   'INTEGER DEFAULT 30'],
+          ['exitDate',           'TEXT'],
+          ['exitReason',         'TEXT'],
+        ];
+        for (const [col, colDef] of empCols) {
+          if (!(await columnExists('employees', col))) {
+            try { await execute(`ALTER TABLE employees ADD COLUMN ${col} ${colDef}`); } catch (e) {}
+          }
+        }
+
         // AI Insights Table
         await execute(`
           CREATE TABLE IF NOT EXISTS ai_insights (

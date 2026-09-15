@@ -14,6 +14,7 @@ import { useRealtimeAttendance } from '../../../hooks/useRealtimeAttendance';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { UserCheck, Users, Briefcase, FileText, Plus, Clock, HeartHandshake, Star, AlertTriangle, DollarSign, Filter, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { TeamLeaveCalendar } from '../components/TeamLeaveCalendar';
 
 export const HrDashboardOverview: React.FC<{ getGreeting: () => string; firstName: string }> = ({ getGreeting, firstName }) => (
   <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
@@ -294,7 +295,14 @@ export const HrDashboardPage: React.FC = () => {
           teamFilter={teamFilter}
           statusFilter={statusFilter}
         />
-        <HrSprintOverview hrTasks={hrTasks} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <HrSprintOverview hrTasks={hrTasks} />
+          </div>
+          <div className="lg:col-span-1">
+            <TeamLeaveCalendar />
+          </div>
+        </div>
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />
       </div>
     </RoleGuard>

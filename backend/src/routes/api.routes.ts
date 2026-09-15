@@ -13,9 +13,11 @@ import * as reportController from '../controllers/report.controller.js';
 import * as lifecycleController from '../controllers/employee-lifecycle.controller.js';
 import * as recruitmentController from '../controllers/recruitment.controller.js';
 import * as payrollController from '../controllers/payroll.controller.js';
+import * as complianceController from '../controllers/compliance.controller.js';
 import * as performanceController from '../controllers/performance.controller.js';
 import * as workflowController from '../controllers/workflow.controller.js';
 import * as schedulingController from '../controllers/scheduling.controller.js';
+import * as attendanceP2 from '../controllers/attendance-phase2.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { tenantScope } from '../middleware/tenantScope.js';
 import { uploadMiddleware } from '../middleware/fileUpload.js';
@@ -156,16 +158,79 @@ router.post('/employees', authenticateToken, enforceScope, authorizePermissions(
 router.put('/employees/:id', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_UPDATE', 'EMPLOYEE_MANAGE']), validateIdParam, validateUpdateEmployee, employeeController.updateEmployee);
 router.delete('/employees/:id', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_DELETE', 'EMPLOYEE_MANAGE']), validateIdParam, employeeController.deleteEmployee);
 
+// Employee Master — full profile (aggregated)
+router.get('/employees/:id/profile', authenticateToken, enforceScope, validateIdParam, employeeController.getFullProfile);
+
+// Employee Master — Bank Details
+router.get('/employees/:id/bank-details', authenticateToken, enforceScope, validateIdParam, employeeController.getBankDetails);
+router.put('/employees/:id/bank-details', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, employeeController.upsertBankDetails);
+
+// Employee Master — Tax Info
+router.get('/employees/:id/tax-info', authenticateToken, enforceScope, validateIdParam, employeeController.getTaxInfo);
+router.put('/employees/:id/tax-info', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, employeeController.upsertTaxInfo);
+
+// Employee Master — Emergency Contacts
+router.get('/employees/:id/emergency-contacts', authenticateToken, enforceScope, validateIdParam, employeeController.getEmergencyContacts);
+router.post('/employees/:id/emergency-contacts', authenticateToken, enforceScope, validateIdParam, employeeController.addEmergencyContact);
+router.put('/employees/:id/emergency-contacts/:contactId', authenticateToken, enforceScope, validateIdParam, employeeController.updateEmergencyContact);
+router.delete('/employees/:id/emergency-contacts/:contactId', authenticateToken, enforceScope, validateIdParam, employeeController.deleteEmergencyContact);
+
+// Employee Master — Skills
+router.get('/employees/:id/skills', authenticateToken, enforceScope, validateIdParam, employeeController.getSkills);
+router.post('/employees/:id/skills', authenticateToken, enforceScope, validateIdParam, employeeController.addSkill);
+router.put('/employees/:id/skills/:skillId', authenticateToken, enforceScope, validateIdParam, employeeController.updateSkill);
+router.delete('/employees/:id/skills/:skillId', authenticateToken, enforceScope, validateIdParam, employeeController.deleteSkill);
+
+// Employee Master — Education
+router.get('/employees/:id/education', authenticateToken, enforceScope, validateIdParam, employeeController.getEducation);
+router.post('/employees/:id/education', authenticateToken, enforceScope, validateIdParam, employeeController.addEducation);
+router.put('/employees/:id/education/:eduId', authenticateToken, enforceScope, validateIdParam, employeeController.updateEducation);
+router.delete('/employees/:id/education/:eduId', authenticateToken, enforceScope, validateIdParam, employeeController.deleteEducation);
+
+// Employee Master — Experience
+router.get('/employees/:id/experience', authenticateToken, enforceScope, validateIdParam, employeeController.getExperience);
+router.post('/employees/:id/experience', authenticateToken, enforceScope, validateIdParam, employeeController.addExperience);
+router.put('/employees/:id/experience/:expId', authenticateToken, enforceScope, validateIdParam, employeeController.updateExperience);
+router.delete('/employees/:id/experience/:expId', authenticateToken, enforceScope, validateIdParam, employeeController.deleteExperience);
+
 // Team CRUD Route mappings
 router.get('/teams', authenticateToken, authenticatedUserLimiter, employeeController.getTeams);
 router.get('/teams/:id/members', authenticateToken, enforceScope, validateIdParam, employeeController.getTeamMembers);
 
 // Org, Dept & RBAC Route mappings
 router.get('/departments', authenticateToken, authenticatedUserLimiter, organizationController.getDepartments);
-router.get('/locations', authenticateToken, authenticatedUserLimiter, organizationController.getLocations);
 router.get('/organizations', authenticateToken, authenticatedUserLimiter, organizationController.getOrganizations);
 router.get('/roles', authenticateToken, authenticatedUserLimiter, organizationController.getRoles);
 router.get('/permissions', authenticateToken, authenticatedUserLimiter, organizationController.getPermissions);
+
+// Locations — full CRUD (Admin + HR)
+router.get('/locations', authenticateToken, authenticatedUserLimiter, organizationController.getLocations);
+router.get('/locations/:id', authenticateToken, authenticatedUserLimiter, validateIdParam, organizationController.getLocationById);
+router.post('/locations', authenticateToken, authorizeRoles(['ADMIN', 'HR']), organizationController.createLocation);
+router.put('/locations/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, organizationController.updateLocation);
+router.delete('/locations/:id', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, organizationController.deleteLocation);
+
+// Designations — full CRUD (Admin + HR)
+router.get('/designations', authenticateToken, authenticatedUserLimiter, organizationController.getDesignations);
+router.post('/designations', authenticateToken, authorizeRoles(['ADMIN', 'HR']), organizationController.createDesignation);
+router.put('/designations/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, organizationController.updateDesignation);
+router.delete('/designations/:id', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, organizationController.deleteDesignation);
+
+// Job Levels — full CRUD (Admin + HR)
+router.get('/job-levels', authenticateToken, authenticatedUserLimiter, organizationController.getJobLevels);
+router.post('/job-levels', authenticateToken, authorizeRoles(['ADMIN', 'HR']), organizationController.createJobLevel);
+router.put('/job-levels/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, organizationController.updateJobLevel);
+router.delete('/job-levels/:id', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, organizationController.deleteJobLevel);
+
+// Cost Centers — full CRUD (Admin + HR)
+router.get('/cost-centers', authenticateToken, authenticatedUserLimiter, organizationController.getCostCenters);
+router.post('/cost-centers', authenticateToken, authorizeRoles(['ADMIN', 'HR']), organizationController.createCostCenter);
+router.put('/cost-centers/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, organizationController.updateCostCenter);
+router.delete('/cost-centers/:id', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, organizationController.deleteCostCenter);
+
+// Org Policies (Admin + HR)
+router.get('/org-policies', authenticateToken, authenticatedUserLimiter, organizationController.getOrgPolicies);
+router.post('/org-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), organizationController.upsertOrgPolicy);
 
 // Attendance Punch & Session Routes
 router.get('/attendance/today', authenticateToken, tenantScope, authenticatedUserLimiter, attendanceController.getTodayAttendance);
@@ -182,6 +247,10 @@ router.get('/attendance/audit-logs', authenticateToken, authenticatedUserLimiter
 router.get('/leave-requests', authenticateToken, enforceScope, authenticatedUserLimiter, workforceController.getLeaveRequests);
 router.post('/leave-requests', authenticateToken, enforceScope, validateLeaveRequest, idempotencyMiddleware, authenticatedUserLimiter, workforceController.createLeaveRequest);
 router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewLeaveRequest, workforceController.reviewLeaveRequest);
+
+router.get('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), workforceController.getLeavePolicies);
+router.post('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), workforceController.createLeavePolicy);
+
 router.get('/tasks', authenticateToken, enforceScope, authenticatedUserLimiter, workforceController.getTasks);
 router.put('/tasks/:id', authenticateToken, validateIdParam, validateUpdateTask, workforceController.updateTask);
 
@@ -189,6 +258,22 @@ router.put('/tasks/:id', authenticateToken, validateIdParam, validateUpdateTask,
 router.post('/attendance/corrections', authenticateToken, enforceScope, validateCorrectionRequest, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.submitCorrection);
 router.get('/attendance/corrections', authenticateToken, enforceScope, authenticatedUserLimiter, attendanceController.getCorrections);
 router.put('/attendance/corrections/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewCorrection, attendanceController.reviewCorrection);
+
+// Phase 2: Org-wide live status & monthly summaries
+router.get('/attendance/live-status', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, attendanceP2.getLiveStatus);
+router.get('/attendance/monthly-summary', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, attendanceP2.getOrgMonthlySummary);
+router.get('/attendance/monthly-summary/:employeeId', authenticateToken, enforceScope, authenticatedUserLimiter, attendanceP2.getEmployeeMonthlySummary);
+router.post('/attendance/monthly-summary/:employeeId/compute', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, attendanceP2.triggerComputeSummary);
+
+// Phase 2: Shifts CRUD
+router.get('/shifts', authenticateToken, authenticatedUserLimiter, attendanceP2.listShifts);
+router.post('/shifts', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, attendanceP2.createShift);
+router.put('/shifts/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, attendanceP2.updateShift);
+router.delete('/shifts/:id', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, authenticatedUserLimiter, attendanceP2.deleteShift);
+
+// Phase 2: Employee Shift Assignments
+router.post('/employees/:id/shift-assignment', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, attendanceP2.assignShift);
+router.get('/employees/:id/shift-assignment', authenticateToken, enforceScope, validateIdParam, authenticatedUserLimiter, attendanceP2.getCurrentShift);
 
 // Analytics
 router.get('/analytics', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getAnalytics);
@@ -293,8 +378,13 @@ router.post('/payroll/salary/:employeeId', authenticateToken, authorizeRoles(['A
 router.get('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getPayrollRuns);
 router.post('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.createPayrollRun);
 router.post('/payroll/runs/:runId/generate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.generatePayslips);
+router.get('/payroll/runs/:runId/payslips', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getRunPayslips);
 router.post('/payroll/runs/:runId/finalize', authenticateToken, authorizeRoles(['ADMIN']), authenticatedUserLimiter, payrollController.finalizePayrollRun);
 router.get('/payroll/payslips/me', authenticateToken, authenticatedUserLimiter, payrollController.getMyPayslips);
+
+// ─── Compliance (Phase 5) ────────────────────────────────────────────────────
+router.get('/compliance/config', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, complianceController.getComplianceConfigs);
+router.post('/compliance/config', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, complianceController.setComplianceConfig);
 
 // ─── Approval Workflow (Step 9) ──────────────────────────────────────────────
 router.get('/workflows/pending', authenticateToken, authenticatedUserLimiter, workflowController.getPendingApprovals);

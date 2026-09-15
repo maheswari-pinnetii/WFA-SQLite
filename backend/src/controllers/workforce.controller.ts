@@ -6,6 +6,8 @@ import { emitToUser, emitToDept, emitToTeam, emitToRole, SOCKET_EVENTS } from '.
 import { handleControllerError } from '../utils/errorHandler.js';
 import { leaveEngineService } from '../services/leave-engine.service.js';
 import { employeeLifecycleService } from '../services/employee-lifecycle.service.js';
+import { query, execute } from '../database/sqlite-cloud.js';
+import { randomUUID } from 'crypto';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
 
@@ -41,31 +43,29 @@ export const getLeaveRequests = async (req, res) => {
   try {
     const orgId = getOrganizationId(req);
     const query = getScopeQuery(req);
-    const leaves = await LeaveRequest.find(query).sort({ createdAt: -1 }) as any[];
+    
+    const filters: any = { organizationId: orgId };
+    if (query.employeeId) filters.employeeId = query.employeeId;
+    if (query.status) filters.status = query.status;
+    
+    // We get leaves natively via our new service
+    const leaves = await leaveEngineService.getLeaveRequests(filters) as any[];
 
-    // Get all employees in the organization to check their joinDate
-    const employees = await Employee.find({ organizationId: orgId }) as any[];
-    const employeeJoinDateMap = new Map<string, string>();
-    employees.forEach(emp => {
-      if (emp.joinDate) {
-        employeeJoinDateMap.set(emp.id, emp.joinDate);
-      }
-    });
+    // Role filtering for Manager/TeamLead since getLeaveRequests service method doesn't join teams natively yet
+    let validLeaves = leaves;
+    if (req.user.role === 'MANAGER' && query.department) {
+      validLeaves = leaves.filter(l => l.department === query.department); // note: may need identity join
+    } else if (req.user.role === 'TEAM_LEAD' && query.team) {
+      validLeaves = leaves.filter(l => l.team === query.team);
+    }
 
-    const isAfterOrOnJoinDate = (recordDateStr: string, joinDateStr?: string) => {
-      if (!joinDateStr) return true;
-      const recDate = recordDateStr.substring(0, 10);
-      const joinDate = joinDateStr.substring(0, 10);
-      return recDate >= joinDate;
-    };
+    // Convert keys for frontend compatibility
+    const formattedLeaves = validLeaves.map(leave => ({
+      ...leave,
+      type: leave.leaveTypeName || leave.type
+    }));
 
-    const validLeaves = leaves.filter(leave => {
-      const joinDate = employeeJoinDateMap.get(leave.employeeId);
-      const leaveDate = leave.createdAt || leave.startDate || new Date().toISOString();
-      return isAfterOrOnJoinDate(leaveDate, joinDate);
-    });
-
-    return res.json({ success: true, data: validLeaves });
+    return res.json({ success: true, data: formattedLeaves });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'workforce.getLeaveRequests', 500, 'Failed to retrieve leave requests.');
   }
@@ -75,8 +75,9 @@ export const createLeaveRequest = async (req, res) => {
   try {
     const body = req.body || {};
     const employeeId = req.user.role === 'EMPLOYEE' ? req.user.id : body.employeeId;
-    const { type, startDate, endDate, reason } = body;
-    if (!employeeId || !type || !startDate || !endDate || !reason?.trim()) {
+    const { leaveTypeId, type, startDate, endDate, reason, isHalfDay, halfDayPeriod } = body;
+    
+    if (!employeeId || (!type && !leaveTypeId) || !startDate || !endDate || !reason?.trim()) {
       return res.status(400).json({ success: false, message: 'Leave type, dates and reason are required.' });
     }
     if (new Date(endDate) < new Date(startDate)) {
@@ -84,18 +85,6 @@ export const createLeaveRequest = async (req, res) => {
     }
 
     const orgId = getOrganizationId(req);
-
-    // Overlap validation
-    const existingLeaves = await LeaveRequest.find({ employeeId, organizationId: orgId });
-    const hasOverlap = (existingLeaves as any[]).some(l => 
-      l.status !== 'REJECTED' && 
-      l.status !== 'CANCELLED' &&
-      new Date(l.startDate) <= new Date(endDate) && 
-      new Date(l.endDate) >= new Date(startDate)
-    );
-    if (hasOverlap) {
-      return res.status(400).json({ success: false, message: 'Leave dates overlap with an existing request.' });
-    }
 
     const identity = await findIdentity(employeeId, orgId);
     if (!identity) {
@@ -108,38 +97,35 @@ export const createLeaveRequest = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Leave request is outside your team.' });
     }
 
-    const id = `leave-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const createdAt = new Date().toISOString();
+    // Resolve leaveTypeId if frontend sent a type string instead of ID
+    let finalLeaveTypeId = leaveTypeId;
+    if (!finalLeaveTypeId && type) {
+      const lTypes = await leaveEngineService.getLeaveTypes(orgId);
+      const matched = (lTypes as any[]).find(lt => lt.name.toUpperCase() === type.toUpperCase() || lt.name === type);
+      if (matched) finalLeaveTypeId = matched.id;
+    }
+    
+    if (!finalLeaveTypeId) {
+       return res.status(400).json({ success: false, message: 'Invalid Leave Type.' });
+    }
 
-    const leave = await LeaveRequest.create({
-      id,
-      employeeId,
-      employeeName: identity.name,
-      department: identity.department,
-      team: identity.team,
+    const leave = await leaveEngineService.createLeaveRequest({
       organizationId: orgId,
-      type,
+      employeeId,
+      leaveTypeId: finalLeaveTypeId,
       startDate,
       endDate,
-      reason: reason.trim(),
-      status: 'PENDING',
-      createdAt
+      isHalfDay,
+      halfDayPeriod,
+      reason: reason.trim()
     });
 
-    logAudit(employeeId, 'LEAVE_REQUESTED', `Submitted ${type} leave request for ${startDate} to ${endDate}`, orgId);
+    logAudit(employeeId, 'LEAVE_REQUESTED', `Submitted leave request for ${startDate} to ${endDate}`, orgId);
 
     // Real-time Event Broadcast
     const leavePayload = {
-      id: leave.id,
-      employeeId,
-      employeeName: identity.name,
-      department: identity.department,
-      team: identity.team,
-      type,
-      startDate,
-      endDate,
-      status: 'PENDING',
-      createdAt
+      ...leave,
+      type: leave.leaveTypeName || type
     };
     emitToRole('HR', SOCKET_EVENTS.LEAVE_SUBMITTED, leavePayload);
     emitToRole('ADMIN', SOCKET_EVENTS.LEAVE_SUBMITTED, leavePayload);
@@ -153,21 +139,21 @@ export const createLeaveRequest = async (req, res) => {
         id: notifId,
         userId: 'HR_GROUP',
         title: 'New Leave Request Submitted',
-        message: `${identity.name} requested ${type} leave from ${startDate} to ${endDate}`,
+        message: `${identity.name} requested leave from ${startDate} to ${endDate}`,
         type: 'LEAVE',
         read: 0,
-        createdAt,
+        createdAt: new Date().toISOString(),
         organizationId: orgId
       });
       emitToRole('HR', SOCKET_EVENTS.NOTIFICATION_NEW, {
         id: notifId,
         title: 'New Leave Request Submitted',
-        message: `${identity.name} requested ${type} leave`,
+        message: `${identity.name} requested leave`,
         type: 'LEAVE'
       });
     } catch (_) {}
 
-    return res.status(201).json({ success: true, data: leave });
+    return res.status(201).json({ success: true, data: leavePayload });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'workforce.createLeaveRequest', 500, 'Failed to create leave request.');
   }
@@ -181,7 +167,7 @@ export const reviewLeaveRequest = async (req, res) => {
     }
 
     const orgId = getOrganizationId(req);
-    const request = await LeaveRequest.findOne({ id: req.params.id, organizationId: orgId });
+    const request = await leaveEngineService.getLeaveRequest(req.params.id, orgId);
     if (!request) {
       return res.status(404).json({ success: false, message: 'Leave request not found.' });
     }
@@ -189,87 +175,69 @@ export const reviewLeaveRequest = async (req, res) => {
       return res.status(409).json({ success: false, message: 'Leave request has already been reviewed.' });
     }
 
-    if (req.user.role === 'MANAGER' && request.department !== req.user.department) {
+    const identity = await findIdentity(request.employeeId, orgId);
+    if (req.user.role === 'MANAGER' && identity.department !== req.user.department) {
       return res.status(403).json({ success: false, message: 'Leave request is outside your department.' });
     }
-    if (req.user.role === 'TEAM_LEAD' && request.team !== req.user.team) {
+    if (req.user.role === 'TEAM_LEAD' && identity.team !== req.user.team) {
       return res.status(403).json({ success: false, message: 'Leave request is outside your team.' });
     }
 
-    request.status = status;
-    request.reviewedBy = req.user.name;
-    request.reviewComment = reviewComment;
-    await request.save();
-
-    // ── BUG FIX 1: Deduct leave balance on APPROVED ────────────────────────────
     if (status === 'APPROVED') {
-      let finalLeaveTypeId = request.leaveTypeId;
-      if (!finalLeaveTypeId && request.type) {
-        const lTypes = await leaveEngineService.getLeaveTypes(orgId);
-        const matched = (lTypes as any[]).find(lt => lt.name.toUpperCase() === request.type.toUpperCase() || lt.name === request.type);
-        if (matched) finalLeaveTypeId = matched.id;
-      }
-
-      if (finalLeaveTypeId) {
-        try {
-          const startDate = new Date(request.startDate);
-          const endDate = new Date(request.endDate);
-          // Calculate working days (simple weekday count as fallback)
-          let days = 0;
+      try {
+        const startDate = new Date(request.startDate);
+        const endDate = new Date(request.endDate);
+        
+        let days = 0;
+        if (request.isHalfDay) {
+          days = 0.5;
+        } else {
           try {
             days = await leaveEngineService.calculateWorkingDays(request.startDate, request.endDate, orgId);
           } catch {
-            // Fallback: rough calendar-day count
             days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
           }
-          await leaveEngineService.deductLeaveBalance(request.employeeId, finalLeaveTypeId, days, orgId);
-        } catch (balanceErr: any) {
-          // Revert approval if balance insufficient
-          request.status = 'PENDING';
-          request.reviewedBy = undefined;
-          request.reviewComment = undefined;
-          await request.save();
-          return res.status(400).json({ success: false, message: `Leave balance error: ${balanceErr.message}` });
         }
+        
+        await leaveEngineService.deductLeaveBalance(request.employeeId, request.leaveTypeId, days, orgId);
+      } catch (balanceErr: any) {
+        return res.status(400).json({ success: false, message: `Leave balance error: ${balanceErr.message}` });
       }
     }
-    // ──────────────────────────────────────────────────────────────────────────
+
+    const updatedRequest = await leaveEngineService.updateLeaveRequestStatus(request.id, orgId, status, req.user.name);
 
     logAudit(request.employeeId, `LEAVE_${status}`, `${req.user.name} reviewed leave request ${request.id}`, orgId);
 
     // Real-time Event Broadcast to employee
     const reviewEvent = status === 'APPROVED' ? SOCKET_EVENTS.LEAVE_APPROVED : SOCKET_EVENTS.LEAVE_REJECTED;
     emitToUser(request.employeeId, reviewEvent, {
-      id: request.id,
-      status,
-      reviewedBy: req.user.name,
-      reviewComment,
-      type: request.type,
-      startDate: request.startDate,
-      endDate: request.endDate
+      ...updatedRequest,
+      type: updatedRequest.leaveTypeName
     });
 
-    // Create and emit notification to employee
-    const empNotifId = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    // Notify employee via notification
+    const notifId = `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     try {
       await Notification.create({
-        id: empNotifId,
+        id: notifId,
         userId: request.employeeId,
         title: `Leave Request ${status}`,
-        message: `Your ${request.type} leave request was ${status.toLowerCase()} by ${req.user.name}.`,
-        type: status === 'APPROVED' ? 'SUCCESS' : 'WARNING',
+        message: `Your leave request has been ${status.toLowerCase()} by ${req.user.name}.`,
+        type: 'LEAVE',
         read: 0,
         createdAt: new Date().toISOString(),
         organizationId: orgId
       });
       emitToUser(request.employeeId, SOCKET_EVENTS.NOTIFICATION_NEW, {
-        id: empNotifId,
+        id: notifId,
         title: `Leave Request ${status}`,
-        message: `Your ${request.type} leave request was ${status.toLowerCase()}.`
+        message: `Your leave request was ${status.toLowerCase()}.`,
+        type: 'LEAVE'
       });
     } catch (_) {}
 
-    return res.json({ success: true, data: request });
+    return res.json({ success: true, data: updatedRequest });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'workforce.reviewLeaveRequest', 500, 'Failed to review leave request.');
   }
@@ -353,5 +321,44 @@ export const updateTask = async (req, res) => {
     return res.json({ success: true, data: task });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'workforce.updateTask', 500, 'Failed to update task.');
+  }
+};
+export const getLeavePolicies = async (req, res) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const policies = await query(
+      SELECT lp.*, lt.name as leaveTypeName 
+       FROM leave_policies lp
+       JOIN leave_types lt ON lp.leaveTypeId = lt.id
+       WHERE lp.organizationId = ?,
+      [orgId]
+    );
+    return res.json({ success: true, data: policies });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.getLeavePolicies', 500, 'Failed to fetch leave policies.');
+  }
+};
+
+export const createLeavePolicy = async (req, res) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { name, description, leaveTypeId, accrualRate, accrualFrequency, maxCarryForward, isProRata } = req.body;
+    
+    if (!name || !leaveTypeId || accrualRate === undefined) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const id = randomUUID();
+    await execute(
+      INSERT INTO leave_policies (
+        id, organizationId, name, description, leaveTypeId, 
+        accrualRate, accrualFrequency, maxCarryForward, isProRata
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?),
+      [id, orgId, name, description || '', leaveTypeId, accrualRate, accrualFrequency || 'MONTHLY', maxCarryForward || 0, isProRata === false ? 0 : 1]
+    );
+
+    return res.status(201).json({ success: true, data: { id, ...req.body } });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.createLeavePolicy', 500, 'Failed to create leave policy.');
   }
 };
