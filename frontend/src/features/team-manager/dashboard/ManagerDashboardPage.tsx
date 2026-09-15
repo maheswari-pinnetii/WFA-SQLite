@@ -171,88 +171,57 @@ export const ManagerDashboardPage: React.FC = () => {
             ]}
           />
 
-          {/* KPI metrics */}
+          {/* KPI metrics (8 KPIs) */}
           <KPIGrid>
-            <KPICard
-              title="Department Staff"
-              value={`${employees.filter(e => e.department === departmentName).length} Engineers`}
-              trendValue="8.3%"
-              trend="up"
-              subtitle="Authorized department rosters"
-              icon={<Users size={20} />}
-              color="info"
-              onClick={() => openDrillDown('Department Roster Breakdown', 'Engineers', 'Active engineering staff', [
-                { label: 'Engineering Total', value: employees.filter(e => e.department === departmentName).length }
-              ])}
-            />
-            <KPICard title="Active Employees" value="18 Online" trend="neutral" subtitle="Checked in today" icon={<Users size={20} />} color="emerald" />
-            <KPICard title="Present Today" value="16 Staff" trendValue="2.0%" trend="up" subtitle="Office presence" icon={<CheckCircle2 size={20} />} color="emerald" />
-            <KPICard title="Absent Today" value="2 Staff" trend="neutral" subtitle="Unexcused absence" icon={<XCircle size={20} />} color="danger" />
-            <KPICard title="Late Today" value="3 Staff" trendValue="1.0%" trend="up" subtitle="Checked in after 9:15" icon={<Clock size={20} />} color="warning" />
-            <KPICard title="On Leave" value="1 Staff" trendValue="1.0%" trend="down" subtitle="Approved PTO today" icon={<AlertTriangle size={20} />} color="info" />
-            <KPICard title="Attendance Rate" value="98.2%" trendValue="1.2%" trend="up" subtitle="Active shift rate" icon={<Star size={20} />} color="info" />
-            <KPICard title="Pending Approvals" value={`${pendingApprovalsCount} Requests`} trend="neutral" subtitle="Requires manager action" icon={<FileText size={20} />} color="danger" />
+            <KPICard title="Team Members" value={analytics.data?.metrics?.teamMembers ?? 0} icon={<Users size={20} />} color="info" trend="neutral" subtitle="Total direct reports" />
+            <KPICard title="Present Today" value={analytics.data?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
+            <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<Star size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="Weekly average" />
+            <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<Clock size={20} />} color="warning" subtitle="Currently on leave" />
+            
+            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<Zap size={20} />} color="info" subtitle="In progress" />
+            <KPICard title="Completed Tasks" value={analytics.data?.metrics?.completedTasks ?? 0} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="5.4%" subtitle="This sprint" />
+            <KPICard title="Pending Approvals" value={pendingApprovalsCount} icon={<FileText size={20} />} color="danger" subtitle="Action required" />
+            <KPICard title="Average Workload" value={analytics.data?.metrics?.averageWorkload ?? '0%'} icon={<AlertTriangle size={20} />} color="warning" subtitle="Team capacity" />
           </KPIGrid>
 
-          {/* Primary Analytics Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AnalyticsLineChart title="Department Growth & Hiring" subtitle="Staff additions inside department" data={analytics.data?.growthData} xKey="name" series={[{ key: 'headcount', name: 'Headcount', color: '#3b82f6' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsBarChart title="Team Attendance Overview" subtitle="Attendance metrics by team" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          </div>
-
-          {/* Secondary Analytics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <AnalyticsDonutChart title="Employment Status Mix" subtitle="Department active duty rate" data={analytics.data?.employmentStatus} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsDonutChart title="Department Distribution" subtitle="Staff distribution in department" data={analytics.data?.departmentDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsBarChart title="Productivity & Performance" subtitle="Team productivity score index" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity', color: '#8b5cf6' }]} layout="vertical" isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsDonutChart title="Retention Risks" subtitle="Retention risk distribution" data={analytics.data?.riskDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} colors={['#ef4444', '#f59e0b', '#10b981']} />
-          </div>
-
-          <EmployeeTable
-            deptFilter={departmentName}
-            teamFilter={teamFilter}
-            statusFilter={statusFilter}
-          />
-          <ManagerSprintOverview tasks={tasks} />
-
           {/* Leave Requests Approvals Desk */}
-          <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-4">
+          <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 mb-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
-                <Clock size={18} className="text-amber-400" /> Pending Team Leave & Request Approvals Desk
+              <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Clock size={18} className="text-amber-500" /> Pending Team Leave Approvals
               </h3>
-              <Link to="/manager/approvals" className="text-xs font-bold text-emerald-400 hover:underline flex items-center gap-1">
+              <Link to="/manager/approvals" className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
                 Approvals Desk <ArrowRight size={12} />
               </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {approvals.length === 0 ? <p className="text-sm text-[var(--text-muted)] md:col-span-3">No leave requests are waiting in your department.</p> : approvals.map((req) => (
-                <div key={req.id} className="p-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-3">
+              {approvals.length === 0 ? <p className="text-sm text-slate-500 md:col-span-3">No leave requests are waiting in your department.</p> : approvals.map((req) => (
+                <div key={req.id} className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-sm text-[var(--text-primary)]">{req.employee}</span>
-                    <span className="badge badge-info text-[9px] uppercase font-bold">{req.type}</span>
+                    <span className="font-bold text-sm text-slate-900 dark:text-white">{req.employee}</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">{req.type}</span>
                   </div>
-                  <p className="text-xs text-slate-300">
-                    <span className="font-semibold text-emerald-400">{req.duration}</span> — {req.reason}
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    <span className="font-semibold text-slate-900 dark:text-slate-300">{req.duration}</span> — {req.reason}
                   </p>
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-color)]">
+                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                     {req.status === 'PENDING' ? (
                       <>
                         <button
                           onClick={() => void handleAction(req.id, 'APPROVED')}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                          className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors"
                         >
                           <CheckCircle2 size={14} /> Approve
                         </button>
                         <button
                           onClick={() => void handleAction(req.id, 'REJECTED')}
-                          className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition-all"
+                          className="px-3 py-1.5 rounded bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-xs flex items-center gap-1.5 transition-colors"
                         >
                           <XCircle size={14} /> Reject
                         </button>
                       </>
                     ) : (
-                      <span className={`badge ${req.status === 'APPROVED' ? 'badge-success' : 'badge-danger'} text-xs font-bold uppercase`}>
+                      <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'}`}>
                         {req.status}
                       </span>
                     )}
@@ -260,6 +229,33 @@ export const ManagerDashboardPage: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Primary Analytics Grid (6 Charts) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsLineChart title="Team Attendance Trend" subtitle="Daily attendance overview" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+            <AnalyticsLineChart title="Task Completion Trend" subtitle="Completed vs total assigned tasks" data={analytics.data?.taskCompletionTrend} xKey="name" series={[{ key: 'completed', name: 'Completed', color: '#8b5cf6' }, { key: 'total', name: 'Total', color: '#3b82f6' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsBarChart title="Workload by Team Member" subtitle="Current assigned task load" layout="horizontal" data={analytics.data?.workloadByMember} xKey="name" series={[{ key: 'tasks', name: 'Tasks', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+            <AnalyticsDonutChart title="Task Status Distribution" subtitle="Sprint task breakdown" data={analytics.data?.taskStatusDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsBarChart title="Leave / Availability" subtitle="Scheduled absence breakdown" data={analytics.data?.leaveTrend} xKey="name" series={[{ key: 'sick', name: 'Sick', color: '#ef4444' }, { key: 'vacation', name: 'Vacation', color: '#3b82f6' }, { key: 'other', name: 'Other', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+            <AnalyticsBarChart title="Department Performance" subtitle="Team productivity score index" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity', color: '#8b5cf6' }]} layout="vertical" isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          </div>
+
+
+
+          <ManagerSprintOverview tasks={tasks} />
+          <div className="mt-6">
+            <EmployeeTable
+              deptFilter={departmentName}
+              teamFilter={teamFilter}
+              statusFilter={statusFilter}
+            />
           </div>
 
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />

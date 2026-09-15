@@ -69,7 +69,7 @@ export const DashboardToolbar: React.FC<DashboardToolbarProps> = ({
   };
 
   return (
-    <div className="glass-panel p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div className="py-2 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 mb-4">
       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-sm">
         <Filter size={18} />
         <span>Filters</span>

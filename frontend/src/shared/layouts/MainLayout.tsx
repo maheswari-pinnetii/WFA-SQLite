@@ -99,7 +99,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const themeClass = getThemeClass(role);
 
   return (
-    <div data-role={role} className={`app-shell ${themeClass} h-screen min-h-screen flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
+    <div data-role={role} className={`app-shell ${themeClass} min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
       {/* Accessibility Skip-to-content Link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -112,7 +112,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
       />
 
       {/* Main Body Wrapper (Below Header) */}
-      <div className="main-body flex-1 flex overflow-hidden w-full relative">
+      <div className="main-body flex-1 flex w-full relative">
         {/* Sleek Dynamic Modular Sidebar Navigation & Mobile Menu */}
         <Sidebar
           collapsed={collapsed}
@@ -126,7 +126,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         <main
           id="main-content"
           tabIndex={-1}
-          className="app-main flex-1 overflow-y-auto focus:outline-none"
+          className="app-main flex-1 focus:outline-none min-w-0"
         >
           <DashboardShell>
             {children}

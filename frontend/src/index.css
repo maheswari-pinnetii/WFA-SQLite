@@ -303,6 +303,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .app-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
   height: var(--header-height) !important;
   padding-inline: clamp(1rem, 2.5vw, 2rem) !important;
   background: var(--bg-secondary) !important;
@@ -344,13 +347,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 @media (min-width: 768px) {
   .app-sidebar {
-    position: relative !important;
-    top: 0 !important;
-    height: 100% !important;
-    min-height: 100% !important;
+    position: sticky !important;
+    top: var(--header-height) !important;
+    height: calc(100vh - var(--header-height)) !important;
+    min-height: calc(100vh - var(--header-height)) !important;
     display: flex !important;
     flex-direction: column !important;
-    align-self: stretch !important;
+    align-self: flex-start !important;
     z-index: 20 !important;
     box-shadow: 1px 0 0 rgba(148, 163, 184, 0.12) !important;
   }

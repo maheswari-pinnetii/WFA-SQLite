@@ -68,7 +68,7 @@ export const AnalyticsBarChart: React.FC<BaseChartProps & { xKey: string; series
         {layout === 'vertical' ? <><XAxis type="number" stroke="var(--text-muted)" tick={{ fontSize: 11 }} /><YAxis dataKey={xKey} type="category" width={110} stroke="var(--text-muted)" tick={{ fontSize: 10 }} /></> : <><XAxis dataKey={xKey} stroke="var(--text-muted)" tick={{ fontSize: 10 }} /><YAxis stroke="var(--text-muted)" tick={{ fontSize: 11 }} /></>}
         <Tooltip contentStyle={tooltipStyle} />
         <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
-        {series.map((item) => <Bar key={item.key} dataKey={item.key} name={item.name} fill={item.color} radius={[6, 6, 0, 0]} />)}
+        {series.map((item) => <Bar key={item.key} dataKey={item.key} name={item.name} fill={item.color} radius={layout === 'vertical' ? [0, 6, 6, 0] : [6, 6, 0, 0]} />)}
       </BarChart>
     </ResponsiveContainer>
   </ChartCard>

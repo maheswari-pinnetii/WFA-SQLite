@@ -54,7 +54,14 @@ async function testDashboards() {
               averagePerformanceScore: 92
             },
             teamProductivity: [],
-            shifts: []
+            shifts: [],
+            tasks: [],
+            employees: [],
+            users: [],
+            departments: [],
+            leaves: [],
+            attendance: [],
+            data: [] // Fallback for some generic paginated endpoints
           }
         })
       });

@@ -10,7 +10,7 @@ import { DashboardErrorBoundary } from '../../../shared/components/DashboardErro
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
-import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Star, FileText, AlertTriangle, ArrowRight, Filter, Layers, Calendar } from 'lucide-react';
+import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Calendar, AlertTriangle, Target, FileText, TrendingUp, Star, ArrowRight, Filter, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
@@ -127,38 +127,33 @@ export const TeamLeadDashboardPage: React.FC = () => {
             ]}
           />
 
-          {/* KPI metrics */}
+          {/* KPI metrics (8 KPIs) */}
           <KPIGrid>
-            <KPICard
-              title="Team Members"
-              value={`${directReports.length} Developers`}
-              trend="neutral"
-              subtitle="Frontend Core Squad"
-              icon={<Users size={20} />}
-              color="info"
-              onClick={() => openDrillDown('Team Roster', `${directReports.length} Developers`, 'Active squad members', [
-                { label: 'Frontend Developers', value: directReports.length }
-              ])}
-            />
-            <KPICard title="Present" value={`${directReports.filter(e => e.status === 'Active').length} Present`} trendValue="5.2%" trend="up" subtitle="On duty today" icon={<CheckCircle2 size={20} />} color="emerald" />
-            <KPICard title="Absent" value="0 Absent" trend="neutral" subtitle="No unexcused absences" icon={<AlertTriangle size={20} />} color="danger" />
-            <KPICard title="Late" value="1 Late" trendValue="1.5%" trend="down" subtitle="Checked in after shift target" icon={<Clock size={20} />} color="warning" />
-            <KPICard title="On Leave" value="0 On Leave" trend="neutral" subtitle="Approved team PTO" icon={<Calendar size={20} />} color="info" />
-            <KPICard title="Working Hours" value="45 hrs today" trendValue="8.0%" trend="up" subtitle="Total squad contribution" icon={<Clock size={20} />} color="danger" />
-            <KPICard title="Tasks Pending" value={`${sprintTasks.filter(t => t.status !== 'COMPLETED').length} Pending`} trendValue="2.0%" trend="up" subtitle="Sprint tasks in backlog" icon={<FileText size={20} />} color="info" />
-            <KPICard title="Tasks Completed" value={`${sprintTasks.filter(t => t.status === 'COMPLETED').length} Closed`} trendValue="100%" trend="up" subtitle="Closed sprint targets" icon={<CheckCircle2 size={20} />} color="emerald" />
+            <KPICard title="Team Members" value={directReports.length} subtitle="Active team roster" icon={<Users size={20} />} color="info" />
+            <KPICard title="Present Today" value={analytics.data?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
+            <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<Star size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="Weekly average" />
+            <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<Clock size={20} />} color="warning" subtitle="Currently on leave" />
+            
+            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<Zap size={20} />} color="info" subtitle="In progress" />
+            <KPICard title="Completed Today" value={analytics.data?.metrics?.completedTasks ?? 0} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="5.4%" subtitle="Daily velocity" />
+            <KPICard title="Blocked Tasks" value={analytics.data?.metrics?.blockedTasks ?? 0} subtitle="Require your intervention" icon={<AlertTriangle size={20} />} color="danger" />
+            <KPICard title="Pending Reviews" value={analytics.data?.metrics?.pendingReviews ?? 0} subtitle="Awaiting review" icon={<GitPullRequest size={20} />} color="warning" />
           </KPIGrid>
 
-          {/* Primary Analytics Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AnalyticsBarChart title="Squad Daily Attendance" subtitle="Weekdays breakdown inside squad" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#0ea5e9' }, { key: 'absent', name: 'Absent', color: '#f43f5e' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsBarChart title="Squad Task Velocity" subtitle="Productivity by sprint task status" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity Rate', color: '#10b981' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          {/* Primary Analytics Grid (6 Charts) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsLineChart title="Sprint Progress" subtitle="Completed vs remaining effort" data={analytics.data?.sprintProgress} xKey="name" series={[{ key: 'completed', name: 'Completed', color: '#10b981' }, { key: 'remaining', name: 'Remaining', color: '#ef4444' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+            <AnalyticsLineChart title="Task Completion Trend" subtitle="Daily completion velocity" data={analytics.data?.taskCompletionTrend} xKey="name" series={[{ key: 'completed', name: 'Completed', color: '#8b5cf6' }, { key: 'total', name: 'Total', color: '#3b82f6' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
           </div>
 
-          {/* Secondary Analytics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <AnalyticsDonutChart title="Employment Status Mix" subtitle="Squad duty allocation" data={analytics.data?.employmentStatus} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-            <AnalyticsLineChart title="Squad Performance History" subtitle="Individual metrics trend" data={analytics.data?.performance} xKey="name" series={[{ key: 'performance', name: 'Performance', color: '#6366f1' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsDonutChart title="Task Status Distribution" subtitle="Sprint task breakdown" data={analytics.data?.taskStatusDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+            <AnalyticsBarChart title="Team Workload" subtitle="Active tasks per member" layout="horizontal" data={analytics.data?.workloadByMember} xKey="name" series={[{ key: 'tasks', name: 'Tasks', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsBarChart title="Blocked Work" subtitle="Blocked vs open tasks by category" data={analytics.data?.blockedWork} xKey="name" series={[{ key: 'blocked', name: 'Blocked', color: '#ef4444' }, { key: 'open', name: 'Open', color: '#10b981' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
+            <AnalyticsBarChart title="Leave / Availability" subtitle="Scheduled absence breakdown" data={analytics.data?.leaveTrend} xKey="name" series={[{ key: 'sick', name: 'Sick', color: '#ef4444' }, { key: 'vacation', name: 'Vacation', color: '#3b82f6' }, { key: 'other', name: 'Other', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
           </div>
 
           <EmployeeTable

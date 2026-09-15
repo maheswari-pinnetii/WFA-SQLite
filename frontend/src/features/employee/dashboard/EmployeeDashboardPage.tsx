@@ -8,7 +8,7 @@ import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWid
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api/attendanceApi';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
-import { AnalyticsBarChart, AnalyticsDonutChart } from '../../../components/charts/AnalyticsCharts';
+import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { DashboardShell, DashboardHeader, KPIGrid, KPICard } from '../../../shared/components/dashboard';
 import {
   Clock,
@@ -30,6 +30,7 @@ import {
   Coffee,
   Check,
   LayoutDashboard,
+  AlertTriangle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
@@ -105,7 +106,7 @@ export const EmployeeShiftScheduleCard: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-full space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -247,7 +248,7 @@ export const PublicHolidaysCard: React.FC = () => {
   ];
 
   return (
-    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-full space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -302,7 +303,7 @@ export const LeaveBalanceCard: React.FC = () => {
   ];
 
   return (
-    <div className="glass-panel p-6 shadow-2xl flex flex-col justify-between h-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col justify-between h-full space-y-4">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -380,7 +381,7 @@ export const EmployeeTimesheetSummaryCard: React.FC = () => {
   };
 
   return (
-    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
+    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 flex flex-col justify-between h-full">
       <div className="space-y-3.5">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -458,7 +459,7 @@ export const EmployeeActivityTimelineFeed: React.FC = () => {
   ];
 
   return (
-    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4 flex flex-col justify-between h-full">
+    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4 flex flex-col justify-between h-full">
       <div className="space-y-3">
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]/60">
           <div>
@@ -501,7 +502,7 @@ export const EmployeeSprintWork: React.FC<{
   loading: boolean;
   handleUpdateTaskStatus: (id: string, stat: Task['status']) => void;
 }> = ({ tasks, loading, handleUpdateTaskStatus }) => (
-  <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+  <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
     <div className="flex items-center justify-between pb-3 border-b border-slate-800">
       <div>
         <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -610,7 +611,7 @@ export const EmployeeCorrectionRequestsCard: React.FC<{
   }, []);
 
   return (
-    <div className="glass-panel p-6 shadow-2xl bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl space-y-4">
+    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]">
         <div>
           <div className="flex items-center gap-2">
@@ -698,7 +699,7 @@ export const EmployeeAttendanceTable: React.FC<{
   setStatusFilter: (s: string) => void;
   onOpenCorrectionModal: (date: string) => void;
 }> = ({ filteredHistory, statusFilter, setStatusFilter, onOpenCorrectionModal }) => (
-  <div className="glass-panel p-6 shadow-2xl space-y-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-3xl">
+  <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-color)]">
       <div>
         <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
@@ -1176,10 +1177,15 @@ export const EmployeeDashboardPage: React.FC = () => {
                 badge="Target: 40h/wk"
               />
             <KPIGrid>
-              <KPICard title="Hours Today" value={hoursToday} icon={<Clock size={24} />} color="info" trend="neutral" subtitle="Active Shift Elapsed" />
-              <KPICard title="Hours This Week" value={hoursThisWeek} icon={<Briefcase size={24} />} color="emerald" trend="neutral" subtitle="Standard 40h Goal" />
-              <KPICard title="Attendance Rate" value={attendanceRate} icon={<Calendar size={24} />} color="success" trend="up" subtitle="Lifetime Adherence" />
-              <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={24} />} color="warning" trend="neutral" subtitle="Approved OT (1.5x)" />
+              <KPICard title="Upcoming Shifts" value="5 Shifts" icon={<Calendar size={20} />} color="info" trend="neutral" subtitle="This week" />
+              <KPICard title="Leave Balance" value="12 Days" icon={<Coffee size={20} />} color="success" subtitle="Available PTO" />
+              <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={20} />} color="warning" trend="up" trendValue="1.5%" subtitle="Approved OT" />
+              <KPICard title="Next Holiday" value="Oct 02" icon={<Calendar size={20} />} color="emerald" subtitle="Gandhi Jayanti" />
+              
+              <KPICard title="Current Tasks" value={tasks.filter(t => t.status === 'IN_PROGRESS' || t.status === 'TODO').length} icon={<Zap size={20} />} color="info" subtitle="Assigned to you" />
+              <KPICard title="Completed Tasks" value={tasks.filter(t => t.status === 'COMPLETED').length} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="2.4%" subtitle="This sprint" />
+              <KPICard title="Blocked Tasks" value={tasks.filter(t => t.status === 'BLOCKED').length} subtitle="Needs attention" icon={<AlertTriangle size={20} />} color="danger" />
+              <KPICard title="Time Tracked" value={hoursThisWeek} subtitle="Logged this week" icon={<Clock size={20} />} color="emerald" />
             </KPIGrid>
             </section>
 
@@ -1191,7 +1197,7 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="cyan"
                 badge="Auto-Rotated"
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch min-w-0">
                 <div className="w-full h-full">
                   <EmployeeShiftScheduleCard />
                 </div>
@@ -1209,7 +1215,7 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="purple"
                 badge="10 Paid Holidays"
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch min-w-0">
                 <div className="w-full h-full">
                   <PublicHolidaysCard />
                 </div>
@@ -1229,21 +1235,60 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="indigo"
                 badge="Current Month"
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+                <AnalyticsLineChart
+                  title="Attendance & Punctuality"
+                  subtitle="Check-in times vs schedule"
+                  data={weeklyHoursData}
+                  xKey="day"
+                  series={[{ key: 'regular', name: 'Attendance', color: '#10b981' }]}
+                />
                 <AnalyticsBarChart
-                  title="Weekly Shift Hours & Overtime"
-                  subtitle="Daily logged hours against standard 8-hour shift"
+                  title="Leave Usage"
+                  subtitle="PTO utilization over time"
+                  data={weeklyHoursData}
+                  xKey="day"
+                  series={[{ key: 'regular', name: 'Leave Taken', color: '#3b82f6' }]}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+                <AnalyticsLineChart
+                  title="Task Completion Velocity"
+                  subtitle="Tasks finished per week"
+                  data={weeklyHoursData}
+                  xKey="day"
+                  series={[{ key: 'regular', name: 'Tasks Completed', color: '#8b5cf6' }]}
+                />
+                <AnalyticsDonutChart
+                  title="Time Allocation"
+                  subtitle="Hours spent per project/category"
+                  data={shiftDistributionData}
+                  nameKey="name"
+                  valueKey="value"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-w-0">
+                <AnalyticsBarChart
+                  title="Weekly Overtime"
+                  subtitle="Logged OT vs standard hours"
                   data={weeklyHoursData}
                   xKey="day"
                   series={[
-                    { key: 'regular', name: 'Regular Hours (8h)', color: '#3B82F6' },
-                    { key: 'overtime', name: 'Overtime (1.5x)', color: '#10B981' }
+                    { key: 'regular', name: 'Regular Hours', color: '#3B82F6' },
+                    { key: 'overtime', name: 'Overtime', color: '#F59E0B' }
                   ]}
                 />
                 <AnalyticsDonutChart
-                  title="Monthly Attendance Distribution"
-                  subtitle="Adherence, on-time arrivals, and PTO quota breakdown"
-                  data={shiftDistributionData}
+                  title="Task Status"
+                  subtitle="Current sprint breakdown"
+                  data={[
+                    { name: 'To Do', value: 4, color: '#94a3b8' },
+                    { name: 'In Progress', value: 6, color: '#3b82f6' },
+                    { name: 'Review', value: 2, color: '#f59e0b' },
+                    { name: 'Completed', value: 8, color: '#10b981' }
+                  ]}
                   nameKey="name"
                   valueKey="value"
                 />

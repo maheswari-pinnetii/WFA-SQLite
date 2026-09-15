@@ -48,21 +48,21 @@ export const KPICard: React.FC<KPICardProps> = ({
     neutral: 'text-slate-500 dark:text-slate-400'
   };
 
-  const baseClasses = "glass-panel p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 shadow-sm flex flex-col justify-between space-y-3 transition-shadow duration-200";
-  const hoverClasses = onClick ? "cursor-pointer hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700" : "";
+  const baseClasses = "p-4 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col justify-between space-y-3 min-w-0";
+  const hoverClasses = onClick ? "cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors" : "";
 
   return (
     <div className={`${baseClasses} ${hoverClasses}`} onClick={onClick}>
-      <div className="flex justify-between items-start">
-        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">{title}</h3>
-        <div className={`p-2 rounded-lg ${colorMap[color]}`}>
+      <div className="flex justify-between items-start gap-2 min-w-0">
+        <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{title}</h3>
+        <div className={`p-2 rounded-lg shrink-0 flex items-center justify-center ${colorMap[color]}`}>
           {icon}
         </div>
       </div>
       
       <div>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-slate-900 dark:text-white">{value}</span>
+          <span className="text-xl font-bold text-slate-900 dark:text-white">{value}</span>
           {status && <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{status}</span>}
         </div>
         

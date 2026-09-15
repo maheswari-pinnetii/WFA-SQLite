@@ -31,8 +31,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   secondaryAction
 }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
-      <div className="space-y-3">
+    <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="space-y-2">
         {/* Breadcrumb */}
         <nav className="flex text-xs font-medium text-slate-500 dark:text-slate-400">
           <ol className="flex items-center space-x-2">
@@ -54,7 +54,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
         {/* Title and Description */}
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{title}</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h1>
             {badge && (
               <div className="mt-1">
                 {badge}

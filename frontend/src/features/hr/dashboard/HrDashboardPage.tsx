@@ -156,44 +156,34 @@ export const HrDashboardPage: React.FC = () => {
             ]}
           />
 
-          {/* KPI metrics */}
+          {/* KPI metrics (8 KPIs) */}
           <KPIGrid>
-            <KPICard
-              title="Total Headcount"
-              value={isLoading ? '…' : `${headCount} Staff`}
-              trendValue="8.4%"
-              trend="up"
-              subtitle="Global workforce"
-              icon={<Users size={20} />}
-              color="info"
-              status="LIVE"
-              onClick={() => openDrillDown('Total Headcount Breakdown', `${headCount} Staff`, 'Full workforce employment contracts', [
-                { label: 'Authorized Workforce', value: headCount },
-                { label: 'Primary Contracts', value: Math.max(0, headCount - 12) },
-                { label: 'External Associates', value: Math.min(12, headCount) },
-              ])}
-            />
-            <KPICard title="Active Employees" value={`${Math.round(headCount * 0.95)} Active`} trendValue="4.2%" trend="up" subtitle="Currently online/on-duty" icon={<UserCheck size={20} />} color="info" status="LIVE" />
-            <KPICard title="New Joiners" value="12 Joiners" trendValue="1.2%" trend="up" subtitle="This Calendar Month" icon={<Plus size={20} />} color="emerald" />
-            <KPICard title="Exits" value="2 Exits" trendValue="2.4%" trend="down" subtitle="This Quarter" icon={<FileText size={20} />} color="warning" />
-            <KPICard title="On Leave" value="8 Staff" trend="neutral" subtitle="Approved PTO today" icon={<HeartHandshake size={20} />} color="danger" status="LIVE" />
-            <KPICard title="Attendance Rate" value={attendanceRate} trendValue="1.5%" trend="up" subtitle="Weekly shift compliance" icon={<Clock size={20} />} color="info" status="LIVE" />
-            <KPICard title="Pending Onboarding" value="5 Pending" trendValue="0.4%" trend="up" subtitle="Awaiting start date" icon={<Star size={20} />} color="info" />
-            <KPICard title="Pending Documents" value="3 Audits" trendValue="0.8%" trend="down" subtitle="Contract reviews" icon={<AlertTriangle size={20} />} color="danger" />
+            <KPICard title="Total Employees" value={analytics?.metrics?.totalWorkforce ?? 0} icon={<Users size={20} />} color="emerald" trend="up" trendValue="12.4%" subtitle="Active workforce" />
+            <KPICard title="Active Employees" value={analytics?.metrics?.activeEmployees ?? 0} icon={<UserCheck size={20} />} color="info" trend="up" trendValue="2.1%" subtitle="Currently active" />
+            <KPICard title="New Joiners" value={analytics?.metrics?.newJoiners ?? 0} icon={<Plus size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="This month" />
+            <KPICard title="Exits" value={analytics?.metrics?.exits ?? 0} icon={<FileText size={20} />} color="warning" trend="down" trendValue="0.5%" subtitle="This month" />
+            
+            <KPICard title="Present Today" value={analytics?.metrics?.presentToday ?? 0} icon={<Briefcase size={20} />} color="success" subtitle="Checked in today" />
+            <KPICard title="Attendance Rate" value={analytics?.metrics?.attendanceRate ?? '0%'} icon={<Clock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Weekly average" />
+            <KPICard title="On Leave" value={analytics?.metrics?.onLeave ?? 0} icon={<HeartHandshake size={20} />} color="warning" subtitle="Approved leave" />
+            <KPICard title="Pending HR Actions" value={analytics?.metrics?.pendingHrActions ?? 0} icon={<AlertTriangle size={20} />} color="danger" subtitle="Requires attention" />
           </KPIGrid>
 
           {/* Primary Analytics Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AnalyticsLineChart title="Employee Growth & Hiring" subtitle="Headcount and new hires by join month" data={analytics?.growthData} xKey="name" series={[{ key: 'headcount', name: 'Headcount', color: '#8b5cf6' }, { key: 'hiring', name: 'New hires', color: '#ec4899' }]} isLoading={isLoading} error={error} onRetry={reload} />
-            <AnalyticsBarChart title="Attendance Compliance Trend" subtitle="Daily shift present/absent stats" data={analytics?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={isLoading} error={error} onRetry={reload} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsLineChart title="Workforce Trend" subtitle="Headcount growth over time" data={analytics?.growthData} xKey="name" series={[{ key: 'headcount', name: 'Employees', color: '#10b981' }, { key: 'hiring', name: 'New Hires', color: '#3b82f6' }]} isLoading={isLoading} error={error} onRetry={reload} />
+            <AnalyticsLineChart title="Attendance Trend" subtitle="Daily attendance overview" data={analytics?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={isLoading} error={error} onRetry={reload} />
           </div>
 
           {/* Secondary Analytics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <AnalyticsDonutChart title="Employment Status Mix" subtitle="Active vs On Leave overview" data={analytics?.employmentStatus} isLoading={isLoading} error={error} onRetry={reload} />
-            <AnalyticsDonutChart title="Department Breakdown" subtitle="Current staff allocation across departments" data={analytics?.departmentDistribution} isLoading={isLoading} error={error} onRetry={reload} />
-            <AnalyticsBarChart title="Skills Coverage Analysis" subtitle="Highest frequency active skills in scope" data={analytics?.skillsAnalysis?.topSkills} xKey="name" series={[{ key: 'coverage', name: 'Coverage %', color: '#06b6d4' }]} layout="vertical" isLoading={isLoading} error={error} onRetry={reload} />
-            <AnalyticsDonutChart title="Retention Risk Distribution" subtitle="Workforce stabilization assessment" data={analytics?.riskDistribution} isLoading={isLoading} error={error} onRetry={reload} colors={['#ef4444', '#f59e0b', '#10b981']} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsBarChart title="Leave Trend" subtitle="Leave usage by type" data={analytics?.leaveTrend} xKey="name" series={[{ key: 'sick', name: 'Sick', color: '#ef4444' }, { key: 'vacation', name: 'Vacation', color: '#3b82f6' }, { key: 'other', name: 'Other', color: '#f59e0b' }]} isLoading={isLoading} error={error} onRetry={reload} />
+            <AnalyticsBarChart title="Department Workforce" subtitle="Workforce by department" layout="horizontal" data={analytics?.departmentComparison} xKey="name" series={[{ key: 'headcount', name: 'Employees', color: '#8b5cf6' }]} isLoading={isLoading} error={error} onRetry={reload} />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
+            <AnalyticsDonutChart title="Employee Status" subtitle="Active, remote, leave and offline workforce" data={analytics?.employmentStatus} isLoading={isLoading} error={error} onRetry={reload} />
+            <AnalyticsBarChart title="Joiners vs Exits" subtitle="Quarterly comparison" data={analytics?.joinersExits} xKey="name" series={[{ key: 'joiners', name: 'Joiners', color: '#10b981' }, { key: 'exits', name: 'Exits', color: '#ef4444' }]} isLoading={isLoading} error={error} onRetry={reload} />
           </div>
 
           <EmployeeTable
