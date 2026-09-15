@@ -5,6 +5,7 @@ import { RootState, AppDispatch } from '../../app/store';
 import { fetchNotifications, markAsRead, markAllAsRead, addNotification } from '../../store/notificationSlice';
 import { useRealtimeNotifications } from '../../hooks/useRealtimeNotifications';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from './ToastContext';
 
 export const NotificationCenter: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ export const NotificationCenter: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { info } = useToast();
 
   const { notifications, unreadCount, status } = useSelector((state: RootState) => state.notifications);
 
@@ -31,6 +33,7 @@ export const NotificationCenter: React.FC = () => {
       createdAt: new Date().toISOString()
     }));
     setHasNewPulse(true);
+    info(newNotif.title || 'New Notification', newNotif.message);
   });
 
   useEffect(() => {

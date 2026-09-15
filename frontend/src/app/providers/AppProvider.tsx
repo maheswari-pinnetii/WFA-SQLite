@@ -7,7 +7,7 @@ import { setupAuthInterceptors } from '../../api/interceptors/authInterceptor';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../../api/queryClient';
 
-import { ToastProvider } from '../../shared/context/ToastContext';
+import { ToastProvider } from '../../components/common/ToastContext';
 import { AuthProvider } from '../../auth/AuthProvider';
 import { GlobalErrorBoundary } from '../../shared/components/GlobalErrorBoundary';
 

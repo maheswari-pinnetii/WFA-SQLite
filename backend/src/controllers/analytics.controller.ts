@@ -1,74 +1,76 @@
+import { Request, Response } from 'express';
 import { analyticsService } from '../services/analytics.service.js';
+import { sendError } from '../utils/apiError.js';
 
-export const getAnalytics = async (req, res) => {
+export const getAnalytics = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getAnalytics(req.user);
+    const data = await analyticsService.getAnalytics((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Analytics query failed:', err);
-    return res.status(500).json({ success: false, message: 'Unable to load analytics data.' });
+    sendError(res, err);
   }
 };
 
-export const getDashboardSummary = async (req, res) => {
+export const getDashboardSummary = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getDashboardSummary(req.user);
+    const data = await analyticsService.getDashboardSummary((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    sendError(res, err);
   }
 };
 
-export const getWorkforceDistribution = async (req, res) => {
+export const getWorkforceDistribution = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getWorkforceDistribution(req.user);
+    const data = await analyticsService.getWorkforceDistribution((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    sendError(res, err);
   }
 };
 
-export const getHeadcountAnalytics = async (req, res) => {
+export const getHeadcountAnalytics = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getHeadcountAnalytics(req.user);
+    const data = await analyticsService.getHeadcountAnalytics((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    sendError(res, err);
   }
 };
 
-export const getRiskAnalytics = async (req, res) => {
+export const getRiskAnalytics = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getRiskAnalytics(req.user);
+    const data = await analyticsService.getRiskAnalytics((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    sendError(res, err);
   }
 };
 
-export const getEmployeeGrowth = async (req, res) => {
+export const getEmployeeGrowth = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getEmployeeGrowth(req.user);
+    const data = await analyticsService.getEmployeeGrowth((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    sendError(res, err);
   }
 };
 
-export const getAttendanceTrend = async (req, res) => {
+export const getAttendanceTrend = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getAttendanceTrend(req.user);
+    const data = await analyticsService.getAttendanceTrend((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    sendError(res, err);
   }
 };
 
-export const getPerformanceAnalytics = async (req, res) => {
+export const getPerformanceAnalytics = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getPerformanceAnalytics(req.user);
+    const data = await analyticsService.getPerformanceAnalytics((req as any).user);
     return res.json({ success: true, data });
-  } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+  } catch (err: any) {
+    sendError(res, err);
   }
 };

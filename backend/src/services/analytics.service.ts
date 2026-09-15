@@ -1,5 +1,5 @@
 import { analyticsRepository } from '../repositories/analytics.repository.js';
-import { Employee } from '../models/index.js';
+import { Employee, LeaveBalance } from '../models/index.js';
 
 const getScope = (user: any, employeeIdKey = 'employeeId') => {
   const query: any = { organizationId: user.organizationId || 'org-stackly' };
@@ -190,7 +190,32 @@ export class AnalyticsService {
       return recordDate.startsWith(today);
     });
     const todaysAttendanceStatus = myTodayRecords.length > 0 ? myTodayRecords[0].status : 'Pending';
-    const workingHours = '8.5h'; // Proxy
+    let actualWorkingHours = 0;
+    validAttendance.forEach((record: any) => {
+      // Very basic working hours aggregation
+      if (record.checkInTime && record.checkOutTime) {
+        const inParts = record.checkInTime.split(':');
+        const outParts = record.checkOutTime.split(':');
+        if (inParts.length >= 2 && outParts.length >= 2) {
+          const start = new Date(); start.setHours(parseInt(inParts[0]), parseInt(inParts[1]));
+          const end = new Date(); end.setHours(parseInt(outParts[0]), parseInt(outParts[1]));
+          actualWorkingHours += Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
+        }
+      }
+    });
+    const workingHours = `${actualWorkingHours > 0 ? (actualWorkingHours / validAttendance.length).toFixed(1) : 0}h`;
+
+    // Real Leave Balance
+    let totalLeaveBalanceDays = 0;
+    if (reqUser.id) {
+      const year = new Date().getFullYear();
+      const balances = await LeaveBalance.find({ employeeId: reqUser.id, year, organizationId: reqUser.organizationId || 'org-stackly' }) as any[];
+      balances.forEach(b => {
+        totalLeaveBalanceDays += Math.max(0, (b.allocated || 0) - (b.used || 0));
+      });
+    }
+    const leaveBalance = `${totalLeaveBalanceDays} Days`;
+
 
     return {
       scope: {
@@ -207,7 +232,7 @@ export class AnalyticsService {
         attendanceRate: `${attendanceRate}%`,
         departments: departmentsCount,
         teams: teamsCount,
-        pendingApprovals: openLeaveRequests, // proxy
+        pendingApprovals: reqUser.role === 'EMPLOYEE' ? 0 : openLeaveRequests, // actually only managers should see this
         openLeaveRequests,
         attendanceExceptions: lateCount,
         openTasks,
@@ -232,12 +257,12 @@ export class AnalyticsService {
         completedToday,
         inProgress: inProgressTasks,
         blockedTasks,
-        pendingReviews: openTasks, // proxy
+        pendingReviews: reqUser.role === 'EMPLOYEE' ? 0 : openTasks, // only managers should see this
 
         todaysAttendance: todaysAttendanceStatus,
         workingHours,
         attendanceThisMonth: `${attendanceRate}%`,
-        leaveBalance: '14 Days', // static proxy for now
+        leaveBalance,
         tasksAssigned: totalTasks,
         tasksCompleted: completedTasks,
         tasksInProgress: inProgressTasks

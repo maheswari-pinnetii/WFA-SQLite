@@ -230,6 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { 
             label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
             children: [
+              { label: 'My Profile', path: '/me/profile' },
               { label: 'System', path: '/admin/settings/system' },
               { label: 'Organization', path: '/admin/settings/org' },
               { label: 'Integrations', path: '/admin/settings/integrations' },
@@ -314,6 +315,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { 
             label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
             children: [
+              { label: 'My Profile', path: '/me/profile' },
               { label: 'My Account', path: '/hr/settings/account' },
               { label: 'Workflow Config', path: '/hr/settings/workflow' },
             ]
@@ -379,7 +381,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Action Center', path: '/manager/actions', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" />, badge: { text: '2', variant: 'amber' } },
           { label: 'Notifications', path: '/manager/notifications', icon: <Bell size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Settings', path: '/manager/settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" /> },
+          { 
+            label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
+            children: [
+              { label: 'My Profile', path: '/me/profile' },
+              { label: 'Manager Settings', path: '/manager/settings' }
+            ]
+          },
         ]
       }
     ],
@@ -424,7 +432,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         items: [
           { label: 'Action Center', path: '/team-lead/actions', icon: <Zap size={18} strokeWidth={2} className="text-amber-400" /> },
           { label: 'Notifications', path: '/team-lead/notifications', icon: <Bell size={18} strokeWidth={2} className="text-cyan-400" /> },
-          { label: 'Settings', path: '/team-lead/settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" /> },
+          { 
+            label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
+            children: [
+              { label: 'My Profile', path: '/me/profile' },
+              { label: 'Team Lead Settings', path: '/team-lead/settings' }
+            ]
+          },
         ]
       }
     ],
@@ -483,7 +497,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           { 
             label: 'Settings', path: '#settings', icon: <Settings size={18} strokeWidth={2} className="text-slate-400" />,
             children: [
-              { label: 'My Profile', path: '/employee/profile' },
+              { label: 'My Profile', path: '/me/profile' },
               { label: 'Account', path: '/employee/account' },
               { label: 'Security', path: '/employee/security' },
             ]

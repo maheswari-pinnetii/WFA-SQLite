@@ -240,19 +240,6 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         {/* 1. Notifications Center */}
         <NotificationCenter />
 
-        {/* 2. Messages Icon */}
-        <button
-          onClick={() => toggleDropdown('messages')}
-          aria-label="View Messages"
-          className={`p-2 rounded-lg border transition-all hidden sm:block cursor-pointer ${
-            isDark
-              ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
-              : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
-          }`}
-          title="Team Messages"
-        >
-          <MessageSquare size={18} />
-        </button>
 
         {/* 3. Theme Toggle */}
         <button
@@ -337,7 +324,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                 {/* Profile Actions List */}
                 <div className="py-1 space-y-1 font-medium">
                   <button
-                    onClick={() => { navigate('/employee/profile'); setActiveDropdown(null); }}
+                    onClick={() => { navigate('/me/profile'); setActiveDropdown(null); }}
                     className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
                     <User size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> View Profile
