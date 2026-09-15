@@ -22,10 +22,12 @@ import {
   CheckCircle2,
   TrendingDown,
   Briefcase,
-  ShieldCheck,
-  Layers,
+  UserCheck,
+  Building2,
   Filter,
-  DollarSign
+  DollarSign,
+  CalendarClock,
+  CalendarOff
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -249,13 +251,13 @@ export const AdminDashboardPage: React.FC = () => {
         {/* KPI metrics (8 KPIs) */}
         <KPIGrid>
           <KPICard title="Total Employees" value={analytics.data?.metrics?.totalWorkforce ?? 0} icon={<Users size={20} />} color="emerald" trend="up" trendValue="12.4%" subtitle="Active workforce" />
-          <KPICard title="Active Employees" value={analytics.data?.metrics?.activeEmployees ?? 0} icon={<ShieldCheck size={20} />} color="info" trend="up" trendValue="2.1%" subtitle="Currently active" />
+          <KPICard title="Active Employees" value={analytics.data?.metrics?.activeEmployees ?? 0} icon={<UserCheck size={20} />} color="info" trend="up" trendValue="2.1%" subtitle="Currently active" />
           <KPICard title="Present Today" value={analytics.data?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
-          <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<Calendar size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Weekly average" />
+          <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Weekly average" />
           
-          <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<Clock size={20} />} color="warning" subtitle="Approved leave" />
-          <KPICard title="Departments" value={analytics.data?.metrics?.departments ?? 0} icon={<Layers size={20} />} color="neutral" subtitle="Active departments" />
-          <KPICard title="Open Vacancies" value={analytics.data?.metrics?.openVacancies ?? 0} icon={<Briefcase size={20} />} color="info" trend="up" trendValue="8.4%" subtitle="Open requisitions" />
+          <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Approved leave" />
+          <KPICard title="Departments" value={analytics.data?.metrics?.departments ?? 0} icon={<Building2 size={20} />} color="neutral" subtitle="Active departments" />
+          <KPICard title="Open Vacancies" value={analytics.data?.metrics?.openVacancies ?? 0} icon={<UserPlus size={20} />} color="info" trend="up" trendValue="8.4%" subtitle="Open requisitions" />
           <KPICard title="Annual Attrition" value={analytics.data?.metrics?.annualAttrition ?? '0%'} icon={<TrendingDown size={20} />} color="danger" trend="down" trendValue="0.8%" subtitle="vs last year" />
         </KPIGrid>
 

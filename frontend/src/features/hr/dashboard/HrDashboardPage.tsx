@@ -13,7 +13,7 @@ import { DashboardShell, DashboardHeader, DashboardToolbar, KPIGrid, KPICard, Ta
 import { useRealtimeDashboard } from '../../../hooks/useRealtimeDashboard';
 import { useRealtimeAttendance } from '../../../hooks/useRealtimeAttendance';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
-import { UserCheck, Users, Briefcase, FileText, Plus, Clock, HeartHandshake, Star, AlertTriangle, DollarSign, Filter, Layers } from 'lucide-react';
+import { UserCheck, Users, UserPlus, UserMinus, FileText, CalendarClock, CalendarOff, CheckCircle2, AlertTriangle, DollarSign, Filter, Layers, Plus, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const HrSprintOverview: React.FC<{ hrTasks: Task[] }> = ({ hrTasks }) => (
@@ -160,12 +160,12 @@ export const HrDashboardPage: React.FC = () => {
           <KPIGrid>
             <KPICard title="Total Employees" value={analytics?.metrics?.totalWorkforce ?? 0} icon={<Users size={20} />} color="emerald" trend="up" trendValue="12.4%" subtitle="Active workforce" />
             <KPICard title="Active Employees" value={analytics?.metrics?.activeEmployees ?? 0} icon={<UserCheck size={20} />} color="info" trend="up" trendValue="2.1%" subtitle="Currently active" />
-            <KPICard title="New Joiners" value={analytics?.metrics?.newJoiners ?? 0} icon={<Plus size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="This month" />
-            <KPICard title="Exits" value={analytics?.metrics?.exits ?? 0} icon={<FileText size={20} />} color="warning" trend="down" trendValue="0.5%" subtitle="This month" />
+            <KPICard title="New Joiners" value={analytics?.metrics?.newJoiners ?? 0} icon={<UserPlus size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="This month" />
+            <KPICard title="Exits" value={analytics?.metrics?.exits ?? 0} icon={<UserMinus size={20} />} color="warning" trend="down" trendValue="0.5%" subtitle="This month" />
             
-            <KPICard title="Present Today" value={analytics?.metrics?.presentToday ?? 0} icon={<Briefcase size={20} />} color="success" subtitle="Checked in today" />
-            <KPICard title="Attendance Rate" value={analytics?.metrics?.attendanceRate ?? '0%'} icon={<Clock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Weekly average" />
-            <KPICard title="On Leave" value={analytics?.metrics?.onLeave ?? 0} icon={<HeartHandshake size={20} />} color="warning" subtitle="Approved leave" />
+            <KPICard title="Present Today" value={analytics?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
+            <KPICard title="Attendance Rate" value={analytics?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Weekly average" />
+            <KPICard title="On Leave" value={analytics?.metrics?.onLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Approved leave" />
             <KPICard title="Pending HR Actions" value={analytics?.metrics?.pendingHrActions ?? 0} icon={<AlertTriangle size={20} />} color="danger" subtitle="Requires attention" />
           </KPIGrid>
 

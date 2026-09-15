@@ -31,6 +31,9 @@ import {
   Check,
   LayoutDashboard,
   AlertTriangle,
+  CalendarClock,
+  CalendarDays,
+  CalendarOff
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
@@ -1141,8 +1144,8 @@ export const EmployeeDashboardPage: React.FC = () => {
           <div className="space-y-6 animate-fadeIn">
             <KPIGrid>
               <KPICard title="Hours Today" value={hoursToday} icon={<Clock size={24} />} color="info" trend="neutral" subtitle="Active Shift Elapsed" />
-              <KPICard title="Hours This Week" value={hoursThisWeek} icon={<Briefcase size={24} />} color="emerald" trend="neutral" subtitle="Standard 40h Goal" />
-              <KPICard title="Attendance Rate" value={attendanceRate} icon={<Calendar size={24} />} color="success" trend="up" subtitle="Lifetime Adherence" />
+              <KPICard title="Hours This Week" value={hoursThisWeek} icon={<CalendarClock size={24} />} color="emerald" trend="neutral" subtitle="Standard 40h Goal" />
+              <KPICard title="Attendance Rate" value={attendanceRate} icon={<CalendarClock size={24} />} color="success" trend="up" subtitle="Lifetime Adherence" />
               <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={24} />} color="warning" trend="neutral" subtitle="Approved OT (1.5x)" />
             </KPIGrid>
             <EmployeeSprintWork
@@ -1177,12 +1180,12 @@ export const EmployeeDashboardPage: React.FC = () => {
                 badge="Target: 40h/wk"
               />
             <KPIGrid>
-              <KPICard title="Upcoming Shifts" value="5 Shifts" icon={<Calendar size={20} />} color="info" trend="neutral" subtitle="This week" />
-              <KPICard title="Leave Balance" value="12 Days" icon={<Coffee size={20} />} color="success" subtitle="Available PTO" />
+              <KPICard title="Upcoming Shifts" value="5 Shifts" icon={<CalendarDays size={20} />} color="info" trend="neutral" subtitle="This week" />
+              <KPICard title="Leave Balance" value="12 Days" icon={<CalendarOff size={20} />} color="success" subtitle="Available PTO" />
               <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={20} />} color="warning" trend="up" trendValue="1.5%" subtitle="Approved OT" />
-              <KPICard title="Next Holiday" value="Oct 02" icon={<Calendar size={20} />} color="emerald" subtitle="Gandhi Jayanti" />
+              <KPICard title="Next Holiday" value="Oct 02" icon={<CalendarDays size={20} />} color="emerald" subtitle="Gandhi Jayanti" />
               
-              <KPICard title="Current Tasks" value={tasks.filter(t => t.status === 'IN_PROGRESS' || t.status === 'TODO').length} icon={<Zap size={20} />} color="info" subtitle="Assigned to you" />
+              <KPICard title="Current Tasks" value={tasks.filter(t => t.status === 'IN_PROGRESS' || t.status === 'TODO').length} icon={<ClipboardList size={20} />} color="info" subtitle="Assigned to you" />
               <KPICard title="Completed Tasks" value={tasks.filter(t => t.status === 'COMPLETED').length} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="2.4%" subtitle="This sprint" />
               <KPICard title="Blocked Tasks" value={tasks.filter(t => t.status === 'BLOCKED').length} subtitle="Needs attention" icon={<AlertTriangle size={20} />} color="danger" />
               <KPICard title="Time Tracked" value={hoursThisWeek} subtitle="Logged this week" icon={<Clock size={20} />} color="emerald" />

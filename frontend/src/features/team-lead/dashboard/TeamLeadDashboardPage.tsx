@@ -10,7 +10,7 @@ import { DashboardErrorBoundary } from '../../../shared/components/DashboardErro
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
-import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Calendar, AlertTriangle, Target, FileText, TrendingUp, Star, ArrowRight, Filter, Layers } from 'lucide-react';
+import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Calendar, AlertTriangle, Target, FileText, TrendingUp, Star, ArrowRight, Filter, Layers, CalendarClock, CalendarOff, ClipboardList, ListTodo } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
@@ -131,13 +131,13 @@ export const TeamLeadDashboardPage: React.FC = () => {
           <KPIGrid>
             <KPICard title="Team Members" value={directReports.length} subtitle="Active team roster" icon={<Users size={20} />} color="info" />
             <KPICard title="Present Today" value={analytics.data?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
-            <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<Star size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="Weekly average" />
-            <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<Clock size={20} />} color="warning" subtitle="Currently on leave" />
+            <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="Weekly average" />
+            <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Currently on leave" />
             
-            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<Zap size={20} />} color="info" subtitle="In progress" />
+            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<ClipboardList size={20} />} color="info" subtitle="In progress" />
             <KPICard title="Completed Today" value={analytics.data?.metrics?.completedTasks ?? 0} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="5.4%" subtitle="Daily velocity" />
             <KPICard title="Blocked Tasks" value={analytics.data?.metrics?.blockedTasks ?? 0} subtitle="Require your intervention" icon={<AlertTriangle size={20} />} color="danger" />
-            <KPICard title="Pending Reviews" value={analytics.data?.metrics?.pendingReviews ?? 0} subtitle="Awaiting review" icon={<GitPullRequest size={20} />} color="warning" />
+            <KPICard title="Pending Reviews" value={analytics.data?.metrics?.pendingReviews ?? 0} subtitle="Awaiting review" icon={<ListTodo size={20} />} color="warning" />
           </KPIGrid>
 
           {/* Primary Analytics Grid (6 Charts) */}
