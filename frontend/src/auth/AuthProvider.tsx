@@ -74,6 +74,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     await authService.logout();
+    // Clear any app-level flags so the next login starts fresh
+    sessionStorage.removeItem('wfa_initialized_role');
+    // Reset React state
     setSessionState(null);
     setAppUser(null);
     setRole(Role.EMPLOYEE);

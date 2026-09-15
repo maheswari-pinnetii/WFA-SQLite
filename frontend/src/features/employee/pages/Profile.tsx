@@ -365,8 +365,9 @@ export const Profile: React.FC = () => {
     return 'present';
   };
 
-  const handleLogout = () => {
-    navigate('/logout');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   return (
