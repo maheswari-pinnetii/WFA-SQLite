@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { payrollApi } from '../../../api/endpoints/payroll.api';
+import { lifecycleApi } from '../../../api/endpoints/lifecycle.api';
+import { assetsApi } from '../../../api/endpoints/assets.api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Employee {
@@ -26,7 +28,8 @@ const TABS = [
   { id: 'emergency',  label: 'Emergency Contacts', icon: '🚨' },
   { id: 'skills',     label: 'Skills & Education', icon: '🎓' },
   { id: 'documents',  label: 'Documents',          icon: '📄' },
-  { id: 'history',    label: 'History',            icon: '📋' },
+  { id: 'assets',     label: 'Assets',             icon: '💻' },
+  { id: 'history',    label: 'History & Onboarding',icon: '📋' },
 ];
 
 const WORK_MODES = ['office', 'remote', 'hybrid'];
@@ -81,6 +84,14 @@ export const EmployeeProfilePage: React.FC = () => {
   const [bankForm, setBankForm] = useState<any>({});
   const [taxForm, setTaxForm] = useState<any>({});
 
+  // Phase 11 & 12 States
+  const [employeeAssets, setEmployeeAssets] = useState<any[]>([]);
+  const [newDocument, setNewDocument] = useState({ documentType: '', documentUrl: '' });
+  const [transitionStatus, setTransitionStatus] = useState({ status: 'ACTIVE', reason: '' });
+  const [allAssets, setAllAssets] = useState<any[]>([]);
+  const [selectedAssetId, setSelectedAssetId] = useState('');
+  const [isAssignAssetModalOpen, setIsAssignAssetModalOpen] = useState(false);
+
   // Payroll / Salary Structure
   const { data: salaryStructure, refetch: refetchSalary } = useQuery({
     queryKey: ['employee-salary', id],
@@ -127,6 +138,64 @@ export const EmployeeProfilePage: React.FC = () => {
   }, [id]);
 
   useEffect(() => { fetchProfile(); }, [fetchProfile]);
+
+  // Phase 11 & 12 Handlers
+  useEffect(() => {
+    if (activeTab === 'assets' && id) {
+      assetsApi.getAssets({ employeeId: id }).then(res => setEmployeeAssets(res.data || [])).catch(console.error);
+    }
+  }, [activeTab, id]);
+
+  const fetchAvailableAssets = async () => {
+    try {
+      const res = await assetsApi.getAssets({ status: 'AVAILABLE' });
+      setAllAssets(res.data || []);
+    } catch (err) { console.error(err); }
+  };
+
+  const handleAssignAsset = async () => {
+    if (!selectedAssetId || !id) return;
+    try {
+      await assetsApi.assignAsset(selectedAssetId, id);
+      showToast('Asset assigned successfully.');
+      setIsAssignAssetModalOpen(false);
+      assetsApi.getAssets({ employeeId: id }).then(res => setEmployeeAssets(res.data || []));
+    } catch (err) {
+      showToast('Failed to assign asset.', 'error');
+    }
+  };
+
+  const handleReturnAsset = async (assetId: string) => {
+    try {
+      await assetsApi.returnAsset(assetId, 'GOOD');
+      showToast('Asset returned.');
+      assetsApi.getAssets({ employeeId: id }).then(res => setEmployeeAssets(res.data || []));
+    } catch (err) { showToast('Failed to return asset.', 'error'); }
+  };
+
+  const handleAddDocument = async () => {
+    if (!id || !newDocument.documentType || !newDocument.documentUrl) return;
+    try {
+      setSaving(true);
+      await lifecycleApi.addDocument(id, newDocument);
+      showToast('Document uploaded.');
+      setNewDocument({ documentType: '', documentUrl: '' });
+      fetchProfile();
+    } catch { showToast('Failed to upload document.', 'error'); }
+    finally { setSaving(false); }
+  };
+
+  const handleTransitionStatus = async () => {
+    if (!id || !transitionStatus.status) return;
+    try {
+      setSaving(true);
+      await lifecycleApi.transitionStatus(id, transitionStatus.status, transitionStatus.reason);
+      showToast('Status transitioned successfully.');
+      setTransitionStatus({ status: 'ACTIVE', reason: '' });
+      fetchProfile();
+    } catch { showToast('Failed to transition status.', 'error'); }
+    finally { setSaving(false); }
+  };
 
   // ─── Save handlers ─────────────────────────────────────────────────────────
   const savePersonal = async () => {
