@@ -21,8 +21,13 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
-    const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME_MODE) as ThemeMode;
-    return savedTheme || 'dark'; // Default to dark mode
+    try {
+      const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME_MODE) as ThemeMode;
+      if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    } catch {
+      // localStorage unavailable (private browsing restrictions, etc.)
+    }
+    return 'dark'; // Default to dark mode
   });
 
   const themeObject = theme === 'light' ? lightTheme : darkTheme;

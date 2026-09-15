@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { DashboardErrorBoundary } from '../../../shared/components/DashboardErrorBoundary';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
@@ -8,6 +9,7 @@ import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api/attendanceApi';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { AnalyticsBarChart, AnalyticsDonutChart } from '../../../components/charts/AnalyticsCharts';
+import { DashboardShell, DashboardHeader, KPIGrid, KPICard } from '../../../shared/components/dashboard';
 import {
   Clock,
   Calendar,
@@ -60,74 +62,7 @@ export const StepSectionHeader: React.FC<{
 );
 
 
-// 1. Employee Dashboard Overview Header
-export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => {
-  const initials = (user?.name || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
-
-  return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-      <div className="flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-semibold text-sm shrink-0">
-          {initials}
-        </div>
-        <div>
-          <h1 className="text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-            {user?.name || 'My Workspace'}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            {[user?.role, user?.department].filter(Boolean).join(' · ')}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 shrink-0 flex-wrap">
-        <a
-          href="#step-1-punch"
-          className="px-3.5 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm flex items-center gap-1.5 transition-colors"
-        >
-          <Clock size={14} /> Check In
-        </a>
-        <Link
-          to="/employee/leave"
-          className="px-3.5 py-2 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm flex items-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
-        >
-          <Calendar size={14} /> Apply Leave
-        </Link>
-        <Link
-          to="/employee/profile"
-          className="px-3.5 py-2 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm flex items-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
-        >
-          <Compass size={14} /> Profile
-        </Link>
-      </div>
-    </div>
-  );
-};
-
-
-
-// 3. Employee KPI Cards
-export const EmployeeKpiGrid: React.FC<{
-  hoursToday: string;
-  hoursThisWeek: string;
-  attendanceRate: string;
-  overtimeHours: string;
-  leaveBalance: string;
-  leavesUsed: string;
-  pendingTasksCount: number;
-  timesheetStatus: string;
-}> = (props) => (
-  <div className="dashboard-kpi-grid">
-    <MinimalKpiCard title="Hours Today" value={props.hoursToday} icon={<Clock size={26} />} iconBgColor="blue" trend="Active Shift Elapsed" />
-    <MinimalKpiCard title="Hours This Week" value={props.hoursThisWeek} icon={<Briefcase size={26} />} iconBgColor="emerald" trend="Standard 40h Goal" />
-    <MinimalKpiCard title="Attendance Rate" value={props.attendanceRate} icon={<Calendar size={26} />} iconBgColor="teal" trend="Lifetime Adherence" />
-    <MinimalKpiCard title="Overtime Hours" value={props.overtimeHours} icon={<Timer size={26} />} iconBgColor="cyan" trend="Approved OT (1.5x)" />
-    <MinimalKpiCard title="Leave Balance" value={props.leaveBalance} icon={<Layers size={26} />} iconBgColor="purple" trend="Available PTO Days" />
-    <MinimalKpiCard title="Leaves Used" value={props.leavesUsed} icon={<FileText size={26} />} iconBgColor="rose" trend="This Calendar Year" />
-    <MinimalKpiCard title="Sprint Tasks Active" value={props.pendingTasksCount} icon={<Zap size={26} />} iconBgColor="amber" trend="In Sprint Backlog" />
-    <MinimalKpiCard title="Timesheet Status" value={props.timesheetStatus} icon={<CheckCircle2 size={26} />} iconBgColor="indigo" trend="Daily Attendance Lock" />
-  </div>
-);
+// EmployeeDashboardOverview and EmployeeKpiGrid have been replaced with shared components
 
 
 
@@ -1079,72 +1014,89 @@ export const EmployeeDashboardPage: React.FC = () => {
   ];
 
   return (
-    <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]} requiredPermission={Permission.PROFILE_VIEW}>
-      <div className="space-y-8 animate-fadeIn font-sans pb-12 max-w-7xl mx-auto">
-        
-        {/* Workspace Mode Switcher Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-color)] pb-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setWorkspaceMode('all-in-one')}
-              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                workspaceMode === 'all-in-one'
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-blue-500/20'
-                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
-              }`}
-            >
-              <LayoutDashboard size={15} />
-              Overview
-            </button>
+    <DashboardErrorBoundary dashboardName="Employee Dashboard">
+      <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]} requiredPermission={Permission.DASHBOARD_VIEW}>
+          <DashboardHeader
+            breadcrumbs={[
+              { label: 'Home', href: '/' },
+              { label: 'Employee', href: '/employee/dashboard' },
+              { label: 'Dashboard' }
+            ]}
+            title={user?.name || 'My Workspace'}
+            description={[user?.role, user?.department].filter(Boolean).join(' · ')}
+            badge={<span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400">EMPLOYEE</span>}
+            lastUpdated={new Date().toLocaleTimeString()}
+            onRefresh={loadDashboardData}
+            isRefreshing={loading}
+            primaryAction={
+              <a href="#step-1-punch" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
+                <Clock size={16} /> Check In
+              </a>
+            }
+            secondaryAction={
+              <div className="flex items-center gap-2">
+                <Link to="/employee/leave" className="px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                  <Calendar size={16} /> Apply Leave
+                </Link>
+                <Link to="/employee/profile" className="px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2">
+                  <Compass size={16} /> Profile
+                </Link>
+              </div>
+            }
+          />
+          
+          {/* Workspace Mode Switcher Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4 mb-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setWorkspaceMode('all-in-one')}
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                  workspaceMode === 'all-in-one'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <LayoutDashboard size={15} />
+                Overview
+              </button>
 
-            <button
-              onClick={() => setWorkspaceMode('absence')}
-              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                workspaceMode === 'absence'
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
-              }`}
-            >
-              <Calendar size={15} />
-              Absence & Leave
-            </button>
+              <button
+                onClick={() => setWorkspaceMode('absence')}
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                  workspaceMode === 'absence'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <Calendar size={15} />
+                Absence & Leave
+              </button>
 
-            <button
-              onClick={() => setWorkspaceMode('attendance')}
-              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                workspaceMode === 'attendance'
-                  ? 'bg-teal-600 text-white shadow-lg shadow-teal-500/20'
-                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
-              }`}
-            >
-              <Clock size={15} className="text-teal-400" />
-              Time Clock & Heatmap
-            </button>
+              <button
+                onClick={() => setWorkspaceMode('attendance')}
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                  workspaceMode === 'attendance'
+                    ? 'bg-teal-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <Clock size={15} />
+                Time Clock & Heatmap
+              </button>
 
-            <button
-              onClick={() => setWorkspaceMode('sprint')}
-              className={`px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer ${
-                workspaceMode === 'sprint'
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-indigo-500/20'
-                  : 'bg-slate-900 text-slate-300 hover:text-white border border-slate-800'
-              }`}
-            >
-              <Layers size={15} />
-              Sprint Tasks
-            </button>
+              <button
+                onClick={() => setWorkspaceMode('sprint')}
+                className={`px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all cursor-pointer ${
+                  workspaceMode === 'sprint'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <Layers size={15} />
+                Sprint Tasks
+              </button>
+            </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={loadDashboardData}
-              disabled={loading}
-              className="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 border border-slate-800 rounded-md hover:bg-slate-800 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-              {loading ? 'Syncing...' : 'Refresh'}
-            </button>
-          </div>
-        </div>
 
         {/* MODE: ABSENCE & LEAVE SUITE */}
         {workspaceMode === 'absence' && (
@@ -1186,16 +1138,12 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* MODE: SPRINT TASKS & DELIVERABLES */}
         {workspaceMode === 'sprint' && (
           <div className="space-y-6 animate-fadeIn">
-            <EmployeeKpiGrid
-              hoursToday={hoursToday}
-              hoursThisWeek={hoursThisWeek}
-              attendanceRate={attendanceRate}
-              overtimeHours={overtimeHours}
-              leaveBalance="14 Days"
-              leavesUsed="4 Days"
-              pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
-              timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
-            />
+            <KPIGrid>
+              <KPICard title="Hours Today" value={hoursToday} icon={<Clock size={24} />} color="info" trend="neutral" subtitle="Active Shift Elapsed" />
+              <KPICard title="Hours This Week" value={hoursThisWeek} icon={<Briefcase size={24} />} color="emerald" trend="neutral" subtitle="Standard 40h Goal" />
+              <KPICard title="Attendance Rate" value={attendanceRate} icon={<Calendar size={24} />} color="success" trend="up" subtitle="Lifetime Adherence" />
+              <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={24} />} color="warning" trend="neutral" subtitle="Approved OT (1.5x)" />
+            </KPIGrid>
             <EmployeeSprintWork
               tasks={tasks}
               loading={loading}
@@ -1216,7 +1164,6 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="blue"
                 badge="Live Sync"
               />
-              <EmployeeDashboardOverview user={user} />
               <LiveCheckInWidget />
             </section>
 
@@ -1228,16 +1175,12 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="emerald"
                 badge="Target: 40h/wk"
               />
-              <EmployeeKpiGrid
-                hoursToday={hoursToday}
-                hoursThisWeek={hoursThisWeek}
-                attendanceRate={attendanceRate}
-                overtimeHours={overtimeHours}
-                leaveBalance="14 Days"
-                leavesUsed="4 Days"
-                pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
-                timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
-              />
+            <KPIGrid>
+              <KPICard title="Hours Today" value={hoursToday} icon={<Clock size={24} />} color="info" trend="neutral" subtitle="Active Shift Elapsed" />
+              <KPICard title="Hours This Week" value={hoursThisWeek} icon={<Briefcase size={24} />} color="emerald" trend="neutral" subtitle="Standard 40h Goal" />
+              <KPICard title="Attendance Rate" value={attendanceRate} icon={<Calendar size={24} />} color="success" trend="up" subtitle="Lifetime Adherence" />
+              <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={24} />} color="warning" trend="neutral" subtitle="Approved OT (1.5x)" />
+            </KPIGrid>
             </section>
 
             {/* STEP 3: Shift Schedule & Monthly Attendance Calendar */}
@@ -1359,117 +1302,117 @@ export const EmployeeDashboardPage: React.FC = () => {
           </div>
         )}
 
-        {/* Correction Request Modal */}
-        {isCorrectionModalOpen && (
-          <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-lg w-full space-y-4 animate-scaleUp">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <div className="flex items-center gap-2">
-                  <Clock className="text-amber-400" size={20} />
-                  <h3 className="text-base font-bold text-white">
-                    Submit Attendance Correction Request
-                  </h3>
+          {/* Correction Request Modal ... */ }
+          {isCorrectionModalOpen && (
+            // ... (keep this intact since it's just a modal)
+            <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full space-y-4 animate-scaleUp">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <Clock className="text-amber-500" size={20} />
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                      Submit Attendance Correction Request
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setIsCorrectionModalOpen(false)}
+                    className="text-slate-400 hover:text-slate-900 dark:hover:text-white text-xl leading-none font-bold cursor-pointer"
+                  >
+                    &times;
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsCorrectionModalOpen(false)}
-                  className="text-slate-400 hover:text-white text-xl leading-none font-bold cursor-pointer"
-                >
-                  &times;
-                </button>
+
+                {correctionSuccessMsg ? (
+                  <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+                    <CheckCircle2 size={20} />
+                    {correctionSuccessMsg}
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitCorrection} className="space-y-3.5 text-xs">
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                      Submit your punch adjustment details. Once submitted, your Department Manager or HR Operations team will audit and accept the correction.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Date of Attendance</label>
+                        <input
+                          type="date"
+                          required
+                          value={correctionDate}
+                          onChange={(e) => setCorrectionDate(e.target.value)}
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Correction Category</label>
+                        <select
+                          value={correctionType}
+                          onChange={(e) => setCorrectionType(e.target.value)}
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white cursor-pointer font-medium"
+                        >
+                          <option>Missed Morning Check-In</option>
+                          <option>Missed Evening Check-Out</option>
+                          <option>Incorrect Duration / Working Hours</option>
+                          <option>Marked Absent Mistakenly</option>
+                          <option>Geofence / Location Signal Issue</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Requested Check-In</label>
+                        <input
+                          type="text"
+                          required
+                          value={requestedIn}
+                          onChange={(e) => setRequestedIn(e.target.value)}
+                          placeholder="e.g. 09:00 AM"
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Requested Check-Out</label>
+                        <input
+                          type="text"
+                          required
+                          value={requestedOut}
+                          onChange={(e) => setRequestedOut(e.target.value)}
+                          placeholder="e.g. 06:00 PM"
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-slate-700 dark:text-slate-300 font-semibold block mb-1">Reason / Explanation for HR & Manager</label>
+                      <textarea
+                        required
+                        rows={3}
+                        value={correctionReason}
+                        onChange={(e) => setCorrectionReason(e.target.value)}
+                        placeholder="Detail why punch correction is required (e.g. badge scanner was offline, on-site client visit, etc.)..."
+                        className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl p-3 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                      <Button variant="outline" size="sm" type="button" onClick={() => setIsCorrectionModalOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" type="submit" disabled={correctionSubmitting}>
+                        {correctionSubmitting ? 'Submitting...' : 'Submit to Manager/HR'}
+                      </Button>
+                    </div>
+                  </form>
+                )}
               </div>
-
-              {correctionSuccessMsg ? (
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
-                  <CheckCircle2 size={20} />
-                  {correctionSuccessMsg}
-                </div>
-              ) : (
-                <form onSubmit={handleSubmitCorrection} className="space-y-3.5 text-xs">
-                  <p className="text-slate-300 leading-relaxed">
-                    Submit your punch adjustment details. Once submitted, your Department Manager or HR Operations team will audit and accept the correction.
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-slate-300 font-semibold block mb-1">Date of Attendance</label>
-                      <input
-                        type="date"
-                        required
-                        value={correctionDate}
-                        onChange={(e) => setCorrectionDate(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-slate-300 font-semibold block mb-1">Correction Category</label>
-                      <select
-                        value={correctionType}
-                        onChange={(e) => setCorrectionType(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white cursor-pointer font-medium"
-                      >
-                        <option>Missed Morning Check-In</option>
-                        <option>Missed Evening Check-Out</option>
-                        <option>Incorrect Duration / Working Hours</option>
-                        <option>Marked Absent Mistakenly</option>
-                        <option>Geofence / Location Signal Issue</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-slate-300 font-semibold block mb-1">Requested Check-In</label>
-                      <input
-                        type="text"
-                        required
-                        value={requestedIn}
-                        onChange={(e) => setRequestedIn(e.target.value)}
-                        placeholder="e.g. 09:00 AM"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-slate-300 font-semibold block mb-1">Requested Check-Out</label>
-                      <input
-                        type="text"
-                        required
-                        value={requestedOut}
-                        onChange={(e) => setRequestedOut(e.target.value)}
-                        placeholder="e.g. 06:00 PM"
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-slate-300 font-semibold block mb-1">Reason / Explanation for HR & Manager</label>
-                    <textarea
-                      required
-                      rows={3}
-                      value={correctionReason}
-                      onChange={(e) => setCorrectionReason(e.target.value)}
-                      placeholder="Detail why punch correction is required (e.g. badge scanner was offline, on-site client visit, etc.)..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                    <Button variant="outline" size="sm" type="button" onClick={() => setIsCorrectionModalOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button size="sm" type="submit" disabled={correctionSubmitting}>
-                      {correctionSubmitting ? 'Submitting...' : 'Submit to Manager/HR'}
-                    </Button>
-                  </div>
-                </form>
-              )}
             </div>
-          </div>
-        )}
-
-      </div>
-    </RoleGuard>
+          )}
+      </RoleGuard>
+    </DashboardErrorBoundary>
   );
 };

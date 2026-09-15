@@ -30,7 +30,7 @@ export const employeeApi = {
       if (response.data.data && response.data.data.employees) {
         return response.data.data.employees;
       }
-      return response.data.data;
+      return Array.isArray(response.data.data) ? response.data.data : [];
     }
     throw new Error(response.data?.message || 'Unable to load employees.');
   },

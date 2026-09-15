@@ -9,24 +9,27 @@ import { queryClient } from '../../api/queryClient';
 
 import { ToastProvider } from '../../shared/context/ToastContext';
 import { AuthProvider } from '../../auth/AuthProvider';
+import { GlobalErrorBoundary } from '../../shared/components/GlobalErrorBoundary';
 
 // Initialize Axios Interceptors
 setupAuthInterceptors();
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <ToastProvider>
-            <AuthProvider>
-              <BrowserRouter>
-                {children}
-              </BrowserRouter>
-            </AuthProvider>
-          </ToastProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </Provider>
+    <GlobalErrorBoundary>
+      <BrowserRouter>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <ToastProvider>
+                <AuthProvider>
+                  {children}
+                </AuthProvider>
+              </ToastProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </Provider>
+      </BrowserRouter>
+    </GlobalErrorBoundary>
   );
 };

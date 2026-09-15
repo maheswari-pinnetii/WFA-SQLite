@@ -55,13 +55,13 @@ export class DashboardErrorBoundary extends Component<Props, State> {
           className="glass-panel"
         >
           <AlertTriangle size={48} color="#ef4444" style={{ marginBottom: '16px' }} />
-          <Typography variant="h5" color="error" gutterBottom fontWeight="bold">
+          <Typography variant="h5" gutterBottom color="error" sx={{ fontWeight: 'bold' }}>
             {this.props.dashboardName ? `${this.props.dashboardName} Error` : 'Dashboard Error'}
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 500 }}>
-            We encountered an unexpected error while loading this dashboard. 
+          <Typography variant="body1" sx={{ mb: 3, maxWidth: 500, color: 'text.secondary' }}>
+            We encountered an unexpected error while loading this dashboard.
             {this.state.error && (
-              <Box component="span" sx={{ display: 'block', mt: 1, p: 2, bgcolor: 'action.hover', borderRadius: 1, fontSize: '0.875rem', fontFamily: 'monospace', textAlign: 'left', overflowX: 'auto' }}>
+              <Box sx={{ display: 'block', mt: 1, p: 2, bgcolor: 'action.hover', borderRadius: 1, fontSize: '0.875rem', fontFamily: 'monospace', textAlign: 'left', overflowX: 'auto' }}>
                 {this.state.error.toString()}
               </Box>
             )}

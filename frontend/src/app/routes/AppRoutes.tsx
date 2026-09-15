@@ -111,9 +111,29 @@ export const AppRoutes: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)] text-[var(--text-muted)] gap-3 font-sans">
-        <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <div className="text-sm tracking-wide">Initializing secure workspace...</div>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '12px',
+        backgroundColor: 'var(--bg-primary, #0F172A)',
+        color: 'var(--text-muted, #94A3B8)',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSize: '14px',
+        letterSpacing: '0.025em',
+      }}>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <div style={{
+          width: '32px',
+          height: '32px',
+          border: '4px solid rgba(16,185,129,0.2)',
+          borderTopColor: '#10B981',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }} />
+        <span>Initializing secure workspace…</span>
       </div>
     );
   }

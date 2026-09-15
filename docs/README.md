@@ -8,6 +8,7 @@ Welcome to the central documentation hub for WFA-SQLite. This repository contain
 * [Traceability Matrix](./TRACEABILITY_MATRIX.md)
 
 ## System Architecture
+* [Complete System Architecture](./architecture/COMPLETE_ARCHITECTURE.md)
 * [System Overview](./system-architecture/SYSTEM_OVERVIEW.md)
 * [Architecture Styles](./system-architecture/ARCHITECTURE_STYLES.md)
 * [How the System Works](./system-architecture/HOW_THE_SYSTEM_WORKS.md)

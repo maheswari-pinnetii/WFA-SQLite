@@ -35,37 +35,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initializeSession = async () => {
-      let storedSession = authService.getStoredSession();
-      
-      // If no stored session, try silent refresh with HttpOnly cookie
-      if (!storedSession) {
-        try {
-          const refreshResult = await authService.refreshSilent();
-          if (refreshResult?.token) {
-            // Need to fetch user data after successful refresh since refresh token only returns token
-            const userResponse = await fetch('/api/v1/auth/me', {
-              headers: { Authorization: `Bearer ${refreshResult.token}` }
-            });
-            if (userResponse.ok) {
-              const userData = await userResponse.json();
-              if (userData?.success && userData?.data) {
-                authService.setStoredSession({ user: userData.data, token: refreshResult.token });
-                storedSession = { user: userData.data, token: refreshResult.token };
+      try {
+        let storedSession = authService.getStoredSession();
+        
+        // If no stored session, try silent refresh with HttpOnly cookie
+        if (!storedSession) {
+          try {
+            // Race the silent refresh against a 5-second timeout so a slow/offline
+            // backend never blocks the loading state for more than 5 seconds.
+            const refreshTimeout = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('refresh-timeout')), 5000)
+            );
+            const refreshResult = await Promise.race([
+              authService.refreshSilent(),
+              refreshTimeout,
+            ]);
+            if (refreshResult?.token) {
+              // Need to fetch user data after successful refresh since refresh token only returns token
+              const userResponse = await fetch('/api/v1/auth/me', {
+                headers: { Authorization: `Bearer ${refreshResult.token}` }
+              });
+              if (userResponse.ok) {
+                const userData = await userResponse.json();
+                if (userData?.success && userData?.data) {
+                  authService.setStoredSession({ user: userData.data, token: refreshResult.token });
+                  storedSession = { user: userData.data, token: refreshResult.token };
+                }
               }
             }
+          } catch {
+            // Silent refresh failed (no cookie, expired, or backend timeout) — proceed unauthenticated
           }
-        } catch (e) {
-          // Silent refresh failed (no cookie or expired), proceed unauthenticated
         }
-      }
 
-      if (storedSession) {
-        setSessionState(storedSession);
-        setAppUser(storedSession.user as User);
-        setRole(storedSession.user.role as Role);
-        setPermissions((storedSession.user.permissions || []) as Permission[]);
+        if (storedSession) {
+          setSessionState(storedSession);
+          setAppUser(storedSession.user as User);
+          setRole(storedSession.user.role as Role);
+          setPermissions((storedSession.user.permissions || []) as Permission[]);
+        }
+      } catch (e) {
+        // Any unexpected error during initialization — log and proceed unauthenticated
+        console.error('[AuthProvider] Session initialization failed:', e);
+      } finally {
+        // Always clear loading state — never leave the app stuck on a spinner
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initializeSession();

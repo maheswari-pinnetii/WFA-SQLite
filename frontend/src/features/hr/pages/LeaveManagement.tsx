@@ -149,6 +149,14 @@ export const LeaveManagement: React.FC = () => {
   const [error, setError] = useState<Error | null>(null);
 
   const { toast } = useToast();
+
+  const addToast = (title: string, description: string) => {
+    toast({
+      title,
+      message: description,
+      type: 'info',
+    });
+  };
   const { params, setPage } = usePagination();
   const { page, limit: pageSize } = params;
   const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; action: () => void; title: string; message: string; variant?: 'danger' | 'warning' | 'info' }>({
@@ -1045,14 +1053,4 @@ export const LeaveManagement: React.FC = () => {
       </div>
     </RoleGuard>
   );
-};
-// ... inside LeaveManagement component
-const { toast } = useToast();
-
-const addToast = (title: string, description: string) => {
-  toast({
-    title,
-    message: description,
-    type: 'info',
-  });
 };
