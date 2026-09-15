@@ -135,10 +135,27 @@ export const workflowService = {
    */
   async getPendingRequestsForApprover(approverId: string, role: string) {
     const requests = await query(
-      `SELECT r.id, r.entityId, w.entityType, w.name as workflowName, r.currentStepOrder, r.createdAt
+      `SELECT r.id, r.entityId, w.entityType, w.name as workflowName, r.currentStepOrder, r.createdAt,
+              COALESCE(e1.name, e2.name, e3.name) as employeeName,
+              CASE
+                WHEN w.entityType = 'EXPENSE' THEN 'Expense Claim: ₹' || ex.amount || ' - ' || ex.category
+                WHEN w.entityType = 'LEAVE' THEN 'Leave: ' || l.type || ' (' || l.startDate || ' to ' || l.endDate || ')'
+                WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN 'Correction: ' || ac.date
+              END as details,
+              CASE
+                WHEN w.entityType = 'EXPENSE' THEN ex.description
+                WHEN w.entityType = 'LEAVE' THEN l.reason
+                WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN ac.reason
+              END as description
        FROM approval_requests r
        JOIN approval_workflows w ON r.workflowId = w.id
        JOIN approval_steps s ON r.workflowId = s.workflowId AND r.currentStepOrder = s.stepOrder
+       LEFT JOIN expense_claims ex ON w.entityType = 'EXPENSE' AND r.entityId = ex.id
+       LEFT JOIN leave_requests l ON w.entityType = 'LEAVE' AND r.entityId = l.id
+       LEFT JOIN attendance_corrections ac ON w.entityType = 'ATTENDANCE_CORRECTION' AND r.entityId = ac.id
+       LEFT JOIN employees e1 ON ex.employeeId = e1.id
+       LEFT JOIN employees e2 ON l.employeeId = e2.id
+       LEFT JOIN employees e3 ON ac.employeeId = e3.id
        WHERE r.status = 'PENDING' 
          AND (s.specificApproverId = ? OR s.approverRole = ?)`,
       [approverId, role]

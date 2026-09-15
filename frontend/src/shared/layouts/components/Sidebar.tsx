@@ -47,7 +47,8 @@ import {
   Search,
   X,
   Palmtree,
-  Settings
+  Settings,
+  Banknote
 } from 'lucide-react';
 
 export interface NavigationItem {
@@ -446,6 +447,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         category: 'Payroll & Compensation',
         items: [
           { label: 'Salary & Monthly Payslips', path: '/employee/payslips', icon: <FileSpreadsheet size={18} strokeWidth={2} className="text-emerald-400" /> },
+          { label: 'My Expenses', path: '/employee/expenses', icon: <Banknote size={18} strokeWidth={2} className="text-orange-400" /> },
         ],
       },
       {

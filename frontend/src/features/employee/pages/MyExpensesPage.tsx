@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Clock, CheckCircle2, XCircle, FileText, IndianRupee } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
-import { api } from '../../../api/client';
+import { apiClient as api } from '../../../api/client';
 
 export const MyExpensesPage: React.FC = () => {
   const [expenses, setExpenses] = useState<any[]>([]);

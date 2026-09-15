@@ -144,6 +144,16 @@ export const payrollService = {
           overtimePay = approvedOTRecords.totalOTHours * hourlyRate * 1.5;
         }
 
+        // Include approved Expense Reimbursements
+        const approvedExpenses = await query(
+          `SELECT id, amount FROM expense_claims
+           WHERE employeeId = ? AND status = 'APPROVED'
+           AND claimDate <= ?`, // Pay out all approved expenses up to the period end
+          [emp.id, run.periodEnd]
+        ) as any[];
+
+        const expenseReimbursement = approvedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
         // Calculate Statutory Compliance (PF, ESI, PT, TDS)
         const { employeePF } = await ComplianceService.calculatePF(basicPay);
         const { employeeESI } = await ComplianceService.calculateESI(totalEarnings + overtimePay);
@@ -152,7 +162,9 @@ export const payrollService = {
 
         const statutoryDeductions = employeePF + employeeESI + pt + tds;
         const totalDeductionsFinal = totalDeductions + statutoryDeductions;
-        const netPay = totalEarnings + overtimePay - totalDeductionsFinal;
+        
+        // Add expense reimbursement to net pay (tax-free reimbursement)
+        const netPay = totalEarnings + overtimePay + expenseReimbursement - totalDeductionsFinal;
 
         const payslipId = randomUUID();
         await execute(
@@ -161,7 +173,12 @@ export const payrollService = {
           [payslipId, payrollRunId, emp.id, basicPay, totalEarnings + overtimePay, totalDeductionsFinal, employeePF, employeeESI, pt, tds, netPay]
         );
 
-        payslips.push({ employeeId: emp.id, netPay, overtimePay, lopDays, statutoryDeductions });
+        // Mark paid expenses as PAID
+        for (const exp of approvedExpenses) {
+          await execute(`UPDATE expense_claims SET status = 'PAID' WHERE id = ?`, [exp.id]);
+        }
+
+        payslips.push({ employeeId: emp.id, netPay, overtimePay, expenseReimbursement, lopDays, statutoryDeductions });
       }
 
       await execute(
