@@ -13,7 +13,7 @@ import { DashboardShell, DashboardHeader, DashboardToolbar, KPIGrid, KPICard, Ta
 import { useRealtimeDashboard } from '../../../hooks/useRealtimeDashboard';
 import { useRealtimeAttendance } from '../../../hooks/useRealtimeAttendance';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
-import { UserCheck, Users, UserPlus, UserMinus, FileText, CalendarClock, CalendarOff, CheckCircle2, AlertTriangle, DollarSign, Filter, Layers, Plus, Briefcase } from 'lucide-react';
+import { UserCheck, Users, UserPlus, UserMinus, FileText, CalendarClock, CalendarOff, CheckCircle2, AlertTriangle, DollarSign, Filter, Layers, Plus, Briefcase, TrendingDown, Clock, FileSpreadsheet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const HrSprintOverview: React.FC<{ hrTasks: Task[] }> = ({ hrTasks }) => (
@@ -34,8 +34,12 @@ export const HrSprintOverview: React.FC<{ hrTasks: Task[] }> = ({ hrTasks }) => 
             <td className="py-3 px-4 text-slate-900 dark:text-white font-medium max-w-[250px] truncate">{task.title}</td>
             <td className="py-3 px-4 text-slate-500">{task.assigneeName || 'Unassigned'}</td>
             <td className="py-3 px-4">
-              <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                task.priority === 'CRITICAL' || task.priority === 'HIGH' ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-slate-100 text-slate-600'
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                task.priority === 'CRITICAL' || task.priority === 'HIGH'
+                  ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30'
+                  : task.priority === 'MEDIUM'
+                  ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
+                  : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
               }`}>
                 {task.priority}
               </span>
@@ -156,17 +160,20 @@ export const HrDashboardPage: React.FC = () => {
             ]}
           />
 
-          {/* KPI metrics (8 KPIs) */}
+          {/* KPI metrics (10 KPIs) */}
           <KPIGrid>
-            <KPICard title="Total Employees" value={analytics?.metrics?.totalWorkforce ?? 0} icon={<Users size={20} />} color="emerald" trend="up" trendValue="12.4%" subtitle="Active workforce" />
-            <KPICard title="Active Employees" value={analytics?.metrics?.activeEmployees ?? 0} icon={<UserCheck size={20} />} color="info" trend="up" trendValue="2.1%" subtitle="Currently active" />
-            <KPICard title="New Joiners" value={analytics?.metrics?.newJoiners ?? 0} icon={<UserPlus size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="This month" />
-            <KPICard title="Exits" value={analytics?.metrics?.exits ?? 0} icon={<UserMinus size={20} />} color="warning" trend="down" trendValue="0.5%" subtitle="This month" />
+            <KPICard title="Total Employees" value={analytics?.metrics?.totalEmployees ?? 0} icon={<Users size={20} />} color="emerald" trend="up" trendValue="12.4%" subtitle="Active workforce" />
+            <KPICard title="New Joiners" value={analytics?.metrics?.newJoiners ?? 0} icon={<UserPlus size={20} />} color="info" trend="up" trendValue="1.2%" subtitle="This month" />
+            <KPICard title="Exits" value={analytics?.metrics?.exits ?? 0} icon={<TrendingDown size={20} />} color="danger" trend="down" trendValue="0.5%" subtitle="This month" />
+            <KPICard title="Onboarding" value={analytics?.metrics?.onboarding ?? 0} icon={<Briefcase size={20} />} color="info" subtitle="In progress" />
             
-            <KPICard title="Present Today" value={analytics?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
-            <KPICard title="Attendance Rate" value={analytics?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Weekly average" />
-            <KPICard title="On Leave" value={analytics?.metrics?.onLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Approved leave" />
-            <KPICard title="Pending HR Actions" value={analytics?.metrics?.pendingHrActions ?? 0} icon={<AlertTriangle size={20} />} color="danger" subtitle="Requires attention" />
+            <KPICard title="Attendance Rate" value={analytics?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Organization average" />
+            <KPICard title="On Leave Today" value={analytics?.metrics?.onLeaveToday ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Approved leave" />
+            <KPICard title="Pending Leave" value={analytics?.metrics?.pendingLeave ?? 0} icon={<Filter size={20} />} color="warning" subtitle="Awaiting review" />
+            <KPICard title="Attendance Exceptions" value={analytics?.metrics?.attendanceExceptions ?? 0} icon={<Clock size={20} />} color="danger" subtitle="Late or missing" />
+            
+            <KPICard title="Employee Requests" value={analytics?.metrics?.employeeRequests ?? 0} icon={<UserCheck size={20} />} color="info" subtitle="Pending action" />
+            <KPICard title="HR Tasks" value={analytics?.metrics?.hrTasks ?? 0} icon={<FileSpreadsheet size={20} />} color="neutral" subtitle="Active workload" />
           </KPIGrid>
 
           {/* Primary Analytics Grid */}

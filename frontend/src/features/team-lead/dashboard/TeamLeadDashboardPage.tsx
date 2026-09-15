@@ -10,7 +10,7 @@ import { DashboardErrorBoundary } from '../../../shared/components/DashboardErro
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
-import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Calendar, AlertTriangle, Target, FileText, TrendingUp, Star, ArrowRight, Filter, Layers, CalendarClock, CalendarOff, ClipboardList, ListTodo } from 'lucide-react';
+import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Calendar, AlertTriangle, Target, FileText, TrendingUp, Star, ArrowRight, Filter, Layers, CalendarClock, CalendarOff, ClipboardList, ListTodo, XCircle, Activity, FileSpreadsheet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
@@ -34,8 +34,12 @@ export const TeamLeadSprintBoard: React.FC<{ sprintTasks: Task[] }> = ({ sprintT
             <td className="py-3 px-4 text-slate-900 dark:text-white font-medium max-w-[250px] truncate">{task.title}</td>
             <td className="py-3 px-4 text-slate-500">{task.assigneeName || 'Unassigned'}</td>
             <td className="py-3 px-4">
-              <span className={`px-2 py-0.5 rounded text-[11px] font-medium ${
-                task.priority === 'CRITICAL' || task.priority === 'HIGH' ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-slate-100 text-slate-600'
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                task.priority === 'CRITICAL' || task.priority === 'HIGH'
+                  ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30'
+                  : task.priority === 'MEDIUM'
+                  ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
+                  : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
               }`}>
                 {task.priority}
               </span>
@@ -127,17 +131,20 @@ export const TeamLeadDashboardPage: React.FC = () => {
             ]}
           />
 
-          {/* KPI metrics (8 KPIs) */}
+          {/* KPI metrics (10 KPIs) */}
           <KPIGrid>
-            <KPICard title="Team Members" value={directReports.length} subtitle="Active team roster" icon={<Users size={20} />} color="info" />
+            <KPICard title="Team Members" value={analytics.data?.metrics?.teamMembers ?? 0} subtitle="Active team roster" icon={<Users size={20} />} color="info" />
             <KPICard title="Present Today" value={analytics.data?.metrics?.presentToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" subtitle="Checked in today" />
             <KPICard title="Attendance Rate" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.2%" subtitle="Weekly average" />
-            <KPICard title="On Leave" value={analytics.data?.metrics?.onLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Currently on leave" />
+            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<FileSpreadsheet size={20} />} color="info" subtitle="In progress" />
             
-            <KPICard title="Active Tasks" value={analytics.data?.metrics?.activeTasks ?? 0} icon={<ClipboardList size={20} />} color="info" subtitle="In progress" />
-            <KPICard title="Completed Today" value={analytics.data?.metrics?.completedTasks ?? 0} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="5.4%" subtitle="Daily velocity" />
-            <KPICard title="Blocked Tasks" value={analytics.data?.metrics?.blockedTasks ?? 0} subtitle="Require your intervention" icon={<AlertTriangle size={20} />} color="danger" />
-            <KPICard title="Pending Reviews" value={analytics.data?.metrics?.pendingReviews ?? 0} subtitle="Awaiting review" icon={<ListTodo size={20} />} color="warning" />
+            <KPICard title="Completed Today" value={analytics.data?.metrics?.completedToday ?? 0} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="5.4%" subtitle="Daily velocity" />
+            <KPICard title="In Progress" value={analytics.data?.metrics?.inProgress ?? 0} icon={<Activity size={20} />} color="info" subtitle="Current focus" />
+            <KPICard title="Blocked Tasks" value={analytics.data?.metrics?.blockedTasks ?? 0} subtitle="Require your intervention" icon={<XCircle size={20} />} color="danger" />
+            <KPICard title="Sprint Completion" value={analytics.data?.metrics?.sprintCompletion ?? '0%'} icon={<Activity size={20} />} color="info" subtitle="Team capacity" />
+            
+            <KPICard title="Overdue Tasks" value={analytics.data?.metrics?.overdueTasks ?? 0} icon={<Clock size={20} />} color="danger" subtitle="Action required" />
+            <KPICard title="Pending Reviews" value={analytics.data?.metrics?.pendingReviews ?? 0} subtitle="Awaiting review" icon={<Filter size={20} />} color="warning" />
           </KPIGrid>
 
           {/* Primary Analytics Grid (6 Charts) */}

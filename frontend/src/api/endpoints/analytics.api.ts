@@ -37,6 +37,14 @@ export interface AnalyticsData {
   blockedWork: Array<{ name: string; blocked: number; open: number }>;
   workingHoursTrend: Array<{ name: string; hours: number }>;
   taskCompletionTrend: Array<{ name: string; completed: number; total: number }>;
+  
+  // Employee Personal Charts
+  personalAttendanceTrend?: Array<{ name: string; present: number; absent: number; late: number }>;
+  hoursTracked?: Array<{ name: string; hours: number }>;
+  personalTaskCompletion?: Array<{ name: string; completed: number }>;
+  personalLeaveHistory?: Array<{ name: string; days: number }>;
+  personalOvertime?: Array<{ name: string; hours: number }>;
+  personalSprintBurndown?: Array<{ name: string; points: number }>;
 }
 
 const fallbackAnalyticsData: AnalyticsData = {
@@ -202,17 +210,58 @@ const fallbackAnalyticsData: AnalyticsData = {
   ],
   workingHoursTrend: [
     { name: 'Mon', hours: 8.5 },
-    { name: 'Tue', hours: 9.0 },
-    { name: 'Wed', hours: 8.2 },
-    { name: 'Thu', hours: 8.8 },
-    { name: 'Fri', hours: 8.0 }
+    { name: 'Tue', hours: 8.2 },
+    { name: 'Wed', hours: 9.0 },
+    { name: 'Thu', hours: 8.0 },
+    { name: 'Fri', hours: 8.8 }
   ],
   taskCompletionTrend: [
-    { name: 'Mon', completed: 5, total: 6 },
-    { name: 'Tue', completed: 8, total: 8 },
-    { name: 'Wed', completed: 6, total: 7 },
-    { name: 'Thu', completed: 9, total: 10 },
-    { name: 'Fri', completed: 4, total: 5 }
+    { name: 'Week 1', completed: 15, total: 20 },
+    { name: 'Week 2', completed: 18, total: 25 },
+    { name: 'Week 3', completed: 22, total: 30 },
+    { name: 'Week 4', completed: 35, total: 40 }
+  ],
+  
+  // Employee Mocks
+  personalAttendanceTrend: [
+    { name: 'Mon', present: 1, absent: 0, late: 0 },
+    { name: 'Tue', present: 1, absent: 0, late: 0 },
+    { name: 'Wed', present: 1, absent: 0, late: 0 },
+    { name: 'Thu', present: 1, absent: 0, late: 0 },
+    { name: 'Fri', present: 0, absent: 1, late: 0 }
+  ],
+  hoursTracked: [
+    { name: 'Mon', hours: 8.5 },
+    { name: 'Tue', hours: 8.2 },
+    { name: 'Wed', hours: 9.0 },
+    { name: 'Thu', hours: 8.0 },
+    { name: 'Fri', hours: 0 }
+  ],
+  personalTaskCompletion: [
+    { name: 'W1', completed: 3 },
+    { name: 'W2', completed: 5 },
+    { name: 'W3', completed: 4 },
+    { name: 'W4', completed: 6 }
+  ],
+  personalLeaveHistory: [
+    { name: 'Jan', days: 1 },
+    { name: 'Feb', days: 0 },
+    { name: 'Mar', days: 2 },
+    { name: 'Apr', days: 0 },
+    { name: 'May', days: 3 }
+  ],
+  personalOvertime: [
+    { name: 'Mon', hours: 0.5 },
+    { name: 'Tue', hours: 0.2 },
+    { name: 'Wed', hours: 1.0 },
+    { name: 'Thu', hours: 0 },
+    { name: 'Fri', hours: 0 }
+  ],
+  personalSprintBurndown: [
+    { name: 'Sprint 21', points: 12 },
+    { name: 'Sprint 22', points: 15 },
+    { name: 'Sprint 23', points: 10 },
+    { name: 'Sprint 24', points: 18 }
   ]
 };
 

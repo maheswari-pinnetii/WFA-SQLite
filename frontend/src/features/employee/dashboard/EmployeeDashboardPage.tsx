@@ -9,7 +9,8 @@ import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api/attendanceApi';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
-import { DashboardShell, DashboardHeader, KPIGrid, KPICard } from '../../../shared/components/dashboard';
+import { DashboardShell, DashboardHeader, KPIGrid, KPICard, TableCard } from '../../../shared/components/dashboard';
+import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import {
   Clock,
   Calendar,
@@ -33,7 +34,8 @@ import {
   AlertTriangle,
   CalendarClock,
   CalendarDays,
-  CalendarOff
+  CalendarOff,
+  FileSpreadsheet
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
@@ -499,82 +501,76 @@ export const EmployeeActivityTimelineFeed: React.FC = () => {
   );
 };
 
-// 8. Sprint Work Table
 export const EmployeeSprintWork: React.FC<{
   tasks: Task[];
   loading: boolean;
   handleUpdateTaskStatus: (id: string, stat: Task['status']) => void;
 }> = ({ tasks, loading, handleUpdateTaskStatus }) => (
-  <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
-    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-      <div>
-        <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <Layers className="text-emerald-400" size={20} /> Sprint Work & Active Deliverables
-        </h3>
-        <p className="text-xs text-slate-400 mt-0.5">Track your assigned engineering tasks and daily progress status.</p>
-      </div>
-      <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+  <TableCard
+    title="Sprint Work & Active Deliverables"
+    subtitle="Track your assigned engineering tasks and daily progress status."
+    action={
+      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-wider">
         Sprint 24 Active
       </span>
-    </div>
+    }
+  >
     {loading ? (
       <div className="flex justify-center items-center py-8">
         <span className="inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
       </div>
     ) : tasks.length === 0 ? (
-      <div className="text-center py-8 bg-slate-950/40 rounded-2xl border border-slate-800 border-dashed">
-        <p className="text-xs text-slate-400 font-medium">No active tasks in current sprint backlog</p>
+      <div className="text-center py-8 bg-slate-50 dark:bg-slate-900/40">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">No active tasks in current sprint backlog</p>
       </div>
     ) : (
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/30">
-        <table className="w-full text-left text-xs min-w-[650px]">
-          <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
-            <tr>
-              <th className="py-3 px-4">Task Title</th>
-              <th className="py-3 px-4 text-center">Estimate</th>
-              <th className="py-3 px-4">Priority</th>
-              <th className="py-3 px-4">Sprint Status</th>
+      <table className="w-full text-left text-xs min-w-[650px]">
+        <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-semibold text-xs">
+          <tr>
+            <th className="py-3 px-4">Task Title</th>
+            <th className="py-3 px-4 text-center">Estimate</th>
+            <th className="py-3 px-4">Priority</th>
+            <th className="py-3 px-4">Sprint Status</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+          {tasks.map(task => (
+            <tr key={task.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+              <td className="py-3 px-4 font-medium text-slate-900 dark:text-white max-w-sm truncate">{task.title}</td>
+              <td className="py-3 px-4 text-center">
+                <span className="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-300 font-mono text-xs px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-800 font-medium">
+                  {task.points} SP
+                </span>
+              </td>
+              <td className="py-3 px-4">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  task.priority === 'CRITICAL' || task.priority === 'HIGH'
+                    ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30'
+                    : task.priority === 'MEDIUM'
+                    ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30'
+                    : 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30'
+                }`}>
+                  {task.priority}
+                </span>
+              </td>
+              <td className="py-3 px-4">
+                <select
+                  value={task.status}
+                  onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value as Task['status'])}
+                  className="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-medium"
+                >
+                  <option value="TODO">To Do</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="BLOCKED">Blocked</option>
+                  <option value="COMPLETED">Completed</option>
+                </select>
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {tasks.map(task => (
-              <tr key={task.id} className="hover:bg-slate-800/30 transition-colors">
-                <td className="py-3 px-4 font-semibold text-white max-w-sm truncate">{task.title}</td>
-                <td className="py-3 px-4 text-center">
-                  <span className="bg-slate-950 text-slate-300 font-mono text-xs px-2.5 py-0.5 rounded-full border border-slate-800 font-bold">
-                    {task.points} SP
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    task.priority === 'CRITICAL' || task.priority === 'HIGH'
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                      : task.priority === 'MEDIUM'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  }`}>
-                    {task.priority}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <select
-                    value={task.status}
-                    onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value as Task['status'])}
-                    className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-bold"
-                  >
-                    <option value="TODO">To Do</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="BLOCKED">Blocked</option>
-                    <option value="COMPLETED">Completed</option>
-                  </select>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     )}
-  </div>
+  </TableCard>
 );
 
 // 9. Attendance Corrections Card
@@ -614,84 +610,76 @@ export const EmployeeCorrectionRequestsCard: React.FC<{
   }, []);
 
   return (
-    <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border-color)]">
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-              <Clock size={18} className="text-amber-400" /> Attendance Correction Requests
-            </h3>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              Manager & HR Review
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Submit punch correction requests for missed check-ins, forgotten check-outs, or system geofence errors.
-          </p>
+    <TableCard
+      title="Attendance Correction Requests"
+      subtitle="Submit punch correction requests for missed check-ins, forgotten check-outs, or system geofence errors."
+      action={
+        <div className="flex items-center gap-3">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 uppercase tracking-wider">
+            Manager & HR Review
+          </span>
+          <button
+            onClick={() => onRequestNew()}
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus size={14} /> Submit Correction
+          </button>
         </div>
-        <button
-          onClick={() => onRequestNew()}
-          className="px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 text-white font-black text-xs shadow-lg shadow-blue-600/20 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
-        >
-          <Plus size={14} /> Submit Correction Request
-        </button>
-      </div>
-
-      <div className="overflow-x-auto rounded-xl border border-[var(--border-color)] bg-[var(--bg-tertiary)]/20">
-        <table className="w-full text-left text-xs min-w-[700px]">
-          <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
-            <tr>
-              <th className="py-3 px-4">Request ID</th>
-              <th className="py-3 px-4">Date</th>
-              <th className="py-3 px-4">Requested Timings</th>
-              <th className="py-3 px-4">Reason / Justification</th>
-              <th className="py-3 px-4 text-center">Approval Status</th>
-              <th className="py-3 px-4">Reviewer Feedback</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {corrections.map((corr) => {
-              const statusUpper = corr.status.toUpperCase();
-              const isApproved = statusUpper === 'APPROVED';
-              const isPending = statusUpper === 'PENDING';
-              return (
-                <tr key={corr.id} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{corr.id}</td>
-                  <td className="py-3.5 px-4 font-bold text-white">{corr.date}</td>
-                  <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
-                    {corr.requestedCheckIn || '09:00 AM'} – {corr.requestedCheckOut || '06:00 PM'}
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-300 max-w-xs truncate" title={corr.reason}>
-                    {corr.reason}
-                  </td>
-                  <td className="py-3.5 px-4 text-center">
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
-                      isApproved 
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' 
-                        : isPending 
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse'
-                        : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
-                    }`}>
-                      {isPending ? '⏳ PENDING REVIEW' : isApproved ? '✓ APPROVED' : '✗ REJECTED'}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 text-slate-400 text-[11px]">
-                    {corr.managerComment || (isPending ? 'Pending review by Manager & HR' : '—')}
-                  </td>
-                </tr>
-              );
-            })}
-            {corrections.length === 0 && (
-              <tr>
-                <td colSpan={6} className="py-6 text-center text-slate-500 font-semibold">
-                  No attendance correction requests submitted yet.
+      }
+    >
+      <table className="w-full text-left text-xs min-w-[700px]">
+        <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-semibold text-xs">
+          <tr>
+            <th className="py-3 px-4">Request ID</th>
+            <th className="py-3 px-4">Date</th>
+            <th className="py-3 px-4">Requested Timings</th>
+            <th className="py-3 px-4">Reason / Justification</th>
+            <th className="py-3 px-4 text-center">Approval Status</th>
+            <th className="py-3 px-4">Reviewer Feedback</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+          {corrections.map((corr) => {
+            const statusUpper = corr.status.toUpperCase();
+            const isApproved = statusUpper === 'APPROVED';
+            const isPending = statusUpper === 'PENDING';
+            return (
+              <tr key={corr.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                <td className="py-3 px-4 font-mono font-medium text-emerald-600 dark:text-emerald-400">{corr.id}</td>
+                <td className="py-3 px-4 font-medium text-slate-900 dark:text-white">{corr.date}</td>
+                <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">
+                  {corr.requestedCheckIn || '09:00 AM'} – {corr.requestedCheckOut || '06:00 PM'}
+                </td>
+                <td className="py-3 px-4 text-slate-600 dark:text-slate-400 max-w-xs truncate" title={corr.reason}>
+                  {corr.reason}
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <span className={`px-2 py-0.5 rounded text-[11px] font-medium uppercase ${
+                    isApproved 
+                      ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/40' 
+                      : isPending 
+                      ? 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/40 animate-pulse'
+                      : 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/40'
+                  }`}>
+                    {isPending ? '⏳ PENDING REVIEW' : isApproved ? '✓ APPROVED' : '✗ REJECTED'}
+                  </span>
+                </td>
+                <td className="py-3 px-4 text-slate-500 dark:text-slate-400 text-xs">
+                  {corr.managerComment || (isPending ? 'Pending review by Manager & HR' : '—')}
                 </td>
               </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+            );
+          })}
+          {corrections.length === 0 && (
+            <tr>
+              <td colSpan={6} className="py-8 text-center text-slate-500 font-medium">
+                No attendance correction requests submitted yet.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </TableCard>
   );
 };
 
@@ -702,20 +690,16 @@ export const EmployeeAttendanceTable: React.FC<{
   setStatusFilter: (s: string) => void;
   onOpenCorrectionModal: (date: string) => void;
 }> = ({ filteredHistory, statusFilter, setStatusFilter, onOpenCorrectionModal }) => (
-  <div className="p-6 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-4">
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-color)]">
-      <div>
-        <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
-          <History size={18} className="text-emerald-500" /> Attendance History Logs
-        </h3>
-        <p className="text-xs text-slate-400 mt-0.5">Chronological record of shifts, check-in/out timestamps, breaks, and overtime.</p>
-      </div>
+  <TableCard
+    title="Attendance History Logs"
+    subtitle="Chronological record of shifts, check-in/out timestamps, breaks, and overtime."
+    action={
       <div className="flex items-center gap-3">
-        <span className="text-xs text-[var(--text-muted)] font-semibold">Filter:</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Filter:</span>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-semibold"
+          className="bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-medium"
         >
           <option value="All">All Statuses</option>
           <option value="Present">Present</option>
@@ -724,10 +708,11 @@ export const EmployeeAttendanceTable: React.FC<{
           <option value="Weekend">Weekend</option>
         </select>
       </div>
-    </div>
-    <div className="overflow-x-auto overflow-y-auto max-h-[420px] rounded-xl border border-[var(--border-color)] bg-[var(--bg-tertiary)]/20 w-full max-w-full min-w-0">
+    }
+  >
+    <div className="max-h-[420px] overflow-y-auto">
       <table className="w-full text-left text-xs min-w-[850px]">
-        <thead className="sticky top-0 z-10 bg-slate-950 text-slate-400 border-b border-slate-800 uppercase font-bold text-[10px] tracking-wider">
+        <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 uppercase font-semibold text-xs tracking-wider">
           <tr>
             <th className="py-3 px-4 w-[140px]">Date</th>
             <th className="py-3 px-4 w-[110px]">Status</th>
@@ -740,35 +725,41 @@ export const EmployeeAttendanceTable: React.FC<{
             <th className="py-3 px-4 w-[100px] text-right">Action</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-800/70">
+        <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
           {filteredHistory.map((h, i) => (
-            <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-              <td className="py-3 px-4 font-bold text-white">{h.date}</td>
+            <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+              <td className="py-3 px-4 font-medium text-slate-900 dark:text-white">{h.date}</td>
               <td className="py-3 px-4">
-                <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                <span className={`px-2 py-0.5 rounded text-[11px] font-medium uppercase ${
                   h.status === 'Present' || h.status === 'Checked In' || h.status === 'Working'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30'
                     : h.status === 'Absent'
-                    ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                    ? 'bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30'
                     : h.status === 'Weekend'
-                    ? 'bg-slate-800 text-slate-400'
-                    : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                    : 'bg-amber-50 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30'
                 }`}>
                   {h.status}
                 </span>
               </td>
-              <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{h.in}</td>
-              <td className="py-3 px-4 font-mono text-rose-400 font-bold">{h.out}</td>
-              <td className="py-3 px-4 font-mono text-emerald-400 font-bold">{h.workingTime}</td>
-              <td className="py-3 px-4 font-mono text-slate-300">{h.break}</td>
-              <td className="py-3 px-4 font-mono text-cyan-400 font-bold">{h.overtime}</td>
-              <td className="py-3 px-4 text-slate-300 font-medium max-w-xs truncate">{h.remarks || '—'}</td>
+              <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">{h.in}</td>
+              <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-300">{h.out}</td>
+              <td className="py-3 px-4 font-mono font-medium text-slate-700 dark:text-slate-200">{h.workingTime}</td>
+              <td className="py-3 px-4 font-mono text-slate-500">{h.break}</td>
+              <td className="py-3 px-4 font-mono">
+                {h.overtime && h.overtime !== '0.00 hrs' && h.overtime !== '0h 0m' ? (
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">{h.overtime}</span>
+                ) : (
+                  <span className="text-slate-400">—</span>
+                )}
+              </td>
+              <td className="py-3 px-4 text-slate-500 dark:text-slate-400 max-w-[120px] truncate" title={h.remarks}>{h.remarks || '—'}</td>
               <td className="py-3 px-4 text-right">
-                <button 
-                  onClick={() => onOpenCorrectionModal(h.rawDate)} 
-                  className="text-emerald-400 hover:text-emerald-300 font-extrabold text-[11px] cursor-pointer"
+                <button
+                  onClick={() => onOpenCorrectionModal(h.rawDate)}
+                  className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 hover:underline transition-colors cursor-pointer"
                 >
-                  Request Fix
+                  Correct
                 </button>
               </td>
             </tr>
@@ -783,12 +774,13 @@ export const EmployeeAttendanceTable: React.FC<{
         </tbody>
       </table>
     </div>
-  </div>
+  </TableCard>
 );
 
 // Main Employee Dashboard Component
 export const EmployeeDashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const analytics = useAnalyticsData();
   const [workspaceMode, setWorkspaceMode] = useState<'all-in-one' | 'absence' | 'attendance' | 'sprint'>('all-in-one');
 
   const [tasks, setTasks] = useState<Task[]>([
@@ -1180,15 +1172,18 @@ export const EmployeeDashboardPage: React.FC = () => {
                 badge="Target: 40h/wk"
               />
             <KPIGrid>
-              <KPICard title="Upcoming Shifts" value="5 Shifts" icon={<CalendarDays size={20} />} color="info" trend="neutral" subtitle="This week" />
-              <KPICard title="Leave Balance" value="12 Days" icon={<CalendarOff size={20} />} color="success" subtitle="Available PTO" />
-              <KPICard title="Overtime Hours" value={overtimeHours} icon={<Timer size={20} />} color="warning" trend="up" trendValue="1.5%" subtitle="Approved OT" />
-              <KPICard title="Next Holiday" value="Oct 02" icon={<CalendarDays size={20} />} color="emerald" subtitle="Gandhi Jayanti" />
+              <KPICard title="Today's Attendance" value={analytics.data?.metrics?.presentToday ? 'Present' : 'Not Logged'} icon={<CheckCircle2 size={20} />} color={analytics.data?.metrics?.presentToday ? 'success' : 'neutral'} subtitle="Daily check-in status" />
+              <KPICard title="Working Hours" value={hoursThisWeek} icon={<Clock size={20} />} color="info" subtitle="Logged this week" />
+              <KPICard title="Attendance This Month" value={analytics.data?.metrics?.attendanceRate ?? '0%'} icon={<CalendarClock size={20} />} color="emerald" trend="up" trendValue="1.5%" subtitle="Monthly adherence" />
+              <KPICard title="Leave Balance" value="12 Days" icon={<Calendar size={20} />} color="emerald" subtitle="Available PTO" />
               
-              <KPICard title="Current Tasks" value={tasks.filter(t => t.status === 'IN_PROGRESS' || t.status === 'TODO').length} icon={<ClipboardList size={20} />} color="info" subtitle="Assigned to you" />
-              <KPICard title="Completed Tasks" value={tasks.filter(t => t.status === 'COMPLETED').length} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="2.4%" subtitle="This sprint" />
-              <KPICard title="Blocked Tasks" value={tasks.filter(t => t.status === 'BLOCKED').length} subtitle="Needs attention" icon={<AlertTriangle size={20} />} color="danger" />
-              <KPICard title="Time Tracked" value={hoursThisWeek} subtitle="Logged this week" icon={<Clock size={20} />} color="emerald" />
+              <KPICard title="Pending Leave" value={analytics.data?.metrics?.pendingLeave ?? 0} icon={<CalendarOff size={20} />} color="warning" subtitle="Awaiting review" />
+              <KPICard title="Tasks Assigned" value={tasks.filter(t => t.status === 'TODO' || t.status === 'IN_PROGRESS').length} icon={<FileSpreadsheet size={20} />} color="info" subtitle="Active workload" />
+              <KPICard title="Tasks Completed" value={tasks.filter(t => t.status === 'COMPLETED').length} icon={<CheckCircle2 size={20} />} color="success" trend="up" trendValue="2.4%" subtitle="This sprint" />
+              <KPICard title="Tasks In Progress" value={tasks.filter(t => t.status === 'IN_PROGRESS').length} icon={<Activity size={20} />} color="info" subtitle="Current focus" />
+              
+              <KPICard title="Overdue Tasks" value={analytics.data?.metrics?.overdueTasks ?? 0} icon={<Clock size={20} />} color="danger" subtitle="Action required" />
+              <KPICard title="Sprint Progress" value={analytics.data?.metrics?.sprintProgress ?? '0%'} icon={<Activity size={20} />} color="info" subtitle="Sprint completion" />
             </KPIGrid>
             </section>
 
@@ -1241,17 +1236,23 @@ export const EmployeeDashboardPage: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 min-w-0">
                 <AnalyticsLineChart
                   title="Attendance & Punctuality"
-                  subtitle="Check-in times vs schedule"
-                  data={weeklyHoursData}
-                  xKey="day"
-                  series={[{ key: 'regular', name: 'Attendance', color: '#10b981' }]}
+                  subtitle="Weekly check-ins vs schedule"
+                  data={analytics.data?.personalAttendanceTrend}
+                  xKey="name"
+                  series={[{ key: 'present', name: 'Attendance', color: '#10b981' }]}
+                  isLoading={analytics.isLoading}
+                  error={analytics.error}
+                  onRetry={analytics.reload}
                 />
                 <AnalyticsBarChart
                   title="Leave Usage"
                   subtitle="PTO utilization over time"
-                  data={weeklyHoursData}
-                  xKey="day"
-                  series={[{ key: 'regular', name: 'Leave Taken', color: '#3b82f6' }]}
+                  data={analytics.data?.personalLeaveHistory}
+                  xKey="name"
+                  series={[{ key: 'days', name: 'Leave Taken', color: '#3b82f6' }]}
+                  isLoading={analytics.isLoading}
+                  error={analytics.error}
+                  onRetry={analytics.reload}
                 />
               </div>
 
@@ -1259,16 +1260,22 @@ export const EmployeeDashboardPage: React.FC = () => {
                 <AnalyticsLineChart
                   title="Task Completion Velocity"
                   subtitle="Tasks finished per week"
-                  data={weeklyHoursData}
-                  xKey="day"
-                  series={[{ key: 'regular', name: 'Tasks Completed', color: '#8b5cf6' }]}
+                  data={analytics.data?.personalTaskCompletion}
+                  xKey="name"
+                  series={[{ key: 'completed', name: 'Tasks Completed', color: '#8b5cf6' }]}
+                  isLoading={analytics.isLoading}
+                  error={analytics.error}
+                  onRetry={analytics.reload}
                 />
                 <AnalyticsDonutChart
-                  title="Time Allocation"
-                  subtitle="Hours spent per project/category"
-                  data={shiftDistributionData}
+                  title="Sprint Burndown"
+                  subtitle="Points completed across sprints"
+                  data={analytics.data?.personalSprintBurndown}
                   nameKey="name"
-                  valueKey="value"
+                  valueKey="points"
+                  isLoading={analytics.isLoading}
+                  error={analytics.error}
+                  onRetry={analytics.reload}
                 />
               </div>
 
@@ -1276,24 +1283,24 @@ export const EmployeeDashboardPage: React.FC = () => {
                 <AnalyticsBarChart
                   title="Weekly Overtime"
                   subtitle="Logged OT vs standard hours"
-                  data={weeklyHoursData}
-                  xKey="day"
+                  data={analytics.data?.personalOvertime}
+                  xKey="name"
                   series={[
-                    { key: 'regular', name: 'Regular Hours', color: '#3B82F6' },
-                    { key: 'overtime', name: 'Overtime', color: '#F59E0B' }
+                    { key: 'hours', name: 'Overtime', color: '#F59E0B' }
                   ]}
+                  isLoading={analytics.isLoading}
+                  error={analytics.error}
+                  onRetry={analytics.reload}
                 />
                 <AnalyticsDonutChart
                   title="Task Status"
                   subtitle="Current sprint breakdown"
-                  data={[
-                    { name: 'To Do', value: 4, color: '#94a3b8' },
-                    { name: 'In Progress', value: 6, color: '#3b82f6' },
-                    { name: 'Review', value: 2, color: '#f59e0b' },
-                    { name: 'Completed', value: 8, color: '#10b981' }
-                  ]}
+                  data={analytics.data?.taskStatusDistribution}
                   nameKey="name"
                   valueKey="value"
+                  isLoading={analytics.isLoading}
+                  error={analytics.error}
+                  onRetry={analytics.reload}
                 />
               </div>
             </section>
