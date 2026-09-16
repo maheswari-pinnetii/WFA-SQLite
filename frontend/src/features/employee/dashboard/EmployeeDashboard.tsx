@@ -8,13 +8,53 @@ import { Clock, Calendar, DollarSign, Award, RefreshCw, AlertCircle, Link as Lin
 import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
-  kpis: { attendanceRate: '—', leavesTaken: 0, upcomingHolidays: 0, performanceScore: '—' },
-  charts: {
-    attendanceTrend: [],
-    leaveBalance: [],
-    salaryComponents: [],
+  kpis: { 
+    hoursLogged: '152.5', 
+    overtime: '6.5', 
+    leaveBalance: '14', 
+    pendingLeaves: '2',
+    tasksAssigned: '12',
+    tasksCompleted: '8',
+    upcomingHolidays: '1',
+    nextReview: 'Oct 15'
   },
-  tables: { recentPayslips: [], recentAttendance: [] },
+  charts: {
+    myAttendanceTrend: [
+      { day: 'Mon', hours: 8.5 }, { day: 'Tue', hours: 8.2 }, { day: 'Wed', hours: 9.0 },
+      { day: 'Thu', hours: 8.0 }, { day: 'Fri', hours: 8.5 }
+    ],
+    taskProgress: [
+      { name: 'To Do', value: 3, color: '#94a3b8' },
+      { name: 'In Progress', value: 4, color: '#3b82f6' },
+      { name: 'Review', value: 2, color: '#f59e0b' },
+      { name: 'Done', value: 8, color: '#10b981' }
+    ],
+    leaveUsage: [
+      { type: 'Casual', used: 2, remaining: 10 },
+      { type: 'Sick', used: 1, remaining: 11 },
+      { type: 'Earned', used: 5, remaining: 13 }
+    ],
+    overtimeHistory: [
+      { month: 'Jun', hours: 12 }, { month: 'Jul', hours: 15 }, { month: 'Aug', hours: 8 }, { month: 'Sep', hours: 6.5 }
+    ],
+    peerFeedbackScore: [
+      { category: 'Teamwork', score: 4.5 },
+      { category: 'Communication', score: 4.2 },
+      { category: 'Initiative', score: 4.8 }
+    ],
+    skillProgression: [
+      { name: 'React', level: 85 },
+      { name: 'Node.js', level: 70 },
+      { name: 'SQL', level: 90 }
+    ]
+  },
+  tables: { 
+    roster: [
+      { task: 'Implement biometric check-in', date: 'Sep 14', status: 'Done' },
+      { task: 'Fix Payroll Export bug', date: 'Sep 15', status: 'In Progress' },
+      { task: 'Update API Docs', date: 'Sep 16', status: 'Pending' }
+    ]
+  },
 };
 
 export const EmployeeDashboard: React.FC = () => {

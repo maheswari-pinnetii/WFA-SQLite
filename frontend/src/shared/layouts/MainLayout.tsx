@@ -87,7 +87,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
 
   return (
-    <div data-role={role} className={`app-shell h-[100dvh] flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
+    <div data-role={role} className={`app-shell min-h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
       {/* Accessibility Skip-to-content Link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -100,7 +100,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
       />
 
       {/* Main Body Wrapper (Below Header) */}
-      <div className="main-body flex-1 flex overflow-hidden w-full relative">
+      <div className="main-body flex-1 flex w-full relative">
         {/* Sleek Dynamic Modular Sidebar Navigation & Mobile Menu */}
         <Sidebar
           collapsed={collapsed}
@@ -114,14 +114,14 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         <main
           id="main-content"
           tabIndex={-1}
-          className="app-main flex-1 flex flex-col overflow-y-auto focus:outline-none"
+          className="app-main flex-1 flex flex-col min-w-0 focus:outline-none"
         >
           <div className="flex-1 p-4 md:p-8 space-y-6">
             {children}
           </div>
 
           {/* Small footprint dashboard footer */}
-          <footer className="app-footer shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+          <footer className="app-footer mt-auto shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
             <span>&copy; {new Date().getFullYear()} Workforce Analytics. All rights reserved.</span>
             <div className="flex items-center gap-4 flex-wrap">
               <button

@@ -7,9 +7,51 @@ import { Users, Clock, Briefcase, Layers, RefreshCw, AlertCircle, CheckCircle } 
 import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
-  kpis: { teamSize: 0, presentToday: 0, onLeave: 0, pendingApprovals: 0 },
-  charts: { attendanceTrend: [], performanceTrend: [] },
-  tables: { teamMembers: [], pendingApprovals: [] },
+  kpis: { 
+    teamSize: 45, 
+    presentToday: 42, 
+    onLeave: 3, 
+    openTasks: 12,
+    taskCompletion: 88,
+    overtimeHours: 24.5,
+    skillGaps: 4,
+    upcomingReviews: 5
+  },
+  charts: { 
+    teamAttendanceTrend: [
+      { day: 'Mon', attendance: 98 }, { day: 'Tue', attendance: 95 }, { day: 'Wed', attendance: 100 },
+      { day: 'Thu', attendance: 92 }, { day: 'Fri', attendance: 95 }
+    ],
+    taskBurnout: [
+      { name: 'Low Risk', value: 30, color: '#10b981' },
+      { name: 'Medium Risk', value: 10, color: '#f59e0b' },
+      { name: 'High Risk', value: 5, color: '#ef4444' }
+    ],
+    skillCoverage: [
+      { skill: 'React', level: 85 },
+      { skill: 'Node.js', level: 75 },
+      { skill: 'UI/UX', level: 60 }
+    ],
+    overtimeByWeek: [
+      { week: 'W1', hours: 10 }, { week: 'W2', hours: 15 }, { week: 'W3', hours: 8 }, { week: 'W4', hours: 12 }
+    ],
+    leavePipeline: [
+      { month: 'Sep', approved: 5, pending: 2 },
+      { month: 'Oct', approved: 8, pending: 5 }
+    ],
+    performanceMatrix: [
+      { name: 'Exceeds', value: 15, color: '#3b82f6' },
+      { name: 'Meets', value: 25, color: '#10b981' },
+      { name: 'Needs Imp.', value: 5, color: '#f59e0b' }
+    ]
+  },
+  tables: { 
+    roster: [
+      { name: 'Alice Smith', role: 'SDE II', status: 'Active', joinDate: '2025-01-15' },
+      { name: 'Bob Johnson', role: 'Frontend Dev', status: 'Active', joinDate: '2025-06-20' },
+      { name: 'Charlie Davis', role: 'Backend Dev', status: 'On Leave', joinDate: '2024-11-10' }
+    ]
+  },
 };
 
 export const ManagerDashboard: React.FC = () => {

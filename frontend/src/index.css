@@ -600,7 +600,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   margin: 0 !important;
   margin-top: 0 !important;
   border-radius: 0 !important;
-  align-self: stretch !important;
+  align-self: flex-start !important;
 }
 
 @media (min-width: 768px) {
@@ -611,7 +611,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     min-height: calc(100vh - var(--header-height)) !important;
     display: flex !important;
     flex-direction: column !important;
-    align-self: stretch !important;
+    align-self: flex-start !important;
     z-index: 20 !important;
     box-shadow: 1px 0 0 rgba(148, 163, 184, 0.12) !important;
   }

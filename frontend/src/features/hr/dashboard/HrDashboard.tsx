@@ -7,9 +7,53 @@ import { Users, UserPlus, Clock, Briefcase, Layers, RefreshCw, AlertCircle } fro
 import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
-  kpis: { totalEmployees: 0, presentToday: 0, onLeaveToday: 0, pendingApprovals: 0, openPositions: 0 },
-  charts: { attendanceTrend: [], departmentDistribution: [], leaveTypes: [] },
-  tables: { recentLeaveRequests: [], upcomingReviews: [] },
+  kpis: { 
+    totalHeadcount: 500, 
+    presentToday: 475, 
+    onLeaveToday: 20, 
+    newHires: 12, 
+    turnoverRate: 4.5,
+    openReqs: 18,
+    trainingCompletion: 85,
+    employeeSatisfaction: 4.2
+  },
+  charts: { 
+    hiringTrend: [
+      { month: 'May', hires: 8 }, { month: 'Jun', hires: 15 }, { month: 'Jul', hires: 10 },
+      { month: 'Aug', hires: 12 }, { month: 'Sep', hires: 18 }
+    ],
+    retentionRate: [
+      { month: 'May', rate: 94 }, { month: 'Jun', rate: 95 }, { month: 'Jul', rate: 96 },
+      { month: 'Aug', rate: 95.5 }, { month: 'Sep', rate: 97 }
+    ],
+    leaveByDept: [
+      { name: 'Engineering', value: 45, color: '#3b82f6' },
+      { name: 'Sales', value: 25, color: '#10b981' },
+      { name: 'Product', value: 15, color: '#f59e0b' }
+    ],
+    trainingProgress: [
+      { name: 'Security', value: 98 },
+      { name: 'Compliance', value: 85 },
+      { name: 'Diversity', value: 92 }
+    ],
+    performanceBellCurve: [
+      { rating: 'Needs Imp.', count: 25 },
+      { rating: 'Meets', count: 350 },
+      { rating: 'Exceeds', count: 125 }
+    ],
+    hrTicketTypes: [
+      { name: 'Payroll', value: 40, color: '#10b981' },
+      { name: 'Benefits', value: 35, color: '#3b82f6' },
+      { name: 'Policies', value: 25, color: '#f59e0b' }
+    ]
+  },
+  tables: { 
+    roster: [
+      { name: 'Sarah Connor', role: 'HR Business Partner', department: 'HR', status: 'Active', joinDate: '2023-04-10' },
+      { name: 'John Doe', role: 'Talent Acquisition', department: 'HR', status: 'Active', joinDate: '2024-02-15' },
+      { name: 'Jane Smith', role: 'Compensation Specialist', department: 'HR', status: 'Active', joinDate: '2022-11-05' }
+    ]
+  },
 };
 
 export const HrDashboard: React.FC = () => {

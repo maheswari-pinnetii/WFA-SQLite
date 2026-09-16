@@ -7,9 +7,57 @@ import { Users, AlertCircle, FileCode, Layers, RefreshCw, Clock } from 'lucide-r
 import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
-  kpis: { teamSize: 0, present: 0, absent: 0, late: 0, onLeave: 0, pendingLeaveRequests: 0, sprintVelocity: null, blockedTasks: null, codeReviews: null },
-  charts: { weeklyAttendance: [], memberStats: [] },
-  tables: { teamMembers: [] },
+  kpis: { 
+    squadSize: 12, 
+    checkedIn: 11, 
+    absent: 0, 
+    late: 1, 
+    onLeave: 1, 
+    pendingLeaveRequests: 2, 
+    activeTasks: 18,
+    sprintVelocity: 45, 
+    blockedTasks: 2, 
+    avgResponseTime: '1.2h',
+    codeReviews: 8 
+  },
+  charts: { 
+    dailyCheckins: [
+      { day: 'Mon', checkedIn: 11 }, { day: 'Tue', checkedIn: 12 }, { day: 'Wed', checkedIn: 10 },
+      { day: 'Thu', checkedIn: 11 }, { day: 'Fri', checkedIn: 12 }
+    ],
+    taskStatus: [
+      { name: 'To Do', value: 5, color: '#94a3b8' },
+      { name: 'In Progress', value: 8, color: '#3b82f6' },
+      { name: 'In Review', value: 3, color: '#f59e0b' },
+      { name: 'Done', value: 12, color: '#10b981' }
+    ],
+    velocityTrend: [
+      { sprint: 'S1', points: 35 }, { sprint: 'S2', points: 42 }, { sprint: 'S3', points: 38 },
+      { sprint: 'S4', points: 45 }
+    ],
+    blockersByType: [
+      { name: 'Dependencies', value: 50, color: '#ef4444' },
+      { name: 'Requirements', value: 30, color: '#f59e0b' },
+      { name: 'Environment', value: 20, color: '#8b5cf6' }
+    ],
+    leaveCalendar: [
+      { week: 'W1', leaves: 2 }, { week: 'W2', leaves: 0 }, { week: 'W3', leaves: 1 },
+      { week: 'W4', leaves: 3 }
+    ],
+    workloadDistribution: [
+      { name: 'Alex', tasks: 4 },
+      { name: 'Sam', tasks: 6 },
+      { name: 'Taylor', tasks: 3 },
+      { name: 'Jordan', tasks: 5 }
+    ]
+  },
+  tables: { 
+    roster: [
+      { name: 'Alex Mercer', role: 'Frontend Dev', status: 'Active', joinDate: '2024-03-12' },
+      { name: 'Sam Fisher', role: 'Backend Dev', status: 'Active', joinDate: '2023-08-20' },
+      { name: 'Taylor Swift', role: 'UI Designer', status: 'Active', joinDate: '2025-01-05' }
+    ]
+  },
 };
 
 export const TeamLeadDashboard: React.FC = () => {
