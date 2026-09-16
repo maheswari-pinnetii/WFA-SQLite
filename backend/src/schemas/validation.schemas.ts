@@ -37,11 +37,16 @@ export const registrationSchema = z.object({
     .refine((val) => /[^A-Za-z0-9]/.test(val), 'Password must contain a special character.')
     .refine((val) => !['password123', 'StacklyWFA2026!', 'qwertyuiop', '1234567890'].includes(val), 'Password is too common or easily guessed.')
     .optional(),
+  // Public self-registration — role is ALWAYS forced to EMPLOYEE server-side (anti-privilege-escalation)
   role: z.enum(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE']).optional(),
+  // Accept both 'department' and 'departmentId' from different form versions
+  department: z.string().trim().max(100).optional(),
   departmentId: z.string().trim().max(100).optional(),
+  team: z.string().trim().max(100).optional(),
+  title: z.string().trim().max(100).optional(),
   locationId: z.string().trim().max(100).optional(),
-  shiftId: z.string().trim().max(100).optional()
-}).strict().refine(data => data.name || data.fullName, {
+  shiftId: z.string().trim().max(100).optional(),
+}).refine(data => data.name || data.fullName, {
   message: 'Full name is required (at least 2 characters).',
   path: ['name']
 });
