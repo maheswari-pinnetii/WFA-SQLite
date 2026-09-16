@@ -7,7 +7,8 @@ import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWid
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api/attendanceApi';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
-import { AnalyticsBarChart, AnalyticsDonutChart } from '../../../components/charts/AnalyticsCharts';
+import { KpiGrid } from '../../../components/dashboard/KpiGrid';
+import { ChartGrid } from '../../../components/dashboard/charts';
 import {
   Clock,
   Calendar,
@@ -136,16 +137,19 @@ export const EmployeeKpiGrid: React.FC<{
   pendingTasksCount: number;
   timesheetStatus: string;
 }> = (props) => (
-  <div className="dashboard-kpi-grid">
-    <MinimalKpiCard title="Hours Today" value={props.hoursToday} icon={<Clock size={26} />} iconBgColor="blue" trend="Active Shift Elapsed" />
-    <MinimalKpiCard title="Hours This Week" value={props.hoursThisWeek} icon={<Briefcase size={26} />} iconBgColor="emerald" trend="Standard 40h Goal" />
-    <MinimalKpiCard title="Attendance Rate" value={props.attendanceRate} icon={<Calendar size={26} />} iconBgColor="teal" trend="Lifetime Adherence" />
-    <MinimalKpiCard title="Overtime Hours" value={props.overtimeHours} icon={<Timer size={26} />} iconBgColor="cyan" trend="Approved OT (1.5x)" />
-    <MinimalKpiCard title="Leave Balance" value={props.leaveBalance} icon={<Layers size={26} />} iconBgColor="purple" trend="Available PTO Days" />
-    <MinimalKpiCard title="Leaves Used" value={props.leavesUsed} icon={<FileText size={26} />} iconBgColor="rose" trend="This Calendar Year" />
-    <MinimalKpiCard title="Sprint Tasks Active" value={props.pendingTasksCount} icon={<Zap size={26} />} iconBgColor="amber" trend="In Sprint Backlog" />
-    <MinimalKpiCard title="Timesheet Status" value={props.timesheetStatus} icon={<CheckCircle2 size={26} />} iconBgColor="indigo" trend="Daily Attendance Lock" />
-  </div>
+  <KpiGrid
+    role={Role.EMPLOYEE}
+    data={{
+      hoursToday: props.hoursToday,
+      hoursThisWeek: props.hoursThisWeek,
+      attendanceRate: props.attendanceRate,
+      overtimeHours: props.overtimeHours,
+      leaveBalance: props.leaveBalance,
+      leavesUsed: props.leavesUsed,
+      pendingTasksCount: props.pendingTasksCount,
+      timesheetStatus: props.timesheetStatus,
+    }}
+  />
 );
 
 
@@ -1444,25 +1448,7 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="indigo"
                 badge="Current Month"
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <AnalyticsBarChart
-                  title="Weekly Shift Hours & Overtime"
-                  subtitle="Daily logged hours against standard 8-hour shift"
-                  data={weeklyHoursData}
-                  xKey="day"
-                  series={[
-                    { key: 'regular', name: 'Regular Hours (8h)', color: '#3B82F6' },
-                    { key: 'overtime', name: 'Overtime (1.5x)', color: '#10B981' }
-                  ]}
-                />
-                <AnalyticsDonutChart
-                  title="Monthly Attendance Distribution"
-                  subtitle="Adherence, on-time arrivals, and PTO quota breakdown"
-                  data={shiftDistributionData}
-                  nameKey="name"
-                  valueKey="value"
-                />
-              </div>
+              <ChartGrid role="EMPLOYEE" />
             </section>
 
             {/* STEP 6: Monthly Timesheet & Activity */}

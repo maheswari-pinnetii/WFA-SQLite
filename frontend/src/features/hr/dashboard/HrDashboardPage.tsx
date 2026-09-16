@@ -9,7 +9,7 @@ import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
-import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
+import { ChartGrid } from '../../../components/dashboard/charts';
 
 import { useRealtimeDashboard } from '../../../hooks/useRealtimeDashboard';
 import { useRealtimeAttendance } from '../../../hooks/useRealtimeAttendance';
@@ -271,19 +271,14 @@ export const HrDashboardPage: React.FC = () => {
         />
 
 
-        {/* Primary Analytics Grid */}
-        <div className="dashboard-chart-grid">
-          <AnalyticsLineChart title="Employee Growth & Hiring" subtitle="Headcount and new hires by join month" data={analytics?.growthData} xKey="name" series={[{ key: 'headcount', name: 'Headcount', color: '#8b5cf6' }, { key: 'hiring', name: 'New hires', color: '#ec4899' }]} isLoading={isLoading} error={error} onRetry={reload} />
-          <AnalyticsBarChart title="Attendance Compliance Trend" subtitle="Daily shift present/absent stats" data={analytics?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={isLoading} error={error} onRetry={reload} />
-        </div>
-
-        {/* Secondary Analytics Grid */}
-        <div className="dashboard-chart-grid !mt-4">
-          <AnalyticsDonutChart title="Employment Status Mix" subtitle="Active vs On Leave overview" data={analytics?.employmentStatus} isLoading={isLoading} error={error} onRetry={reload} />
-          <AnalyticsDonutChart title="Department Breakdown" subtitle="Current staff allocation across departments" data={analytics?.departmentDistribution} isLoading={isLoading} error={error} onRetry={reload} />
-          <AnalyticsBarChart title="Skills Coverage Analysis" subtitle="Highest frequency active skills in scope" data={analytics?.skillsAnalysis?.topSkills} xKey="name" series={[{ key: 'coverage', name: 'Coverage %', color: '#06b6d4' }]} layout="vertical" isLoading={isLoading} error={error} onRetry={reload} />
-          <AnalyticsDonutChart title="Retention Risk Distribution" subtitle="Workforce stabilization assessment" data={analytics?.riskDistribution} isLoading={isLoading} error={error} onRetry={reload} colors={['#ef4444', '#f59e0b', '#10b981']} />
-        </div>
+        {/* Reusable Enterprise Chart Grid (8 Charts) */}
+        <ChartGrid
+          role="HR"
+          dashboardData={analytics}
+          loading={isLoading}
+          error={error ? String(error) : null}
+          onRetry={reload}
+        />
 
         <EmployeeTable
           locationFilter={locationFilter}

@@ -8,7 +8,7 @@ import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
-import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
+import { ChartGrid } from '../../../components/dashboard/charts';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
@@ -353,21 +353,14 @@ export const AdminDashboardPage: React.FC = () => {
         />
 
 
-        {/* Primary Analytics Grid */}
-        <div className="dashboard-chart-grid">
-          <AnalyticsLineChart title="Employee Growth & Hiring" subtitle="Headcount and new hires by join month" data={analytics.data?.growthData} xKey="name" series={[{ key: 'headcount', name: 'Headcount', color: '#3b82f6' }, { key: 'hiring', name: 'New hires', color: '#06b6d4' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsBarChart title="Attendance Overview" subtitle="Present, absent and late attendance by weekday" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }, { key: 'late', name: 'Late', color: '#f59e0b' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsBarChart title="Department Comparison" subtitle="Headcount and attendance performance by department" data={analytics.data?.departmentComparison} xKey="name" series={[{ key: 'headcount', name: 'Headcount', color: '#6366f1' }, { key: 'attendance', name: 'Attendance %', color: '#10b981' }]} layout="vertical" isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsDonutChart title="Department Distribution" subtitle="Current workforce allocation" data={analytics.data?.departmentDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-        </div>
-
-        {/* Secondary Analytics Grid */}
-        <div className="dashboard-chart-grid !mt-4">
-          <AnalyticsDonutChart title="Role Distribution" subtitle="Role mix in the authorized scope" data={analytics.data?.roleDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsDonutChart title="Employment Status" subtitle="Active, remote, leave and offline workforce" data={analytics.data?.employmentStatus} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsDonutChart title="Workforce Mode" subtitle="Office, remote and client attendance modes" data={analytics.data?.workforceDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsDonutChart title="Retention Risk" subtitle="Performance and attendance risk distribution" data={analytics.data?.riskDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} colors={['#ef4444', '#f59e0b', '#10b981']} />
-        </div>
+        {/* Reusable Enterprise Chart Grid (8 Charts) */}
+        <ChartGrid
+          role="ADMIN"
+          dashboardData={analytics.data}
+          loading={analytics.isLoading}
+          error={analytics.error ? String(analytics.error) : null}
+          onRetry={analytics.reload}
+        />
 
         <EmployeeTable
           locationFilter={locationFilter}

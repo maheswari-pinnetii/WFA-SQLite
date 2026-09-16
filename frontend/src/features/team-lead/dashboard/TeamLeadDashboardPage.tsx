@@ -7,7 +7,7 @@ import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
-import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
+import { ChartGrid } from '../../../components/dashboard/charts';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
@@ -221,17 +221,14 @@ export const TeamLeadDashboardPage: React.FC = () => {
         />
 
 
-        {/* Primary Analytics Grid */}
-        <div className="dashboard-chart-grid">
-          <AnalyticsBarChart title="Squad Daily Attendance" subtitle="Weekdays breakdown inside squad" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#0ea5e9' }, { key: 'absent', name: 'Absent', color: '#f43f5e' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsBarChart title="Squad Task Velocity" subtitle="Productivity by sprint task status" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity Rate', color: '#10b981' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-        </div>
-
-        {/* Secondary Analytics Grid */}
-        <div className="dashboard-chart-grid !mt-4">
-          <AnalyticsDonutChart title="Employment Status Mix" subtitle="Squad duty allocation" data={analytics.data?.employmentStatus} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsLineChart title="Squad Performance History" subtitle="Individual metrics trend" data={analytics.data?.performance} xKey="name" series={[{ key: 'performance', name: 'Performance', color: '#6366f1' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-        </div>
+        {/* Reusable Enterprise Chart Grid (8 Charts) */}
+        <ChartGrid
+          role="TEAM_LEAD"
+          dashboardData={analytics.data}
+          loading={analytics.isLoading}
+          error={analytics.error ? String(analytics.error) : null}
+          onRetry={analytics.reload}
+        />
 
         <EmployeeTable
           teamFilter={teamName}

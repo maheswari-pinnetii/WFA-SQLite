@@ -7,7 +7,7 @@ import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
-import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
+import { ChartGrid } from '../../../components/dashboard/charts';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { Employee } from '../../../shared/types/common.types';
@@ -278,19 +278,14 @@ export const ManagerDashboardPage: React.FC = () => {
         />
 
 
-        {/* Primary Analytics Grid */}
-        <div className="dashboard-chart-grid">
-          <AnalyticsLineChart title="Department Growth & Hiring" subtitle="Staff additions inside department" data={analytics.data?.growthData} xKey="name" series={[{ key: 'headcount', name: 'Headcount', color: '#3b82f6' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsBarChart title="Team Attendance Overview" subtitle="Attendance metrics by team" data={analytics.data?.attendanceOverview} xKey="name" series={[{ key: 'present', name: 'Present', color: '#10b981' }, { key: 'absent', name: 'Absent', color: '#ef4444' }]} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-        </div>
-
-        {/* Secondary Analytics Grid */}
-        <div className="dashboard-chart-grid !mt-4">
-          <AnalyticsDonutChart title="Employment Status Mix" subtitle="Department active duty rate" data={analytics.data?.employmentStatus} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsDonutChart title="Department Distribution" subtitle="Staff distribution in department" data={analytics.data?.departmentDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsBarChart title="Productivity & Performance" subtitle="Team productivity score index" data={analytics.data?.teamProductivity} xKey="name" series={[{ key: 'productivity', name: 'Productivity', color: '#8b5cf6' }]} layout="vertical" isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} />
-          <AnalyticsDonutChart title="Retention Risks" subtitle="Retention risk distribution" data={analytics.data?.riskDistribution} isLoading={analytics.isLoading} error={analytics.error} onRetry={analytics.reload} colors={['#ef4444', '#f59e0b', '#10b981']} />
-        </div>
+        {/* Reusable Enterprise Chart Grid (8 Charts) */}
+        <ChartGrid
+          role="MANAGER"
+          dashboardData={analytics.data}
+          loading={analytics.isLoading}
+          error={analytics.error ? String(analytics.error) : null}
+          onRetry={analytics.reload}
+        />
 
         <EmployeeTable
           deptFilter={departmentName}
