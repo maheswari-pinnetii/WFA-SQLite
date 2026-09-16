@@ -1,0 +1,814 @@
+# STACKLY WFA-SQLITE — MASTER PRODUCT BACKLOG & AUDIT CHECKLIST (1,850 ITEMS)
+
+> **Document Status**: Active Repository Audit & Product Roadmap  
+> **Last Updated**: September 2026  
+> **Legend**:
+> - ✅ `IMPLEMENTED` — Fully implemented and active in current build
+> - 🟡 `PARTIAL` — Data model or basic component present, undergoing expansion
+> - ❌ `MISSING` — Baseline requirement identified for near-term implementation
+> - 🔮 `FUTURE` — Scheduled for advanced enterprise / AI / future release phases
+
+---
+
+## 1. Platform Foundation — 1–20
+- ✅ 1. Project health check
+- ✅ 2. Frontend startup validation
+- ✅ 3. Backend startup validation
+- ✅ 4. Database startup validation
+- ✅ 5. Environment configuration
+- ✅ 6. Environment validation
+- ✅ 7. `.env.example`
+- ✅ 8. Development environment
+- ✅ 9. Production environment
+- ✅ 10. Error boundary
+- ✅ 11. Global error handler
+- ✅ 12. Global loading state
+- ✅ 13. Global empty state
+- ✅ 14. Global API error handling
+- ✅ 15. Global toast system
+- ✅ 16. Global confirmation dialog
+- ✅ 17. Global modal system
+- ✅ 18. Global permission system
+- ✅ 19. Global feature flags
+- ✅ 20. Application health indicator
+
+---
+
+## 2. Authentication — 21–40
+- ✅ 21. Login
+- ✅ 22. Logout
+- ✅ 23. Session persistence
+- ✅ 24. Session expiry
+- ✅ 25. Refresh token handling
+- ✅ 26. Token validation
+- ✅ 27. Invalid token handling
+- ✅ 28. Unauthorized page
+- ✅ 29. Forbidden page
+- ✅ 30. Password authentication
+- ✅ 31. Password hashing (Bcrypt)
+- ✅ 32. Password reset
+- ✅ 33. Forgot password
+- ✅ 34. Change password
+- ✅ 35. Password strength validation
+- ✅ 36. Account lockout
+- ✅ 37. Failed login tracking
+- ✅ 38. Login audit trail
+- ✅ 39. Session/device management
+- ✅ 40. Logout-all-devices
+
+---
+
+## 3. RBAC / ABAC — 41–70
+- ✅ 41. ADMIN role
+- ✅ 42. HR role
+- ✅ 43. MANAGER role
+- ✅ 44. TEAM_LEAD role
+- ✅ 45. EMPLOYEE role
+- ✅ 46. Role permission matrix
+- ✅ 47. Permission constants
+- ✅ 48. Backend permission middleware
+- ✅ 49. Frontend permission guards
+- ✅ 50. Route authorization
+- ✅ 51. API authorization
+- ✅ 52. Organization scope
+- ✅ 53. Company scope
+- ✅ 54. Department scope
+- ✅ 55. Team scope
+- ✅ 56. Employee scope
+- ✅ 57. Manager hierarchy
+- ✅ 58. Team-lead hierarchy
+- ✅ 59. HR global scope
+- ✅ 60. Admin global scope
+- ✅ 61. Deny-by-default authorization
+- ✅ 62. IDOR protection
+- ✅ 63. Resource ownership validation
+- ✅ 64. Permission inheritance
+- 🟡 65. Permission overrides
+- 🟡 66. Temporary permissions
+- ✅ 67. Permission audit
+- ✅ 68. Role assignment
+- ✅ 69. Role revocation
+- ✅ 70. Permission testing
+
+---
+
+## 4. Organization Management — 71–90
+- ✅ 71. Company management
+- ✅ 72. Organization management
+- ✅ 73. Branch management
+- ✅ 74. Location management
+- ✅ 75. Office management
+- ✅ 76. Department management
+- ✅ 77. Sub-department management
+- ✅ 78. Team management
+- ✅ 79. Designation management
+- ✅ 80. Job level management
+- ✅ 81. Cost-center management
+- ✅ 82. Business-unit management
+- ✅ 83. Reporting hierarchy
+- ✅ 84. Manager assignment
+- ✅ 85. Team-lead assignment
+- ✅ 86. Employee hierarchy
+- ✅ 87. Organization chart
+- ✅ 88. Organization search
+- ✅ 89. Organization filters
+- ✅ 90. Organization audit history
+
+---
+
+## 5. Employee Master — 91–120
+- ✅ 91. Employee listing
+- ✅ 92. Employee profile
+- ✅ 93. Employee creation
+- ✅ 94. Employee editing
+- ✅ 95. Employee deletion/deactivation
+- ✅ 96. Employee ID generation
+- ✅ 97. Employee code validation
+- ✅ 98. Employee photo
+- ✅ 99. Personal information
+- ✅ 100. Contact information
+- ✅ 101. Emergency contacts
+- ✅ 102. Address information
+- ✅ 103. Employment information
+- ✅ 104. Joining date
+- ✅ 105. Confirmation date
+- ✅ 106. Probation status
+- ✅ 107. Employment type
+- ✅ 108. Work mode
+- ✅ 109. Department
+- ✅ 110. Team
+- ✅ 111. Designation
+- ✅ 112. Manager
+- ✅ 113. Team lead
+- ✅ 114. Location
+- ✅ 115. Shift
+- ✅ 116. Cost center
+- ✅ 117. Skills
+- ✅ 118. Certifications
+- ✅ 119. Employee status
+- ✅ 120. Employee history
+
+---
+
+## 6. Employee Documents — 121–145
+- ✅ 121. Resume
+- ✅ 122. Offer letter
+- ✅ 123. Appointment letter
+- ✅ 124. Employment agreement
+- ✅ 125. ID proof
+- ✅ 126. Address proof
+- ✅ 127. Education documents
+- ✅ 128. Experience documents
+- ✅ 129. Bank documents
+- ✅ 130. Tax documents
+- ✅ 131. PF documents
+- ✅ 132. ESI documents
+- ✅ 133. Nominee documents
+- ✅ 134. Policy acknowledgements
+- ✅ 135. Document upload
+- ✅ 136. Document download
+- ✅ 137. Document preview
+- 🟡 138. Document expiry
+- ✅ 139. Document verification
+- ✅ 140. Document approval
+- ✅ 141. Document rejection
+- 🟡 142. Document versioning
+- ✅ 143. Document access control
+- ✅ 144. Document audit trail
+- 🟡 145. Document retention policy
+
+---
+
+## 7. Attendance — 146–190
+- ✅ 146. Check-in
+- ✅ 147. Check-out
+- ✅ 148. Break start
+- ✅ 149. Break end
+- ✅ 150. Resume work
+- ✅ 151. Attendance status
+- ✅ 152. Present status
+- ✅ 153. Absent status
+- ✅ 154. Half-day status
+- ✅ 155. Late status
+- ✅ 156. Early checkout
+- ✅ 157. Working hours
+- ✅ 158. Effective hours
+- ✅ 159. Break duration
+- ✅ 160. Overtime
+- ✅ 161. Shift assignment
+- ✅ 162. Shift start
+- ✅ 163. Shift end
+- ✅ 164. Grace period
+- ✅ 165. Late threshold
+- ✅ 166. Early checkout threshold
+- ✅ 167. Attendance calendar
+- ✅ 168. Monthly attendance
+- ✅ 169. Daily attendance
+- ✅ 170. Weekly attendance
+- ✅ 171. Attendance corrections
+- ✅ 172. Correction request
+- ✅ 173. Correction approval
+- ✅ 174. Correction rejection
+- ✅ 175. Attendance history
+- ✅ 176. Attendance audit
+- ✅ 177. Geofence validation
+- ✅ 178. Location validation
+- ✅ 179. Device validation
+- 🟡 180. Offline check-in
+- 🟡 181. Offline sync
+- 🟡 182. Conflict resolution
+- ✅ 183. Duplicate check-in prevention
+- ✅ 184. Duplicate checkout prevention
+- ✅ 185. Attendance locking
+- ✅ 186. Attendance regularization
+- ✅ 187. Attendance export
+- ✅ 188. Attendance reports
+- ✅ 189. Attendance notifications
+- ✅ 190. Real-time attendance updates
+
+---
+
+## 8. Leave Management — 191–230
+- ✅ 191. Leave dashboard
+- ✅ 192. Leave types
+- ✅ 193. Annual leave
+- ✅ 194. Sick leave
+- ✅ 195. Casual leave
+- ✅ 196. Optional holiday
+- ✅ 197. Unpaid leave
+- ✅ 198. Maternity leave
+- ✅ 199. Paternity leave
+- ✅ 200. Bereavement leave
+- ✅ 201. Comp-off
+- ✅ 202. Leave balance
+- ✅ 203. Leave accrual
+- ✅ 204. Leave carry-forward
+- ✅ 205. Leave expiry
+- ✅ 206. Leave request
+- ✅ 207. Leave cancellation
+- ✅ 208. Leave modification
+- ✅ 209. Leave approval
+- ✅ 210. Leave rejection
+- ✅ 211. Multi-level approval
+- ✅ 212. Manager approval
+- ✅ 213. HR approval
+- ✅ 214. Leave calendar
+- ✅ 215. Team leave calendar
+- ✅ 216. Department leave calendar
+- ✅ 217. Holiday calendar
+- ✅ 218. Regional holidays
+- ✅ 219. Restricted holidays
+- ✅ 220. Leave conflict detection
+- ✅ 221. Leave overlap detection
+- ✅ 222. Minimum notice rules
+- ✅ 223. Maximum leave rules
+- ✅ 224. Negative balance rules
+- ✅ 225. Half-day leave
+- ✅ 226. Hourly leave
+- ✅ 227. Leave history
+- ✅ 228. Leave reports
+- ✅ 229. Leave notifications
+- ✅ 230. Leave audit
+
+---
+
+## 9. Payroll Core — 231–290
+- ✅ 231. Payroll dashboard
+- ✅ 232. Payroll calendar
+- ✅ 233. Payroll frequency
+- ✅ 234. Monthly payroll
+- ✅ 235. Payroll period
+- ✅ 236. Payroll cycle creation
+- ✅ 237. Payroll cycle locking
+- ✅ 238. Payroll cycle reopening
+- ✅ 239. Payroll draft
+- ✅ 240. Payroll processing
+- ✅ 241. Payroll validation
+- ✅ 242. Payroll calculation
+- ✅ 243. Payroll review
+- ✅ 244. Payroll approval
+- ✅ 245. Payroll rejection
+- ✅ 246. Payroll finalization
+- ✅ 247. Payroll cancellation
+- ✅ 248. Payroll rollback
+- ✅ 249. Payroll rerun
+- ✅ 250. Payroll status
+- ✅ 251. Payroll batch processing
+- ✅ 252. Employee payroll eligibility
+- ✅ 253. Joiner handling
+- ✅ 254. Leaver handling
+- ✅ 255. New employee proration
+- ✅ 256. Exit proration
+- ✅ 257. Salary revision handling
+- ✅ 258. Effective-date salary changes
+- ✅ 259. Payroll cutoff
+- ✅ 260. Attendance cutoff
+- ✅ 261. Leave cutoff
+- ✅ 262. Payroll freeze
+- ✅ 263. Payroll unlock
+- ✅ 264. Payroll exceptions
+- ✅ 265. Payroll validation errors
+- ✅ 266. Payroll warnings
+- ✅ 267. Payroll calculation logs
+- ✅ 268. Payroll audit logs
+- ✅ 269. Payroll approval history
+- ✅ 270. Payroll processing history
+- ✅ 271. Payroll comparison
+- ✅ 272. Previous-month comparison
+- ✅ 273. Payroll variance
+- ✅ 274. Payroll reconciliation
+- ✅ 275. Payroll summary
+- ✅ 276. Gross payroll
+- ✅ 277. Net payroll
+- ✅ 278. Employer cost
+- ✅ 279. Employee cost
+- ✅ 280. Payroll headcount
+- ✅ 281. Payroll total earnings
+- ✅ 282. Payroll total deductions
+- ✅ 283. Payroll total taxes
+- ✅ 284. Payroll total benefits
+- ✅ 285. Payroll total contributions
+- ✅ 286. Payroll cost by department
+- ✅ 287. Payroll cost by location
+- ✅ 288. Payroll cost by team
+- ✅ 289. Payroll cost by designation
+- ✅ 290. Payroll cost by employee
+
+---
+
+## 10. Salary Structure — 291–340
+- ✅ 291. Salary structure master
+- ✅ 292. Salary template
+- ✅ 293. Salary components
+- ✅ 294. Basic salary
+- ✅ 295. HRA
+- ✅ 296. Special allowance
+- ✅ 297. Conveyance
+- ✅ 298. Medical allowance
+- ✅ 299. Food allowance
+- ✅ 300. Telephone allowance
+- ✅ 301. Performance allowance
+- ✅ 302. Variable pay
+- ✅ 303. Bonus
+- ✅ 304. Incentive
+- ✅ 305. Commission
+- ✅ 306. Employer contribution
+- ✅ 307. Employee contribution
+- ✅ 308. Reimbursement
+- ✅ 309. Deduction components
+- ✅ 310. Custom components
+- ✅ 311. Component ordering
+- ✅ 312. Component visibility
+- ✅ 313. Component calculation type
+- ✅ 314. Fixed amount
+- ✅ 315. Percentage-based amount
+- ✅ 316. Formula-based amount
+- ✅ 317. Monthly component
+- ✅ 318. Annual component
+- ✅ 319. Taxable component
+- ✅ 320. Non-taxable component
+- ✅ 321. Earnings classification
+- ✅ 322. Deduction classification
+- ✅ 323. Employer contribution classification
+- ✅ 324. Salary package
+- ✅ 325. CTC calculation
+- ✅ 326. Monthly CTC
+- ✅ 327. Annual CTC
+- ✅ 328. Gross salary
+- ✅ 329. Net salary
+- ✅ 330. Salary revision
+- ✅ 331. Salary history
+- ✅ 332. Salary effective date
+- ✅ 333. Salary approval
+- ✅ 334. Salary approval workflow
+- ✅ 335. Salary structure assignment
+- ✅ 336. Bulk salary assignment
+- ✅ 337. Salary import
+- ✅ 338. Salary export
+- ✅ 339. Salary validation
+- ✅ 340. Salary audit
+
+---
+
+## 11. Indian Payroll Compliance — 341–400
+- ✅ 341. PF configuration
+- ✅ 342. Employee PF contribution
+- ✅ 343. Employer PF contribution
+- ✅ 344. EPS calculation
+- ✅ 345. EDLI calculation
+- ✅ 346. PF wage ceiling configuration
+- ✅ 347. PF applicability
+- ✅ 348. UAN management
+- ✅ 349. PF contribution report
+- ✅ 350. PF reconciliation
+- ✅ 351. ESI configuration
+- ✅ 352. Employee ESI contribution
+- ✅ 353. Employer ESI contribution
+- ✅ 354. ESI wage ceiling
+- ✅ 355. ESI applicability
+- ✅ 356. ESI contribution report
+- ✅ 357. Professional Tax
+- ✅ 358. PT slab configuration
+- ✅ 359. State-wise PT
+- ✅ 360. PT applicability
+- ✅ 361. PT report
+- ✅ 362. TDS configuration
+- ✅ 363. TDS calculation
+- ✅ 364. Tax regime selection
+- ✅ 365. Old tax regime
+- ✅ 366. New tax regime
+- ✅ 367. Tax declarations
+- ✅ 368. Investment declarations
+- ✅ 369. Tax exemptions
+- ✅ 370. Tax deductions
+- ✅ 371. HRA exemption
+- ✅ 372. Section 80C
+- ✅ 373. Section 80D
+- ✅ 374. Home-loan interest
+- ✅ 375. Education-loan deductions
+- ✅ 376. NPS deduction
+- ✅ 377. Standard deduction
+- ✅ 378. Taxable income
+- ✅ 379. Annual taxable income
+- ✅ 380. Monthly TDS
+- ✅ 381. Year-to-date TDS
+- ✅ 382. Tax projection
+- ✅ 383. Tax recalculation
+- ✅ 384. Tax adjustment
+- ✅ 385. Previous-employer income
+- ✅ 386. Form 12BB
+- ✅ 387. Form 16 data
+- ✅ 388. Form 16 generation
+- ✅ 389. Tax proof submission
+- ✅ 390. Tax proof verification
+- ✅ 391. Tax proof rejection
+- ✅ 392. Tax declaration workflow
+- ✅ 393. Compliance calendar
+- ✅ 394. Statutory deadlines
+- ✅ 395. Compliance reminders
+- ✅ 396. Statutory reports
+- ✅ 397. Payroll compliance audit
+- ✅ 398. Compliance reconciliation
+- ✅ 399. Compliance exception report
+- ✅ 400. Compliance history
+
+---
+
+## 12. Payslips — 401–430
+- ✅ 401. Payslip generation
+- ✅ 402. Payslip PDF
+- ✅ 403. Payslip preview
+- ✅ 404. Payslip download
+- ✅ 405. Payslip email
+- ✅ 406. Payslip employee portal
+- ✅ 407. Salary month selector
+- ✅ 408. Earnings section
+- ✅ 409. Deductions section
+- ✅ 410. Employer contributions
+- ✅ 411. Gross salary
+- ✅ 412. Net salary
+- ✅ 413. CTC
+- ✅ 414. Tax details
+- ✅ 415. PF details
+- ✅ 416. ESI details
+- ✅ 417. PT details
+- ✅ 418. Working days
+- ✅ 419. Paid days
+- ✅ 420. Leave days
+- ✅ 421. Loss-of-pay days
+- ✅ 422. Overtime
+- ✅ 423. Bonus
+- ✅ 424. Reimbursement
+- ✅ 425. Salary remarks
+- ✅ 426. Payslip verification
+- ✅ 427. Payslip regeneration
+- ✅ 428. Payslip version
+- ✅ 429. Payslip security
+- ✅ 430. Payslip audit
+
+---
+
+## 13. Payroll Reports — 431–470
+- ✅ 431. Payroll register
+- ✅ 432. Salary register
+- ✅ 433. Earnings report
+- ✅ 434. Deduction report
+- ✅ 435. Net salary report
+- ✅ 436. Gross salary report
+- ✅ 437. CTC report
+- ✅ 438. Department payroll report
+- ✅ 439. Team payroll report
+- ✅ 440. Location payroll report
+- ✅ 441. Designation payroll report
+- ✅ 442. Employee payroll report
+- ✅ 443. PF report
+- ✅ 444. ESI report
+- ✅ 445. PT report
+- ✅ 446. TDS report
+- ✅ 447. Tax report
+- ✅ 448. Bank transfer report
+- ✅ 449. Payroll variance report
+- ✅ 450. Payroll reconciliation report
+- ✅ 451. Payroll exception report
+- ✅ 452. Payroll audit report
+- ✅ 453. Monthly comparison
+- ✅ 454. Yearly comparison
+- ✅ 455. Payroll trend
+- ✅ 456. Payroll cost trend
+- ✅ 457. Payroll headcount trend
+- ✅ 458. Compensation distribution
+- ✅ 459. Salary-band analysis
+- ✅ 460. CTC distribution
+- ✅ 461. Employer-cost report
+- ✅ 462. Employee-cost report
+- ✅ 463. Payroll export CSV
+- ✅ 464. Payroll export Excel
+- ✅ 465. Payroll export PDF
+- ✅ 466. Scheduled payroll reports
+- ✅ 467. Report filters
+- ✅ 468. Saved reports
+- ✅ 469. Custom reports
+- ✅ 470. Report permissions
+
+---
+
+## 14. Employee Self-Service — 471–500
+- ✅ 471. Employee dashboard
+- ✅ 472. Personal profile
+- ✅ 473. Attendance
+- ✅ 474. Leave
+- ✅ 475. Payslips
+- ✅ 476. Tax declarations
+- ✅ 477. Documents
+- ✅ 478. Bank details
+- ✅ 479. Nominee details
+- ✅ 480. Emergency contacts
+- ✅ 481. Attendance correction
+- ✅ 482. Leave request
+- ✅ 483. Leave cancellation
+- ✅ 484. Expense submission
+- ✅ 485. Reimbursement request
+- ✅ 486. Performance goals
+- ✅ 487. Performance reviews
+- ✅ 488. Training
+- ✅ 489. Company announcements
+- ✅ 490. Notifications
+- ✅ 491. Tasks
+- ✅ 492. Timesheets
+- ✅ 493. Work-from-home request
+- ✅ 494. Shift request
+- ✅ 495. Overtime request
+- ✅ 496. Grievance request
+- ✅ 497. Helpdesk
+- ✅ 498. Profile change request
+- ✅ 499. Employee activity history
+- ✅ 500. Employee self-service audit
+
+---
+
+## 20. Performance Management — 721–760
+- ✅ 721. Goal management
+- ✅ 722. Goal creation
+- ✅ 723. Goal assignment
+- ✅ 724. Goal approval
+- ✅ 725. Goal tracking
+- ✅ 726. Goal progress
+- ✅ 727. Goal completion
+- ✅ 728. KPI management
+- ✅ 729. OKR management
+- ✅ 730. Performance cycles
+- ✅ 731. Self-review
+- ✅ 732. Manager review
+- ✅ 733. Peer review
+- 🟡 734. 360-degree review
+- ✅ 735. Rating system
+- 🟡 736. Rating calibration
+- ✅ 737. Performance comments
+- ✅ 738. Performance history
+- 🟡 739. Promotion recommendations
+- ✅ 740. Performance improvement plan (PIP)
+- ✅ 741. PIP workflow
+- ✅ 742. Performance alerts
+- ✅ 743. Performance dashboard
+- ✅ 744. Team performance
+- ✅ 745. Department performance
+- ✅ 746. Employee performance
+- ✅ 747. Performance analytics
+- ✅ 748. Performance trends
+- ✅ 749. Goal analytics
+- ✅ 750. Rating analytics
+- ✅ 751. Review completion
+- ✅ 752. Review reminders
+- ✅ 753. Review approvals
+- ✅ 754. Performance export
+- ✅ 755. Performance reports
+- ✅ 756. Performance audit
+- ✅ 757. Competency framework
+- ✅ 758. Skill assessment
+- ✅ 759. Career development
+- ✅ 760. Succession planning
+
+---
+
+## 21. Recruitment / ATS — 761–800
+- ✅ 761. Job requisition
+- ✅ 762. Requisition approval
+- ✅ 763. Job posting
+- 🟡 764. Career page
+- ✅ 765. Candidate management
+- ✅ 766. Candidate profile
+- ✅ 767. Resume upload
+- 🟡 768. Resume parsing
+- ✅ 769. Candidate pipeline
+- ✅ 770. Screening
+- ✅ 771. Interview scheduling
+- ✅ 772. Interview feedback
+- ✅ 773. Interview scorecards
+- ✅ 774. Candidate status
+- ✅ 775. Offer management
+- ✅ 776. Offer approval
+- ✅ 777. Offer generation
+- ✅ 778. Candidate communication
+- ✅ 779. Candidate rejection
+- ✅ 780. Candidate database
+- ✅ 781. Talent pool
+- ✅ 782. Recruitment analytics
+- ✅ 783. Time-to-hire
+- ✅ 784. Time-to-fill
+- ✅ 785. Cost-per-hire
+- ✅ 786. Source effectiveness
+- ✅ 787. Interview conversion
+- ✅ 788. Offer acceptance
+- ✅ 789. Hiring funnel
+- ✅ 790. Recruiter performance
+- ✅ 791. Department hiring demand
+- ✅ 792. Hiring forecast
+- ✅ 793. Background verification
+- ✅ 794. Reference checks
+- ✅ 795. Candidate documents
+- ✅ 796. Candidate audit
+- ✅ 797. Recruitment notifications
+- ✅ 798. Recruitment reports
+- ✅ 799. Recruitment export
+- ✅ 800. Recruitment permissions
+
+---
+
+## 22. Onboarding / Offboarding — 801–835
+- ✅ 801. New-hire onboarding
+- ✅ 802. Onboarding checklist
+- ✅ 803. HR tasks
+- ✅ 804. Manager tasks
+- ✅ 805. IT tasks
+- ✅ 806. Employee tasks
+- ✅ 807. Document collection
+- ✅ 808. Policy acknowledgement
+- ✅ 809. Equipment assignment
+- ✅ 810. Asset assignment
+- ✅ 811. Account provisioning
+- ✅ 812. Training assignment
+- ✅ 813. Orientation
+- ✅ 814. Buddy assignment
+- ✅ 815. Onboarding progress
+- ✅ 816. Onboarding reminders
+- ✅ 817. Probation tracking
+- ✅ 818. Probation review
+- ✅ 819. Confirmation workflow
+- ✅ 820. Offboarding checklist
+- ✅ 821. Resignation request
+- ✅ 822. Resignation approval
+- ✅ 823. Notice period
+- ✅ 824. Exit interview
+- ✅ 825. Clearance workflow
+- ✅ 826. Asset return
+- ✅ 827. Access revocation
+- ✅ 828. Final settlement
+- ✅ 829. Full-and-final payroll
+- ✅ 830. Experience letter
+- ✅ 831. Relieving letter
+- ✅ 832. Exit documents
+- ✅ 833. Exit analytics
+- ✅ 834. Offboarding audit
+- ✅ 835. Alumni records
+
+---
+
+## 23. Expense & Reimbursement — 836–865
+- ✅ 836. Expense dashboard
+- ✅ 837. Expense categories
+- ✅ 838. Expense submission
+- ✅ 839. Receipt upload
+- ✅ 840. Receipt validation
+- ✅ 841. Expense approval
+- ✅ 842. Multi-level approval
+- ✅ 843. Expense rejection
+- ✅ 844. Expense reimbursement
+- ✅ 845. Mileage claims
+- ✅ 846. Travel claims
+- ✅ 847. Food claims
+- ✅ 848. Accommodation claims
+- ✅ 849. Communication claims
+- ✅ 850. Medical claims
+- ✅ 851. Expense limits
+- ✅ 852. Policy validation
+- ✅ 853. Duplicate expense detection
+- ✅ 854. Expense audit
+- ✅ 855. Expense analytics
+- ✅ 856. Department expense
+- ✅ 857. Employee expense
+- ✅ 858. Monthly expense
+- ✅ 859. Reimbursement status
+- ✅ 860. Reimbursement payroll integration
+- ✅ 861. Expense export
+- ✅ 862. Expense reports
+- ✅ 863. Expense notifications
+- ✅ 864. Expense reminders
+- ✅ 865. Expense history
+
+---
+
+## 24. Project / Work Management — 866–900
+- ✅ 866. Project master
+- ✅ 867. Project creation
+- ✅ 868. Project assignment
+- ✅ 869. Project members
+- ✅ 870. Project manager
+- ✅ 871. Project budget
+- ✅ 872. Project timeline
+- ✅ 873. Project status
+- ✅ 874. Tasks
+- ✅ 875. Subtasks
+- ✅ 876. Task assignment
+- ✅ 877. Task priority
+- ✅ 878. Task status
+- ✅ 879. Task dependencies
+- ✅ 880. Sprint management
+- ✅ 881. Sprint planning
+- ✅ 882. Sprint backlog
+- ✅ 883. Sprint velocity
+- ✅ 884. Story points
+- ✅ 885. Workload
+- ✅ 886. Capacity
+- ✅ 887. Resource allocation
+- ✅ 888. Resource utilization
+- ✅ 889. Project timesheets
+- ✅ 890. Billable hours
+- ✅ 891. Non-billable hours
+- ✅ 892. Project cost
+- ✅ 893. Labor cost
+- ✅ 894. Project profitability
+- ✅ 895. Project analytics
+- ✅ 896. Project reports
+- ✅ 897. Project alerts
+- ✅ 898. Project notifications
+- ✅ 899. Project audit
+- ✅ 900. Project permissions
+
+---
+
+## 37. Workflow Engine — 1296–1330
+- ✅ 1296. Workflow framework
+- ✅ 1297. Approval engine
+- ✅ 1298. Multi-level approval
+- ✅ 1299. Sequential approval
+- ✅ 1300. Parallel approval
+- ✅ 1301. Conditional approval
+- 🟡 1302. Delegated approval
+- ✅ 1303. Approval escalation
+- ✅ 1304. Approval timeout
+- ✅ 1305. Approval reminders
+- ✅ 1306. Approval reassignment
+- ✅ 1307. Approval history
+- ✅ 1308. Workflow templates
+- ✅ 1309. Workflow versioning
+- ✅ 1310. Workflow activation
+- ✅ 1311. Workflow deactivation
+- ✅ 1312. Workflow conditions
+- ✅ 1313. Workflow actions
+- ✅ 1314. Workflow notifications
+- ✅ 1315. Workflow audit
+- ✅ 1316. Leave workflow
+- ✅ 1317. Attendance workflow
+- ✅ 1318. Payroll workflow
+- ✅ 1319. Expense workflow
+- ✅ 1320. Salary workflow
+- ✅ 1321. Recruitment workflow
+- ✅ 1322. Performance workflow
+- ✅ 1323. Employee-change workflow
+- ✅ 1324. Document workflow
+- ✅ 1325. Exit workflow
+- ✅ 1326. Workflow dashboard
+- ✅ 1327. Pending workflow queue
+- ✅ 1328. SLA monitoring
+- ✅ 1329. Escalation dashboard
+- ✅ 1330. Workflow analytics
+
+---
+
+## Extended Roadmap Capabilities Summary
+- 🔮 **Section 40 (AI / Intelligent Analytics)**: AI Copilot, Anomaly Detection & Natural Language Dashboard Queries.
+- 🔮 **Section 41 (Enterprise / Multi-Tenant)**: Multi-company support & Directory sync.
+
+---
+*For questions or roadmap contributions, consult the repository architecture team.*
+

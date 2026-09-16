@@ -142,9 +142,16 @@ const PayrollDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MinimalKpiCard title="Active Draft Runs" value={runs.filter(r => r.status === 'DRAFT' || r.status === 'CALCULATED').length.toString()} icon={<Activity size={26} />} iconBgColor="amber" trend="Pending Approval" />
         <MinimalKpiCard title="Total Finalized Runs" value={runs.filter(r => r.status === 'FINALIZED').length.toString()} icon={<CheckCircle2 size={26} />} iconBgColor="emerald" trend="Completed & Issued" />
-        <MinimalKpiCard title="Statutory Compliance" value="100%" icon={<FileText size={26} />} iconBgColor="purple" trend="EPF, ESI, PT & TDS" />
+        <MinimalKpiCard 
+          title="Statutory Compliance" 
+          value={runs.length > 0 ? `${Math.round(((runs.filter(r => r.status === 'FINALIZED' || r.status === 'APPROVED').length) / runs.length) * 100)}%` : '100%'} 
+          icon={<FileText size={26} />} 
+          iconBgColor="purple" 
+          trend={`${runs.filter(r => r.status === 'DRAFT').length} Active Draft(s)`} 
+        />
         <MinimalKpiCard title="Payroll Coverage" value="Active" icon={<Users size={26} />} iconBgColor="blue" trend="All Departments" />
       </div>
+
 
       {/* Payroll Runs Table */}
       <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl space-y-4 shadow-xl">

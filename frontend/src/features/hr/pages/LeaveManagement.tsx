@@ -117,25 +117,9 @@ const INITIAL_HOLIDAYS: Holiday[] = [
   { date: '2026-12-25', name: 'Christmas Day', type: 'MANDATORY', day: 'Friday' },
 ];
 
-const INITIAL_REQUESTS: LeaveRecord[] = [
-  { id: 'LR-1001', employeeId: 'EMP-001', employeeName: 'Sarah Connor', department: 'Engineering', type: 'EARNED', duration: 'MULTIPLE_DAYS', startDate: '2026-09-10', endDate: '2026-09-15', totalDays: 4, reason: 'Annual family vacation to coastal retreat.', status: 'APPROVED', appliedOn: '2026-08-28', approvedBy: 'David Sterling', approvedOn: '2026-08-29' },
-  { id: 'LR-1002', employeeId: 'EMP-004', employeeName: 'Ananya Sharma', department: 'Product', type: 'SICK', duration: 'FULL_DAY', startDate: '2026-09-02', endDate: '2026-09-02', totalDays: 1, reason: 'Viral fever and doctor-advised bed rest.', status: 'PENDING', appliedOn: '2026-09-01' },
-  { id: 'LR-1003', employeeId: 'EMP-012', employeeName: 'Vikram Malhotra', department: 'Marketing', type: 'CASUAL', duration: 'FIRST_HALF', startDate: '2026-09-05', endDate: '2026-09-05', totalDays: 0.5, reason: 'Personal banking and vehicle registration work.', status: 'PENDING', appliedOn: '2026-08-30' },
-  { id: 'LR-1004', employeeId: 'EMP-018', employeeName: 'Rohit Verma', department: 'Engineering', type: 'COMP_OFF', duration: 'FULL_DAY', startDate: '2026-09-08', endDate: '2026-09-08', totalDays: 1, reason: 'Comp-off against Sunday maintenance deployment (Aug 30).', status: 'PENDING', appliedOn: '2026-08-31' },
-  { id: 'LR-1005', employeeId: 'EMP-025', employeeName: 'Elena Rostova', department: 'Human Resources', type: 'LWP', duration: 'FULL_DAY', startDate: '2026-08-20', endDate: '2026-08-20', totalDays: 1, reason: 'Personal matter after casual leave quota exhausted.', status: 'APPROVED', appliedOn: '2026-08-18', approvedBy: 'Sarah Connor', approvedOn: '2026-08-19' },
-  { id: 'LR-1006', employeeId: 'EMP-031', employeeName: 'Marcus Vance', department: 'Engineering', type: 'CASUAL', duration: 'FULL_DAY', startDate: '2026-08-12', endDate: '2026-08-12', totalDays: 1, reason: 'Home renovation emergency.', status: 'REJECTED', appliedOn: '2026-08-11', approvedBy: 'Sarah Connor', approvedOn: '2026-08-11', rejectionReason: 'Critical sprint release deadline requires team presence.' },
-  { id: 'LR-1007', employeeId: 'EMP-045', employeeName: 'Sneha Patel', department: 'Operations', type: 'MATERNITY', duration: 'MULTIPLE_DAYS', startDate: '2026-10-01', endDate: '2027-03-30', totalDays: 180, reason: 'Maternity leave under company statutory policy.', status: 'APPROVED', appliedOn: '2026-08-15', approvedBy: 'Elena Rostova', approvedOn: '2026-08-16' },
-];
+const INITIAL_REQUESTS: LeaveRecord[] = [];
+const INITIAL_BALANCES: LeaveBalance[] = [];
 
-const INITIAL_BALANCES: LeaveBalance[] = [
-  { employeeId: 'EMP-001', employeeName: 'Sarah Connor', department: 'Engineering', casual: { total: 12, used: 3, pending: 0 }, sick: { total: 12, used: 1, pending: 0 }, earned: { total: 18, used: 4, pending: 0 }, compOff: { total: 4, used: 1, pending: 0 }, lwp: { total: 30, used: 0, pending: 0 } },
-  { employeeId: 'EMP-004', employeeName: 'Ananya Sharma', department: 'Product', casual: { total: 12, used: 4, pending: 0 }, sick: { total: 12, used: 2, pending: 1 }, earned: { total: 18, used: 6, pending: 0 }, compOff: { total: 2, used: 0, pending: 0 }, lwp: { total: 30, used: 0, pending: 0 } },
-  { employeeId: 'EMP-012', employeeName: 'Vikram Malhotra', department: 'Marketing', casual: { total: 12, used: 2, pending: 0.5 }, sick: { total: 12, used: 0, pending: 0 }, earned: { total: 18, used: 2, pending: 0 }, compOff: { total: 1, used: 0, pending: 0 }, lwp: { total: 30, used: 0, pending: 0 } },
-  { employeeId: 'EMP-018', employeeName: 'Rohit Verma', department: 'Engineering', casual: { total: 12, used: 5, pending: 0 }, sick: { total: 12, used: 3, pending: 0 }, earned: { total: 18, used: 8, pending: 0 }, compOff: { total: 3, used: 1, pending: 1 }, lwp: { total: 30, used: 0, pending: 0 } },
-  { employeeId: 'EMP-025', employeeName: 'Elena Rostova', department: 'Human Resources', casual: { total: 12, used: 12, pending: 0 }, sick: { total: 12, used: 4, pending: 0 }, earned: { total: 18, used: 10, pending: 0 }, compOff: { total: 2, used: 0, pending: 0 }, lwp: { total: 30, used: 1, pending: 0 } },
-  { employeeId: 'EMP-031', employeeName: 'Marcus Vance', department: 'Engineering', casual: { total: 12, used: 1, pending: 0 }, sick: { total: 12, used: 1, pending: 0 }, earned: { total: 18, used: 3, pending: 0 }, compOff: { total: 5, used: 2, pending: 0 }, lwp: { total: 30, used: 0, pending: 0 } },
-  { employeeId: 'EMP-045', employeeName: 'Sneha Patel', department: 'Operations', casual: { total: 12, used: 6, pending: 0 }, sick: { total: 12, used: 2, pending: 0 }, earned: { total: 18, used: 12, pending: 0 }, compOff: { total: 0, used: 0, pending: 0 }, lwp: { total: 30, used: 0, pending: 0 } },
-];
 
 export const LeaveManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'requests' | 'balances' | 'calendar' | 'policies' | 'holidays' | 'history'>('requests');

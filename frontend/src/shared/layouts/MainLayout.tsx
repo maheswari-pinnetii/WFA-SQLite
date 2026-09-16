@@ -40,18 +40,11 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     localStorage.setItem('sidebar_collapsed', JSON.stringify(collapsed));
   }, [collapsed]);
 
-  // Set the default theme mode based on role recommendations ONLY when the role changes
+  // Standardized theme initialization without role-based color forcing
   useEffect(() => {
-    const lastInitializedRole = sessionStorage.getItem('wfa_initialized_role');
-    if (lastInitializedRole !== role) {
-      if (role === 'HR' || role === 'EMPLOYEE' || role === 'MANAGER') {
-        setTheme('light');
-      } else if (role === 'ADMIN' || role === 'TEAM_LEAD') {
-        setTheme('dark');
-      }
-      sessionStorage.setItem('wfa_initialized_role', role);
-    }
-  }, [role, setTheme]);
+    sessionStorage.setItem('wfa_initialized_role', role);
+  }, [role]);
+
 
   const toggleSidebar = () => {
     if (window.innerWidth < 768) {
