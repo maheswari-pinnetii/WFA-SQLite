@@ -3,6 +3,8 @@ import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
 import { KPICard } from '../../../components/cards/KPICard';
+import { KpiGrid } from '../../../components/dashboard/KpiGrid';
+
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
@@ -202,28 +204,22 @@ export const TeamLeadDashboardPage: React.FC = () => {
           directReports={directReports}
         />
 
-        {/* KPI metrics */}
-        <div className="dashboard-kpi-grid">
-          <KPICard
-            title="Team Members"
-            value={`${directReports.length} Developers`}
-            change={0.0}
-            trend="neutral"
-            subtitle="Frontend Core Squad"
-            icon={<Users size={20} />}
-            accentColor="cyan"
-            onClick={() => openDrillDown('Team Roster', `${directReports.length} Developers`, 'Active squad members', [
-              { label: 'Frontend Developers', value: directReports.length }
-            ])}
-          />
-          <KPICard title="Present" value={`${directReports.filter(e => e.status === 'Active').length} Present`} change={5.2} trend="up" subtitle="On duty today" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
-          <KPICard title="Absent" value="0 Absent" change={0.0} trend="neutral" subtitle="No unexcused absences" icon={<AlertTriangle size={20} />} accentColor="rose" />
-          <KPICard title="Late" value="1 Late" change={-1.5} trend="down" subtitle="Checked in after shift target" icon={<Clock size={20} />} accentColor="amber" />
-          <KPICard title="On Leave" value="0 On Leave" change={0.0} trend="neutral" subtitle="Approved team PTO" icon={<Calendar size={20} />} accentColor="blue" />
-          <KPICard title="Working Hours" value="45 hrs today" change={8.0} trend="up" subtitle="Total squad contribution" icon={<Clock size={20} />} accentColor="rose" />
-          <KPICard title="Tasks Pending" value={`${sprintTasks.filter(t => t.status !== 'COMPLETED').length} Pending`} change={2.0} trend="up" subtitle="Sprint tasks in backlog" icon={<FileText size={20} />} accentColor="blue" />
-          <KPICard title="Tasks Completed" value={`${sprintTasks.filter(t => t.status === 'COMPLETED').length} Closed`} change={100} trend="up" subtitle="Closed sprint targets" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
-        </div>
+        {/* Enterprise KPI Grid */}
+        <KpiGrid
+          role={Role.TEAM_LEAD}
+          loading={loading}
+          data={{
+            teamMembersCount: directReports.length || 8,
+            presentTodayCount: directReports.filter(e => e.status === 'Active').length || 7,
+            attendanceRate: 97.5,
+            lateArrivalsCount: 1,
+            activeTasksCount: sprintTasks.filter(t => t.status !== 'COMPLETED').length || 4,
+            completedTasksCount: sprintTasks.filter(t => t.status === 'COMPLETED').length || 12,
+            workHoursLogged: '45h 30m',
+            pendingItemsCount: 2,
+          }}
+        />
+
 
         {/* Primary Analytics Grid */}
         <div className="dashboard-chart-grid">

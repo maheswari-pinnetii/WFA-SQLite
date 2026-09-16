@@ -4,6 +4,8 @@ import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
 import { KPICard } from '../../../components/cards/KPICard';
+import { KpiGrid } from '../../../components/dashboard/KpiGrid';
+
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
@@ -249,31 +251,25 @@ export const HrDashboardPage: React.FC = () => {
           setStatusFilter={setStatusFilter}
         />
 
-        {/* KPI metrics - Grid controlled by the Page */}
-        <div className="dashboard-kpi-grid">
-          <KPICard
-            title="Total Headcount"
-            value={isLoading ? '…' : `${headCount} Staff`}
-            change={8.4}
-            trend="up"
-            subtitle="Global workforce"
-            icon={<Users size={20} />}
-            accentColor="purple"
-            isLive={true}
-            onClick={() => openDrillDown('Total Headcount Breakdown', `${headCount} Staff`, 'Full workforce employment contracts', [
-              { label: 'Authorized Workforce', value: headCount },
-              { label: 'Primary Contracts', value: Math.max(0, headCount - 12) },
-              { label: 'External Associates', value: Math.min(12, headCount) },
-            ])}
-          />
-          <KPICard title="Active Employees" value={`${Math.round(headCount * 0.95)} Active`} change={4.2} trend="up" subtitle="Currently online/on-duty" icon={<UserCheck size={20} />} accentColor="blue" isLive={true} />
-          <KPICard title="New Joiners" value="12 Joiners" change={1.2} trend="up" subtitle="This Calendar Month" icon={<Plus size={20} />} accentColor="emerald" />
-          <KPICard title="Exits" value="2 Exits" change={-2.4} trend="down" subtitle="This Quarter" icon={<FileText size={20} />} accentColor="amber" />
-          <KPICard title="On Leave" value="8 Staff" change={0} trend="neutral" subtitle="Approved PTO today" icon={<HeartHandshake size={20} />} accentColor="rose" isLive={true} />
-          <KPICard title="Attendance Rate" value={attendanceRate} change={1.5} trend="up" subtitle="Weekly shift compliance" icon={<Clock size={20} />} accentColor="cyan" isLive={true} />
-          <KPICard title="Pending Onboarding" value="5 Pending" change={0.4} trend="up" subtitle="Awaiting start date" icon={<Star size={20} />} accentColor="blue" />
-          <KPICard title="Pending Documents" value="3 Audits" change={-0.8} trend="down" subtitle="Contract reviews" icon={<AlertTriangle size={20} />} accentColor="rose" />
-        </div>
+        {/* Enterprise KPI Grid */}
+        <KpiGrid
+          role={Role.HR}
+          loading={isLoading}
+          data={{
+            headcount: headCount,
+            headcountTrend: 8.4,
+            attendanceRate: typeof attendanceRate === 'number' ? attendanceRate : 96.5,
+            attendanceRateTrend: 1.5,
+            pendingLeaveRequests: 8,
+            pendingCorrections: 3,
+            newJoinersMonth: 12,
+            attritionRate: 4.2,
+            attritionTrend: -0.8,
+            lateArrivalsToday: 4,
+            complianceScore: 100,
+          }}
+        />
+
 
         {/* Primary Analytics Grid */}
         <div className="dashboard-chart-grid">

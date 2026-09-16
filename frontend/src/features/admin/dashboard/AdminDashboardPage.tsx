@@ -5,6 +5,8 @@ import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
+import { KpiGrid } from '../../../components/dashboard/KpiGrid';
+
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { employeeApi } from '../../../api/endpoints/employee.api';
@@ -330,53 +332,26 @@ export const AdminDashboardPage: React.FC = () => {
           setStatusFilter={setStatusFilter}
         />
 
-        {/* KPI metrics - Grid controlled by the Page */}
-        <div className="dashboard-kpi-grid">
-          <MinimalKpiCard
-            title="Total Headcount"
-            value={employees.length || "500"}
-            icon={<Users size={26} />}
-            iconBgColor="emerald"
-            isLive={true}
-            trend="+12.4% than last month"
-            trendType="positive"
-            onClick={() => openDrillDown('Total Employee Headcount', employees.length || 500, 'Global workforce roster', [
-              { label: 'Full-time Permanent', value: Math.round((employees.length || 500) * 0.85) },
-              { label: 'Contractors', value: Math.round((employees.length || 500) * 0.15) },
-            ])}
-          />
-          <MinimalKpiCard
-            title="Active Duty Rate"
-            value={analytics.data?.metrics?.activePresent || Math.round((employees.length || 500) * 0.96)}
-            icon={<ShieldCheck size={26} />}
-            iconBgColor="blue"
-            isLive={true}
-            trend="+96.8% active shift"
-            trendType="positive"
-          />
-          <MinimalKpiCard
-            title="Attendance Rate"
-            value={analytics.data?.metrics?.attendanceRate || "96.5%"}
-            icon={<Clock size={26} />}
-            iconBgColor="amber"
-            isLive={true}
-            trend="+1.5% compliance"
-            trendType="positive"
-          />
-          <MinimalKpiCard title="Annual Attrition" value="4.2%" icon={<TrendingDown size={26} />} iconBgColor="rose" trend="-0.8% than last year" trendType="positive" />
-          <MinimalKpiCard title="Monthly Payroll" value="$4.8M" icon={<DollarSign size={26} />} iconBgColor="purple" trend="+4.35% budget allocation" trendType="positive" />
-          <MinimalKpiCard
-            title="Productivity Score"
-            value={analytics.data?.metrics?.productivityScore || "94.8%"}
-            icon={<Award size={26} />}
-            iconBgColor="cyan"
-            isLive={true}
-            trend="+3.2% performance"
-            trendType="positive"
-          />
-          <MinimalKpiCard title="Open Vacancies" value="124" icon={<Briefcase size={26} />} iconBgColor="indigo" trend="+8.4% open requisitions" trendType="positive" />
-          <MinimalKpiCard title="Audit Compliance" value="99.8%" icon={<Layers size={26} />} iconBgColor="teal" trend="100% Zero-Trust Pass" trendType="positive" />
-        </div>
+        {/* Enterprise KPI Grid */}
+        <KpiGrid
+          role={Role.ADMIN}
+          loading={loading}
+          data={{
+            totalEmployees: employees.length || 172,
+            totalEmployeesTrend: 12.4,
+            presentToday: analytics.data?.metrics?.activePresent || 164,
+            presentTodayTrend: 4.8,
+            attendanceRate: analytics.data?.metrics?.attendanceRate || 96.5,
+            attendanceRateTrend: 1.5,
+            totalDepartments: 8,
+            onLeaveToday: 6,
+            onLeaveTrend: -0.5,
+            pendingApprovals: 4,
+            lateArrivalsToday: 3,
+            avgWorkHours: '8h 45m',
+          }}
+        />
+
 
         {/* Primary Analytics Grid */}
         <div className="dashboard-chart-grid">

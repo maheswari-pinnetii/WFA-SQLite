@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { Role } from '../../../security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
+import { KpiGrid } from '../../../components/dashboard/KpiGrid';
+
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
 import { Clock, Calendar, DollarSign, Award, RefreshCw, AlertCircle, Link as LinkIcon, Layers } from 'lucide-react';
@@ -117,22 +119,22 @@ export const EmployeeDashboard: React.FC = () => {
       )}
 
       {/* KPIs */}
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {[...Array(8)].map((_, i) => <div key={i} className="h-28 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />)}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <MinimalKpiCard title="Hours Logged" value={kpis.hoursLogged ?? 0} icon={<Clock size={26} />} iconBgColor="emerald" />
-          <MinimalKpiCard title="Overtime (hrs)" value={kpis.overtime ?? 0} icon={<Clock size={26} />} iconBgColor="rose" />
-          <MinimalKpiCard title="Leave Balance" value={kpis.leaveBalance ?? 0} icon={<Calendar size={26} />} iconBgColor="blue" />
-          <MinimalKpiCard title="Pending Leaves" value={kpis.pendingLeaves ?? 0} icon={<AlertCircle size={26} />} iconBgColor="amber" />
-          <MinimalKpiCard title="Tasks Assigned" value={kpis.tasksAssigned ?? 0} icon={<Layers size={26} />} iconBgColor="purple" />
-          <MinimalKpiCard title="Tasks Completed" value={kpis.tasksCompleted ?? 0} icon={<Award size={26} />} iconBgColor="emerald" />
-          <MinimalKpiCard title="Next Holiday" value={kpis.upcomingHolidays ?? 0} icon={<Calendar size={26} />} iconBgColor="blue" />
-          <MinimalKpiCard title="Next Review" value={kpis.nextReview ?? '—'} icon={<RefreshCw size={26} />} iconBgColor="amber" />
-        </div>
-      )}
+      {/* Enterprise KPI Grid */}
+      <KpiGrid
+        role={Role.EMPLOYEE}
+        loading={loading}
+        data={{
+          todayStatus: 'On Duty',
+          checkInTime: '09:05 AM',
+          workHoursToday: `${kpis.hoursLogged || 8.5}h`,
+          breakTimeToday: '45m',
+          myAttendanceRate: 98,
+          availableLeaveBalance: kpis.leaveBalance || 14,
+          myPendingRequests: kpis.pendingLeaves || 2,
+          currentActivity: 'Active on Sprint Tasks',
+        }}
+      />
+
 
       {/* Charts */}
       {loading ? (

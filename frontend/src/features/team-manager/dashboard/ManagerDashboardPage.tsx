@@ -3,6 +3,8 @@ import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
 import { KPICard } from '../../../components/cards/KPICard';
+import { KpiGrid } from '../../../components/dashboard/KpiGrid';
+
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
@@ -257,28 +259,24 @@ export const ManagerDashboardPage: React.FC = () => {
           departmentName={departmentName}
         />
 
-        {/* KPI metrics */}
-        <div className="dashboard-kpi-grid">
-          <KPICard
-            title="Department Staff"
-            value={`${employees.filter(e => e.department === departmentName).length} Engineers`}
-            change={8.3}
-            trend="up"
-            subtitle="Authorized department rosters"
-            icon={<Users size={20} />}
-            accentColor="blue"
-            onClick={() => openDrillDown('Department Roster Breakdown', 'Engineers', 'Active engineering staff', [
-              { label: 'Engineering Total', value: employees.filter(e => e.department === departmentName).length }
-            ])}
-          />
-          <KPICard title="Active Employees" value="18 Online" change={0.0} trend="neutral" subtitle="Checked in today" icon={<Users size={20} />} accentColor="cyan" />
-          <KPICard title="Present Today" value="16 Staff" change={2.0} trend="up" subtitle="Office presence" icon={<CheckCircle2 size={20} />} accentColor="emerald" />
-          <KPICard title="Absent Today" value="2 Staff" change={0} trend="neutral" subtitle="Unexcused absence" icon={<XCircle size={20} />} accentColor="rose" />
-          <KPICard title="Late Today" value="3 Staff" change={1.0} trend="up" subtitle="Checked in after 9:15" icon={<Clock size={20} />} accentColor="amber" />
-          <KPICard title="On Leave" value="1 Staff" change={-1.0} trend="down" subtitle="Approved PTO today" icon={<AlertTriangle size={20} />} accentColor="blue" />
-          <KPICard title="Attendance %" value="98.2%" change={1.2} trend="up" subtitle="Active shift rate" icon={<Star size={20} />} accentColor="cyan" />
-          <KPICard title="Pending Approvals" value={`${pendingApprovalsCount} Requests`} change={0.0} trend="neutral" subtitle="Requires manager action" icon={<FileText size={20} />} accentColor="rose" />
-        </div>
+        {/* Enterprise KPI Grid */}
+        <KpiGrid
+          role={Role.MANAGER}
+          loading={loading}
+          data={{
+            teamSize: employees.filter(e => e.department === departmentName).length || 18,
+            teamAttendanceRate: 98.2,
+            teamAttendanceTrend: 1.2,
+            presentCount: 16,
+            onLeaveCount: 1,
+            lateCount: 3,
+            avgTeamWorkHours: '8h 30m',
+            productivityScore: 92.4,
+            productivityTrend: 2.1,
+            pendingTeamApprovals: pendingApprovalsCount,
+          }}
+        />
+
 
         {/* Primary Analytics Grid */}
         <div className="dashboard-chart-grid">
