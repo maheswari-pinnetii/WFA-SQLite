@@ -9,7 +9,7 @@ export const AccessControlPage: React.FC = () => {
   const auditLogs = auditLogger.getLogs();
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN]}>
+    <>
       <div className="space-y-6 animate-fadeIn pb-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[var(--border-color)] pb-4">
@@ -67,6 +67,6 @@ export const AccessControlPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

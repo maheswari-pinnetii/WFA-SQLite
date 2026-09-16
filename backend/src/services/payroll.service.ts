@@ -2,6 +2,8 @@ import { randomUUID } from 'crypto';
 import { query, execute } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
 import { ComplianceService } from './compliance.service.js';
+import { leaveEngineService } from './leave-engine.service.js';
+import { jobScheduler } from './jobScheduler.service.js';
 
 export interface SetSalaryStructureParams {
   employeeId: string;
@@ -160,10 +162,33 @@ export const payrollService = {
       [structure.id]
     );
 
-    // 3. Mock LOP (Loss of Pay) calculation based on attendance Engine
-    const lopDays = 0; 
-    const workingDays = 30; // standard 30 day divisor for Indian payroll
-    const prorationFactor = Math.max(0, (workingDays - lopDays) / workingDays);
+    // 3. Dynamic LOP (Loss of Pay) calculation based on Leave Engine
+    const unpaidLeaves = await query(
+      `SELECT lr.*, lt.isPaid 
+       FROM leaverequests lr
+       JOIN leave_types lt ON lr.type = lt.id
+       WHERE lr.employeeId = ? 
+       AND lr.status = 'APPROVED'
+       AND lt.isPaid = 0
+       AND lr.startDate >= ? AND lr.startDate <= ?`,
+      [employeeId, periodStart, periodEnd]
+    );
+
+    let lopDays = 0;
+    // We assume organization ID matches structure organizationId
+    const orgId = structure.organizationId;
+
+    for (const req of unpaidLeaves as any[]) {
+      if (req.isHalfDay) {
+        lopDays += 0.5;
+      } else {
+        const workingDays = await leaveEngineService.calculateWorkingDays(req.startDate, req.endDate, orgId);
+        lopDays += workingDays;
+      }
+    }
+
+    const workingDaysDivisor = 30; // standard 30 day divisor for Indian payroll
+    const prorationFactor = Math.max(0, (workingDaysDivisor - lopDays) / workingDaysDivisor);
 
     let totalEarnings = 0;
     let totalDeductions = 0;
@@ -298,3 +323,20 @@ export const payrollService = {
     }));
   }
 };
+
+// Register Job for automated Draft Payroll Runs (Runs on 25th)
+jobScheduler.registerHandler('MONTHLY_PAYROLL_DRAFT', async (payload: { organizationId: string }) => {
+  const date = new Date();
+  try {
+    const runId = await payrollService.createPayrollRun({
+      organizationId: payload.organizationId,
+      month: date.getMonth() + 1,
+      year: date.getFullYear()
+    });
+    // Auto-generate the payslips for this draft
+    await payrollService.generatePayslips(runId);
+    logger.info(`[Payroll] Automatically ran monthly draft payroll for org ${payload.organizationId}`);
+  } catch (err: any) {
+    logger.error(`[Payroll] Automated payroll draft failed: ${err.message}`);
+  }
+});

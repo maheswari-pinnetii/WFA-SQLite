@@ -176,7 +176,7 @@ export const TeamLeadDashboardPage: React.FC = () => {
 
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]} requiredPermission={Permission.PRODUCTIVITY_VIEW}>
+    <>
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         <TeamLeadDashboardOverview />
 
@@ -233,6 +233,6 @@ export const TeamLeadDashboardPage: React.FC = () => {
 
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />
       </div>
-    </RoleGuard>
+    </>
   );
 };

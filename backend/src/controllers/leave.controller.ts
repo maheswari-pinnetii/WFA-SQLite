@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { leaveService } from '../services/leave.service.js';
+import { leaveEngineService } from '../services/leave-engine.service.js';
 
 export const getMyLeaveBalances = async (req: Request, res: Response) => {
   try {
@@ -14,8 +15,8 @@ export const getMyLeaveBalances = async (req: Request, res: Response) => {
 
 export const runAccruals = async (req: Request, res: Response) => {
   try {
-    const result = await leaveService.runMonthlyAccruals();
-    return res.json(result);
+    await leaveEngineService.runMonthlyAccruals();
+    return res.json({ success: true, message: 'Monthly accruals processed successfully' });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });
   }

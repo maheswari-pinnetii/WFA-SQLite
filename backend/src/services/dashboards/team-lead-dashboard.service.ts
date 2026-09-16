@@ -74,6 +74,17 @@ export class TeamLeadDashboardService {
       codeReviews: 14 // Estimated
     };
 
+    const leaveCalendarRows = teamLead
+      ? await query(`SELECT strftime('%W', startDate) as week, COUNT(*) as leaves FROM leaverequests WHERE organizationId = ? AND team = ? AND startDate IS NOT NULL GROUP BY week ORDER BY week DESC LIMIT 4`, [orgId, teamLead])
+      : await query(`SELECT strftime('%W', startDate) as week, COUNT(*) as leaves FROM leaverequests WHERE organizationId = ? AND startDate IS NOT NULL GROUP BY week ORDER BY week DESC LIMIT 4`, [orgId]);
+
+    const leaveCalendar = leaveCalendarRows.length > 0 ? leaveCalendarRows.map((r: any, i: number) => ({
+      week: `W${i+1}`,
+      leaves: r.leaves
+    })) : [
+      { week: 'W1', leaves: 2 }
+    ];
+
     // 6 Charts
     const charts = {
       dailyCheckins: [
@@ -96,17 +107,12 @@ export class TeamLeadDashboardService {
         { sprint: 'Sprint 4', points: 42 }
       ],
       blockersByType: [
-        { name: 'Dependencies', value: 40, color: '#ef4444' },
+        { name: 'Dependencies', value: taskMap['BLOCKED'] || 0, color: '#ef4444' },
         { name: 'Clarification', value: 30, color: '#f59e0b' },
         { name: 'Environment', value: 20, color: '#8b5cf6' },
         { name: 'Other', value: 10, color: '#64748b' }
       ],
-      leaveCalendar: [
-        { week: 'W1', leaves: 2 },
-        { week: 'W2', leaves: 0 },
-        { week: 'W3', leaves: 1 },
-        { week: 'W4', leaves: 3 }
-      ],
+      leaveCalendar,
       workloadDistribution: teamRows.slice(0, 5).map(emp => ({
         name: emp.name ? emp.name.split(' ')[0] : `User ${emp.id}`,
         tasks: Math.floor(Math.random() * 8) + 2

@@ -8,12 +8,16 @@ export class HrDashboardService {
     const [
       employees,
       attendance,
-      departmentComparison
+      departmentComparison,
+      leaveByDeptRows,
+      skillsMetrics
     ] = await Promise.all([
       analyticsRepository.getEmployeesSummary({ organizationId: orgId }),
       analyticsRepository.getAttendanceRecords({ organizationId: orgId }),
-      analyticsRepository.getDepartmentComparison({ organizationId: orgId })
-    ]) as [any[], any[], any[]];
+      analyticsRepository.getDepartmentComparison({ organizationId: orgId }),
+      analyticsRepository.getLeaveByDept({ organizationId: orgId }),
+      analyticsRepository.getSkillsMetrics({ organizationId: orgId })
+    ]) as [any[], any[], any[], any[], any[]];
 
     const totalHeadcount = employees.length;
     const activeHeadcount = employees.filter(e => e.status === 'ACTIVE').length;
@@ -30,6 +34,16 @@ export class HrDashboardService {
     // Query pending leave requests
     const leaveReqs = await query(`SELECT COUNT(*) as count FROM leaverequests WHERE status = 'PENDING' AND organizationId = ?`, [orgId]);
     const leaveRequests = leaveReqs[0]?.count || 0;
+
+    // HR Issues (workflow instances)
+    const activeWorkflows = await query(`SELECT COUNT(*) as count FROM workflow_instances WHERE status IN ('OPEN', 'IN_PROGRESS') AND organizationId = ?`, [orgId]);
+    const hrIssues = activeWorkflows[0]?.count || 0;
+
+    // Workflow types for chart
+    const workflowTypesRows = await query(`SELECT type as name, COUNT(*) as value FROM workflow_instances WHERE organizationId = ? GROUP BY type`, [orgId]);
+    const hrTicketTypes = workflowTypesRows.length > 0 ? workflowTypesRows : [
+      { name: 'Onboarding', value: 0 }
+    ];
 
     // Real Hiring Trend (Last 6 months)
     const hiringTrendRows = await query(`
@@ -63,8 +77,8 @@ export class HrDashboardService {
       turnoverRate,
       openReqs: Math.floor(totalHeadcount * 0.05), // Estimated open reqs
       leaveRequests,
-      trainingCompletion: 82, // Placeholder until skills/training table
-      hrIssues: 3, // Placeholder
+      trainingCompletion: Math.round(skillsMetrics.reduce((sum: number, s: any) => sum + (s.covered / s.people), 0) / (skillsMetrics.length || 1) * 100), 
+      hrIssues,
       employeeSatisfaction: 4.6 // Placeholder
     };
 
@@ -82,19 +96,20 @@ export class HrDashboardService {
         { month: 'May', rate: 96.5 },
         { month: 'Jun', rate: 95.8 }
       ],
-      leaveByDept: departmentComparison,
-      trainingProgress: [
-        { name: 'Compliance', value: 95, color: '#10b981' },
-        { name: 'Security', value: 80, color: '#3b82f6' },
-        { name: 'Leadership', value: 45, color: '#f59e0b' }
+      leaveByDept: leaveByDeptRows.length > 0 ? leaveByDeptRows : departmentComparison,
+      trainingProgress: skillsMetrics.length > 0 ? skillsMetrics.slice(0, 5).map((s: any, i: number) => ({
+        name: s.name,
+        value: Math.round((s.covered / (s.people || 1)) * 100),
+        color: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'][i % 5]
+      })) : [
+        { name: 'Compliance', value: 95, color: '#10b981' }
       ],
       performanceBellCurve,
-      hrTicketTypes: [
-        { name: 'Payroll Info', value: 40, color: '#8b5cf6' },
-        { name: 'Benefits', value: 30, color: '#ec4899' },
-        { name: 'Policy Clarification', value: 20, color: '#14b8a6' },
-        { name: 'Other', value: 10, color: '#64748b' }
-      ]
+      hrTicketTypes: hrTicketTypes.map((t: any, i: number) => ({
+        name: t.name.replace('_', ' '),
+        value: t.value,
+        color: ['#8b5cf6', '#ec4899', '#14b8a6', '#64748b', '#f59e0b'][i % 5]
+      }))
     };
 
     // Table

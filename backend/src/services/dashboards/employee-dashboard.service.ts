@@ -63,6 +63,15 @@ export class EmployeeDashboardService {
       nextReview: '14 Days'
     };
 
+    // Fetch employee's skills
+    const skillRows = await query(`SELECT skillName, level FROM skills WHERE employeeId = ? AND organizationId = ?`, [employeeId, orgId]);
+    const skillProgression = skillRows.length > 0 ? skillRows.map((s: any) => ({
+      name: s.skillName,
+      level: s.level * 20 // scale 1-5 to 20-100
+    })) : [
+      { name: 'React', level: 85 }
+    ];
+
     // 6 Charts
     const charts = {
       myAttendanceTrend: [
@@ -78,7 +87,7 @@ export class EmployeeDashboardService {
         { name: 'To Do', value: tasksToDo, color: '#64748b' }
       ],
       leaveUsage: [
-        { type: 'Annual Leave', used: 5, remaining: 15 },
+        { type: 'Annual Leave', used: pendingLeaves, remaining: 15 - pendingLeaves },
         { type: 'Sick Leave', used: 2, remaining: 8 },
         { type: 'Personal Leave', used: 1, remaining: 4 }
       ],
@@ -94,12 +103,7 @@ export class EmployeeDashboardService {
         { category: 'Technical', score: 4.2 },
         { category: 'Leadership', score: 3.9 }
       ],
-      skillProgression: [
-        { name: 'React', level: 85 },
-        { name: 'Node.js', level: 75 },
-        { name: 'TypeScript', level: 90 },
-        { name: 'UI/UX', level: 60 }
-      ]
+      skillProgression
     };
 
     // Map database task rows for table

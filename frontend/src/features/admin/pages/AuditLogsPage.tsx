@@ -41,7 +41,7 @@ export const AuditLogsPage: React.FC = () => {
   }, []);
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}>
+    <>
       <div className="w-full space-y-6 animate-fadeIn font-sans pb-10">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -102,6 +102,6 @@ export const AuditLogsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

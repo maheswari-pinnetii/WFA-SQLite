@@ -224,7 +224,7 @@ export const EmployeeManagement: React.FC = () => {
   const joiningYears = ['ALL', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR]} requiredPermission={Permission.EMPLOYEE_MANAGE}>
+    <>
       <div className="space-y-6">
         {/* Page Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -486,6 +486,6 @@ export const EmployeeManagement: React.FC = () => {
           )}
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

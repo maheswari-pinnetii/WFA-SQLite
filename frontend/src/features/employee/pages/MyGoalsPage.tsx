@@ -93,7 +93,7 @@ export const MyGoalsPage: React.FC = () => {
   };
 
   return (
-    <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -238,6 +238,6 @@ export const MyGoalsPage: React.FC = () => {
           </div>
         )}
       </div>
-    </RoleGuard>
+    </>
   );
 };

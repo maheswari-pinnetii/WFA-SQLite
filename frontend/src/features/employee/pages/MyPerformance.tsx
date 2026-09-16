@@ -59,7 +59,7 @@ export const MyPerformance: React.FC = () => {
     : 'N/A';
 
   return (
-    <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -133,6 +133,6 @@ export const MyPerformance: React.FC = () => {
 
         <AnalyticsOverview title="My Live Performance Analytics" subtitle="Personal performance trend, productivity and workforce skills" compact />
       </div>
-    </RoleGuard>
+    </>
   );
 };

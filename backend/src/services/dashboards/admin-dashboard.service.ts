@@ -9,12 +9,14 @@ export class AdminDashboardService {
     const [
       employees,
       departmentComparison,
-      roleDistribution
+      roleDistribution,
+      leaveTrendsData
     ] = await Promise.all([
       analyticsRepository.getEmployeesSummary({ organizationId: orgId }),
       analyticsRepository.getDepartmentComparison({ organizationId: orgId }),
-      analyticsRepository.getRoleDistribution({ organizationId: orgId })
-    ]) as [any[], any[], any[]];
+      analyticsRepository.getRoleDistribution({ organizationId: orgId }),
+      analyticsRepository.getLeaveTrends({ organizationId: orgId })
+    ]) as [any[], any[], any[], any[]];
 
     const totalHeadcount = employees.length;
     const activeHeadcount = employees.filter(e => e.status === 'ACTIVE').length;
@@ -28,13 +30,7 @@ export class AdminDashboardService {
     const pendingApprovals = pendingLeaveReqs[0]?.count || 0;
 
     // Real task completion stats for admin
-    const taskStats = await query(`
-      SELECT status, COUNT(*) as count 
-      FROM tasks 
-      WHERE organizationId = ? 
-      GROUP BY status
-    `, [orgId]);
-    
+    const taskStats = await analyticsRepository.getTasksSummary({ organizationId: orgId });
     const taskMap: Record<string, number> = {};
     for (const t of taskStats) taskMap[t.status] = t.count;
     
@@ -81,7 +77,10 @@ export class AdminDashboardService {
       ],
       employeesByDept: departmentComparison,
       roleDistribution,
-      leaveTrends: [
+      leaveTrends: leaveTrendsData.length > 0 ? leaveTrendsData.map((r: any) => ({
+        month: new Date(`${r.month}-01`).toLocaleDateString('en-US', { month: 'short' }),
+        leaves: r.count
+      })) : [
         { month: 'Jan', leaves: 15 },
         { month: 'Feb', leaves: 12 },
         { month: 'Mar', leaves: 18 },

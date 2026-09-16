@@ -42,7 +42,7 @@ export const ShiftsPage: React.FC = () => {
   const activeShift = shifts.find(s => s.id === selectedShift) || shifts[0];
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]}>
+    <>
       <div className="space-y-6 animate-fadeIn pb-10 font-sans">
         
         {/* Header */}
@@ -262,6 +262,6 @@ export const ShiftsPage: React.FC = () => {
         )}
 
       </div>
-    </RoleGuard>
+    </>
   );
 };

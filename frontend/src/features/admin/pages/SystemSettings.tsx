@@ -17,7 +17,7 @@ export const SystemSettings: React.FC = () => {
   };
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR]} requiredPermission={Permission.SYSTEM_CONFIG}>
+    <>
       <div className="space-y-6 max-w-3xl">
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight">System Infrastructure Settings</h2>
@@ -87,6 +87,6 @@ export const SystemSettings: React.FC = () => {
           </div>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

@@ -11,9 +11,19 @@ export class ManagerDashboardService {
     const deptFilter = dept ? 'AND department = ?' : '';
     const deptParams = dept ? [orgId, dept] : [orgId];
 
-    const employees = await analyticsRepository.getEmployeesSummary(
-      dept ? { organizationId: orgId, department: dept } : { organizationId: orgId }
-    ) as any[];
+    const [
+      employees,
+      attendanceTrendRows,
+      leaveReqsRows
+    ] = await Promise.all([
+      analyticsRepository.getEmployeesSummary(
+        dept ? { organizationId: orgId, department: dept } : { organizationId: orgId }
+      ),
+      analyticsRepository.getAttendanceTrend(
+        dept ? { organizationId: orgId, department: dept } : { organizationId: orgId }
+      ),
+      query(`SELECT strftime('%Y-%m', startDate) as month, status, COUNT(*) as count FROM leaverequests WHERE organizationId = ? ${deptFilter} AND startDate IS NOT NULL GROUP BY month, status ORDER BY month ASC LIMIT 20`, deptParams)
+    ]) as [any[], any[], any[]];
 
     const teamCount = employees.length;
     
@@ -73,19 +83,37 @@ export class ManagerDashboardService {
       { name: 'Needs Development', value: perfScoreRanges['Needs Development'], color: '#f59e0b' }
     ];
 
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const teamAttendanceTrend = attendanceTrendRows.length > 0 ? attendanceTrendRows.map((r: any) => ({
+      day: days[new Date(r.date).getDay()],
+      attendance: r.count
+    })) : [
+      { day: 'Mon', attendance: 95 },
+      { day: 'Tue', attendance: 92 },
+      { day: 'Wed', attendance: 98 },
+      { day: 'Thu', attendance: 90 },
+      { day: 'Fri', attendance: 85 }
+    ];
+
+    const leavePipelineMap: Record<string, any> = {};
+    for (const r of leaveReqsRows) {
+      if (!leavePipelineMap[r.month]) leavePipelineMap[r.month] = { approved: 0, pending: 0 };
+      if (r.status === 'APPROVED') leavePipelineMap[r.month].approved += r.count;
+      else if (r.status === 'PENDING') leavePipelineMap[r.month].pending += r.count;
+    }
+    const leavePipeline = Object.keys(leavePipelineMap).map(k => ({
+      month: new Date(`${k}-01`).toLocaleDateString('en-US', { month: 'short' }),
+      approved: leavePipelineMap[k].approved,
+      pending: leavePipelineMap[k].pending
+    }));
+
     // 6 Charts
     const charts = {
-      teamAttendanceTrend: [
-        { day: 'Mon', attendance: 95 },
-        { day: 'Tue', attendance: 92 },
-        { day: 'Wed', attendance: 98 },
-        { day: 'Thu', attendance: 90 },
-        { day: 'Fri', attendance: 85 }
-      ],
+      teamAttendanceTrend,
       taskBurnout: [
-        { name: 'On Track', value: 70, color: '#10b981' },
-        { name: 'At Risk', value: 20, color: '#f59e0b' },
-        { name: 'Burned Out', value: 10, color: '#ef4444' }
+        { name: 'On Track', value: completedTasks, color: '#10b981' },
+        { name: 'At Risk', value: openTasks, color: '#f59e0b' },
+        { name: 'Burned Out', value: taskMap['BLOCKED'] || 0, color: '#ef4444' }
       ],
       skillCoverage: [
         { skill: 'React', level: 85 },
@@ -100,11 +128,8 @@ export class ManagerDashboardService {
         { week: 'W3', hours: 8 },
         { week: 'W4', hours: 24 }
       ],
-      leavePipeline: [
-        { month: 'Jan', approved: 2, pending: 1 },
-        { month: 'Feb', approved: 4, pending: 0 },
-        { month: 'Mar', approved: 1, pending: 3 },
-        { month: 'Apr', approved: 5, pending: 2 }
+      leavePipeline: leavePipeline.length > 0 ? leavePipeline : [
+        { month: 'Jan', approved: 2, pending: 1 }
       ],
       performanceMatrix
     };

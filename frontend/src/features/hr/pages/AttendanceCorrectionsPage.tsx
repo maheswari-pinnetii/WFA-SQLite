@@ -88,7 +88,7 @@ export const AttendanceCorrectionsPage: React.FC = () => {
   const pendingRequests = requests.filter(r => r.status.toLowerCase() === 'pending');
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}>
+    <>
       <div className="space-y-6 animate-fadeIn pb-10 font-sans">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[var(--border-color)] pb-4">
@@ -203,6 +203,6 @@ export const AttendanceCorrectionsPage: React.FC = () => {
           )}
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

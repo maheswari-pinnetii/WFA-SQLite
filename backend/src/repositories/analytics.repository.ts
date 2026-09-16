@@ -181,7 +181,54 @@ export class AnalyticsRepository {
       FROM skills
       ${clause}
       GROUP BY skillName
-      ORDER BY people DESC
+    `, params);
+    return rows;
+  }
+
+  async getTasksSummary(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT status, COUNT(*) as count 
+      FROM tasks 
+      ${clause}
+      GROUP BY status
+    `, params);
+    return rows;
+  }
+
+  async getLeaveTrends(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT strftime('%Y-%m', startDate) as month, COUNT(*) as count
+      FROM leaverequests
+      ${clause} AND startDate IS NOT NULL
+      GROUP BY month
+      ORDER BY month ASC
+      LIMIT 6
+    `, params);
+    return rows;
+  }
+
+  async getLeaveByDept(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT COALESCE(department, 'Unassigned') as name, COUNT(*) as count
+      FROM leaverequests
+      ${clause}
+      GROUP BY department
+    `, params);
+    return rows;
+  }
+
+  async getAttendanceTrend(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT date, COUNT(*) as count
+      FROM attendancerecords
+      ${clause} AND status = 'PRESENT'
+      GROUP BY date
+      ORDER BY date ASC
+      LIMIT 7
     `, params);
     return rows;
   }

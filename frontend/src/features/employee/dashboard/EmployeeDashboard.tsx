@@ -4,7 +4,7 @@ import { Role } from '../../../security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
-import { Clock, Calendar, DollarSign, Award, RefreshCw, AlertCircle, Link as LinkIcon } from 'lucide-react';
+import { Clock, Calendar, DollarSign, Award, RefreshCw, AlertCircle, Link as LinkIcon, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {

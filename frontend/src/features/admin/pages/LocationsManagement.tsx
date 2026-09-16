@@ -14,7 +14,7 @@ export const LocationsManagement: React.FC = () => {
   ]);
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN]}>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -58,6 +58,6 @@ export const LocationsManagement: React.FC = () => {
           ))}
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

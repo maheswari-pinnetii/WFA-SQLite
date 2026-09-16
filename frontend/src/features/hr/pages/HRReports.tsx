@@ -29,7 +29,7 @@ export const HRReports: React.FC = () => {
   };
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR]} requiredPermission={Permission.REPORT_VIEW}>
+    <>
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight">HR Intelligence & Compliance Reports</h2>
@@ -104,6 +104,6 @@ export const HRReports: React.FC = () => {
           </div>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

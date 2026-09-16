@@ -358,7 +358,7 @@ export const LeaveManagement: React.FC = () => {
   };
 
   return (
-    <RoleGuard allowedRoles={[Role.HR, Role.ADMIN, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]}>
+    <>
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1020,6 +1020,6 @@ export const LeaveManagement: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </RoleGuard>
+    </>
   );
 };

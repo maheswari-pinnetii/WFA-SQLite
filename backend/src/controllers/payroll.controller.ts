@@ -59,6 +59,25 @@ export const createPayrollRun = async (req: Request, res: Response) => {
   }
 };
 
+export const triggerMonthlyDraft = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const organizationId = user?.organizationId || 'org-stackly';
+    const date = new Date();
+    
+    const runId = await payrollService.createPayrollRun({
+      organizationId,
+      month: date.getMonth() + 1,
+      year: date.getFullYear()
+    });
+    
+    const result = await payrollService.generatePayslips(runId);
+    return res.status(201).json({ id: runId, message: 'Monthly payroll draft created and calculated', result });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 export const generatePayslips = async (req: Request, res: Response) => {
   try {
     const { runId } = req.params;

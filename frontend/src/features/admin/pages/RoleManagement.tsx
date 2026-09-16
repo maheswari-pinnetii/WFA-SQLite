@@ -10,7 +10,7 @@ export const RoleManagement: React.FC = () => {
   const permissions = Object.values(Permission);
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN]} requiredPermission={Permission.ROLES_MANAGE}>
+    <>
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight">Role & Permission Policy Matrix</h2>
@@ -57,6 +57,6 @@ export const RoleManagement: React.FC = () => {
           </table>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

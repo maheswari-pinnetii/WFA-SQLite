@@ -308,7 +308,7 @@ export const AdminDashboardPage: React.FC = () => {
   const firstName = user?.name ? user.name.split(' ')[0] : 'Admin';
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN]} requiredPermission={Permission.SYSTEM_CONFIG}>
+    <>
       <div className="admin-dashboard space-y-6 animate-fadeIn font-sans pb-10">
         <AdminDashboardOverview
           currentDateFormatted={currentDateFormatted}
@@ -403,6 +403,6 @@ export const AdminDashboardPage: React.FC = () => {
         <AdminSprintOverview tasks={tasks} />
         <DrillDownModal isOpen={!!drillDownData} data={drillDownData} onClose={() => setDrillDownData(null)} />
       </div>
-    </RoleGuard>
+    </>
   );
 };

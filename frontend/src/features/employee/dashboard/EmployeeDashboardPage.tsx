@@ -1079,7 +1079,7 @@ export const EmployeeDashboardPage: React.FC = () => {
   ];
 
   return (
-    <RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]} requiredPermission={Permission.PROFILE_VIEW}>
+    <>
       <div className="space-y-8 animate-fadeIn font-sans pb-12 max-w-7xl mx-auto">
         
         {/* Workspace Mode Switcher Tabs */}
@@ -1470,6 +1470,6 @@ export const EmployeeDashboardPage: React.FC = () => {
         )}
 
       </div>
-    </RoleGuard>
+    </>
   );
 };

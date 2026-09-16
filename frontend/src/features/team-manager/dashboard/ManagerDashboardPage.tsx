@@ -229,7 +229,7 @@ export const ManagerDashboardPage: React.FC = () => {
   const pendingApprovalsCount = approvals.filter(a => a.status === 'PENDING').length;
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]} requiredPermission={Permission.TEAM_ANALYTICS_VIEW}>
+    <>
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         <ManagerDashboardOverview />
 
@@ -339,6 +339,6 @@ export const ManagerDashboardPage: React.FC = () => {
 
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />
       </div>
-    </RoleGuard>
+    </>
   );
 };

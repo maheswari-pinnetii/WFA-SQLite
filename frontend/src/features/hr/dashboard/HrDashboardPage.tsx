@@ -228,7 +228,7 @@ export const HrDashboardPage: React.FC = () => {
   useRealtimeAttendance(() => reload());
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR]} requiredPermission={Permission.EMPLOYEE_READ}>
+    <>
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         <HrDashboardOverview getGreeting={getGreeting} firstName={firstName} />
 
@@ -305,6 +305,6 @@ export const HrDashboardPage: React.FC = () => {
         </div>
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />
       </div>
-    </RoleGuard>
+    </>
   );
 };
