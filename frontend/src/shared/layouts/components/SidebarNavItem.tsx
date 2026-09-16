@@ -18,7 +18,8 @@ interface SidebarNavItemProps {
 export const isRouteActive = (item: NavigationItem, pathname: string): boolean => {
   if (!item.path) return false;
   if (item.path === '/dashboard' && pathname === '/dashboard') return true;
-  if (item.path !== '/' && pathname.startsWith(item.path)) return true;
+  if (item.path === pathname) return true;
+  if (item.path !== '/' && pathname.startsWith(item.path + '/')) return true;
   return false;
 };
 
