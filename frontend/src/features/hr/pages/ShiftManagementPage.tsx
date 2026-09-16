@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import { schedulingApi } from '../../../api/schedulingApi';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../app/store';
 
@@ -13,8 +13,8 @@ export const ShiftManagementPage: React.FC = () => {
   const fetchShifts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get('/api/shifts');
-      setShifts(res.data.data);
+      const res = await schedulingApi.getShifts();
+      setShifts(res.data || res);
     } catch { setShifts([]); }
     finally { setLoading(false); }
   }, []);
@@ -29,9 +29,9 @@ export const ShiftManagementPage: React.FC = () => {
 
     try {
       if (editingShift?.id) {
-        await axios.put(`/api/shifts/${editingShift.id}`, payload);
+        await schedulingApi.createShift({ ...payload, id: editingShift.id });
       } else {
-        await axios.post('/api/shifts', payload);
+        await schedulingApi.createShift(payload);
       }
       setIsModalOpen(false);
       fetchShifts();
@@ -43,7 +43,7 @@ export const ShiftManagementPage: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('Deactivate shift?')) return;
     try {
-      await axios.delete(`/api/shifts/${id}`);
+      await schedulingApi.createShift({ id, isActive: false });
       fetchShifts();
     } catch (err) {
       alert('Error deleting shift');

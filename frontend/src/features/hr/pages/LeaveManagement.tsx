@@ -35,6 +35,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../..
 import { Badge } from '../../../components/ui/badge';
 import { Input } from '../../../components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../../components/ui/dialog';
+import { leaveApi } from '../../../api/leaveApi';
 import { AnimatedTabs } from '../../../components/ui/tabs';
 import { DeltaBadge, Callout, ProgressBar } from '../../../components/cards/tremor-kpi';
 import { Avatar } from '../../../components/ui/avatar';
@@ -142,10 +143,10 @@ export const LeaveManagement: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Data states
-  const [requests, setRequests] = useState<LeaveRecord[]>(INITIAL_REQUESTS);
-  const [balances, setBalances] = useState<LeaveBalance[]>(INITIAL_BALANCES);
+  const [requests, setRequests] = useState<LeaveRecord[]>([]);
+  const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [policies, setPolicies] = useState<LeavePolicy[]>(INITIAL_POLICIES);
-  const [holidays, setHolidays] = useState<Holiday[]>(INITIAL_HOLIDAYS);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,6 +171,43 @@ export const LeaveManagement: React.FC = () => {
     endDate: new Date().toISOString().split('T')[0],
     reason: ''
   });
+
+    // Fetch Data
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [reqsResp, holsResp, typesResp] = await Promise.all([
+        leaveApi.getRequests(),
+        leaveApi.getHolidays(),
+        leaveApi.getTypes()
+      ]);
+      setRequests(reqsResp.data || []);
+      setHolidays(holsResp.data || []);
+      // Map API policies to frontend format if needed
+      if (typesResp.data) {
+        const mapped = typesResp.data.map((t: any) => ({
+          type: t.name,
+          title: t.name,
+          annualAllocation: t.defaultDays,
+          carryoverLimit: 0,
+          requiresProofAfterDays: 0,
+          isPaid: t.isPaid,
+          color: 'blue',
+          description: t.description
+        }));
+        setPolicies(mapped);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   // KPI Metrics Calculation
   const metrics = useMemo(() => {

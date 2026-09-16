@@ -87,7 +87,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
 
   return (
-    <div data-role={role} className={`app-shell h-screen min-h-screen flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
+    <div data-role={role} className={`app-shell h-[100dvh] flex flex-col overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-300`}>
       {/* Accessibility Skip-to-content Link */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -114,46 +114,48 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
         <main
           id="main-content"
           tabIndex={-1}
-          className="app-main flex-1 overflow-y-auto p-4 md:p-8 space-y-6 focus:outline-none"
+          className="app-main flex-1 flex flex-col overflow-y-auto focus:outline-none"
         >
-          {children}
+          <div className="flex-1 p-4 md:p-8 space-y-6">
+            {children}
+          </div>
+
+          {/* Small footprint dashboard footer */}
+          <footer className="app-footer shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+            <span>&copy; {new Date().getFullYear()} Workforce Analytics. All rights reserved.</span>
+            <div className="flex items-center gap-4 flex-wrap">
+              <button
+                onClick={() => setOnboardingOpen(true)}
+                className="cursor-pointer hover:text-emerald-400 transition-colors"
+              >
+                Product Tour
+              </button>
+              <button
+                onClick={() => setBetaFeedbackOpen(true)}
+                className="cursor-pointer hover:text-emerald-400 transition-colors flex items-center gap-1 font-semibold"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> Beta Feedback
+              </button>
+              <button
+                onClick={() => setPrivacyModalOpen(true)}
+                className="cursor-pointer hover:text-white transition-colors"
+              >
+                Privacy Settings
+              </button>
+              <button
+                onClick={() => setShortcutsModalOpen(true)}
+                className="cursor-pointer hover:text-white transition-colors flex items-center gap-1.5"
+                title="Press ? for keyboard shortcuts"
+              >
+                <span>Shortcuts</span>
+                <kbd className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 border border-slate-700 text-slate-300">?</kbd>
+              </button>
+              <span className="cursor-pointer hover:text-white transition-colors" onClick={() => setSupportModalOpen(true)}>Support & FAQs</span>
+              <span className="text-slate-500 font-mono">v1.0.0</span>
+            </div>
+          </footer>
         </main>
       </div>
-
-      {/* Small footprint dashboard footer spanning full width */}
-      <footer className="app-footer shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-        <span>&copy; {new Date().getFullYear()} Workforce Analytics. All rights reserved.</span>
-        <div className="flex items-center gap-4 flex-wrap">
-          <button
-            onClick={() => setOnboardingOpen(true)}
-            className="cursor-pointer hover:text-emerald-400 transition-colors"
-          >
-            Product Tour
-          </button>
-          <button
-            onClick={() => setBetaFeedbackOpen(true)}
-            className="cursor-pointer hover:text-emerald-400 transition-colors flex items-center gap-1 font-semibold"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> Beta Feedback
-          </button>
-          <button
-            onClick={() => setPrivacyModalOpen(true)}
-            className="cursor-pointer hover:text-white transition-colors"
-          >
-            Privacy Settings
-          </button>
-          <button
-            onClick={() => setShortcutsModalOpen(true)}
-            className="cursor-pointer hover:text-white transition-colors flex items-center gap-1.5"
-            title="Press ? for keyboard shortcuts"
-          >
-            <span>Shortcuts</span>
-            <kbd className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-800 border border-slate-700 text-slate-300">?</kbd>
-          </button>
-          <span className="cursor-pointer hover:text-white transition-colors" onClick={() => setSupportModalOpen(true)}>Support & FAQs</span>
-          <span className="text-slate-500 font-mono">v1.0.0</span>
-        </div>
-      </footer>
 
       {/* Responsive Mobile Bottom Navigation Bar */}
       <MobileBottomNav onOpenMobileMenu={() => setMobileOpen(true)} />

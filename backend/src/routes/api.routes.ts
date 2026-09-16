@@ -19,6 +19,11 @@ import * as workflowController from '../controllers/workflow.controller.js';
 import * as expenseController from '../controllers/expense.controller.js';
 import * as schedulingController from '../controllers/scheduling.controller.js';
 import * as attendanceP2 from '../controllers/attendance-phase2.controller.js';
+import * as adminDashboardController from '../controllers/admin-dashboard.controller.js';
+import * as hrDashboardController from '../controllers/hr-dashboard.controller.js';
+import * as managerDashboardController from '../controllers/manager-dashboard.controller.js';
+import * as teamLeadDashboardController from '../controllers/team-lead-dashboard.controller.js';
+import * as employeeDashboardController from '../controllers/employee-dashboard.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { tenantScope } from '../middleware/tenantScope.js';
 import { uploadMiddleware } from '../middleware/fileUpload.js';
@@ -280,7 +285,14 @@ router.get('/employees/:id/shift-assignment', authenticateToken, enforceScope, v
 router.get('/analytics', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getAnalytics);
 router.get('/dashboard/metrics', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getAnalytics);
 
-// Dashboard specific endpoints
+// Dashboard specific endpoints (Phase 2: Role-Specific)
+router.get('/dashboard/admin', authenticateToken, authorizeRoles(['ADMIN']), authenticatedUserLimiter, adminDashboardController.getAdminDashboard);
+router.get('/dashboard/hr', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, hrDashboardController.getHrDashboard);
+router.get('/dashboard/manager', authenticateToken, authorizeRoles(['ADMIN', 'MANAGER']), authenticatedUserLimiter, managerDashboardController.getManagerDashboard);
+router.get('/dashboard/team-lead', authenticateToken, authorizeRoles(['ADMIN', 'TEAM_LEAD']), authenticatedUserLimiter, teamLeadDashboardController.getTeamLeadDashboard);
+router.get('/dashboard/employee', authenticateToken, enforceScope, authenticatedUserLimiter, employeeDashboardController.getEmployeeDashboard);
+
+// Legacy Analytics endpoints
 router.get('/dashboard/summary', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getDashboardSummary);
 router.get('/dashboard/workforce', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getWorkforceDistribution);
 router.get('/dashboard/headcount', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getHeadcountAnalytics);

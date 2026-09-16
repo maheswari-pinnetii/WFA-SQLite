@@ -37,7 +37,8 @@ export const fetchAttendanceDataThunk = createAsyncThunk(
     try {
       const recordsRes = await apiClient.get('/v1/attendance/records');
       if (recordsRes.data && recordsRes.data.success) {
-        records = recordsRes.data.data;
+        const payloadData = recordsRes.data.data;
+        records = Array.isArray(payloadData?.data) ? payloadData.data : (Array.isArray(payloadData) ? payloadData : []);
       }
 
       const correctionsRes = await apiClient.get('/v1/attendance/corrections');

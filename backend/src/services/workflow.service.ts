@@ -23,14 +23,47 @@ export const workflowService = {
     const id = randomUUID();
     const now = new Date().toISOString();
 
+    // Check if the workflow's first step is AUTO_APPROVE
+    const firstStep = await query(
+      `SELECT * FROM approval_steps WHERE workflowId = ? AND stepOrder = 1`,
+      [params.workflowId]
+    ).then(res => res[0]);
+
+    if (firstStep?.approverType === 'AUTO_APPROVE') {
+      await execute(
+        `INSERT INTO approval_requests (id, workflowId, entityId, requesterId, status, currentStepOrder, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, 'APPROVED', 1, ?, ?)`,
+        [id, params.workflowId, params.entityId, params.requesterId, now, now]
+      );
+      await this.finalizeEntity(params.workflowId, params.entityId, 'APPROVED');
+      logger.info(`[Workflow] Created and AUTO-APPROVED request ${id} for entity ${params.entityId}`);
+      return { id, status: 'APPROVED', currentStepOrder: 1 };
+    }
+
     await execute(
       `INSERT INTO approval_requests (id, workflowId, entityId, requesterId, status, currentStepOrder, createdAt, updatedAt)
-       VALUES (?, ?, ?, ?, 'PENDING', 1, ?, ?)`,
+       VALUES (?, ?, ?, ?, 'PENDING_APPROVAL', 1, ?, ?)`,
       [id, params.workflowId, params.entityId, params.requesterId, now, now]
     );
 
     logger.info(`[Workflow] Created approval request ${id} for entity ${params.entityId}`);
-    return { id, status: 'PENDING', currentStepOrder: 1 };
+    return { id, status: 'PENDING_APPROVAL', currentStepOrder: 1 };
+  },
+
+  /**
+   * Finalize the entity status (Leave, Expense, etc.) when workflow ends
+   */
+  async finalizeEntity(workflowId: string, entityId: string, finalStatus: string) {
+    const workflow = await query(`SELECT entityType FROM approval_workflows WHERE id = ?`, [workflowId]).then(res => res[0]);
+    if (!workflow) return;
+
+    if (workflow.entityType === 'EXPENSE') {
+      await execute(`UPDATE expense_claims SET status = ? WHERE id = ?`, [finalStatus, entityId]);
+    } else if (workflow.entityType === 'LEAVE') {
+      await execute(`UPDATE leave_requests SET status = ? WHERE id = ?`, [finalStatus, entityId]);
+    } else if (workflow.entityType === 'ATTENDANCE_CORRECTION') {
+      await execute(`UPDATE attendance_corrections SET status = ? WHERE id = ?`, [finalStatus, entityId]);
+    }
   },
 
   /**
@@ -52,11 +85,11 @@ export const workflowService = {
       throw new Error(`Approval request ${requestId} not found`);
     }
 
-    if (request.status !== 'PENDING') {
+    if (request.status !== 'PENDING_APPROVAL') {
       throw new Error(`Request is already ${request.status}`);
     }
 
-    // Verify if this is the correct step
+    // Verify current step
     const currentStep = await query(
       `SELECT * FROM approval_steps 
        WHERE workflowId = ? AND stepOrder = ?`,
@@ -67,7 +100,7 @@ export const workflowService = {
       throw new Error(`Workflow configuration error: Step ${request.currentStepOrder} not found`);
     }
 
-    // Insert action
+    // Record the action
     const actionId = randomUUID();
     await execute(
       `INSERT INTO approval_actions (id, requestId, stepOrder, approverId, action, comments, actionAt)
@@ -80,50 +113,45 @@ export const workflowService = {
         `UPDATE approval_requests SET status = 'REJECTED', updatedAt = ? WHERE id = ?`,
         [now, requestId]
       );
-      
-      // Update entity status
-      if (request.entityType === 'EXPENSE') {
-        await execute(`UPDATE expense_claims SET status = 'REJECTED' WHERE id = ?`, [request.entityId]);
-      } else if (request.entityType === 'LEAVE') {
-        await execute(`UPDATE leave_requests SET status = 'REJECTED' WHERE id = ?`, [request.entityId]);
-      } else if (request.entityType === 'ATTENDANCE_CORRECTION') {
-        await execute(`UPDATE attendance_corrections SET status = 'REJECTED' WHERE id = ?`, [request.entityId]);
-      }
-
+      await this.finalizeEntity(request.workflowId, request.entityId, 'REJECTED');
       logger.info(`[Workflow] Request ${requestId} REJECTED at step ${request.currentStepOrder}`);
       return { status: 'REJECTED' };
     }
 
-    // If APPROVED, check if there are more steps
+    // If APPROVED, check routing logic for PARALLEL vs SEQUENTIAL
+    if (currentStep.routingType === 'PARALLEL') {
+      // Logic for parallel approvals...
+    }
+
     const nextStep = await query(
       `SELECT * FROM approval_steps WHERE workflowId = ? AND stepOrder > ? ORDER BY stepOrder ASC LIMIT 1`,
       [request.workflowId, request.currentStepOrder]
     ).then(res => res[0]);
 
     if (nextStep) {
-      // Move to next step
+      if (nextStep.approverType === 'AUTO_APPROVE') {
+         await execute(
+           `INSERT INTO approval_actions (id, requestId, stepOrder, approverId, action, comments, actionAt)
+            VALUES (?, ?, ?, 'SYSTEM', 'APPROVED', 'Auto-Approved', ?)`,
+           [randomUUID(), requestId, nextStep.stepOrder, now]
+         );
+         await execute(`UPDATE approval_requests SET status = 'APPROVED', updatedAt = ? WHERE id = ?`, [now, requestId]);
+         await this.finalizeEntity(request.workflowId, request.entityId, 'APPROVED');
+         return { status: 'APPROVED' };
+      }
+
       await execute(
         `UPDATE approval_requests SET currentStepOrder = ?, updatedAt = ? WHERE id = ?`,
         [nextStep.stepOrder, now, requestId]
       );
       logger.info(`[Workflow] Request ${requestId} moved to step ${nextStep.stepOrder}`);
-      return { status: 'PENDING', currentStepOrder: nextStep.stepOrder };
+      return { status: 'PENDING_APPROVAL', currentStepOrder: nextStep.stepOrder };
     } else {
-      // Final approval reached
       await execute(
         `UPDATE approval_requests SET status = 'APPROVED', updatedAt = ? WHERE id = ?`,
         [now, requestId]
       );
-      
-      // Update entity status
-      if (request.entityType === 'EXPENSE') {
-        await execute(`UPDATE expense_claims SET status = 'APPROVED' WHERE id = ?`, [request.entityId]);
-      } else if (request.entityType === 'LEAVE') {
-        await execute(`UPDATE leave_requests SET status = 'APPROVED' WHERE id = ?`, [request.entityId]);
-      } else if (request.entityType === 'ATTENDANCE_CORRECTION') {
-        await execute(`UPDATE attendance_corrections SET status = 'APPROVED' WHERE id = ?`, [request.entityId]);
-      }
-
+      await this.finalizeEntity(request.workflowId, request.entityId, 'APPROVED');
       logger.info(`[Workflow] Request ${requestId} fully APPROVED`);
       return { status: 'APPROVED' };
     }
@@ -131,12 +159,12 @@ export const workflowService = {
 
   /**
    * Retrieves pending requests for a specific approver.
-   * Resolves role-based logic or specific approver logic.
    */
   async getPendingRequestsForApprover(approverId: string, role: string) {
     const requests = await query(
-      `SELECT r.id, r.entityId, w.entityType, w.name as workflowName, r.currentStepOrder, r.createdAt,
+      `SELECT r.id, r.entityId, r.requesterId, w.entityType, w.name as workflowName, r.currentStepOrder, r.createdAt,
               COALESCE(e1.name, e2.name, e3.name) as employeeName,
+              req.managerId,
               CASE
                 WHEN w.entityType = 'EXPENSE' THEN 'Expense Claim: ₹' || ex.amount || ' - ' || ex.category
                 WHEN w.entityType = 'LEAVE' THEN 'Leave: ' || l.type || ' (' || l.startDate || ' to ' || l.endDate || ')'
@@ -148,6 +176,7 @@ export const workflowService = {
                 WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN ac.reason
               END as description
        FROM approval_requests r
+       JOIN employees req ON r.requesterId = req.id
        JOIN approval_workflows w ON r.workflowId = w.id
        JOIN approval_steps s ON r.workflowId = s.workflowId AND r.currentStepOrder = s.stepOrder
        LEFT JOIN expense_claims ex ON w.entityType = 'EXPENSE' AND r.entityId = ex.id
@@ -156,9 +185,13 @@ export const workflowService = {
        LEFT JOIN employees e1 ON ex.employeeId = e1.id
        LEFT JOIN employees e2 ON l.employeeId = e2.id
        LEFT JOIN employees e3 ON ac.employeeId = e3.id
-       WHERE r.status = 'PENDING' 
-         AND (s.specificApproverId = ? OR s.approverRole = ?)`,
-      [approverId, role]
+       WHERE r.status = 'PENDING_APPROVAL' 
+         AND (
+           (s.approverType = 'SPECIFIC_USER' AND s.specificApproverId = ?) OR 
+           (s.approverType = 'ROLE' AND s.approverRole = ?) OR
+           (s.approverType = 'RELATIONSHIP' AND s.approverRelationship = 'DIRECT_MANAGER' AND req.managerId = ?)
+         )`,
+      [approverId, role, approverId]
     );
     return requests;
   },
@@ -174,18 +207,18 @@ export const workflowService = {
     const leaveWfId = randomUUID();
     const corrWfId = randomUUID();
 
-    await execute(`INSERT INTO approval_workflows (id, name, entityType) VALUES 
-      (?, 'Standard Expense Approval', 'EXPENSE'),
-      (?, 'Standard Leave Approval', 'LEAVE'),
-      (?, 'Standard Attendance Correction', 'ATTENDANCE_CORRECTION')
+    await execute(`INSERT INTO approval_workflows (id, name, entityType, createdAt) VALUES 
+      (?, 'Standard Expense Approval', 'EXPENSE', datetime('now')),
+      (?, 'Standard Leave Approval', 'LEAVE', datetime('now')),
+      (?, 'Standard Attendance Correction', 'ATTENDANCE_CORRECTION', datetime('now'))
     `, [expenseWfId, leaveWfId, corrWfId]);
 
-    await execute(`INSERT INTO approval_steps (id, workflowId, stepOrder, approverRole) VALUES 
-      (?, ?, 1, 'MANAGER'),
-      (?, ?, 1, 'MANAGER'),
-      (?, ?, 1, 'MANAGER')
+    await execute(`INSERT INTO approval_steps (id, workflowId, stepOrder, approverType, approverRole, approverRelationship) VALUES 
+      (?, ?, 1, 'RELATIONSHIP', NULL, 'DIRECT_MANAGER'),
+      (?, ?, 1, 'RELATIONSHIP', NULL, 'DIRECT_MANAGER'),
+      (?, ?, 1, 'RELATIONSHIP', NULL, 'DIRECT_MANAGER')
     `, [randomUUID(), expenseWfId, randomUUID(), leaveWfId, randomUUID(), corrWfId]);
 
-    logger.info(`[Workflow] Seeded default workflows`);
+    logger.info(`[Workflow] Seeded advanced workflows with RELATIONSHIP-based routing`);
   }
 };

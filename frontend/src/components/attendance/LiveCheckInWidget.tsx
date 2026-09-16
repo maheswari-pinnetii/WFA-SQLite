@@ -36,9 +36,17 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
   ]);
 
   // Redux state
-  const { activeRecord, offlineQueueLength } = useSelector(
+  const { activeRecord, records, offlineQueueLength, isLoading } = useSelector(
     (state: RootState) => state.attendance
   );
+
+  const todayStr = (() => {
+    const format = new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' });
+    const [month, day, year] = format.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  })();
+
+  const todayRecord = activeRecord || records?.find(r => r.date === todayStr);
 
   const employeeName = propName || user?.name || 'Alex Mercer';
   const employeeId = user?.id || 'emp-001';
@@ -255,19 +263,27 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
       {/* Action triggers with modern live status icons */}
       <div className="flex flex-col sm:flex-row items-center gap-3">
         {!activeRecord ? (
-          <button
-            onClick={handleCheckIn}
-            className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer h-10"
-            title="Punch Check-In attendance for today"
-            aria-label="Check-In Now"
-          >
-            <CheckCircle2 size={16} /> Check In
-          </button>
+          todayRecord && todayRecord.status === 'Checked Out' ? (
+            <div className="w-full px-5 py-2.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-medium text-sm text-slate-500 dark:text-slate-400 flex items-center justify-center gap-2 h-10 cursor-not-allowed">
+              <CheckSquare size={16} /> Shift Completed
+            </div>
+          ) : (
+            <button
+              onClick={handleCheckIn}
+              disabled={isLoading}
+              className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed h-10"
+              title="Punch Check-In attendance for today"
+              aria-label="Check-In Now"
+            >
+              <CheckCircle2 size={16} /> Check In
+            </button>
+          )
         ) : (
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
             <button
               onClick={handleCheckOut}
-              className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-rose-600 hover:bg-rose-700 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer h-10"
+              disabled={isLoading}
+              className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-rose-600 hover:bg-rose-700 disabled:opacity-50 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed h-10"
               title="Complete shift and Check-Out"
               aria-label="Check-Out"
             >
@@ -277,7 +293,8 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
             {activeRecord.status !== 'On Break' ? (
               <button
                 onClick={handleTakeBreak}
-                className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-medium text-sm text-slate-700 dark:text-slate-200 transition-colors flex items-center justify-center gap-2 cursor-pointer h-10"
+                disabled={isLoading}
+                className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-medium text-sm text-slate-700 dark:text-slate-200 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed h-10"
                 title="Pause active shift for a break"
                 aria-label="Take Break"
               >
@@ -286,7 +303,8 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
             ) : (
               <button
                 onClick={handleResume}
-                className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-amber-600 hover:bg-amber-700 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer h-10"
+                disabled={isLoading}
+                className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed h-10"
                 title="End break and resume active work"
                 aria-label="Resume Work"
               >
@@ -352,8 +370,8 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
               <select
                 value={shiftType}
                 onChange={(e) => setShiftType(e.target.value as any)}
-                disabled={!!activeRecord}
-                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 outline-none cursor-pointer"
+                disabled={!!activeRecord || (todayRecord && todayRecord.status === 'Checked Out')}
+                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 outline-none cursor-pointer disabled:opacity-50"
               >
                 {availableShifts.map((shift) => (
                   <option key={shift.name} value={shift.name}>{shift.name} Shift ({shift.startTime} - {shift.endTime})</option>
@@ -367,8 +385,8 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
               <select
                 value={workMode}
                 onChange={(e) => setWorkMode(e.target.value as any)}
-                disabled={!!activeRecord}
-                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 outline-none cursor-pointer"
+                disabled={!!activeRecord || (todayRecord && todayRecord.status === 'Checked Out')}
+                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-1.5 text-xs text-slate-900 dark:text-slate-100 outline-none cursor-pointer disabled:opacity-50"
               >
                 <option value="Office">In-Office (Geofenced)</option>
                 <option value="Remote">Remote Work-From-Home</option>

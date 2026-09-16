@@ -24,4 +24,10 @@ export const Company = new ModelShim('companies');
 export const Organization = Company;
 export const Role = new ModelShim('roles');
 export const Permission = new ModelShim('permissions');
-
+export const EmployeeBankDetail = new ModelShim('employee_bank_details');
+export const EmployeeTaxInfo = new ModelShim('employee_tax_info');
+export const EmployeeEmergencyContact = new ModelShim('employee_emergency_contacts');
+export const EmployeeEducation = new ModelShim('employee_education');
+export const EmployeeCertification = new ModelShim('employee_certifications');
+export const EmployeeExperience = new ModelShim('employee_experience');
+export const LifecycleEvent = new ModelShim('lifecycle_events');

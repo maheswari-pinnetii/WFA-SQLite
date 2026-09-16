@@ -1,4 +1,4 @@
-import { getDb } from './connection.js';
+import { getDb, execute } from './connection.js';
 
 let tableColumnsCache: Record<string, string[]> = {};
 
@@ -155,10 +155,10 @@ export function deserializeRow(tableName: string, row: any): any {
       
       if (tableName === 'idempotencyrecords') {
         values.push(result.companyId, result.key);
-        db.prepare(`UPDATE ${tableName} SET ${setClause} WHERE companyId = ? AND key = ?`).run(...values);
+        await execute(`UPDATE ${tableName} SET ${setClause} WHERE companyId = ? AND key = ?`, values);
       } else {
         values.push(result.id);
-        db.prepare(`UPDATE ${tableName} SET ${setClause} WHERE id = ?`).run(...values);
+        await execute(`UPDATE ${tableName} SET ${setClause} WHERE id = ?`, values);
       }
       return result;
     } catch (e) {

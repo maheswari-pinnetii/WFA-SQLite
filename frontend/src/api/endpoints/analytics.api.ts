@@ -134,6 +134,14 @@ export const analyticsApi = {
       return fallbackAnalyticsData;
     }
   },
+  async getDashboard(role: string): Promise<any> {
+    try {
+      return unwrap(await apiClient.get(`/v1/dashboard/${role}`));
+    } catch (err) {
+      console.warn(`[Analytics API] Failed to fetch dashboard for ${role}:`, err);
+      return null;
+    }
+  },
   async getShifts(): Promise<Array<{ name: 'Regular' | 'Flexible' | 'Overnight'; startTime: string; endTime: string }>> {
     try {
       return unwrap(await apiClient.get('/v1/attendance/shifts'));

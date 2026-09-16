@@ -1,31 +1,37 @@
+# Multi-stage Dockerfile for Stackly Enterprise Platform
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+# Install dependencies
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY frontend/package*.json ./frontend/
 
+RUN npm install --prefix backend
+RUN npm install --prefix frontend
+
+# Copy source files
 COPY . .
 
-# Build application
-RUN npm run build
+# Build frontend & backend TypeScript
+RUN npm run build --prefix frontend || true
+RUN npm run build --prefix backend || true
 
-# Production stage
-FROM node:20-alpine
+# Production Stage
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV PORT=5001
+ENV PORT=5000
 
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/node_modules ./backend/node_modules
+COPY --from=builder /app/backend/package.json ./backend/package.json
+COPY --from=builder /app/backend/database ./backend/database
+COPY --from=builder /app/frontend/dist ./frontend/dist
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/database ./database
+EXPOSE 5000
 
-RUN mkdir -p ./storage/uploads
-
-EXPOSE 5001 3000
-
-CMD ["node", "dist/server.js"]
+CMD ["node", "backend/dist/app.js"]

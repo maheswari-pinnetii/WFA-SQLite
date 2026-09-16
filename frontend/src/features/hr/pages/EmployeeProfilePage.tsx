@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { payrollApi } from '../../../api/endpoints/payroll.api';
 import { lifecycleApi } from '../../../api/endpoints/lifecycle.api';
 import { assetsApi } from '../../../api/endpoints/assets.api';
+import { SalaryStructureBuilder } from '../components/SalaryStructureBuilder';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Employee {
@@ -99,22 +100,7 @@ export const EmployeeProfilePage: React.FC = () => {
     enabled: !!id,
   });
 
-  const saveSalaryMutation = useMutation({
-    mutationFn: (baseSalary: number) => payrollApi.setSalaryStructure(id!, { baseSalary }),
-    onSuccess: () => {
-      showToast('Salary structure updated.');
-      refetchSalary();
-    },
-    onError: () => showToast('Failed to update salary.', 'error')
-  });
-
   const [editSalary, setEditSalary] = useState(false);
-  const [baseSalaryInput, setBaseSalaryInput] = useState('');
-
-  const handleSaveSalary = () => {
-    saveSalaryMutation.mutate(Number(baseSalaryInput));
-    setEditSalary(false);
-  };
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToast({ msg, type });
@@ -478,19 +464,11 @@ export const EmployeeProfilePage: React.FC = () => {
             <SectionTitle>Salary Structure</SectionTitle>
             {!editSalary ? (
               <button onClick={() => {
-                setBaseSalaryInput(salaryStructure?.baseSalary?.toString() || '0');
                 setEditSalary(true);
               }} className="btn btn-sm btn-primary text-xs">
                 Edit Structure
               </button>
-            ) : (
-              <div className="flex gap-2">
-                <button onClick={() => setEditSalary(false)} className="btn btn-sm text-xs">Cancel</button>
-                <button onClick={handleSaveSalary} disabled={saveSalaryMutation.isPending} className="btn btn-sm btn-primary text-xs">
-                  {saveSalaryMutation.isPending ? 'Saving...' : 'Save Structure'}
-                </button>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {!editSalary ? (
@@ -501,21 +479,14 @@ export const EmployeeProfilePage: React.FC = () => {
               <Field label="Effective Date" value={salaryStructure?.effectiveDate ? new Date(salaryStructure.effectiveDate).toLocaleDateString() : '—'} />
             </div>
           ) : (
-            <div className="flex flex-col gap-4 max-w-sm">
-              <label className="flex flex-col gap-1">
-                <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">Annual Base Salary (CTC)</span>
-                <input
-                  type="number"
-                  value={baseSalaryInput}
-                  onChange={(e) => setBaseSalaryInput(e.target.value)}
-                  className="bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-3 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none"
-                  placeholder="e.g. 75000"
-                />
-              </label>
-            </div>
+            <SalaryStructureBuilder 
+              employeeId={id!} 
+              initialStructure={salaryStructure} 
+              onClose={() => setEditSalary(false)} 
+            />
           )}
 
-          {salaryStructure?.components && salaryStructure.components.length > 0 && (
+          {!editSalary && salaryStructure?.components && salaryStructure.components.length > 0 && (
             <div className="mt-4">
               <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Components Breakdown</h4>
               <div className="border border-[var(--border-color)] rounded-lg overflow-hidden">

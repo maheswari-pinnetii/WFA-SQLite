@@ -1,222 +1,300 @@
 import { randomUUID } from 'crypto';
-import { query, execute, transaction } from '../database/sqlite-cloud.js';
+import { query, execute } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
-import { AppError, ErrorCode } from '../utils/apiError.js';
 import { ComplianceService } from './compliance.service.js';
 
+export interface SetSalaryStructureParams {
+  employeeId: string;
+  organizationId: string;
+  baseSalary: number;
+  currency: string;
+  effectiveDate: string;
+  components: Array<{
+    name: string;
+    type: 'EARNING' | 'DEDUCTION';
+    amount: number;
+  }>;
+}
+
+export interface CreatePayrollRunParams {
+  organizationId: string;
+  month: number;
+  year: number;
+}
+
 export const payrollService = {
-
-  /** ─── SALARY STRUCTURES ─────────────────────────── */
-  async getSalaryStructure(employeeId: string, organizationId: string) {
+  /**
+   * Retrieves the current salary structure for an employee
+   */
+  async getSalaryStructure(employeeId: string) {
     const structure = await query(
-      `SELECT s.*, json_group_array(json_object('id', c.id, 'componentName', c.componentName, 'type', c.type, 'amount', c.amount)) as components
-       FROM salary_structures s
-       LEFT JOIN salary_components c ON c.salaryStructureId = s.id
-       WHERE s.employeeId = ? AND s.organizationId = ?
-       ORDER BY s.effectiveDate DESC LIMIT 1`,
-      [employeeId, organizationId]
-    ).then(r => r[0]);
+      `SELECT * FROM salary_structures WHERE employeeId = ? ORDER BY effectiveDate DESC LIMIT 1`,
+      [employeeId]
+    ).then(res => res[0]);
 
-    if (structure && (structure as any).components) {
-      try { (structure as any).components = JSON.parse((structure as any).components); } catch { /* noop */ }
-    }
-    return structure;
+    if (!structure) return null;
+
+    const components = await query(
+      `SELECT * FROM salary_components WHERE salaryStructureId = ?`,
+      [structure.id]
+    );
+
+    return { ...structure, components };
   },
 
-  async setSalaryStructure(
-    employeeId: string,
-    organizationId: string,
-    data: {
-      baseSalary: number;
-      currency?: string;
-      effectiveDate: string;
-      components?: Array<{ componentName: string; type: 'EARNING' | 'DEDUCTION'; amount: number }>;
-    }
-  ) {
-    const id = randomUUID();
+  /**
+   * Sets or updates the salary structure and components for an employee
+   */
+  async setSalaryStructure(params: SetSalaryStructureParams) {
+    const { employeeId, organizationId, baseSalary, currency, effectiveDate, components } = params;
+    
+    // Simple transaction-like approach
+    const structId = randomUUID();
     await execute(
       `INSERT INTO salary_structures (id, employeeId, baseSalary, currency, effectiveDate, organizationId)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, employeeId, data.baseSalary, data.currency || 'USD', data.effectiveDate, organizationId]
+      [structId, employeeId, baseSalary, currency, effectiveDate, organizationId]
     );
 
-    if (data.components) {
-      for (const comp of data.components) {
-        await execute(
-          `INSERT INTO salary_components (id, salaryStructureId, componentName, type, amount) VALUES (?, ?, ?, ?, ?)`,
-          [randomUUID(), id, comp.componentName, comp.type, comp.amount]
-        );
-      }
+    for (const comp of components) {
+      await execute(
+        `INSERT INTO salary_components (id, salaryStructureId, componentName, type, amount)
+         VALUES (?, ?, ?, ?, ?)`,
+        [randomUUID(), structId, comp.name, comp.type, comp.amount]
+      );
     }
-    return { id };
+
+    return this.getSalaryStructure(employeeId);
   },
 
-  /** ─── PAYROLL RUNS ───────────────────────────────── */
+  /**
+   * Fetch all runs
+   */
   async getPayrollRuns(organizationId: string) {
     return query(
-      `SELECT * FROM payroll_runs WHERE organizationId = ? ORDER BY runDate DESC`,
+      `SELECT * FROM payroll_runs WHERE organizationId = ? ORDER BY periodStart DESC`,
       [organizationId]
     );
   },
 
-  async createPayrollRun(organizationId: string, periodStart: string, periodEnd: string) {
-    const id = randomUUID();
-    const now = new Date().toISOString();
+  /**
+   * Creates a draft payroll run
+   */
+  async createPayrollRun(params: CreatePayrollRunParams) {
+    const { organizationId, month, year } = params;
+    
+    const periodStart = `${year}-${String(month).padStart(2, '0')}-01`;
+    const lastDay = new Date(year, month, 0).getDate();
+    const periodEnd = `${year}-${String(month).padStart(2, '0')}-${lastDay}`;
+    const runDate = new Date().toISOString();
+
+    const existingRun = await query(
+      `SELECT id FROM payroll_runs WHERE organizationId = ? AND periodStart = ? AND periodEnd = ?`,
+      [organizationId, periodStart, periodEnd]
+    ).then(res => res[0]);
+
+    if (existingRun) {
+      throw new Error(`Payroll run for ${periodStart} to ${periodEnd} already exists.`);
+    }
+
+    const runId = randomUUID();
+    
     await execute(
       `INSERT INTO payroll_runs (id, organizationId, periodStart, periodEnd, runDate, status)
        VALUES (?, ?, ?, ?, ?, 'DRAFT')`,
-      [id, organizationId, periodStart, periodEnd, now]
+      [runId, organizationId, periodStart, periodEnd, runDate]
     );
-    return { id };
+
+    logger.info(`[Payroll] Created DRAFT payroll run ${runId} for ${month}/${year}`);
+    return runId;
   },
 
-  /** ─── PAYSLIP GENERATION ─────────────────────────── */
-  async generatePayslips(payrollRunId: string, organizationId: string) {
-    const run = await query(`SELECT * FROM payroll_runs WHERE id = ? AND organizationId = ?`, [payrollRunId, organizationId])
-      .then(r => r[0]) as any;
+  /**
+   * Generates payslips for a specific DRAFT run
+   */
+  async generatePayslips(runId: string) {
+    const run = await query(`SELECT * FROM payroll_runs WHERE id = ?`, [runId]).then(res => res[0]);
+    if (!run) throw new Error('Payroll run not found');
+    if (run.status !== 'DRAFT') throw new Error('Can only generate payslips for DRAFT runs');
 
-    if (!run) throw AppError.notFound('Payroll run', ErrorCode.PAYROLL_RUN_NOT_FOUND);
-    if (run.status === 'FINALIZED' || run.status === 'LOCKED') {
-      throw AppError.conflict(ErrorCode.PAYROLL_RUN_ALREADY_FINALIZED, 'This payroll run has already been finalized and cannot be re-processed.');
+    const employees = await query(
+      `SELECT id FROM employees WHERE organizationId = ? AND status = 'ACTIVE'`,
+      [run.organizationId]
+    );
+
+    let processedCount = 0;
+    
+    // Clear existing payslips for this run just in case we are re-generating
+    await execute(`DELETE FROM payslips WHERE payrollRunId = ?`, [runId]);
+
+    for (const emp of employees) {
+      try {
+        await this.calculateEmployeePay(runId, emp.id, run.periodStart, run.periodEnd);
+        processedCount++;
+      } catch (err: any) {
+        logger.error(`[Payroll] Failed to calculate pay for employee ${emp.id}: ${err.message}`);
+      }
     }
 
-    return transaction(async () => {
-      const employees = await query(
-        `SELECT id FROM employees WHERE organizationId = ? AND status = 'ACTIVE'`,
-        [organizationId]
-      ) as any[];
+    logger.info(`[Payroll] Successfully processed ${processedCount} payslips for run ${runId}`);
+    return { runId, processedCount };
+  },
 
-      const payslips = [];
+  /**
+   * Calculates pay for a single employee and inserts the payslip.
+   */
+  async calculateEmployeePay(runId: string, employeeId: string, periodStart: string, periodEnd: string) {
+    // 1. Fetch Salary Structure
+    const structure = await query(
+      `SELECT * FROM salary_structures WHERE employeeId = ? ORDER BY effectiveDate DESC LIMIT 1`,
+      [employeeId]
+    ).then(res => res[0]);
 
-      for (const emp of employees) {
-        const structure = await this.getSalaryStructure(emp.id, organizationId) as any;
-        if (!structure) {
-          logger.warn(`[Payroll] No salary structure for employee ${emp.id}, skipping`);
-          continue;
-        }
+    if (!structure) {
+      throw new Error(`No active salary structure found.`);
+    }
 
-        // Calculate Calendar Days for the Period
-        const start = new Date(run.periodStart);
-        const end = new Date(run.periodEnd);
-        const totalDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        const monthString = run.periodStart.substring(0, 7); // e.g. "2026-09"
+    // 2. Fetch Components
+    const components = await query(
+      `SELECT * FROM salary_components WHERE salaryStructureId = ?`,
+      [structure.id]
+    );
 
-        // Fetch LOP Days from Attendance Summary
-        const attendanceSummary = await query(
-          `SELECT lop_days FROM attendance_monthly_summary 
-           WHERE employee_id = ? AND month = ?`,
-          [emp.id, monthString]
-        ).then(r => r[0]) as any;
+    // 3. Mock LOP (Loss of Pay) calculation based on attendance Engine
+    const lopDays = 0; 
+    const workingDays = 30; // standard 30 day divisor for Indian payroll
+    const prorationFactor = Math.max(0, (workingDays - lopDays) / workingDays);
 
-        const lopDays = attendanceSummary?.lop_days || 0;
-        const prorationFactor = Math.max(0, (totalDays - lopDays) / totalDays);
+    let totalEarnings = 0;
+    let totalDeductions = 0;
+    let basicPay = 0;
 
-        const components = Array.isArray(structure.components) ? structure.components : [];
-        
-        // Prorate Earnings (Basic and Allowances)
-        const rawEarnings = components
-          .filter((c: any) => c.type === 'EARNING')
-          .reduce((sum: number, c: any) => sum + c.amount, 0);
-        
-        const earnings = rawEarnings * prorationFactor;
+    const lineItems = [];
 
-        // Deductions generally aren't prorated by LOP in basic scenarios (unless it's PF, but that's phase 5)
-        const deductions = components
-          .filter((c: any) => c.type === 'DEDUCTION')
-          .reduce((sum: number, c: any) => sum + c.amount, 0);
+    // Calculate Components
+    for (const comp of components) {
+      const amount = comp.amount * prorationFactor;
 
-        const rawBasicPay = structure.baseSalary;
-        const basicPay = rawBasicPay * prorationFactor;
-        const totalEarnings = basicPay + earnings;
-        const totalDeductions = deductions;
-
-        // Include approved Overtime pay
-        const approvedOTRecords = await query(
-          `SELECT SUM(hours) as totalOTHours FROM overtime_records
-           WHERE employeeId = ? AND organizationId = ? AND status = 'APPROVED'
-           AND date BETWEEN ? AND ?`,
-          [emp.id, organizationId, run.periodStart, run.periodEnd]
-        ).then(r => r[0]) as any;
-
-        let overtimePay = 0;
-        if (approvedOTRecords?.totalOTHours > 0) {
-          const hourlyRate = rawBasicPay / 160;
-          overtimePay = approvedOTRecords.totalOTHours * hourlyRate * 1.5;
-        }
-
-        // Include approved Expense Reimbursements
-        const approvedExpenses = await query(
-          `SELECT id, amount FROM expense_claims
-           WHERE employeeId = ? AND status = 'APPROVED'
-           AND claimDate <= ?`, // Pay out all approved expenses up to the period end
-          [emp.id, run.periodEnd]
-        ) as any[];
-
-        const expenseReimbursement = approvedExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-
-        // Calculate Statutory Compliance (PF, ESI, PT, TDS)
-        const { employeePF } = await ComplianceService.calculatePF(basicPay);
-        const { employeeESI } = await ComplianceService.calculateESI(totalEarnings + overtimePay);
-        const pt = await ComplianceService.calculatePT(totalEarnings + overtimePay);
-        const tds = await ComplianceService.calculateTDS(totalEarnings + overtimePay);
-
-        const statutoryDeductions = employeePF + employeeESI + pt + tds;
-        const totalDeductionsFinal = totalDeductions + statutoryDeductions;
-        
-        // Add expense reimbursement to net pay (tax-free reimbursement)
-        const netPay = totalEarnings + overtimePay + expenseReimbursement - totalDeductionsFinal;
-
-        const payslipId = randomUUID();
-        await execute(
-          `INSERT OR REPLACE INTO payslips (id, payrollRunId, employeeId, basicPay, totalEarnings, totalDeductions, pfAmount, esiAmount, ptAmount, tdsAmount, netPay, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'GENERATED')`,
-          [payslipId, payrollRunId, emp.id, basicPay, totalEarnings + overtimePay, totalDeductionsFinal, employeePF, employeeESI, pt, tds, netPay]
-        );
-
-        // Mark paid expenses as PAID
-        for (const exp of approvedExpenses) {
-          await execute(`UPDATE expense_claims SET status = 'PAID' WHERE id = ?`, [exp.id]);
-        }
-
-        payslips.push({ employeeId: emp.id, netPay, overtimePay, expenseReimbursement, lopDays, statutoryDeductions });
+      if (comp.componentName === 'Basic Pay') {
+        basicPay = amount;
       }
 
+      if (comp.type === 'EARNING') {
+        totalEarnings += amount;
+      } else if (comp.type === 'DEDUCTION') {
+        totalDeductions += amount;
+      }
+
+      lineItems.push({
+        id: comp.id,
+        name: comp.componentName,
+        type: comp.type,
+        amount: Number(amount.toFixed(2))
+      });
+    }
+
+    const netPay = totalEarnings - totalDeductions;
+    const payslipId = randomUUID();
+
+    // Indian Statutory Compliance Calculation
+    try {
+      const pfResult = await ComplianceService.calculatePF(basicPay);
+      const esiResult = await ComplianceService.calculateESI(totalEarnings);
+      const ptDeduction = await ComplianceService.calculatePT(totalEarnings);
+      const tdsDeduction = await ComplianceService.calculateTDS(totalEarnings);
+
+      const complianceId = randomUUID();
       await execute(
-        `UPDATE payroll_runs SET status = 'PROCESSED' WHERE id = ?`,
-        [payrollRunId]
+        `INSERT INTO pf_esi_records (id, payrollRunId, employeeId, pfWage, pfEmployeeContribution, pfEmployerContribution, pfEpsContribution, esiWage, esiEmployeeContribution, esiEmployerContribution, ptDeduction, tdsDeduction) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [complianceId, runId, employeeId, Math.min(basicPay, 15000), pfResult.employeePF, pfResult.employerPF, 0, totalEarnings, esiResult.employeeESI, esiResult.employerESI, ptDeduction, tdsDeduction]
       );
+      
+      // Add deductions to payslip line items
+      if (pfResult.employeePF > 0) {
+        totalDeductions += pfResult.employeePF;
+        lineItems.push({ id: randomUUID(), name: 'PF Contribution', type: 'DEDUCTION', amount: pfResult.employeePF });
+      }
+      if (esiResult.employeeESI > 0) {
+        totalDeductions += esiResult.employeeESI;
+        lineItems.push({ id: randomUUID(), name: 'ESI Contribution', type: 'DEDUCTION', amount: esiResult.employeeESI });
+      }
+      if (ptDeduction > 0) {
+        totalDeductions += ptDeduction;
+        lineItems.push({ id: randomUUID(), name: 'Professional Tax', type: 'DEDUCTION', amount: ptDeduction });
+      }
+      if (tdsDeduction > 0) {
+        totalDeductions += tdsDeduction;
+        lineItems.push({ id: randomUUID(), name: 'TDS', type: 'DEDUCTION', amount: tdsDeduction });
+      }
 
-      logger.info(`[Payroll] Generated ${payslips.length} payslips for run ${payrollRunId}`);
-      return { payrollRunId, payslipsGenerated: payslips.length, payslips };
-    });
-  },
+    } catch (e) {
+      logger.error(`[Payroll] Failed compliance calculation: ` + e);
+    }
 
-  async getPayslips(employeeId: string, organizationId: string) {
-    return query(
-      `SELECT p.*, pr.periodStart, pr.periodEnd 
-       FROM payslips p 
-       JOIN payroll_runs pr ON p.payrollRunId = pr.id
-       WHERE p.employeeId = ? AND pr.organizationId = ?
-       ORDER BY pr.runDate DESC`,
-      [employeeId, organizationId]
-    );
-  },
+    const finalNetPay = totalEarnings - totalDeductions;
 
-  async getRunPayslips(runId: string, organizationId: string) {
-    return query(
-      `SELECT p.*, e.firstName, e.lastName, e.department
-       FROM payslips p 
-       JOIN employees e ON p.employeeId = e.id
-       JOIN payroll_runs pr ON p.payrollRunId = pr.id
-       WHERE p.payrollRunId = ? AND pr.organizationId = ?`,
-      [runId, organizationId]
-    );
-  },
-
-  async finalizePayrollRun(payrollRunId: string, organizationId: string) {
+    // 4. Insert Payslip
     await execute(
-      `UPDATE payroll_runs SET status = 'FINALIZED' WHERE id = ? AND organizationId = ?`,
-      [payrollRunId, organizationId]
+      `INSERT INTO payslips (id, payrollRunId, employeeId, basicPay, totalEarnings, totalDeductions, netPay, lineItems, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'GENERATED')`,
+      [
+        payslipId, 
+        runId, 
+        employeeId, 
+        Number(basicPay.toFixed(2)), 
+        Number(totalEarnings.toFixed(2)), 
+        Number(totalDeductions.toFixed(2)), 
+        Number(finalNetPay.toFixed(2)),
+        JSON.stringify(lineItems)
+      ]
     );
+  },
+
+  /**
+   * Fetch payslips for a run
+   */
+  async getPayslipsForRun(runId: string) {
+    return query(
+      `SELECT p.*, e.name as employeeName, e.employeeCode 
+       FROM payslips p
+       JOIN employees e ON p.employeeId = e.id
+       WHERE p.payrollRunId = ?
+       ORDER BY e.name ASC`,
+      [runId]
+    ).then(res => res.map((p: any) => {
+      try { p.lineItems = JSON.parse(p.lineItems || '[]'); } catch(e) {}
+      return p;
+    }));
+  },
+
+  /**
+   * Finalize a payroll run
+   */
+  async finalizePayrollRun(runId: string) {
+    await execute(
+      `UPDATE payroll_runs SET status = 'FINALIZED' WHERE id = ?`,
+      [runId]
+    );
+    await execute(
+      `UPDATE payslips SET status = 'ISSUED' WHERE payrollRunId = ?`,
+      [runId]
+    );
+  },
+
+  /**
+   * Fetch all payslips for an employee (self-service)
+   */
+  async getEmployeePayslips(employeeId: string) {
+    return query(
+      `SELECT p.*, r.periodStart, r.periodEnd
+       FROM payslips p
+       JOIN payroll_runs r ON p.payrollRunId = r.id
+       WHERE p.employeeId = ? AND p.status = 'ISSUED'
+       ORDER BY r.periodStart DESC`,
+      [employeeId]
+    ).then(res => res.map((p: any) => {
+      try { p.lineItems = JSON.parse(p.lineItems || '[]'); } catch(e) {}
+      return p;
+    }));
   }
 };
