@@ -24,7 +24,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   loading = false,
   error = null,
   onRetry,
-  height = 280,
+  height = 260,
   className = '',
   actionSlot,
 }) => {
@@ -32,7 +32,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
 
   return (
     <div
-      className={`bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/60 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between ${className}`}
+      className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-lg p-4 sm:p-5 shadow-2xs flex flex-col justify-between ${className}`}
     >
       <div>
         <ChartHeader
@@ -42,7 +42,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
           actionSlot={actionSlot}
         />
 
-        <div className="mt-4 min-h-[200px]">
+        <div className="mt-3 min-h-[190px]">
           {loading ? (
             <ChartSkeleton height={height} />
           ) : error ? (
@@ -61,3 +61,4 @@ export const ChartCard: React.FC<ChartCardProps> = ({
     </div>
   );
 };
+
