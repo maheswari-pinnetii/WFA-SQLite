@@ -275,3 +275,52 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
     ]
   }
 ];
+
+export const hasRoleAccess = (item: NavigationItem, userRole: Role): boolean => {
+  if (!item.roles || item.roles.length === 0) return true;
+  return item.roles.includes(userRole);
+};
+
+export const getNavigationForRole = (userRole: Role): NavigationItem[] => {
+  const filterItems = (items: NavigationItem[]): NavigationItem[] => {
+    return items
+      .filter((item) => hasRoleAccess(item, userRole))
+      .map((item) => {
+        if (item.children) {
+          return {
+            ...item,
+            children: filterItems(item.children),
+          };
+        }
+        return item;
+      });
+  };
+
+  return filterItems(MAIN_NAVIGATION);
+};
+
+export const filterNavigationByQuery = (items: NavigationItem[], query: string): NavigationItem[] => {
+  if (!query.trim()) return items;
+  const q = query.toLowerCase().trim();
+
+  const filterRecursive = (itemList: NavigationItem[]): NavigationItem[] => {
+    const matched: NavigationItem[] = [];
+
+    for (const item of itemList) {
+      const labelMatches = item.label.toLowerCase().includes(q);
+      const childMatches = item.children ? filterRecursive(item.children) : [];
+
+      if (labelMatches || childMatches.length > 0) {
+        matched.push({
+          ...item,
+          children: childMatches.length > 0 ? childMatches : item.children,
+        });
+      }
+    }
+
+    return matched;
+  };
+
+  return filterRecursive(items);
+};
+

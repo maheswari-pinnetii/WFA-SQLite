@@ -27,11 +27,13 @@ import {
 import { RealtimeStatusBadge } from '../../../components/common/RealtimeStatusBadge';
 import { useRealtimeNotifications } from '../../../hooks/useRealtimeNotifications';
 import { connectSocket } from '../../../websocket/socket';
+import { Breadcrumbs } from '../../../components/common/Breadcrumbs';
 
 interface EnterpriseHeaderProps {
   onToggleSidebar: () => void;
   onOpenHelp?: () => void;
 }
+
 
 export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSidebar, onOpenHelp }) => {
   const { user, role, logout, permissions } = useAuth();
@@ -166,21 +168,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         </Link>
 
         {/* Dynamic Breadcrumbs */}
-        <div className="hidden sm:flex items-center gap-1.5 text-xs min-w-0 pl-2 border-l border-slate-200 dark:border-slate-800">
-          <Link to="/" className="text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1">
-            <Home size={14} />
-          </Link>
-          {breadcrumbs.map((b, idx) => (
-            <React.Fragment key={b.path}>
-              <ChevronRight className="text-slate-400 dark:text-slate-600" size={13} />
-              <span className={`truncate max-w-[130px] ${
-                idx === breadcrumbs.length - 1 ? 'font-medium text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}>
-                {b.label}
-              </span>
-            </React.Fragment>
-          ))}
-        </div>
+        <Breadcrumbs className="hidden sm:flex pl-2 border-l border-slate-200 dark:border-slate-800" />
       </div>
 
       {/* CENTER SECTION: Global Command Search Surface */}

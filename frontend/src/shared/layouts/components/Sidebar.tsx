@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { useTheme } from '../../../design-system/theme/theme';
 import { ROLE_LABELS, Role } from '../../../security/roles/roles';
-import { PanelLeftClose, Sun, Moon } from 'lucide-react';
-import { MAIN_NAVIGATION, NavigationItem } from './SidebarConfig';
+import { PanelLeftClose, Sun, Moon, Search, X } from 'lucide-react';
+import { 
+  MAIN_NAVIGATION, 
+  NavigationItem, 
+  getNavigationForRole, 
+  filterNavigationByQuery 
+} from './SidebarConfig';
 import { SidebarNavItem, hasActiveDescendant, isRouteActive } from './SidebarNavItem';
 
 interface SidebarProps {
@@ -54,6 +59,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const roleAccent = ROLE_ACCENTS[activeRole] || ROLE_ACCENTS[Role.EMPLOYEE];
   const isDark = theme === 'dark';
 
+  const [menuSearchQuery, setMenuSearchQuery] = useState('');
+
   // Load expanded items from localStorage
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
     try {
@@ -67,6 +74,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return new Set();
   });
 
+  // Get navigation tree filtered by role and search query
+  const roleNavigation = useMemo(() => {
+    return getNavigationForRole(activeRole);
+  }, [activeRole]);
+
+  const displayNavigation = useMemo(() => {
+    return filterNavigationByQuery(roleNavigation, menuSearchQuery);
+  }, [roleNavigation, menuSearchQuery]);
+
   // Save expanded items to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('stackly.sidebar.expanded', JSON.stringify(Array.from(expandedItems)));
@@ -74,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Auto-expand ancestors of active route on mount/location change
   useEffect(() => {
-    const activeAncestors = getActiveAncestorIds(MAIN_NAVIGATION, location.pathname);
+    const activeAncestors = getActiveAncestorIds(roleNavigation, location.pathname);
     if (activeAncestors.length > 0) {
       setExpandedItems(prev => {
         const next = new Set(prev);
@@ -88,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         return changed ? next : prev;
       });
     }
-  }, [location.pathname]);
+  }, [location.pathname, roleNavigation]);
 
   const toggleItem = (id: string) => {
     setExpandedItems(prev => {
@@ -125,9 +141,38 @@ export const Sidebar: React.FC<SidebarProps> = ({
           collapsed ? 'sidebar-is-collapsed w-[76px]' : 'sidebar-is-expanded w-[280px]'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
+        {/* Quick Search Filter when Expanded */}
+        {!collapsed && (
+          <div className="px-3 pt-3 pb-1 border-b border-slate-100 dark:border-slate-800/60">
+            <div className="relative flex items-center">
+              <Search className="absolute left-2.5 text-slate-400 pointer-events-none" size={14} />
+              <input
+                type="text"
+                value={menuSearchQuery}
+                onChange={(e) => setMenuSearchQuery(e.target.value)}
+                placeholder="Filter menu..."
+                className={`w-full text-xs pl-8 pr-7 py-1.5 rounded-md outline-none transition-colors border ${
+                  isDark
+                    ? 'bg-slate-900 border-slate-800 text-slate-200 placeholder-slate-500 focus:border-emerald-500'
+                    : 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:border-emerald-600 focus:bg-white'
+                }`}
+              />
+              {menuSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setMenuSearchQuery('')}
+                  className="absolute right-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Sidebar Navigation Items List */}
-        <nav className="sidebar-nav sidebar-nav-scroll flex-1 overflow-y-auto w-full scrollbar-thin pt-4 flex flex-col gap-1">
-          {MAIN_NAVIGATION.map(item => (
+        <nav className="sidebar-nav sidebar-nav-scroll flex-1 overflow-y-auto w-full scrollbar-thin pt-2 flex flex-col gap-1">
+          {displayNavigation.map(item => (
             <SidebarNavItem
               key={item.id}
               item={item}
@@ -141,6 +186,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               hasAccess={hasAccess}
             />
           ))}
+          {displayNavigation.length === 0 && !collapsed && (
+            <div className="px-4 py-6 text-center text-xs text-slate-400 dark:text-slate-500">
+              No menu items match "{menuSearchQuery}"
+            </div>
+          )}
         </nav>
 
         <div className={`sidebar-footer ${collapsed ? 'is-collapsed' : ''}`}>
