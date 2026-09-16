@@ -95,6 +95,29 @@ export const reviewCorrection = async (req: any, res: any) => {
   }
 };
 
+export const bulkReviewCorrections = async (req: any, res: any) => {
+  try {
+    const { correctionIds, status, managerComment = '' } = req.body || {};
+    if (!Array.isArray(correctionIds) || correctionIds.length === 0 || !['APPROVED', 'REJECTED'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'correctionIds array and status (APPROVED or REJECTED) are required.' });
+    }
+
+    let reviewedCount = 0;
+    for (const corrId of correctionIds) {
+      try {
+        await attendanceService.reviewCorrection(req.user, corrId, status, managerComment);
+        reviewedCount++;
+      } catch (e) {
+        // Skip individual errors
+      }
+    }
+
+    return res.json({ success: true, message: `Successfully ${status.toLowerCase()} ${reviewedCount} out of ${correctionIds.length} correction requests.`, reviewedCount });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'attendance.bulkReviewCorrections', 500, 'Failed to perform bulk correction review.');
+  }
+};
+
 export const getCorrections = async (req: any, res: any) => {
   try {
     const data = await attendanceService.getCorrections(req.user);

@@ -114,6 +114,28 @@ export const updateEmployeeStatus = async (req: any, res: any) => {
   }
 };
 
+export const bulkUpdateEmployees = async (req: any, res: any) => {
+  try {
+    const { employeeIds, updates } = req.body || {};
+    if (!Array.isArray(employeeIds) || employeeIds.length === 0 || !updates || typeof updates !== 'object') {
+      return res.status(400).json({ success: false, message: 'employeeIds array and updates object are required.' });
+    }
+
+    const orgId = getOrganizationId(req);
+    let updatedCount = 0;
+
+    for (const empId of employeeIds) {
+      const result = await employeeService.updateEmployee(empId, orgId, updates);
+      if (result) updatedCount++;
+    }
+
+    logAudit(req.user.id, 'EMPLOYEE_BULK_UPDATE', `Bulk updated ${updatedCount} employees with fields: ${Object.keys(updates).join(', ')}`, orgId);
+    return res.json({ success: true, message: `Successfully updated ${updatedCount} out of ${employeeIds.length} employees.`, updatedCount });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.bulkUpdateEmployees', 500, 'Failed to perform bulk employee update.');
+  }
+};
+
 export const deleteEmployee = async (req: any, res: any) => {
   try {
     const { id } = req.params;

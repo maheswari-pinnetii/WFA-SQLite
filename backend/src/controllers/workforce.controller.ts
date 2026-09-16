@@ -243,6 +243,41 @@ export const reviewLeaveRequest = async (req, res) => {
   }
 };
 
+export const bulkReviewLeaveRequests = async (req, res) => {
+  try {
+    const { requestIds, status } = req.body || {};
+    if (!Array.isArray(requestIds) || requestIds.length === 0 || !['APPROVED', 'REJECTED'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'requestIds array and status (APPROVED or REJECTED) are required.' });
+    }
+
+    const orgId = getOrganizationId(req);
+    let reviewedCount = 0;
+
+    for (const reqId of requestIds) {
+      try {
+        const request = await leaveEngineService.getLeaveRequest(reqId, orgId);
+        if (request && request.status === 'PENDING') {
+          if (status === 'APPROVED') {
+            const startDate = new Date(request.startDate);
+            const endDate = new Date(request.endDate);
+            let days = request.isHalfDay ? 0.5 : Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            await leaveEngineService.deductLeaveBalance(request.employeeId, request.leaveTypeId, days, orgId);
+          }
+          await leaveEngineService.updateLeaveRequestStatus(reqId, orgId, status, req.user.name);
+          reviewedCount++;
+        }
+      } catch (e) {
+        // Skip failed individual requests
+      }
+    }
+
+    logAudit(req.user.id, `LEAVE_BULK_${status}`, `Bulk ${status.toLowerCase()} ${reviewedCount} leave requests`, orgId);
+    return res.json({ success: true, message: `Successfully ${status.toLowerCase()} ${reviewedCount} out of ${requestIds.length} leave requests.`, reviewedCount });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.bulkReviewLeaveRequests', 500, 'Failed to perform bulk leave review.');
+  }
+};
+
 export const getTasks = async (req, res) => {
   try {
     const orgId = getOrganizationId(req);

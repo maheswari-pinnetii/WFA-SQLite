@@ -156,6 +156,7 @@ router.post(
 
 // Employees Directory
 router.get('/employees', authenticateToken, enforceScope, authenticatedUserLimiter, employeeController.getEmployees);
+router.post('/employees/bulk-update', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, employeeController.bulkUpdateEmployees);
 router.get('/employees/:id/export-data', authenticateToken, validateIdParam, employeeController.exportEmployeeData);
 router.post('/employees/:id/anonymize-data', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, employeeController.anonymizeEmployeeData);
 router.put('/employees/:id/status', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_UPDATE', 'EMPLOYEE_MANAGE']), validateIdParam, validateUpdateEmployeeStatus, employeeController.updateEmployeeStatus);
@@ -252,6 +253,7 @@ router.get('/attendance/audit-logs', authenticateToken, authenticatedUserLimiter
 // Persisted leave and task workflows
 router.get('/leave-requests', authenticateToken, enforceScope, authenticatedUserLimiter, workforceController.getLeaveRequests);
 router.post('/leave-requests', authenticateToken, enforceScope, validateLeaveRequest, idempotencyMiddleware, authenticatedUserLimiter, workforceController.createLeaveRequest);
+router.post('/leave-requests/bulk-review', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), authenticatedUserLimiter, workforceController.bulkReviewLeaveRequests);
 router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewLeaveRequest, workforceController.reviewLeaveRequest);
 
 router.get('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), workforceController.getLeavePolicies);
@@ -263,6 +265,7 @@ router.put('/tasks/:id', authenticateToken, validateIdParam, validateUpdateTask,
 // Corrections Requests
 router.post('/attendance/corrections', authenticateToken, enforceScope, validateCorrectionRequest, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.submitCorrection);
 router.get('/attendance/corrections', authenticateToken, enforceScope, authenticatedUserLimiter, attendanceController.getCorrections);
+router.post('/attendance/corrections/bulk-review', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), authenticatedUserLimiter, attendanceController.bulkReviewCorrections);
 router.put('/attendance/corrections/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewCorrection, attendanceController.reviewCorrection);
 
 // Phase 2: Org-wide live status & monthly summaries
