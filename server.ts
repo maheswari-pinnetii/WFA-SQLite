@@ -6,7 +6,7 @@ import { initSockets } from './backend/src/sockets/index.js';
 import { getDb } from './backend/src/config/db.js';
 import { logger } from './backend/src/config/logger.js';
 
-const PORT = process.env.PORT || 5001;
+const PORT = Number(process.env.PORT || 5001);
 
 let server: http.Server;
 let io: SocketServer;
@@ -52,6 +52,18 @@ if (process.env.NODE_ENV !== 'test') {
   });
 
   server.listen(PORT, () => {
+    const env = process.env.NODE_ENV || 'development';
+    console.log('');
+    console.log('┌─────────────────────────────────────────────────┐');
+    console.log('│         Stackly WFA Backend — RUNNING            │');
+    console.log('├─────────────────────────────────────────────────┤');
+    console.log(`│  Environment : ${env.padEnd(32)}│`);
+    console.log(`│  Server      : http://localhost:${PORT}             │`);
+    console.log(`│  Health      : http://localhost:${PORT}/api/health   │`);
+    console.log(`│  API         : http://localhost:${PORT}/api/v1       │`);
+    console.log('│  Database    : SQLite (WAL mode)                 │');
+    console.log('└─────────────────────────────────────────────────┘');
+    console.log('');
     logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${PORT}`);
   });
 } else {

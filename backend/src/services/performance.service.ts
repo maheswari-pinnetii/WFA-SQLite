@@ -73,3 +73,5 @@ export class PerformanceService {
     await execute(`UPDATE okr_objectives SET progress = ?, status = ?, updatedAt = ? WHERE id = ?`, [finalProgress, status, now, objectiveId]);
   }
 }
+
+export const performanceService = new PerformanceService();

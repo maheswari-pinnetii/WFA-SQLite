@@ -127,12 +127,7 @@ const unwrap = <T,>(response: { data?: { success?: boolean; data?: T; message?: 
 
 export const analyticsApi = {
   async getAnalytics(): Promise<AnalyticsData> {
-    try {
-      return unwrap(await apiClient.get('/v1/analytics'));
-    } catch (err) {
-      console.warn('[Analytics API] Live query failed or disconnected, falling back to cached enterprise analytics:', err);
-      return fallbackAnalyticsData;
-    }
+    return unwrap(await apiClient.get('/v1/analytics'));
   },
   async getDashboard(role: string): Promise<any> {
     try {

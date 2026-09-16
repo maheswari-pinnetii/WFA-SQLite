@@ -91,9 +91,24 @@ app.get('/ready', async (req: Request, res: Response) => {
   }
 });
 
-// Generic Health Check
+// Generic Health Check — accessible without proxy at /health
 app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
+  res.status(200).json({ success: true, service: 'wfa-backend', status: 'UP', timestamp: new Date().toISOString() });
+});
+
+// /api/health — routed via Vite proxy in dev, same check with DB verification
+app.get('/api/health', async (req: Request, res: Response) => {
+  let dbConnected = false;
+  try {
+    dbConnected = await healthCheck();
+  } catch (_) {}
+  res.status(dbConnected ? 200 : 503).json({
+    success: dbConnected,
+    service: 'wfa-backend',
+    database: dbConnected ? 'connected' : 'unavailable',
+    status: dbConnected ? 'UP' : 'DEGRADED',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Detailed API Health Monitor & System Metrics (Protected)
