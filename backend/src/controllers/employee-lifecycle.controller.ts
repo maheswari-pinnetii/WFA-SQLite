@@ -86,3 +86,54 @@ export const addDocument = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+export const calculateFnFSettlement = async (req: Request, res: Response) => {
+  try {
+    const user = getUser(req);
+    const { employeeId, exitDate, resignationDate, noticePeriodDays, noticeServedDays, gratuityAmount, otherDeductions } = req.body;
+    if (!employeeId || !exitDate) {
+      return res.status(400).json({ success: false, message: 'employeeId and exitDate are required' });
+    }
+    const { FullFinalSettlementService } = await import('../services/full-final-settlement.service.js');
+    const result = await FullFinalSettlementService.calculateFnFSettlement({
+      employeeId,
+      exitDate,
+      resignationDate,
+      noticePeriodDays,
+      noticeServedDays,
+      gratuityAmount,
+      otherDeductions,
+      preparedBy: user.id
+    });
+    res.status(201).json({ success: true, data: result });
+  } catch (err: any) {
+    logger.error(`[Lifecycle] calculateFnFSettlement: ${err.message}`);
+    res.status(500).json({ success: false, message: err.message || 'Server error' });
+  }
+};
+
+export const listFnFSettlements = async (req: Request, res: Response) => {
+  try {
+    const user = getUser(req);
+    const { FullFinalSettlementService } = await import('../services/full-final-settlement.service.js');
+    const data = await FullFinalSettlementService.listFnFSettlements(user.organizationId);
+    res.json({ success: true, data });
+  } catch (err: any) {
+    logger.error(`[Lifecycle] listFnFSettlements: ${err.message}`);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const approveFnFSettlement = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const user = getUser(req);
+    const { FullFinalSettlementService } = await import('../services/full-final-settlement.service.js');
+    const result = await FullFinalSettlementService.approveFnFSettlement(id, user.id);
+    res.json({ success: true, data: result });
+  } catch (err: any) {
+    logger.error(`[Lifecycle] approveFnFSettlement: ${err.message}`);
+    res.status(500).json({ success: false, message: err.message || 'Server error' });
+  }
+};
+

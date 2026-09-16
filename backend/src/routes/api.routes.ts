@@ -358,6 +358,12 @@ router.post('/employees/:id/transition', authenticateToken, authorizeRoles(['ADM
 router.get('/employees/:id/documents', authenticateToken, enforceScope, authenticatedUserLimiter, lifecycleController.getDocuments);
 router.post('/employees/:id/documents', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, lifecycleController.addDocument);
 
+// Full & Final Settlement (F&F)
+router.get('/payroll/fnf', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, lifecycleController.listFnFSettlements);
+router.post('/payroll/fnf', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, lifecycleController.calculateFnFSettlement);
+router.post('/payroll/fnf/:id/approve', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, lifecycleController.approveFnFSettlement);
+
+
 // ─── Leave Engine (Step 3) ───────────────────────────────────────────────────
 router.get('/leave/types', authenticateToken, authenticatedUserLimiter, performanceController.getLeaveTypes);
 router.post('/leave/types', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.createLeaveType);
@@ -387,16 +393,36 @@ router.patch('/performance/goals/:goalId/progress', authenticateToken, enforceSc
 router.get('/performance/cycles/:cycleId/employees/:employeeId/reviews', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.getReviews);
 router.patch('/performance/reviews/:reviewId/submit', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.submitReview);
 
-// ─── Payroll (Step 6) ───────────────────────────────────────────────────────
-router.get('/payroll/salary/:employeeId', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getSalaryStructure);
+// ─── Payroll & Compensation Engine ─────────────────────────────────────────
+router.get('/payroll/salary/:employeeId', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'EMPLOYEE']), enforceScope, authenticatedUserLimiter, payrollController.getSalaryStructure);
 router.post('/payroll/salary/:employeeId', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.setSalaryStructure);
-router.get('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getPayrollRuns);
+router.get('/payroll/salary/:employeeId/revisions', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'EMPLOYEE']), enforceScope, authenticatedUserLimiter, payrollController.getSalaryRevisionHistory);
+
+router.post('/payroll/ctc/calculate', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.calculateCtc);
+
+router.get('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.getPayrollRuns);
 router.post('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.createPayrollRun);
-router.post('/payroll/runs/monthly-draft', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.triggerMonthlyDraft);
-router.post('/payroll/runs/:runId/generate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.generatePayslips);
-router.get('/payroll/runs/:runId/payslips', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getRunPayslips);
+router.post('/payroll/runs/:runId/calculate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.calculatePayrollRun);
+router.post('/payroll/runs/:runId/validate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.validatePayrollRun);
+router.post('/payroll/runs/:runId/submit', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.submitPayrollRun);
+router.post('/payroll/runs/:runId/approve', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.approvePayrollRun);
+router.post('/payroll/runs/:runId/reject', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.rejectPayrollRun);
+router.post('/payroll/runs/:runId/lock', authenticateToken, authorizeRoles(['ADMIN']), authenticatedUserLimiter, payrollController.lockPayrollRun);
 router.post('/payroll/runs/:runId/finalize', authenticateToken, authorizeRoles(['ADMIN']), authenticatedUserLimiter, payrollController.finalizePayrollRun);
+router.post('/payroll/runs/:runId/rollback', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.rollbackPayrollRun);
+router.post('/payroll/runs/:runId/reverse', authenticateToken, authorizeRoles(['ADMIN']), authenticatedUserLimiter, payrollController.reversePayrollRun);
+
+router.get('/payroll/runs/:runId/payslips', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.getRunPayslips);
+router.get('/payroll/runs/:runId/register', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getPayrollRegister);
+router.get('/payroll/departments/summary', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.getDepartmentSummary);
+
 router.get('/payroll/payslips/me', authenticateToken, authenticatedUserLimiter, payrollController.getMyPayslips);
+router.get('/payroll/payslips/:payslipId/pdf', authenticateToken, authenticatedUserLimiter, payrollController.getPayslipPdf);
+
+router.get('/payroll/ytd/:employeeId', authenticateToken, enforceScope, authenticatedUserLimiter, payrollController.getEmployeeYtd);
+router.get('/payroll/tax/:employeeId', authenticateToken, enforceScope, authenticatedUserLimiter, payrollController.getEmployeeTaxProfile);
+router.post('/payroll/tax/:employeeId', authenticateToken, enforceScope, authenticatedUserLimiter, payrollController.upsertEmployeeTaxProfile);
+router.get('/payroll/tax/:employeeId/form16', authenticateToken, enforceScope, authenticatedUserLimiter, payrollController.getForm16Pdf);
 
 // ─── Compliance (Phase 5) ────────────────────────────────────────────────────
 router.get('/compliance/config', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, complianceController.getComplianceConfigs);

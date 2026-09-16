@@ -154,42 +154,16 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
     icon: <FileSpreadsheet size={18} strokeWidth={2} />,
     roles: ALL_ROLES,
     children: [
-      { id: 'payroll.dashboard', label: 'Dashboard', path: '/payroll/dashboard', roles: HR_ADMIN_ROLES },
-      { id: 'payroll.structures', label: 'Salary Structures', path: '/payroll/structures', roles: HR_ADMIN_ROLES },
-      { id: 'payroll.components', label: 'Salary Components', path: '/payroll/components', roles: HR_ADMIN_ROLES },
-      {
-        id: 'payroll.runs',
-        label: 'Payroll Runs',
-        roles: HR_ADMIN_ROLES,
-        children: [
-          { id: 'payroll.runs.draft', label: 'Draft', path: '/payroll/runs/draft' },
-          { id: 'payroll.runs.review', label: 'Review', path: '/payroll/runs/review' },
-          { id: 'payroll.runs.approved', label: 'Approved', path: '/payroll/runs/approved' },
-          { id: 'payroll.runs.locked', label: 'Locked', path: '/payroll/runs/locked' },
-        ]
-      },
+      { id: 'payroll.dashboard', label: 'Dashboard', path: '/payroll/dashboard', roles: LEADERSHIP_ROLES },
+      { id: 'payroll.register', label: 'Payroll Register', path: '/payroll/register', roles: HR_ADMIN_ROLES },
+      { id: 'payroll.ctc', label: 'CTC Calculator', path: '/payroll/ctc-calculator', roles: LEADERSHIP_ROLES },
+      { id: 'payroll.departments', label: 'Department Payroll', path: '/payroll/departments', roles: LEADERSHIP_ROLES },
+      { id: 'payroll.fnf', label: 'Full & Final (F&F)', path: '/payroll/fnf', roles: HR_ADMIN_ROLES },
+      { id: 'payroll.revisions', label: 'Salary Revisions', path: '/payroll/revisions', roles: ALL_ROLES },
       { id: 'payroll.payslips', label: 'Payslips', path: '/payroll/payslips', roles: ALL_ROLES },
-      {
-        id: 'payroll.tax',
-        label: 'Tax',
-        roles: ALL_ROLES,
-        children: [
-          { id: 'payroll.tax.declarations', label: 'Tax Declarations', path: '/payroll/tax/declarations' },
-          { id: 'payroll.tax.investments', label: 'Investments', path: '/payroll/tax/investments' },
-          { id: 'payroll.tax.tds', label: 'TDS', path: '/payroll/tax/tds', roles: HR_ADMIN_ROLES },
-        ]
-      },
-      {
-        id: 'payroll.compliance',
-        label: 'Compliance',
-        roles: HR_ADMIN_ROLES,
-        children: [
-          { id: 'payroll.compliance.pf', label: 'PF', path: '/payroll/compliance/pf' },
-          { id: 'payroll.compliance.esi', label: 'ESI', path: '/payroll/compliance/esi' },
-          { id: 'payroll.compliance.pt', label: 'Professional Tax', path: '/payroll/compliance/pt' },
-        ]
-      },
+      { id: 'payroll.tax.declarations', label: 'Tax & Declarations', path: '/payroll/tax-declarations', roles: ALL_ROLES },
       { id: 'payroll.reports', label: 'Payroll Reports', path: '/payroll/reports', roles: HR_ADMIN_ROLES },
+
     ]
   },
   {

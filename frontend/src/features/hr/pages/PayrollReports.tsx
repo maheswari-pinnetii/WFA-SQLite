@@ -174,9 +174,7 @@ export const PayrollReports: React.FC = () => {
       // Basic date manipulation to get first/last of month based on selected string
       // Just sending generic strings to keep it simple
       const d = new Date();
-      const first = new Date(d.getFullYear(), d.getMonth(), 1).toISOString().split('T')[0];
-      const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).toISOString().split('T')[0];
-      return payrollApi.createRun(first, last);
+      return payrollApi.createRun(d.getMonth() + 1, d.getFullYear());
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });

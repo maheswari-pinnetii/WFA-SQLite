@@ -299,6 +299,394 @@ export const initDb = async (): Promise<void> => {
           )
         `);
 
+        // Payroll Domain Tables
+        await execute(`
+          CREATE TABLE IF NOT EXISTS employee_salary_structures (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            salaryStructureId TEXT,
+            annualCtc REAL NOT NULL,
+            monthlyGross REAL NOT NULL,
+            currency TEXT DEFAULT 'INR',
+            effectiveFrom TEXT NOT NULL,
+            effectiveTo TEXT,
+            revisionReason TEXT,
+            isActive INTEGER DEFAULT 1,
+            createdBy TEXT,
+            createdAt TEXT NOT NULL,
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS salary_revisions (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            previousCtc REAL NOT NULL,
+            newCtc REAL NOT NULL,
+            previousStructureId TEXT,
+            newStructureId TEXT NOT NULL,
+            effectiveDate TEXT NOT NULL,
+            revisionPercentage REAL NOT NULL,
+            reason TEXT NOT NULL,
+            createdBy TEXT NOT NULL,
+            approvedBy TEXT,
+            createdTimestamp TEXT NOT NULL,
+            approvalTimestamp TEXT,
+            status TEXT DEFAULT 'APPROVED'
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_run_employees (
+            id TEXT PRIMARY KEY,
+            payrollRunId TEXT NOT NULL,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            departmentId TEXT,
+            designation TEXT,
+            effectiveStructureId TEXT,
+            taxRegime TEXT DEFAULT 'new',
+            annualCtc REAL DEFAULT 0,
+            basicPay REAL DEFAULT 0,
+            hra REAL DEFAULT 0,
+            specialAllowance REAL DEFAULT 0,
+            otherEarnings REAL DEFAULT 0,
+            overtimePay REAL DEFAULT 0,
+            grossEarnings REAL DEFAULT 0,
+            eligibleReimbursements REAL DEFAULT 0,
+            employeePf REAL DEFAULT 0,
+            employerPf REAL DEFAULT 0,
+            employeeEsi REAL DEFAULT 0,
+            employerEsi REAL DEFAULT 0,
+            professionalTax REAL DEFAULT 0,
+            tdsDeduction REAL DEFAULT 0,
+            lopDays REAL DEFAULT 0,
+            lopDeduction REAL DEFAULT 0,
+            otherDeductions REAL DEFAULT 0,
+            totalDeductions REAL DEFAULT 0,
+            netPay REAL DEFAULT 0,
+            status TEXT DEFAULT 'CALCULATED',
+            createdAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_line_items (
+            id TEXT PRIMARY KEY,
+            payrollRunEmployeeId TEXT NOT NULL,
+            code TEXT NOT NULL,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            amount REAL NOT NULL,
+            taxable INTEGER DEFAULT 1,
+            pfApplicable INTEGER DEFAULT 1,
+            esiApplicable INTEGER DEFAULT 1,
+            calculationBasis TEXT
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_lop_records (
+            id TEXT PRIMARY KEY,
+            payrollRunEmployeeId TEXT NOT NULL,
+            employeeId TEXT NOT NULL,
+            payrollRunId TEXT NOT NULL,
+            lopDays REAL NOT NULL,
+            payrollDivisor INTEGER NOT NULL DEFAULT 30,
+            lopBasisAmount REAL NOT NULL,
+            calculatedLopAmount REAL NOT NULL,
+            createdAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_overtime_records (
+            id TEXT PRIMARY KEY,
+            payrollRunEmployeeId TEXT NOT NULL,
+            overtimeRecordId TEXT NOT NULL,
+            approvedHours REAL NOT NULL,
+            hourlyRate REAL NOT NULL,
+            multiplier REAL DEFAULT 1.5,
+            calculatedAmount REAL NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_reimbursement_records (
+            id TEXT PRIMARY KEY,
+            payrollRunEmployeeId TEXT NOT NULL,
+            expenseClaimId TEXT NOT NULL,
+            category TEXT NOT NULL,
+            approvedAmount REAL NOT NULL,
+            taxable INTEGER DEFAULT 0
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_approvals (
+            id TEXT PRIMARY KEY,
+            payrollRunId TEXT NOT NULL,
+            actorId TEXT NOT NULL,
+            actorRole TEXT NOT NULL,
+            action TEXT NOT NULL,
+            previousStatus TEXT NOT NULL,
+            newStatus TEXT NOT NULL,
+            reason TEXT,
+            timestamp TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_reversals (
+            id TEXT PRIMARY KEY,
+            originalPayrollRunId TEXT NOT NULL,
+            replacementPayrollRunId TEXT,
+            reversedBy TEXT NOT NULL,
+            reversalDate TEXT NOT NULL,
+            reversalReason TEXT NOT NULL,
+            totalReversedAmount REAL NOT NULL,
+            status TEXT DEFAULT 'COMPLETED'
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS employee_tax_profiles (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            financialYear TEXT NOT NULL DEFAULT '2024-25',
+            regime TEXT NOT NULL DEFAULT 'new',
+            declarationStatus TEXT DEFAULT 'SUBMITTED',
+            previousEmployerIncome REAL DEFAULT 0,
+            previousEmployerTds REAL DEFAULT 0,
+            otherIncome REAL DEFAULT 0,
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS tax_declarations (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            financialYear TEXT NOT NULL DEFAULT '2024-25',
+            sectionCode TEXT NOT NULL,
+            componentName TEXT NOT NULL,
+            declaredAmount REAL NOT NULL DEFAULT 0,
+            verifiedAmount REAL DEFAULT 0,
+            proofDocumentUrl TEXT,
+            status TEXT DEFAULT 'DECLARED',
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_ytd (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            financialYear TEXT NOT NULL,
+            ytdGross REAL DEFAULT 0,
+            ytdBasic REAL DEFAULT 0,
+            ytdHra REAL DEFAULT 0,
+            ytdAllowances REAL DEFAULT 0,
+            ytdOvertime REAL DEFAULT 0,
+            ytdReimbursements REAL DEFAULT 0,
+            ytdPf REAL DEFAULT 0,
+            ytdEsi REAL DEFAULT 0,
+            ytdPt REAL DEFAULT 0,
+            ytdTds REAL DEFAULT 0,
+            ytdLopDeduction REAL DEFAULT 0,
+            ytdOtherDeductions REAL DEFAULT 0,
+            ytdNetPay REAL DEFAULT 0,
+            ytdTaxableIncome REAL DEFAULT 0,
+            lastUpdatedRunId TEXT,
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS payroll_audit_logs (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            actorId TEXT NOT NULL,
+            actorRole TEXT,
+            action TEXT NOT NULL,
+            entityType TEXT NOT NULL,
+            entityId TEXT NOT NULL,
+            previousValues TEXT,
+            newValues TEXT,
+            ipAddress TEXT,
+            timestamp TEXT NOT NULL
+          );
+        `);
+
+        // Master HRMS Domain Tables
+        await execute(`
+          CREATE TABLE IF NOT EXISTS employee_documents (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            documentType TEXT NOT NULL,
+            documentName TEXT NOT NULL,
+            fileUrl TEXT NOT NULL,
+            fileSize INTEGER,
+            mimeType TEXT,
+            documentNumber TEXT,
+            issuedDate TEXT,
+            expiryDate TEXT,
+            verificationStatus TEXT DEFAULT 'PENDING',
+            uploadedBy TEXT NOT NULL,
+            createdAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS roster_assignments (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            shiftId TEXT NOT NULL,
+            date TEXT NOT NULL,
+            isOffDay INTEGER DEFAULT 0,
+            isHoliday INTEGER DEFAULT 0,
+            swapStatus TEXT DEFAULT 'NONE',
+            swappedWithEmployeeId TEXT,
+            assignedBy TEXT,
+            createdAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS leave_accruals (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            leaveTypeId TEXT NOT NULL,
+            accrualPeriod TEXT NOT NULL,
+            openingBalance REAL NOT NULL DEFAULT 0,
+            accruedAmount REAL NOT NULL DEFAULT 0,
+            usedAmount REAL NOT NULL DEFAULT 0,
+            carryForwardAmount REAL NOT NULL DEFAULT 0,
+            encashedAmount REAL NOT NULL DEFAULT 0,
+            closingBalance REAL NOT NULL DEFAULT 0,
+            createdTimestamp TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS workflows (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            module TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            isActive INTEGER DEFAULT 1,
+            minThreshold REAL DEFAULT 0,
+            createdAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS workflow_steps (
+            id TEXT PRIMARY KEY,
+            workflowId TEXT NOT NULL,
+            stepOrder INTEGER NOT NULL,
+            approverRole TEXT NOT NULL,
+            approverUserId TEXT,
+            slaHours INTEGER DEFAULT 48,
+            autoApproveOnSlaExceeded INTEGER DEFAULT 0,
+            escalateToRole TEXT
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS workflow_requests (
+            id TEXT PRIMARY KEY,
+            workflowId TEXT NOT NULL,
+            entityType TEXT NOT NULL,
+            entityId TEXT NOT NULL,
+            requesterId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            currentStepOrder INTEGER DEFAULT 1,
+            status TEXT DEFAULT 'PENDING',
+            submittedAt TEXT NOT NULL,
+            completedAt TEXT
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS assets (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            assetCode TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            model TEXT,
+            serialNumber TEXT,
+            purchaseDate TEXT,
+            purchaseCost REAL,
+            status TEXT DEFAULT 'AVAILABLE',
+            locationId TEXT,
+            createdAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS asset_assignments (
+            id TEXT PRIMARY KEY,
+            assetId TEXT NOT NULL,
+            employeeId TEXT NOT NULL,
+            assignedDate TEXT NOT NULL,
+            returnDueDate TEXT,
+            actualReturnDate TEXT,
+            conditionOnAssign TEXT DEFAULT 'GOOD',
+            conditionOnReturn TEXT,
+            status TEXT DEFAULT 'ACTIVE',
+            assignedBy TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS full_and_final_settlements (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            exitDate TEXT NOT NULL,
+            resignationDate TEXT,
+            noticePeriodDays INTEGER DEFAULT 30,
+            noticeServedDays INTEGER DEFAULT 30,
+            unpaidSalaryAmount REAL DEFAULT 0,
+            lopDeductionAmount REAL DEFAULT 0,
+            leaveEncashmentDays REAL DEFAULT 0,
+            leaveEncashmentAmount REAL DEFAULT 0,
+            reimbursementAmount REAL DEFAULT 0,
+            noticeShortfallDeduction REAL DEFAULT 0,
+            gratuityAmount REAL DEFAULT 0,
+            otherDeductions REAL DEFAULT 0,
+            netSettlementAmount REAL NOT NULL,
+            status TEXT DEFAULT 'DRAFT',
+            preparedBy TEXT NOT NULL,
+            approvedBy TEXT,
+            createdAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS system_calendars (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            locationId TEXT,
+            departmentId TEXT,
+            title TEXT NOT NULL,
+            date TEXT NOT NULL,
+            type TEXT NOT NULL,
+            description TEXT,
+            isPaid INTEGER DEFAULT 1,
+            createdAt TEXT NOT NULL
+          );
+        `);
+
         // Materialized View for HR Dashboard
         await execute(`
           CREATE TABLE IF NOT EXISTS dashboard_summary_mv (

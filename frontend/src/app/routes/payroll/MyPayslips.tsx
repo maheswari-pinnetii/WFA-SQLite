@@ -21,17 +21,16 @@ const MyPayslips: React.FC = () => {
       setPayslips([
         {
           id: 'ps-001',
+          payrollRunId: 'pr-001',
           employeeId: 'emp-1',
           employeeName: 'Alex Mercer',
           periodStart: '2026-08-01',
           periodEnd: '2026-08-31',
           basicPay: 45000,
-          allowances: 12000,
           totalEarnings: 57000,
-          taxDeductions: 5200,
-          otherDeductions: 1800,
           totalDeductions: 7000,
           netPay: 50000,
+          lineItems: [],
           status: 'PAID'
         }
       ]);

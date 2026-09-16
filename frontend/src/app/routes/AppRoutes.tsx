@@ -94,6 +94,16 @@ import { ShiftManagementPage } from '../../features/hr/pages/ShiftManagementPage
 import { LeavePoliciesPage } from '../../features/hr/pages/LeavePoliciesPage';
 import PayrollDashboard from './payroll/PayrollDashboard';
 import MyPayslips from './payroll/MyPayslips';
+import { PayrollRunDetailsPage } from './payroll/PayrollRunDetailsPage';
+import { PayrollRegisterPage } from './payroll/PayrollRegisterPage';
+import { CtcCalculatorPage } from '../../features/hr/pages/CtcCalculatorPage';
+import { SalaryRevisionHistoryPage } from '../../features/hr/pages/SalaryRevisionHistoryPage';
+import { DepartmentPayrollPage } from '../../features/hr/pages/DepartmentPayrollPage';
+import { TaxDeclarationsPage } from '../../features/employee/pages/TaxDeclarationsPage';
+import { EmployeePayrollProfilePage } from '../../features/employee/pages/EmployeePayrollProfilePage';
+import { AssetManagementPage } from '../../features/hr/pages/AssetManagementPage';
+import { FullFinalSettlementPage } from '../../features/hr/pages/FullFinalSettlementPage';
+
 const DefaultHomeRedirect: React.FC = () => {
   const { role, isAuthenticated } = useAuth();
   if (!isAuthenticated) {
@@ -351,15 +361,28 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/leave/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
 
                 {/* Payroll */}
-                <Route path="/payroll/dashboard" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollDashboard /></RoleGuard>} />
+                <Route path="/payroll/dashboard" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><PayrollDashboard /></RoleGuard>} />
+                <Route path="/payroll/runs/:id" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><PayrollRunDetailsPage /></RoleGuard>} />
+                <Route path="/payroll/register" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollRegisterPage /></RoleGuard>} />
+                <Route path="/payroll/ctc-calculator" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><CtcCalculatorPage /></RoleGuard>} />
+                <Route path="/payroll/revisions" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.EMPLOYEE]}><SalaryRevisionHistoryPage /></RoleGuard>} />
+                <Route path="/payroll/departments" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><DepartmentPayrollPage /></RoleGuard>} />
+                <Route path="/payroll/fnf" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><FullFinalSettlementPage /></RoleGuard>} />
+                <Route path="/payroll/tax-declarations" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><TaxDeclarationsPage /></RoleGuard>} />
+                <Route path="/payroll/profile" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeePayrollProfilePage /></RoleGuard>} />
                 <Route path="/payroll/structures" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollReports /></RoleGuard>} />
                 <Route path="/payroll/components" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollReports /></RoleGuard>} />
-                <Route path="/payroll/runs/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollReports /></RoleGuard>} />
+                <Route path="/payroll/runs/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollDashboard /></RoleGuard>} />
                 <Route path="/payroll/payslips" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyPayslips /></RoleGuard>} />
-                <Route path="/payroll/tax/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyPayslips /></RoleGuard>} />
+                <Route path="/payroll/tax/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><TaxDeclarationsPage /></RoleGuard>} />
                 <Route path="/payroll/compliance/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollReports /></RoleGuard>} />
                 <Route path="/payroll/reports" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollReports /></RoleGuard>} />
                 <Route path="/payroll/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollDashboard /></RoleGuard>} />
+
+                {/* Assets */}
+                <Route path="/assets" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><AssetManagementPage /></RoleGuard>} />
+                <Route path="/assets/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><AssetManagementPage /></RoleGuard>} />
+
 
                 {/* Performance */}
                 <Route path="/performance/dashboard" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PerformanceOverviewPage /></RoleGuard>} />
