@@ -684,18 +684,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .admin-dashboard .kpi-card {
-  min-height: 8.5rem;
+  min-height: 7.5rem;
   background: var(--surface) !important;
   border-color: var(--line) !important;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.055) !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
 }
 .admin-dashboard .kpi-card:hover {
   border-color: rgba(37, 99, 235, 0.38) !important;
-  box-shadow: 0 18px 34px rgba(37, 99, 235, 0.12) !important;
-  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.1) !important;
+  transform: translateY(-2px);
 }
-.admin-dashboard .kpi-card h3 { color: var(--text-primary) !important; }
-.admin-dashboard .kpi-card p { color: var(--text-muted) !important; }
 
 .admin-dashboard > div > .flex.items-center.justify-between h3 {
   color: var(--text-secondary) !important;

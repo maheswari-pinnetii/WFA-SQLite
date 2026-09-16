@@ -199,6 +199,33 @@ export const initDb = async (): Promise<void> => {
         await execute(`CREATE INDEX IF NOT EXISTS idx_evt_token_hash ON email_verification_tokens(token_hash)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_evt_user_id    ON email_verification_tokens(user_id)`);
 
+        // Ensure audit_logs table exists and has actorId and timestamp columns
+        await execute(`
+          CREATE TABLE IF NOT EXISTS audit_logs (
+            id TEXT PRIMARY KEY,
+            actorId TEXT NOT NULL,
+            action TEXT NOT NULL,
+            entityType TEXT NOT NULL DEFAULT 'system',
+            entityId TEXT NOT NULL DEFAULT 'server',
+            details TEXT,
+            ipAddress TEXT,
+            createdAt TEXT NOT NULL,
+            timestamp TEXT
+          )
+        `);
+        if (!(await columnExists('audit_logs', 'actorId'))) {
+          try { await execute("ALTER TABLE audit_logs ADD COLUMN actorId TEXT DEFAULT 'anonymous';"); } catch (e) {}
+        }
+        if (!(await columnExists('audit_logs', 'entityType'))) {
+          try { await execute("ALTER TABLE audit_logs ADD COLUMN entityType TEXT DEFAULT 'system';"); } catch (e) {}
+        }
+        if (!(await columnExists('audit_logs', 'entityId'))) {
+          try { await execute("ALTER TABLE audit_logs ADD COLUMN entityId TEXT DEFAULT 'server';"); } catch (e) {}
+        }
+        if (!(await columnExists('audit_logs', 'timestamp'))) {
+          try { await execute("ALTER TABLE audit_logs ADD COLUMN timestamp TEXT;"); } catch (e) {}
+        }
+
         // Ensure email_verified columns exist on users
         if (!(await columnExists('users', 'email_verified'))) {
           try { await execute('ALTER TABLE users ADD COLUMN email_verified    INTEGER DEFAULT 0'); } catch (e) {}
@@ -799,14 +826,14 @@ export const initDb = async (): Promise<void> => {
           throw new Error('Database ping query failed during initialization.');
         }
 
-        // Startup write-test: use actual audit_logs schema (actorId, createdAt)
+        // Startup write-test: use actual audit_logs schema (actorId, createdAt, timestamp)
         const auditTestId = 'startup-verify-' + Date.now();
         const auditTestTs = new Date().toISOString();
         try {
           await execute(`
-            INSERT INTO audit_logs (id, actorId, action, entityType, entityId, details, createdAt)
-            VALUES (?, 'system', 'STARTUP_TEST', 'system', 'server', 'validation-write', ?)
-          `, [auditTestId, auditTestTs]);
+            INSERT INTO audit_logs (id, actorId, action, entityType, entityId, details, createdAt, timestamp)
+            VALUES (?, 'system', 'STARTUP_TEST', 'system', 'server', 'validation-write', ?, ?)
+          `, [auditTestId, auditTestTs, auditTestTs]);
           await execute('DELETE FROM audit_logs WHERE id = ?', [auditTestId]);
         } catch (auditErr: any) {
           // Non-fatal: audit_logs schema may differ across versions
@@ -828,9 +855,9 @@ export const logAudit = async (userId: string, action: string, details: string, 
   const ts = new Date().toISOString();
   try {
     await execute(`
-      INSERT INTO audit_logs (id, actorId, action, entityType, entityId, details, createdAt)
-      VALUES (?, ?, ?, 'system', 'server', ?, ?)
-    `, [id, userId || 'anonymous', action, details, ts]);
+      INSERT INTO audit_logs (id, actorId, action, entityType, entityId, details, createdAt, timestamp)
+      VALUES (?, ?, ?, 'system', 'server', ?, ?, ?)
+    `, [id, userId || 'anonymous', action, details, ts, ts]);
   } catch (err) {
     console.error('[logAudit] Failed to log audit event:', err);
   }

@@ -29,13 +29,24 @@ export const ManagerDashboardOverview: React.FC = () => (
         </p>
       </div>
     </div>
-    <div className="flex items-center gap-2 shrink-0">
-      <Link to="/manager/approvals" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-sm">
-        <CheckCircle2 size={14} /> Leave Approvals
-      </Link>
-      <Link to="/manager/analytics" className="btn btn-secondary btn-sm flex items-center gap-1.5">
-        <Zap size={14} /> Team Analytics
-      </Link>
+    <div className="flex flex-col items-end gap-2 shrink-0">
+      <div className="flex items-center gap-2 flex-wrap">
+        <Link to="/manager/approvals" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-sm">
+          <CheckCircle2 size={14} /> Leave Approvals
+        </Link>
+        <Link to="/manager/analytics" className="btn btn-secondary btn-sm flex items-center gap-1.5">
+          <Zap size={14} /> Team Analytics
+        </Link>
+      </div>
+      <div className="flex items-center gap-1.5 flex-wrap text-xs">
+        <Link to="/attendance/regularization" className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-400 font-medium">Regularization</Link>
+        <Link to="/leave/requests" className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-400 font-medium">Leave Requests</Link>
+        <Link to="/payroll/payslips" className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-400 font-medium">My Payroll</Link>
+        <Link to="/payroll/revisions" className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-400 font-medium">Salary Revisions</Link>
+        <Link to="/performance/okrs" className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-400 font-medium">OKRs</Link>
+        <Link to="/performance/360-feedback" className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-400 font-medium">360 Feedback</Link>
+        <Link to="/expenses/claims" className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-emerald-400 font-medium">Claims</Link>
+      </div>
     </div>
   </div>
 );

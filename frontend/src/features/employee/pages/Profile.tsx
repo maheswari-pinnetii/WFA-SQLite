@@ -14,6 +14,7 @@ import {
   FileText,
   Settings,
   Download,
+  Award,
   LogOut as LogOutIcon,
   ChevronLeft,
   ChevronRight,
@@ -21,7 +22,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -33,7 +34,7 @@ const YEARS = Array.from({ length: 16 }, (_, i) => (2020 + i).toString());
 export const Profile: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'performance' | 'documents' | 'security'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'performance' | 'documents' | 'bank' | 'security'>('overview');
 
   // MFA / 2FA States
   const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: string | null }>({ enabled: false, verifiedAt: null });
@@ -412,12 +413,13 @@ export const Profile: React.FC = () => {
         </div>
 
         {/* Profile Navigation Tabs */}
-        <div className="flex border-b border-[var(--border-color)] gap-4 text-xs font-bold">
+        <div className="flex border-b border-[var(--border-color)] gap-4 text-xs font-bold overflow-x-auto">
           {[
             { id: 'overview', label: 'Overview', icon: <UserIcon size={14} /> },
             { id: 'attendance', label: 'Attendance', icon: <Clock size={14} /> },
             { id: 'performance', label: 'Performance', icon: <TrendingUp size={14} /> },
-            { id: 'documents', label: 'Documents', icon: <FileText size={14} /> },
+            { id: 'documents', label: 'Documents & KYC', icon: <FileText size={14} /> },
+            { id: 'bank', label: 'Bank & Tax Details', icon: <Award size={14} /> },
             { id: 'security', label: 'Security', icon: <Settings size={14} /> },
           ].map((tab) => (
             <button
@@ -700,25 +702,154 @@ export const Profile: React.FC = () => {
           </div>
         )}
 
-        {/* Tab 4: Documents */}
+        {/* Tab 4: Documents & KYC Uploads */}
         {activeTab === 'documents' && (
-          <div className="space-y-2 text-xs animate-fadeIn">
-            {[
-              { name: 'Employment Offer Letter & Contract.pdf', size: '2.4 MB' },
-              { name: 'Q1 Performance Appraisal Review.pdf', size: '1.1 MB' },
-              { name: 'Non-Disclosure Agreement (NDA).pdf', size: '850 KB' },
-            ].map((doc, idx) => (
-              <div key={idx} className="p-3 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileText size={16} className="text-emerald-500" />
-                  <span className="font-semibold text-[var(--text-primary)]">{doc.name}</span>
+          <div className="space-y-6 text-xs animate-fadeIn">
+            {/* Upload Category Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { title: 'Aadhaar Card (Front & Back)', code: 'AADHAAR', icon: <FileText className="text-emerald-400" size={18} />, status: 'Verified' },
+                { title: 'PAN Card (Permanent Account)', code: 'PAN', icon: <FileText className="text-blue-400" size={18} />, status: 'Verified' },
+                { title: 'Tax Investment Proofs (80C/80D)', code: 'TAX_PROOF', icon: <FileText className="text-amber-400" size={18} />, status: 'Pending Review' },
+              ].map((docType) => (
+                <div key={docType.code} className="p-4 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-bold text-[var(--text-primary)]">
+                      {docType.icon} {docType.title}
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      docType.status === 'Verified' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                    }`}>
+                      {docType.status}
+                    </span>
+                  </div>
+                  <label className="block p-3 rounded-xl border border-dashed border-slate-700 hover:border-emerald-500 bg-slate-950/40 text-center cursor-pointer transition-colors">
+                    <input type="file" className="hidden" onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        alert(`Uploaded ${e.target.files[0].name} for ${docType.title}`);
+                      }
+                    }} />
+                    <span className="text-[11px] font-bold text-slate-300 block">Click or drag PDF / Image to upload</span>
+                    <span className="text-[10px] text-slate-400">Max size: 5MB (.pdf, .jpg, .png)</span>
+                  </label>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono flex items-center gap-2">
-                  {doc.size}
-                  <button className="p-1 hover:text-emerald-500"><Download size={14} /></button>
+              ))}
+            </div>
+
+            {/* Existing Uploaded Documents List */}
+            <div className="space-y-3">
+              <h4 className="font-extrabold text-[var(--text-primary)] border-b border-[var(--border-color)] pb-2">Your Uploaded KYC & HR Documents</h4>
+              {[
+                { name: 'Aadhaar_Card_Verified_Emp1005.pdf', category: 'Aadhaar', size: '1.8 MB', date: 'Jan 12, 2026', verified: true },
+                { name: 'PAN_Card_Verified_Emp1005.pdf', category: 'PAN Card', size: '920 KB', date: 'Jan 12, 2026', verified: true },
+                { name: 'LIC_80C_Premium_Receipt_2026.pdf', category: 'Tax Proof', size: '1.4 MB', date: 'Aug 24, 2026', verified: false },
+                { name: 'Employment Offer Letter & Contract.pdf', category: 'Contract', size: '2.4 MB', date: 'Jan 01, 2026', verified: true },
+              ].map((doc, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <FileText size={16} className="text-emerald-500 shrink-0" />
+                    <div>
+                      <span className="font-semibold text-[var(--text-primary)] block">{doc.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{doc.category} · Uploaded {doc.date}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      doc.verified ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                    }`}>
+                      {doc.verified ? '✓ Verified' : 'Pending Verification'}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono flex items-center gap-2">
+                      {doc.size}
+                      <button className="p-1 hover:text-emerald-500"><Download size={14} /></button>
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: Bank & Tax Details */}
+        {activeTab === 'bank' && (
+          <div className="space-y-6 text-xs animate-fadeIn text-[var(--text-primary)]">
+            <div className="p-5 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-4">
+              <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+                <div>
+                  <h4 className="text-sm font-extrabold text-[var(--text-primary)]">Employee Bank Account Details</h4>
+                  <p className="text-[11px] text-slate-400">Direct salary deposit and monthly expense reimbursement account</p>
+                </div>
+                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">
+                  ✓ Verified by HR Payroll
                 </span>
               </div>
-            ))}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">Account Holder Name</label>
+                  <input readOnly value={user?.name || 'Alex Mercer'} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-medium" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">Bank Name</label>
+                  <input readOnly value="HDFC Bank Ltd" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-medium" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">Account Number</label>
+                  <input readOnly value="50100482910482" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">IFSC Code</label>
+                  <input readOnly value="HDFC0000240" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">Branch Name</label>
+                  <input readOnly value="Koramangala 4th Block, Bengaluru" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-medium" />
+                </div>
+                <div>
+                  <label className="text-[11px] text-slate-400 font-bold block mb-1">Account Type</label>
+                  <input readOnly value="Savings Salary Account" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-medium" />
+                </div>
+              </div>
+            </div>
+
+            {/* Tax & Statutory Identifiers */}
+            <div className="p-5 rounded-2xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-4">
+              <div className="border-b border-[var(--border-color)] pb-3">
+                <h4 className="text-sm font-extrabold text-[var(--text-primary)]">Statutory & Tax Identifiers</h4>
+                <p className="text-[11px] text-slate-400">PAN, Aadhaar, Provident Fund (PF) UAN, and ESI Registration</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block">PAN Card Number</span>
+                    <span className="font-mono text-sm font-bold text-white">ABCDE1234F</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full">PAN Verified</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Aadhaar Reference</span>
+                    <span className="font-mono text-sm font-bold text-white">XXXX-XXXX-9842</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full">eKYC Active</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block">PF Universal Account No (UAN)</span>
+                    <span className="font-mono text-sm font-bold text-white">101294810294</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full">Active Contribution</span>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block">Current Tax Regime</span>
+                    <span className="font-mono text-sm font-bold text-emerald-400">New Tax Regime (FY 2024-25)</span>
+                  </div>
+                  <Link to="/payroll/tax-declarations" className="text-[10px] text-indigo-400 font-bold underline">Change Regime →</Link>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

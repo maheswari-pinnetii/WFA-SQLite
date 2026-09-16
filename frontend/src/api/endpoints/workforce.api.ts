@@ -51,5 +51,8 @@ export const workforceApi = {
   },
   async updateTask(id: string, status: Task['status']): Promise<Task> {
     return unwrap(await apiClient.put(`/v1/tasks/${id}`, { status }));
+  },
+  async createTask(payload: Partial<Task>): Promise<Task> {
+    return unwrap(await apiClient.post('/v1/tasks', payload));
   }
 };

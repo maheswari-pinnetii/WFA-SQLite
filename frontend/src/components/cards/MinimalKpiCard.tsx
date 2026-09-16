@@ -59,22 +59,21 @@ export const MinimalKpiCard: React.FC<MinimalKpiCardProps> = ({
       </div>
 
       {/* Numerical Value & Contextual Title */}
-      <div className="text-right space-y-0.5 flex-1 min-w-0">
-        <h3 className="text-2xl lg:text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight truncate">
-          {value}
-        </h3>
-        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
+      <div className="flex flex-col justify-center flex-1 min-w-0">
+        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
           {title}
-        </p>
-
+        </span>
+        <div className="text-2xl lg:text-3xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight truncate my-0.5">
+          {value}
+        </div>
         {trend && (
-          <p
-            className={`text-xs font-medium pt-0.5 ${
+          <span
+            className={`text-[11px] font-medium ${
               trendType === 'positive' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'
             }`}
           >
             {trend}
-          </p>
+          </span>
         )}
       </div>
     </div>

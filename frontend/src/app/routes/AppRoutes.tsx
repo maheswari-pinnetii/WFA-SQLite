@@ -19,7 +19,7 @@ import { useAuth } from '../../auth/hooks/useAuth';
 const ALL_ROLES = [Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE];
 
 // Admin Dashboards & Pages
-import { AdminDashboard } from '../../features/admin/dashboard/AdminDashboard';
+import { AdminDashboardPage as AdminDashboard } from '../../features/admin/dashboard/AdminDashboardPage';
 import { UserManagement } from '../../features/admin/pages/UserManagement';
 import { RoleManagement } from '../../features/admin/pages/RoleManagement';
 import { PermissionsManagement } from '../../features/admin/pages/PermissionsManagement';
@@ -31,7 +31,7 @@ import { SystemConfiguration } from '../../features/admin/pages/SystemConfigurat
 import { SecurityAdminDashboard } from '../../features/admin/pages/SecurityAdminDashboard';
 
 // HR Dashboards & Pages
-import { HrDashboard as HRDashboard } from '../../features/hr/dashboard/HrDashboard';
+import { HrDashboardPage as HRDashboard } from '../../features/hr/dashboard/HrDashboardPage';
 import { EmployeeManagement } from '../../features/hr/pages/EmployeeManagement';
 import { EmployeeProfilePage } from '../../features/hr/pages/EmployeeProfilePage';
 import { AttendanceManagement } from '../../features/hr/pages/AttendanceManagement';
@@ -41,14 +41,14 @@ import { PayrollReports } from '../../features/hr/pages/PayrollReports';
 import { HRReports } from '../../features/hr/pages/HRReports';
 
 // Manager Dashboards & Pages
-import { ManagerDashboard } from '../../features/team-manager/dashboard/ManagerDashboard';
+import { ManagerDashboardPage as ManagerDashboard } from '../../features/team-manager/dashboard/ManagerDashboardPage';
 import { TeamAnalytics } from '../../features/team-manager/pages/TeamAnalytics';
 import { TeamReports } from '../../features/team-manager/pages/TeamReports';
 import { ApprovalsPage } from '../../features/team-manager/pages/ApprovalsPage';
 import { DeptHeadDashboard } from '../../features/team-manager/pages/DeptHeadDashboard';
 
 // Team Lead Dashboards & Pages
-import { TeamLeadDashboard } from '../../features/team-lead/dashboard/TeamLeadDashboard';
+import { TeamLeadDashboardPage as TeamLeadDashboard } from '../../features/team-lead/dashboard/TeamLeadDashboardPage';
 import { TeamMembersPage } from '../../features/team-lead/pages/TeamMembersPage';
 import { TaskTrackingPage } from '../../features/team-lead/pages/TaskTrackingPage';
 import { Productivity } from '../../features/team-lead/pages/Productivity';
@@ -364,7 +364,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/payroll/dashboard" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><PayrollDashboard /></RoleGuard>} />
                 <Route path="/payroll/runs/:id" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><PayrollRunDetailsPage /></RoleGuard>} />
                 <Route path="/payroll/register" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollRegisterPage /></RoleGuard>} />
-                <Route path="/payroll/ctc-calculator" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><CtcCalculatorPage /></RoleGuard>} />
+                <Route path="/payroll/ctc-calculator" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><CtcCalculatorPage /></RoleGuard>} />
                 <Route path="/payroll/revisions" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.EMPLOYEE]}><SalaryRevisionHistoryPage /></RoleGuard>} />
                 <Route path="/payroll/departments" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><DepartmentPayrollPage /></RoleGuard>} />
                 <Route path="/payroll/fnf" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><FullFinalSettlementPage /></RoleGuard>} />

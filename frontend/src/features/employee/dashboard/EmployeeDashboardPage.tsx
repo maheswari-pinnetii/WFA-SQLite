@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { Permission } from '../../../security/permissions/permissions';
@@ -28,6 +28,7 @@ import {
   Coffee,
   Check,
   LayoutDashboard,
+  TrendingUp,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
@@ -83,21 +84,39 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
       <div className="flex items-center gap-2 shrink-0 flex-wrap">
         <a
           href="#step-1-punch"
-          className="px-3.5 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm flex items-center gap-1.5 transition-colors"
+          className="px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs flex items-center gap-1 transition-colors"
         >
-          <Clock size={14} /> Check In
+          <Clock size={13} /> Check In
         </a>
         <Link
-          to="/employee/leave"
-          className="px-3.5 py-2 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm flex items-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
+          to="/payroll/payslips"
+          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
         >
-          <Calendar size={14} /> Apply Leave
+          <FileText size={13} className="text-emerald-400" /> My Payroll
         </Link>
         <Link
           to="/employee/profile"
-          className="px-3.5 py-2 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-sm flex items-center gap-1.5 transition-colors border border-slate-200 dark:border-slate-700"
+          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
         >
-          <Compass size={14} /> Profile
+          <Compass size={13} className="text-blue-400" /> My Documents
+        </Link>
+        <Link
+          to="/payroll/ctc-calculator"
+          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+        >
+          <Zap size={13} className="text-amber-400" /> CTC Calculator
+        </Link>
+        <Link
+          to="/leave/my"
+          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+        >
+          <Calendar size={13} className="text-teal-400" /> Leave Requests
+        </Link>
+        <Link
+          to="/payroll/revisions"
+          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+        >
+          <TrendingUp size={13} className="text-indigo-400" /> Salary Revisions
         </Link>
       </div>
     </div>
@@ -565,78 +584,188 @@ export const EmployeeSprintWork: React.FC<{
   tasks: Task[];
   loading: boolean;
   handleUpdateTaskStatus: (id: string, stat: Task['status']) => void;
-}> = ({ tasks, loading, handleUpdateTaskStatus }) => (
-  <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
-    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-      <div>
-        <h3 className="text-base font-bold text-white flex items-center gap-2">
-          <Layers className="text-emerald-400" size={20} /> Sprint Work & Active Deliverables
-        </h3>
-        <p className="text-xs text-slate-400 mt-0.5">Track your assigned engineering tasks and daily progress status.</p>
+  onAddTask?: (task: Partial<Task>) => void;
+}> = ({ tasks, loading, handleUpdateTaskStatus, onAddTask }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [priority, setPriority] = useState<Task['priority']>('MEDIUM');
+  const [points, setPoints] = useState(3);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    setSubmitting(true);
+    try {
+      if (onAddTask) {
+        await onAddTask({
+          title,
+          priority,
+          points,
+          status: 'TODO'
+        });
+      }
+      setTitle('');
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Task creation failed', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div>
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <Layers className="text-emerald-400" size={20} /> Sprint Work & Active Deliverables
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">Track your assigned engineering tasks and daily progress status.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <Plus size={14} /> Add Sprint Task
+          </button>
+          <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+            Sprint 24 Active
+          </span>
+        </div>
       </div>
-      <span className="text-xs text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-        Sprint 24 Active
-      </span>
-    </div>
-    {loading ? (
-      <div className="flex justify-center items-center py-8">
-        <span className="inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
-      </div>
-    ) : tasks.length === 0 ? (
-      <div className="text-center py-8 bg-slate-950/40 rounded-2xl border border-slate-800 border-dashed">
-        <p className="text-xs text-slate-400 font-medium">No active tasks in current sprint backlog</p>
-      </div>
-    ) : (
-      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/30">
-        <table className="w-full text-left text-xs min-w-[650px]">
-          <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
-            <tr>
-              <th className="py-3 px-4">Task Title</th>
-              <th className="py-3 px-4 text-center">Estimate</th>
-              <th className="py-3 px-4">Priority</th>
-              <th className="py-3 px-4">Sprint Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {tasks.map(task => (
-              <tr key={task.id} className="hover:bg-slate-800/30 transition-colors">
-                <td className="py-3 px-4 font-semibold text-white max-w-sm truncate">{task.title}</td>
-                <td className="py-3 px-4 text-center">
-                  <span className="bg-slate-950 text-slate-300 font-mono text-xs px-2.5 py-0.5 rounded-full border border-slate-800 font-bold">
-                    {task.points} SP
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    task.priority === 'CRITICAL' || task.priority === 'HIGH'
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                      : task.priority === 'MEDIUM'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  }`}>
-                    {task.priority}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <select
-                    value={task.status}
-                    onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value as Task['status'])}
-                    className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-bold"
-                  >
-                    <option value="TODO">To Do</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="BLOCKED">Blocked</option>
-                    <option value="COMPLETED">Completed</option>
-                  </select>
-                </td>
+      {loading ? (
+        <div className="flex justify-center items-center py-8">
+          <span className="inline-block w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
+        </div>
+      ) : tasks.length === 0 ? (
+        <div className="text-center py-8 bg-slate-950/40 rounded-2xl border border-slate-800 border-dashed">
+          <p className="text-xs text-slate-400 font-medium">No active tasks in current sprint backlog</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/30">
+          <table className="w-full text-left text-xs min-w-[650px]">
+            <thead className="bg-slate-950 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th className="py-3 px-4">Task Title</th>
+                <th className="py-3 px-4 text-center">Estimate</th>
+                <th className="py-3 px-4">Priority</th>
+                <th className="py-3 px-4">Sprint Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
-);
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {tasks.map(task => (
+                <tr key={task.id} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="py-3 px-4 font-semibold text-white max-w-sm truncate">{task.title}</td>
+                  <td className="py-3 px-4 text-center">
+                    <span className="bg-slate-950 text-slate-300 font-mono text-xs px-2.5 py-0.5 rounded-full border border-slate-800 font-bold">
+                      {task.points} SP
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      task.priority === 'CRITICAL' || task.priority === 'HIGH'
+                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                        : task.priority === 'MEDIUM'
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    }`}>
+                      {task.priority}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <select
+                      value={task.status}
+                      onChange={(e) => handleUpdateTaskStatus(task.id, e.target.value as Task['status'])}
+                      className="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 cursor-pointer font-bold"
+                    >
+                      <option value="TODO">To Do</option>
+                      <option value="IN_PROGRESS">In Progress</option>
+                      <option value="BLOCKED">Blocked</option>
+                      <option value="COMPLETED">Completed</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Add Sprint Task Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[9999] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="p-6 rounded-3xl bg-slate-900 border border-slate-700 shadow-2xl max-w-md w-full space-y-4 animate-scaleUp text-xs">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <Plus className="text-emerald-400" size={18} />
+                <h3 className="text-base font-bold text-white">Add New Sprint Task</h3>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-slate-400 hover:text-white text-xl leading-none font-bold cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-slate-300 font-semibold block mb-1">Task Title / Requirement</label>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="e.g., Integrate Biometric Check-in API"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Priority</label>
+                  <select
+                    value={priority}
+                    onChange={(e) => setPriority(e.target.value as any)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-medium cursor-pointer"
+                  >
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="CRITICAL">Critical</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-slate-300 font-semibold block mb-1">Story Points (SP)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="13"
+                    value={points}
+                    onChange={(e) => setPoints(parseInt(e.target.value) || 1)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <Button variant="outline" size="sm" type="button" onClick={() => setIsModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button size="sm" type="submit" disabled={submitting}>
+                  {submitting ? 'Creating...' : 'Create Task'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // 9. Attendance Corrections Card
 export const EmployeeCorrectionRequestsCard: React.FC<{
@@ -872,6 +1001,34 @@ export const EmployeeDashboardPage: React.FC = () => {
   const [correctionReason, setCorrectionReason] = useState('');
   const [correctionSuccessMsg, setCorrectionSuccessMsg] = useState('');
   const [correctionSubmitting, setCorrectionSubmitting] = useState(false);
+
+  const handleCreateTask = async (newTaskData: Partial<Task>) => {
+    try {
+      const created = await workforceApi.createTask({
+        title: newTaskData.title || 'New Sprint Task',
+        priority: newTaskData.priority || 'MEDIUM',
+        points: newTaskData.points || 3,
+        status: newTaskData.status || 'TODO',
+        assigneeId: user?.id || 'usr-emp-01',
+        department: user?.department || 'Engineering'
+      });
+      setTasks(prev => [created, ...prev]);
+    } catch {
+      const fallback: Task = {
+        id: `TSK-${Date.now().toString().slice(-3)}`,
+        title: newTaskData.title || 'New Sprint Task',
+        priority: newTaskData.priority || 'MEDIUM',
+        points: newTaskData.points || 3,
+        status: newTaskData.status || 'TODO',
+        assigneeId: user?.id || 'usr-emp-01',
+        assigneeName: user?.name || 'Alex Mercer',
+        department: user?.department || 'Engineering',
+        team: 'Mobile Core',
+        updatedAt: new Date().toISOString()
+      };
+      setTasks(prev => [fallback, ...prev]);
+    }
+  };
 
   const handleOpenCorrection = (date?: string) => {
     if (date) setCorrectionDate(date);
@@ -1200,6 +1357,7 @@ export const EmployeeDashboardPage: React.FC = () => {
               tasks={tasks}
               loading={loading}
               handleUpdateTaskStatus={handleUpdateTaskStatus}
+              onAddTask={handleCreateTask}
             />
           </div>
         )}

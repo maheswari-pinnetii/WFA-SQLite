@@ -156,7 +156,7 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
     children: [
       { id: 'payroll.dashboard', label: 'Dashboard', path: '/payroll/dashboard', roles: LEADERSHIP_ROLES },
       { id: 'payroll.register', label: 'Payroll Register', path: '/payroll/register', roles: HR_ADMIN_ROLES },
-      { id: 'payroll.ctc', label: 'CTC Calculator', path: '/payroll/ctc-calculator', roles: LEADERSHIP_ROLES },
+      { id: 'payroll.ctc', label: 'CTC Calculator', path: '/payroll/ctc-calculator', roles: ALL_ROLES },
       { id: 'payroll.departments', label: 'Department Payroll', path: '/payroll/departments', roles: LEADERSHIP_ROLES },
       { id: 'payroll.fnf', label: 'Full & Final (F&F)', path: '/payroll/fnf', roles: HR_ADMIN_ROLES },
       { id: 'payroll.revisions', label: 'Salary Revisions', path: '/payroll/revisions', roles: ALL_ROLES },

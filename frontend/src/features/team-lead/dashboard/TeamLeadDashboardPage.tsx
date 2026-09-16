@@ -29,13 +29,25 @@ export const TeamLeadDashboardOverview: React.FC = () => (
         </p>
       </div>
     </div>
-    <div className="flex items-center gap-2 shrink-0">
-      <Link to="/team-lead/tasks" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-sm">
-        <Flame size={14} /> Sprint Tasks
-      </Link>
-      <Link to="/team-lead/members" className="btn btn-secondary btn-sm flex items-center gap-1.5">
-        <Users size={14} /> Team Roster
-      </Link>
+    <div className="flex flex-col items-end gap-2 shrink-0">
+      <div className="flex items-center gap-2 flex-wrap">
+        <Link to="/team-lead/tasks" className="btn btn-primary btn-sm flex items-center gap-1.5 shadow-sm">
+          <Flame size={14} /> Sprint Tasks
+        </Link>
+        <Link to="/team-lead/members" className="btn btn-secondary btn-sm flex items-center gap-1.5">
+          <Users size={14} /> Team Roster
+        </Link>
+      </div>
+      <div className="flex items-center gap-1.5 flex-wrap text-xs">
+        <Link to="/attendance/regularization" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Regularization</Link>
+        <Link to="/leave/requests" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Leave Requests</Link>
+        <Link to="/payroll/payslips" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">My Payroll</Link>
+        <Link to="/payroll/ctc-calculator" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">CTC Calculator</Link>
+        <Link to="/payroll/revisions" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Salary Revisions</Link>
+        <Link to="/performance/okrs" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">OKRs</Link>
+        <Link to="/performance/360-feedback" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">360 Feedback</Link>
+        <Link to="/expenses/claims" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Claims</Link>
+      </div>
     </div>
   </div>
 );
