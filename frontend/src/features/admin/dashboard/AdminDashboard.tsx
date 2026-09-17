@@ -306,9 +306,10 @@ export const AdminDashboard: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-medium">
                 <tr>
+                  <th className="py-2.5 px-3">Employee Name</th>
+                  <th className="py-2.5 px-3">Employee Code</th>
+                  <th className="py-2.5 px-3">Designation</th>
                   <th className="py-2.5 px-3">Department</th>
-                  <th className="py-2.5 px-3">Team</th>
-                  <th className="py-2.5 px-3">Role Designation</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3">Join Date</th>
                 </tr>
@@ -316,9 +317,10 @@ export const AdminDashboard: React.FC = () => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
                 {(tables.recentJoiners || []).map((emp: any, i: number) => (
                   <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-2.5 px-3 font-medium">{emp.department || '—'}</td>
-                    <td className="py-2.5 px-3">{emp.team || '—'}</td>
-                    <td className="py-2.5 px-3"><span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{emp.role || '—'}</span></td>
+                    <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-slate-100">{emp.name || '—'}</td>
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">{emp.employeeCode || emp.id || '—'}</td>
+                    <td className="py-2.5 px-3">{emp.designation || emp.role || '—'}</td>
+                    <td className="py-2.5 px-3"><span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{emp.department || '—'}</span></td>
                     <td className="py-2.5 px-3"><span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${emp.status === 'ACTIVE' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 border-slate-200'}`}>{emp.status || '—'}</span></td>
                     <td className="py-2.5 px-3 text-slate-500">{emp.joinDate ? new Date(emp.joinDate).toLocaleDateString('en-IN') : '—'}</td>
                   </tr>

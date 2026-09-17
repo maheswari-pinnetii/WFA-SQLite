@@ -45,7 +45,7 @@ export class AnalyticsRepository {
   async getEmployeesSummary(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
     const rows = await query(`
-      SELECT id, department, team, role, status, performanceScore, attendanceRate, joinDate 
+      SELECT id, employeeCode, name, designation, department, team, role, status, performanceScore, attendanceRate, joinDate 
       FROM employees 
       ${clause}
     `, params);
