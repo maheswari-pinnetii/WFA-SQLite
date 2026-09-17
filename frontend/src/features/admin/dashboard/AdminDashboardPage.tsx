@@ -259,7 +259,7 @@ export const AdminDashboardPage: React.FC = () => {
       setLoading(true);
       try {
         const [empData, taskData] = await Promise.all([
-          employeeApi.getEmployees().catch(() => []),
+          employeeApi.getEmployees({ pageSize: 1000 }).catch(() => []),
           workforceApi.getTasks().catch(() => [])
         ]);
         setEmployees(Array.isArray(empData) ? empData : empData.employees || []);
@@ -337,17 +337,17 @@ export const AdminDashboardPage: React.FC = () => {
           role={Role.ADMIN}
           loading={loading}
           data={{
-            totalEmployees: employees.length || 172,
+            totalEmployees: employees.length || 1000,
             totalEmployeesTrend: 12.4,
-            presentToday: analytics.data?.metrics?.activePresent || 164,
+            presentToday: analytics.data?.metrics?.activePresent || 950,
             presentTodayTrend: 4.8,
             attendanceRate: analytics.data?.metrics?.attendanceRate || 96.5,
             attendanceRateTrend: 1.5,
-            totalDepartments: 8,
-            onLeaveToday: 6,
+            totalDepartments: 10,
+            onLeaveToday: 35,
             onLeaveTrend: -0.5,
-            pendingApprovals: 4,
-            lateArrivalsToday: 3,
+            pendingApprovals: 12,
+            lateArrivalsToday: 8,
             avgWorkHours: '8h 45m',
           }}
         />
