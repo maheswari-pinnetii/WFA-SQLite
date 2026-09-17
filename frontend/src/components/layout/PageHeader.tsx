@@ -25,11 +25,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+          <h1 className="text-[24px] sm:text-[28px] font-[650] leading-[32px] sm:leading-[36px] tracking-tight text-slate-900 dark:text-slate-50">
             {title}
           </h1>
           {description && (
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-3xl leading-normal">
+            <p className="text-[13px] text-slate-500 dark:text-slate-400 mt-1 max-w-3xl leading-[19px]">
               {description}
             </p>
           )}

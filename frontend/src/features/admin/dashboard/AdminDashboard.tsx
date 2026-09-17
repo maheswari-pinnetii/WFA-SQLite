@@ -68,7 +68,7 @@ const FALLBACK: any = {
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(FALLBACK);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -77,8 +77,11 @@ export const AdminDashboard: React.FC = () => {
     setError(null);
     try {
       const res = await analyticsApi.getDashboard('admin');
-      if (res) setData(res);
-      else setError('Dashboard returned empty data. Showing active baseline.');
+      if (res && (res.kpis || res.charts)) {
+        setData(res);
+      } else {
+        setError('Failed to fetch Admin dashboard data from server.');
+      }
     } catch (err: any) {
       setError(err?.message || 'Failed to load system metrics.');
     } finally {
@@ -88,9 +91,9 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
-  const kpis = data?.kpis || FALLBACK.kpis;
-  const charts = data?.charts || FALLBACK.charts;
-  const tables = data?.tables || FALLBACK.tables;
+  const kpis = data?.kpis || {};
+  const charts = data?.charts || {};
+  const tables = data?.tables || {};
 
   const adminExceptions: ExceptionItem[] = [
     {

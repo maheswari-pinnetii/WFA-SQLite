@@ -41,26 +41,26 @@ export const MinimalKpiCard: React.FC<MinimalKpiCardProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`kpi-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-lg p-4 sm:p-4.5 shadow-2xs transition-all flex items-start justify-between gap-3 ${
-        onClick ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-xs' : 'cursor-default'
+      className={`kpi-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[10px] p-4 sm:p-5 shadow-none transition-all flex items-start justify-between gap-3 ${
+        onClick ? 'cursor-pointer hover:border-slate-300 dark:hover:border-slate-700' : 'cursor-default'
       }`}
     >
       {/* Numerical Value & Contextual Title */}
       <div className="flex flex-col justify-between flex-1 min-w-0">
-        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 truncate tracking-wide">
+        <span className="text-[13px] font-medium text-slate-600 dark:text-slate-400 truncate tracking-wide">
           {title}
         </span>
         
-        <div className="text-2xl font-bold text-slate-900 dark:text-slate-50 tracking-tight truncate my-1">
+        <div className="text-[26px] font-[650] leading-[32px] text-slate-900 dark:text-slate-50 tracking-tight truncate my-1">
           {value}
         </div>
 
         {trend ? (
-          <span className={`text-[11px] font-medium truncate ${getTrendColor()}`}>
+          <span className={`text-[12px] font-normal truncate ${getTrendColor()}`}>
             {trend}
           </span>
         ) : (
-          <span className="text-[11px] font-normal text-slate-400 dark:text-slate-500 truncate">
+          <span className="text-[12px] font-normal text-slate-400 dark:text-slate-500 truncate">
             Standard scope
           </span>
         )}

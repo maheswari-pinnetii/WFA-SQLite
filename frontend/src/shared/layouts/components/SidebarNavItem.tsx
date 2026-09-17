@@ -97,7 +97,7 @@ export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
 
         {!collapsed && (
           <>
-            <span className="sidebar-link-label font-medium text-sm truncate flex-1 min-w-0">
+            <span className={`sidebar-link-label text-[13px] truncate flex-1 min-w-0 ${isActive ? 'font-semibold' : 'font-medium'}`}>
               {item.label}
             </span>
             {hasChildren && (
