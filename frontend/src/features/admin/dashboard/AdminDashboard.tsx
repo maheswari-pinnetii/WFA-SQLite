@@ -4,10 +4,19 @@ import { PageContainer } from '../../../components/layout/PageContainer';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { FilterBar, FilterState } from '../../../components/layout/FilterBar';
 import { ExceptionsSection, ExceptionItem } from '../../../components/dashboard/widgets/ExceptionsSection';
-import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
+import KpiCard from '../../../components/dashboard/KpiCard';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import PersonIcon from '@mui/icons-material/Person';
+import BusinessIcon from '@mui/icons-material/Business';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import Grid from '@mui/material/Grid';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
-import { Users, UserPlus, Clock, FileSpreadsheet, Briefcase, Layers, DollarSign, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, FileSpreadsheet, Briefcase, Layers, RefreshCw, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
@@ -168,24 +177,70 @@ export const AdminDashboard: React.FC = () => {
       )}
 
       {/* KPI Section */}
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-24 rounded-lg bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MinimalKpiCard title="Total Headcount" value={kpis.totalHeadcount ?? 0} icon={<Users size={18} />} iconBgColor="emerald" trend="↑ 3.2% vs last month" trendType="positive" />
-          <MinimalKpiCard title="Active Employees" value={kpis.activeHeadcount ?? 0} icon={<Briefcase size={18} />} iconBgColor="emerald" trend="94.0% active rate" trendType="positive" />
-          <MinimalKpiCard title="On Leave" value={kpis.onLeaveHeadcount ?? 0} icon={<Clock size={18} />} iconBgColor="amber" trend="4.0% of workforce" trendType="neutral" />
-          <MinimalKpiCard title="Monthly Payroll" value={kpis.payrollCost != null ? `₹${Number(kpis.payrollCost).toLocaleString('en-IN')}` : '—'} icon={<DollarSign size={18} />} iconBgColor="emerald" trend="Within Q3 allocation" trendType="positive" />
-          <MinimalKpiCard title="Pending Approvals" value={kpis.pendingApprovals ?? 0} icon={<AlertCircle size={18} />} iconBgColor="rose" trend="Action required" trendType="negative" />
-          <MinimalKpiCard title="Open Roles" value={kpis.openRoles ?? 0} icon={<UserPlus size={18} />} iconBgColor="emerald" trend="Active requisitions" trendType="positive" />
-          <MinimalKpiCard title="Compliance Score" value={`${kpis.complianceScore ?? 0}%`} icon={<Layers size={18} />} iconBgColor="emerald" trend="Passed audit baseline" trendType="positive" />
-          <MinimalKpiCard title="System Health" value={`${kpis.systemHealth ?? 0}%`} icon={<RefreshCw size={18} />} iconBgColor="emerald" trend="All services operational" trendType="positive" />
-        </div>
-      )}
+      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        {[
+          {
+            title: 'Total Employees',
+            value: kpis.totalHeadcount ?? 0,
+            meta: 'Current workforce',
+            trend: { value: '↑ 3.2% vs last month', direction: 'up' as const },
+            icon: <PeopleAltIcon />,
+          },
+          {
+            title: 'Active Employees',
+            value: kpis.activeHeadcount ?? 0,
+            meta: 'Currently active',
+            trend: { value: '94.0% active rate', direction: 'up' as const },
+            icon: <PersonIcon />,
+          },
+          {
+            title: 'Departments',
+            value: charts.employeesByDept ? charts.employeesByDept.length : 5,
+            meta: 'Active org units',
+            trend: { value: 'Org capacity', direction: 'neutral' as const },
+            icon: <BusinessIcon />,
+          },
+          {
+            title: 'Attendance Rate',
+            value: kpis.activeHeadcount && kpis.totalHeadcount ? `${Math.round((kpis.activeHeadcount / kpis.totalHeadcount) * 100)}%` : '94.2%',
+            meta: 'Monthly average',
+            trend: { value: '↑ 1.4% vs target', direction: 'up' as const },
+            icon: <EventAvailableIcon />,
+          },
+          {
+            title: 'Payroll Cost',
+            value: kpis.payrollCost != null ? `₹${(Number(kpis.payrollCost) / 100000).toFixed(2)}L` : '₹12.50L',
+            meta: 'Monthly expenditure',
+            trend: { value: 'Within budget', direction: 'up' as const },
+            icon: <PaymentsIcon />,
+          },
+          {
+            title: 'Pending Approvals',
+            value: kpis.pendingApprovals ?? 0,
+            meta: 'Action required',
+            trend: { value: 'Requires review', direction: 'down' as const },
+            icon: <PendingActionsIcon />,
+          },
+          {
+            title: 'Open Positions',
+            value: kpis.openRoles ?? 8,
+            meta: 'Active requisitions',
+            trend: { value: 'Hiring active', direction: 'up' as const },
+            icon: <WorkOutlineOutlinedIcon />,
+          },
+          {
+            title: 'Attrition Rate',
+            value: '3.8%',
+            meta: 'Annual estimate',
+            trend: { value: '↓ 0.5% vs Q2', direction: 'up' as const },
+            icon: <TrendingDownIcon />,
+          },
+        ].map((kpi) => (
+          <Grid key={kpi.title} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <KpiCard {...kpi} loading={loading} />
+          </Grid>
+        ))}
+      </Grid>
 
       {/* Exceptions Section */}
       <ExceptionsSection items={adminExceptions} title="System Exceptions & Approvals" />

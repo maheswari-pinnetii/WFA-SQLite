@@ -4,10 +4,19 @@ import { PageContainer } from '../../../components/layout/PageContainer';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { FilterBar, FilterState } from '../../../components/layout/FilterBar';
 import { ExceptionsSection, ExceptionItem } from '../../../components/dashboard/widgets/ExceptionsSection';
-import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
+import KpiCard from '../../../components/dashboard/KpiCard';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import Grid from '@mui/material/Grid';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
-import { Users, UserPlus, Clock, Briefcase, Layers, RefreshCw, AlertCircle } from 'lucide-react';
+import { Users, UserPlus, Clock, FileSpreadsheet, Briefcase, Layers, RefreshCw, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
@@ -162,24 +171,70 @@ export const HrDashboard: React.FC = () => {
       )}
 
       {/* KPI Section */}
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-24 rounded-lg bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MinimalKpiCard title="Total Headcount" value={kpis.totalHeadcount ?? 0} icon={<Users size={18} />} iconBgColor="emerald" trend="↑ 2.4% vs last month" trendType="positive" />
-          <MinimalKpiCard title="Present Today" value={kpis.presentToday ?? 0} icon={<Briefcase size={18} />} iconBgColor="emerald" trend="95.0% attendance rate" trendType="positive" />
-          <MinimalKpiCard title="On Leave Today" value={kpis.onLeaveToday ?? 0} icon={<Clock size={18} />} iconBgColor="amber" trend="4.0% leave rate" trendType="neutral" />
-          <MinimalKpiCard title="New Hires (30d)" value={kpis.newHires ?? 0} icon={<UserPlus size={18} />} iconBgColor="emerald" trend="Onboarding active" trendType="positive" />
-          <MinimalKpiCard title="Annual Turnover" value={`${kpis.turnoverRate ?? 0}%`} icon={<AlertCircle size={18} />} iconBgColor="rose" trend="Within 5% benchmark" trendType="positive" />
-          <MinimalKpiCard title="Open Requisitions" value={kpis.openReqs ?? 0} icon={<Briefcase size={18} />} iconBgColor="emerald" trend="18 active requisitions" trendType="positive" />
-          <MinimalKpiCard title="Compliance Training" value={`${kpis.trainingCompletion ?? 0}%`} icon={<Layers size={18} />} iconBgColor="emerald" trend="↑ 4% completion" trendType="positive" />
-          <MinimalKpiCard title="Pulse Rating" value={`${kpis.employeeSatisfaction ?? 0} / 5`} icon={<RefreshCw size={18} />} iconBgColor="emerald" trend="Q3 Employee score" trendType="positive" />
-        </div>
-      )}
+      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        {[
+          {
+            title: 'Total Employees',
+            value: kpis.totalHeadcount ?? 500,
+            meta: 'Current workforce',
+            trend: { value: '↑ 2.4% vs last month', direction: 'up' as const },
+            icon: <PeopleAltIcon />,
+          },
+          {
+            title: 'Present Today',
+            value: kpis.presentToday ?? 475,
+            meta: 'Checked-in headcount',
+            trend: { value: '95.0% attendance rate', direction: 'up' as const },
+            icon: <HowToRegIcon />,
+          },
+          {
+            title: 'Attendance Rate',
+            value: kpis.presentToday && kpis.totalHeadcount ? `${Math.round((kpis.presentToday / kpis.totalHeadcount) * 100)}%` : '95%',
+            meta: 'Monthly average',
+            trend: { value: '↑ 1.2% benchmark', direction: 'up' as const },
+            icon: <EventAvailableIcon />,
+          },
+          {
+            title: 'Leave Requests',
+            value: kpis.onLeaveToday ?? 20,
+            meta: 'Active leave today',
+            trend: { value: '4.0% leave rate', direction: 'neutral' as const },
+            icon: <BeachAccessIcon />,
+          },
+          {
+            title: 'Pending Approvals',
+            value: 6,
+            meta: 'HR escalation queue',
+            trend: { value: 'Action required', direction: 'down' as const },
+            icon: <PendingActionsIcon />,
+          },
+          {
+            title: 'New Hires',
+            value: kpis.newHires ?? 12,
+            meta: 'Joined last 30 days',
+            trend: { value: 'Onboarding active', direction: 'up' as const },
+            icon: <PersonAddAltIcon />,
+          },
+          {
+            title: 'Attrition Rate',
+            value: `${kpis.turnoverRate ?? 4.5}%`,
+            meta: 'Annual turnover',
+            trend: { value: 'Within 5% benchmark', direction: 'up' as const },
+            icon: <TrendingDownIcon />,
+          },
+          {
+            title: 'Payroll Status',
+            value: 'COMPLETED',
+            meta: 'Current pay period',
+            trend: { value: 'Disbursed Sep 01', direction: 'up' as const },
+            icon: <PaymentsIcon />,
+          },
+        ].map((kpi) => (
+          <Grid key={kpi.title} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <KpiCard {...kpi} loading={loading} />
+          </Grid>
+        ))}
+      </Grid>
 
       {/* Exceptions Section */}
       <ExceptionsSection items={hrExceptions} title="HR Action Items & Escalations" />

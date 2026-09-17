@@ -73,10 +73,11 @@ export const KpiGrid: React.FC<KpiGridProps> = ({ role, data = {}, loading = fal
           : configs.map((config) => (
               <KpiCard
                 key={config.key}
-                config={config}
-                value={data[config.dataKey]}
-                trend={data[config.trendKey || '']}
-                sparklineData={data[config.sparklineKey || '']}
+                title={config.title}
+                value={data[config.dataKey] ?? '—'}
+                meta={config.subtitle}
+                icon={<span>◉</span>}
+                trend={data[config.trendKey || ''] ? { value: `${data[config.trendKey || '']}%`, direction: 'up' } : undefined}
                 loading={loading}
               />
             ))}

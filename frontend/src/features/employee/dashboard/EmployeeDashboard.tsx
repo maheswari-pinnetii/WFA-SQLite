@@ -3,11 +3,38 @@ import { useAuth } from '../../../auth/hooks/useAuth';
 import { PageContainer } from '../../../components/layout/PageContainer';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { FilterBar, FilterState } from '../../../components/layout/FilterBar';
-import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
+import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWidget';
+import KpiCard from '../../../components/dashboard/KpiCard';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BeachAccessIcon from '@mui/icons-material/BeachAccess';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import SpeedIcon from '@mui/icons-material/Speed';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import MoreTimeIcon from '@mui/icons-material/MoreTime';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import Grid from '@mui/material/Grid';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
-import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWidget';
-import { Clock, Calendar, DollarSign, Award, RefreshCw, AlertCircle, Layers, CheckCircle2 } from 'lucide-react';
+import {
+  Clock,
+  Calendar,
+  DollarSign,
+  AlertCircle,
+  FileCheck,
+  CheckCircle2,
+  FolderOpen,
+  Send,
+  Receipt,
+  Award,
+  Layers,
+  FileText,
+  ShieldCheck,
+  HelpCircle,
+  BookOpen,
+  Bell,
+  RefreshCw,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const EmployeeDashboard: React.FC = () => {
@@ -165,24 +192,70 @@ export const EmployeeDashboard: React.FC = () => {
       )}
 
       {/* KPI Section */}
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(8)].map((_, i) => (
-            <div key={i} className="h-24 rounded-lg bg-slate-100 dark:bg-slate-800/60 animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MinimalKpiCard title="Hours Logged (Month)" value={`${kpis.hoursLogged ?? 0}h`} icon={<Clock size={18} />} iconBgColor="emerald" trend="Standard 40h/week" trendType="positive" />
-          <MinimalKpiCard title="Overtime Hours" value={`${kpis.overtime ?? 0}h`} icon={<Clock size={18} />} iconBgColor="emerald" trend="Approved overtime" trendType="positive" />
-          <MinimalKpiCard title="Leave Balance" value={`${kpis.leaveBalance ?? 0} Days`} icon={<Calendar size={18} />} iconBgColor="emerald" trend="Available for use" trendType="positive" />
-          <MinimalKpiCard title="Pending Requests" value={kpis.pendingLeaves ?? 0} icon={<AlertCircle size={18} />} iconBgColor="amber" trend="Awaiting review" trendType="neutral" />
-          <MinimalKpiCard title="Assigned Tasks" value={kpis.tasksAssigned ?? 0} icon={<Layers size={18} />} iconBgColor="emerald" trend="Current sprint items" trendType="positive" />
-          <MinimalKpiCard title="Tasks Completed" value={kpis.tasksCompleted ?? 0} icon={<CheckCircle2 size={18} />} iconBgColor="emerald" trend="↑ Completed sprint work" trendType="positive" />
-          <MinimalKpiCard title="Upcoming Holidays" value={`${kpis.upcomingHolidays ?? 0} Days`} icon={<Calendar size={18} />} iconBgColor="emerald" trend="Company holiday calendar" trendType="positive" />
-          <MinimalKpiCard title="Performance Review" value={kpis.nextReview ?? '—'} icon={<Award size={18} />} iconBgColor="emerald" trend="Scheduled appraisal" trendType="positive" />
-        </div>
-      )}
+      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        {[
+          {
+            title: 'Attendance Rate',
+            value: '98.4%',
+            meta: 'Current month',
+            trend: { value: '↑ 0.8% vs last month', direction: 'up' as const },
+            icon: <EventAvailableIcon />,
+          },
+          {
+            title: 'Working Hours',
+            value: `${kpis.hoursLogged ?? 152.5}h`,
+            meta: 'This pay period',
+            trend: { value: 'Standard 40h/week', direction: 'up' as const },
+            icon: <AccessTimeIcon />,
+          },
+          {
+            title: 'Leave Balance',
+            value: `${kpis.leaveBalance ?? 14} Days`,
+            meta: 'Available PTO',
+            trend: { value: 'Casual & Earned leave', direction: 'up' as const },
+            icon: <BeachAccessIcon />,
+          },
+          {
+            title: 'Tasks Completed',
+            value: kpis.tasksCompleted ?? 12,
+            meta: 'Current sprint',
+            trend: { value: '↑ 2 completed today', direction: 'up' as const },
+            icon: <TaskAltIcon />,
+          },
+          {
+            title: 'Sprint Progress',
+            value: '85%',
+            meta: 'Sprint 24 milestone',
+            trend: { value: 'On schedule', direction: 'up' as const },
+            icon: <SpeedIcon />,
+          },
+          {
+            title: 'Performance',
+            value: 'Exceeds',
+            meta: 'Q3 Appraisal rating',
+            trend: { value: 'Top performer', direction: 'up' as const },
+            icon: <AssessmentIcon />,
+          },
+          {
+            title: 'Overtime',
+            value: `${kpis.overtime ?? 6.5}h`,
+            meta: 'Pre-approved extra hours',
+            trend: { value: 'Disbursed in salary', direction: 'up' as const },
+            icon: <MoreTimeIcon />,
+          },
+          {
+            title: 'Attendance Streak',
+            value: '18 Days',
+            meta: 'Consecutive on-time punches',
+            trend: { value: 'Perfect record', direction: 'up' as const },
+            icon: <LocalFireDepartmentIcon />,
+          },
+        ].map((kpi) => (
+          <Grid key={kpi.title} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <KpiCard {...kpi} loading={loading} />
+          </Grid>
+        ))}
+      </Grid>
 
       {/* Critical Action Center */}
       {data?.actionCenter && data.actionCenter.length > 0 && (
