@@ -78,19 +78,6 @@ const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: strin
     }
   };
 
-  useEffect(() => {
-    if (activeTab === 'security') {
-      fetchMfaStatus();
-      fetchTrustedDevices();
-      setSetupData(null);
-      setIsSetupMode(false);
-      setIsDisableMode(false);
-      setSecurityError('');
-      setSecuritySuccess('');
-      setRecoveryCodes([]);
-    }
-  }, [activeTab]);
-
   const handleStartSetup = async () => {
     setSecurityError('');
     setSecuritySuccess('');
@@ -169,12 +156,6 @@ const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: strin
       setSecurityLoading(false);
     }
   };
-
-  const [selectedMonth, setSelectedMonth] = useState('August');
-  const [selectedYear, setSelectedYear] = useState('2026');
-
-  const monthIndex = MONTHS.indexOf(selectedMonth);
-  const yearNum = parseInt(selectedYear, 10);
 
   // Dynamic calculations for days and starting weekday
   const daysInMonth = new Date(yearNum, monthIndex + 1, 0).getDate();
