@@ -137,6 +137,33 @@ CREATE TABLE IF NOT EXISTS employees (
   FOREIGN KEY (managerId) REFERENCES employees(id) ON DELETE SET NULL
 );
 
+CREATE TABLE IF NOT EXISTS job_families (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  code TEXT UNIQUE NOT NULL,
+  description TEXT,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS job_roles (
+  id TEXT PRIMARY KEY,
+  jobFamilyId TEXT NOT NULL,
+  name TEXT NOT NULL,
+  code TEXT UNIQUE NOT NULL,
+  level TEXT,
+  description TEXT,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (jobFamilyId) REFERENCES job_families(id) ON DELETE CASCADE,
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS skills (
   id TEXT PRIMARY KEY,
   employeeId TEXT NOT NULL,
