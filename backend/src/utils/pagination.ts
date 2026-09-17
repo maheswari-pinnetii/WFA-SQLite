@@ -19,8 +19,8 @@ export const getPaginationParams = (req: Request) => {
   const page = parseInt(req.query.page as string, 10) || 1;
   const limit = parseInt(req.query.limit as string, 10) || 20;
   
-  // Cap the limit to prevent huge queries
-  const cappedLimit = Math.min(limit, 100);
+  // Cap the limit to allow up to 1,000 employees in full list queries
+  const cappedLimit = Math.min(limit, 1000);
   
   const offset = (page - 1) * cappedLimit;
   
