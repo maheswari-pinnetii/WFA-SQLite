@@ -102,12 +102,12 @@ export function KpiCard({
       className="kpi-card-wrapper"
       sx={{
         p: '1px',
-        borderRadius: '16px',
+        borderRadius: '24px',
         position: 'relative',
         width: '100%',
         height: '100%',
-        background: 'linear-gradient(135deg, rgba(32, 191, 179, 0.35), rgba(32, 191, 179, 0.12) 45%, rgba(32, 191, 179, 0.4))',
-        transition: 'border-color 180ms ease, box-shadow 180ms ease',
+        background: 'linear-gradient(135deg, rgba(32, 191, 179, 0.45), rgba(32, 191, 179, 0.10) 50%, rgba(32, 191, 179, 0.35))',
+        transition: 'all 240ms ease-in-out',
       }}
     >
       <Box
@@ -117,32 +117,45 @@ export function KpiCard({
           minHeight: 165,
           height: '100%',
           width: '100%',
-          p: 2.5,
-          borderRadius: '15px',
+          p: 2.75,
+          borderRadius: '23px',
           background: `
             radial-gradient(
-              140px circle at 100% 0%,
-              rgba(32, 191, 179, 0.20),
-              transparent 72%
+              220px circle at 95% 5%,
+              rgba(32, 191, 179, 0.32),
+              transparent 75%
             ),
             linear-gradient(
               145deg,
-              #151D25,
-              #10161D
+              #131C24 0%,
+              #0D131A 100%
             )
           `,
-          boxShadow: '0 12px 28px rgba(0, 0, 0, 0.28)',
+          boxShadow: '0 14px 30px rgba(0, 0, 0, 0.35)',
           color: '#FFFFFF',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          transition: 'transform 180ms ease, box-shadow 180ms ease',
+          transition: 'transform 240ms ease, box-shadow 240ms ease, background 240ms ease',
           '&:hover': {
-            transform: 'translateY(-2px)',
+            transform: 'translateY(-3px)',
+            background: `
+              radial-gradient(
+                260px circle at 90% 5%,
+                rgba(32, 191, 179, 0.55),
+                rgba(14, 165, 160, 0.25) 55%,
+                transparent 85%
+              ),
+              linear-gradient(
+                145deg,
+                #15202A 0%,
+                #0E161F 100%
+              )
+            `,
             boxShadow: `
-              0 16px 32px rgba(0, 0, 0, 0.34),
-              0 0 18px rgba(32, 191, 179, 0.10)
+              0 20px 40px rgba(0, 0, 0, 0.45),
+              0 0 25px rgba(32, 191, 179, 0.22)
             `,
           },
         }}
@@ -154,12 +167,13 @@ export function KpiCard({
           onClick={handleOpenMenu}
           sx={{
             position: 'absolute',
-            top: 10,
-            right: 10,
-            color: '#94A3B8',
+            top: 14,
+            right: 14,
+            color: '#64748B',
+            transition: 'color 180ms ease, background-color 180ms ease',
             '&:hover': {
               color: '#20BFB3',
-              backgroundColor: 'rgba(32, 191, 179, 0.10)',
+              backgroundColor: 'rgba(32, 191, 179, 0.12)',
             },
           }}
         >
@@ -175,8 +189,9 @@ export function KpiCard({
             slotProps={{
               paper: {
                 sx: {
-                  bgcolor: '#151D25',
+                  bgcolor: '#131C24',
                   color: '#FFFFFF',
+                  borderRadius: '12px',
                   border: '1px solid rgba(32, 191, 179, 0.35)',
                   boxShadow: '0 12px 28px rgba(0, 0, 0, 0.45)',
                 },
@@ -202,32 +217,32 @@ export function KpiCard({
           </Menu>
         )}
 
-        {/* Circular Icon */}
+        {/* Circular Icon with Drop Glow */}
         <Box
           className="kpi-card-icon"
           sx={{
-            width: 42,
-            height: 42,
-            minWidth: 42,
-            minHeight: 42,
+            width: 44,
+            height: 44,
+            minWidth: 44,
+            minHeight: 44,
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            mb: 2,
-            background: 'linear-gradient(135deg, #20BFB3, #0EA5A0)',
-            boxShadow: '0 6px 18px rgba(32, 191, 179, 0.28)',
+            mb: 2.25,
+            background: 'linear-gradient(135deg, #00C49F 0%, #20BFB3 100%)',
+            boxShadow: '0 0 20px rgba(32, 191, 179, 0.6), 0 4px 12px rgba(32, 191, 179, 0.35)',
             color: '#FFFFFF',
-            transition: 'transform 180ms ease, box-shadow 180ms ease',
+            transition: 'transform 200ms ease, box-shadow 200ms ease',
             '& svg': {
-              width: 20,
-              height: 20,
+              width: 22,
+              height: 22,
               color: '#FFFFFF',
               flexShrink: 0,
             },
             '&:hover': {
-              transform: 'scale(1.05)',
-              boxShadow: '0 6px 18px rgba(32, 191, 179, 0.45)',
+              transform: 'scale(1.06)',
+              boxShadow: '0 0 25px rgba(32, 191, 179, 0.8), 0 6px 16px rgba(32, 191, 179, 0.45)',
             },
           }}
         >
@@ -236,6 +251,21 @@ export function KpiCard({
 
         {/* Content Box */}
         <Box sx={{ mt: 'auto' }}>
+          <Typography
+            className="kpi-card-value"
+            sx={{
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontSize: '1.75rem',
+              lineHeight: 1.15,
+              fontWeight: 800,
+              letterSpacing: '-0.025em',
+              color: '#FFFFFF',
+              mb: 0.5,
+            }}
+          >
+            {value ?? '—'}
+          </Typography>
+
           <Typography
             className="kpi-card-title"
             sx={{
@@ -249,27 +279,13 @@ export function KpiCard({
             {title}
           </Typography>
 
-          <Typography
-            className="kpi-card-value"
-            sx={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: '1.5rem',
-              lineHeight: 1.2,
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              color: '#FFFFFF',
-              mb: 0.25,
-            }}
-          >
-            {value ?? '—'}
-          </Typography>
-
           {trend && (
             <Typography
               className={`kpi-card-trend ${trend.direction || 'up'}`}
               sx={{
-                mt: 0.5,
-                fontSize: '0.75rem',
+                mt: 0.25,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
+                fontSize: '0.78rem',
                 fontWeight: 600,
                 color: getTrendColor(),
               }}
@@ -282,9 +298,9 @@ export function KpiCard({
             <Typography
               className="kpi-card-meta"
               sx={{
-                mt: 0.5,
+                mt: 0.25,
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
-                fontSize: '0.75rem',
+                fontSize: '0.78rem',
                 fontWeight: 500,
                 color: '#94A3B8',
               }}
