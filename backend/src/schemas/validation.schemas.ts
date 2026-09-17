@@ -46,7 +46,7 @@ export const registrationSchema = z.object({
   title: z.string().trim().max(100).optional(),
   locationId: z.string().trim().max(100).optional(),
   shiftId: z.string().trim().max(100).optional(),
-}).refine(data => data.name || data.fullName, {
+}).strict().refine(data => data.name || data.fullName, {
   message: 'Full name is required (at least 2 characters).',
   path: ['name']
 });

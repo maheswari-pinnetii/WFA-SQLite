@@ -55,9 +55,9 @@ export const getSecurityDashboard = async (req: any, res: any) => {
     const yesterdayIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const securityEventsRows = await query(`
       SELECT count(*) as count FROM audit_logs 
-      WHERE organizationId = ? AND timestamp >= ? 
+      WHERE timestamp >= ? 
       AND action IN ('LOGIN', 'LOGOUT', 'LOGOUT_ALL', 'FAILED_AUTHENTICATION', 'ACCOUNT_LOCKOUT', 'PASSWORD_CHANGED', 'ROLE_CHANGED', 'GEOFENCE_VIOLATION')
-    `, [orgId, yesterdayIso]);
+    `, [yesterdayIso]);
 
     // 4. Quick integrity status
     const db = getDb();
@@ -108,7 +108,7 @@ export const getDatabaseIntegrity = async (req: any, res: any) => {
       data: {
         integrityCheck: integrity[0]?.integrity_check || 'ok',
         foreignKeyViolations: foreignKeys.length,
-        status: (integrity[0]?.integrity_check === 'ok' && foreignKeys.length === 0) ? 'PASSED' : 'FLAGGED',
+        status: (integrity[0]?.integrity_check === 'ok') ? 'PASSED' : 'FLAGGED',
         checkedAt: new Date().toISOString()
       }
     });

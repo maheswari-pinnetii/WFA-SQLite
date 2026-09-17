@@ -287,7 +287,7 @@ describe('Security Hardening & Protection Verification Suite', () => {
       const envExamplePath = path.resolve(__dirname, '../../.env.example');
       const content = fs.readFileSync(envExamplePath, 'utf-8');
       expect(content).not.toContain('xenaeusZqMZhUIfNKX9p9qx8TNRR7Y1XisX4APazqdE');
-      expect(content).toContain('<STRONG_RANDOM_SECRET>');
+      expect(content).toContain('<STRONG_RANDOM_SECRET_MIN_32_CHARS>');
     });
 
     it('verifies backend uses env.JWT_SECRET dynamically without hardcoded fallback strings', () => {

@@ -44,15 +44,15 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server (no origin) and test environments
-    if (!origin || process.env.NODE_ENV === 'test') {
+    // Allow server-to-server requests (no origin header)
+    if (!origin) {
       return callback(null, true);
     }
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     logger.warn('security.cors.rejected', `Blocked CORS request from unlisted origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    callback(AppError.forbidden(ErrorCode.AUTH_PERMISSION_DENIED));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-Idempotency-Key'],
