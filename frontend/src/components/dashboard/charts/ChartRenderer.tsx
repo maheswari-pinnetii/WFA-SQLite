@@ -71,14 +71,14 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
     const valueKey = seriesItem.key;
 
     return (
-      <div style={{ width: '100%', height }}>
-        <ResponsiveContainer>
+      <div className="w-full min-w-0 flex-1" style={{ width: '100%', height }}>
+        <ResponsiveContainer width="100%" height={height} minWidth={1}>
           <PieChart>
             <Tooltip content={<CustomTooltip />} />
             <Legend
               verticalAlign="bottom"
               height={36}
-              formatter={(value) => <span className="text-xs text-slate-600 font-medium dark:text-slate-400">{value}</span>}
+              formatter={(value) => <span className="text-xs text-slate-400 font-medium">{value}</span>}
             />
             <Pie
               data={data}
@@ -86,10 +86,10 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
               nameKey={xKey}
               cx="50%"
               cy="50%"
-              innerRadius={isDonut ? 60 : 0}
-              outerRadius={90}
+              innerRadius={isDonut ? 55 : 0}
+              outerRadius={85}
               paddingAngle={isDonut ? 4 : 0}
-              stroke="#ffffff"
+              stroke="#0f172a"
               strokeWidth={2}
             >
               {data.map((_, index) => (
@@ -103,8 +103,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
   }
 
   return (
-    <div style={{ width: '100%', height }}>
-      <ResponsiveContainer>
+    <div className="w-full min-w-0 flex-1" style={{ width: '100%', height }}>
+      <ResponsiveContainer width="100%" height={height} minWidth={1}>
         {config.type === 'line' ? (
           <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.6} />

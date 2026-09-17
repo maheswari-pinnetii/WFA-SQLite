@@ -70,13 +70,13 @@ export const KpiGrid: React.FC<KpiGridProps> = ({ role, data = {}, loading = fal
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => <KpiSkeleton key={i} />)
-          : configs.map((config) => (
+          : configs.slice(0, 8).map((config) => (
               <KpiCard
                 key={config.key}
                 title={config.title}
                 value={data[config.dataKey] ?? '—'}
                 meta={config.subtitle}
-                icon={<span>◉</span>}
+                icon={config.icon}
                 trend={data[config.trendKey || ''] ? { value: `${data[config.trendKey || '']}%`, direction: 'up' } : undefined}
                 loading={loading}
               />

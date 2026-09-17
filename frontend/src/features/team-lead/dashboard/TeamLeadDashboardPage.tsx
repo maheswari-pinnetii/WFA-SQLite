@@ -164,7 +164,7 @@ export const TeamLeadDashboardPage: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      employeeApi.getEmployees().catch(() => []),
+      employeeApi.getEmployees({ pageSize: 1000 }).catch(() => []),
       workforceApi.getTasks().catch(() => [])
     ]).then(([employees, tasks]) => {
       const allEmp = Array.isArray(employees) ? employees : employees.employees || [];

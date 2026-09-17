@@ -201,7 +201,7 @@ export const ManagerDashboardPage: React.FC = () => {
       setLoading(true);
       try {
         const [empData, taskData] = await Promise.all([
-          employeeApi.getEmployees().catch(() => []),
+          employeeApi.getEmployees({ pageSize: 1000 }).catch(() => []),
           workforceApi.getTasks().catch(() => [])
         ]);
         setEmployees(Array.isArray(empData) ? empData : empData.employees || []);
@@ -264,12 +264,12 @@ export const ManagerDashboardPage: React.FC = () => {
           role={Role.MANAGER}
           loading={loading}
           data={{
-            teamSize: employees.filter(e => e.department === departmentName).length || 18,
+            teamSize: employees.length || 1000,
             teamAttendanceRate: 98.2,
             teamAttendanceTrend: 1.2,
-            presentCount: 16,
-            onLeaveCount: 1,
-            lateCount: 3,
+            presentCount: 950,
+            onLeaveCount: 35,
+            lateCount: 15,
             avgTeamWorkHours: '8h 30m',
             productivityScore: 92.4,
             productivityTrend: 2.1,

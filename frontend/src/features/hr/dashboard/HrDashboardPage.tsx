@@ -221,8 +221,8 @@ export const HrDashboardPage: React.FC = () => {
 
   const firstName = user?.name ? user.name.split(' ')[0] : 'HR';
 
-  const rawCount = analytics?.metrics?.totalWorkforce ?? 254;
-  const headCount = typeof rawCount === 'number' ? rawCount : Number(rawCount) || 254;
+  const rawCount = analytics?.metrics?.totalWorkforce ?? 1000;
+  const headCount = typeof rawCount === 'number' ? rawCount : Number(rawCount) || 1000;
   const attendanceRate = analytics?.metrics?.attendanceRate ?? '96.5%';
 
   // Real-time synchronization for HR Dashboard
@@ -233,8 +233,6 @@ export const HrDashboardPage: React.FC = () => {
     <>
       <div className="space-y-6 animate-fadeIn font-sans pb-10">
         <HrDashboardOverview getGreeting={getGreeting} firstName={firstName} />
-
-
 
         <HrDashboardFilters
           dateFilter={dateFilter}
@@ -251,6 +249,48 @@ export const HrDashboardPage: React.FC = () => {
           setStatusFilter={setStatusFilter}
         />
 
+        {/* Employee Lifecycle Operations Pipeline Bar */}
+        <div className="p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-3">
+          <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-2.5">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)] flex items-center gap-2">
+              <HeartHandshake size={15} className="text-emerald-500" /> Employee Lifecycle Operations Pipeline
+            </h3>
+            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">Active Q3 2026 Cycle</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
+            <div className="p-3 rounded-md bg-[var(--bg-tertiary)]/50 border border-[var(--border-color)]">
+              <p className="text-[11px] text-[var(--text-muted)] font-medium">Applied</p>
+              <p className="text-lg font-extrabold text-[var(--text-primary)] mt-0.5">84</p>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Open reqs: 36</span>
+            </div>
+            <div className="p-3 rounded-md bg-[var(--bg-tertiary)]/50 border border-[var(--border-color)]">
+              <p className="text-[11px] text-[var(--text-muted)] font-medium">Interviews</p>
+              <p className="text-lg font-extrabold text-[var(--text-primary)] mt-0.5">28</p>
+              <span className="text-[10px] text-amber-500">This week</span>
+            </div>
+            <div className="p-3 rounded-md bg-[var(--bg-tertiary)]/50 border border-[var(--border-color)]">
+              <p className="text-[11px] text-[var(--text-muted)] font-medium">Offers Issued</p>
+              <p className="text-lg font-extrabold text-[var(--text-primary)] mt-0.5">14</p>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400">Accepted: 11</span>
+            </div>
+            <div className="p-3 rounded-md bg-[var(--bg-tertiary)]/50 border border-[var(--border-color)]">
+              <p className="text-[11px] text-[var(--text-muted)] font-medium">Onboarding</p>
+              <p className="text-lg font-extrabold text-[var(--text-primary)] mt-0.5">24</p>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400">In progress</span>
+            </div>
+            <div className="p-3 rounded-md bg-[var(--bg-tertiary)]/50 border border-[var(--border-color)]">
+              <p className="text-[11px] text-[var(--text-muted)] font-medium">Probation Review</p>
+              <p className="text-lg font-extrabold text-[var(--text-primary)] mt-0.5">16</p>
+              <span className="text-[10px] text-amber-500 font-medium">Due in 14 days</span>
+            </div>
+            <div className="p-3 rounded-md bg-[var(--bg-tertiary)]/50 border border-[var(--border-color)]">
+              <p className="text-[11px] text-[var(--text-muted)] font-medium">Confirmed Total</p>
+              <p className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">1,000</p>
+              <span className="text-[10px] text-[var(--text-muted)]">Active roster</span>
+            </div>
+          </div>
+        </div>
+
         {/* Enterprise KPI Grid */}
         <KpiGrid
           role={Role.HR}
@@ -262,7 +302,7 @@ export const HrDashboardPage: React.FC = () => {
             attendanceRateTrend: 1.5,
             pendingLeaveRequests: 8,
             pendingCorrections: 3,
-            newJoinersMonth: 12,
+            newJoinersMonth: 24,
             attritionRate: 4.2,
             attritionTrend: -0.8,
             lateArrivalsToday: 4,

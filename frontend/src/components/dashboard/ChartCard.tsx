@@ -16,7 +16,7 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   title,
   subtitle,
   badgeText,
-  badgeVariant = 'blue',
+  badgeVariant = 'emerald',
   isLoading = false,
   error = null,
   isEmpty = false,
@@ -25,16 +25,12 @@ export const ChartCard: React.FC<ChartCardProps> = ({
 }) => {
   const getBadgeClass = () => {
     switch (badgeVariant) {
-      case 'emerald':
-        return 'badge-success';
       case 'amber':
-        return 'badge-warning';
+        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
       case 'rose':
-        return 'badge-danger';
-      case 'purple':
-        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+        return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20';
       default:
-        return 'badge-primary';
+        return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20';
     }
   };
 
@@ -42,9 +38,9 @@ export const ChartCard: React.FC<ChartCardProps> = ({
     if (isLoading) {
       return (
         <div className="w-full h-full flex flex-col justify-center space-y-4 animate-pulse py-8">
-          <div className="h-4 bg-slate-800 rounded w-1/3"></div>
-          <div className="h-32 bg-slate-800/50 rounded w-full"></div>
-          <div className="h-3 bg-slate-800 rounded w-2/3"></div>
+          <div className="h-4 bg-[var(--bg-tertiary)] rounded w-1/3"></div>
+          <div className="h-36 bg-[var(--bg-tertiary)] rounded-xl w-full"></div>
+          <div className="h-3 bg-[var(--bg-tertiary)] rounded w-2/3"></div>
         </div>
       );
     }
@@ -52,13 +48,13 @@ export const ChartCard: React.FC<ChartCardProps> = ({
     if (error) {
       return (
         <div className="w-full h-full flex flex-col items-center justify-center text-center py-10 space-y-3">
-          <div className="text-rose-400 text-sm font-bold bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 max-w-md">
+          <div className="text-rose-600 dark:text-rose-400 text-sm font-semibold bg-rose-500/10 p-4 rounded-xl border border-rose-500/20 max-w-md">
             {error}
           </div>
           {onRetry && (
             <button
               onClick={onRetry}
-              className="btn btn-secondary btn-sm px-4 py-2 hover:scale-[1.02] active:scale-[0.98] transition-transform"
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--bg-tertiary)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-all"
             >
               Retry Loading
             </button>
@@ -69,12 +65,12 @@ export const ChartCard: React.FC<ChartCardProps> = ({
 
     if (isEmpty) {
       return (
-        <div className="w-full h-full flex flex-col items-center justify-center text-center py-12 text-slate-400 space-y-2">
-          <svg className="w-12 h-12 text-slate-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-full h-full flex flex-col items-center justify-center text-center py-12 text-[var(--text-muted)] space-y-2">
+          <svg className="w-10 h-10 text-[var(--text-muted)] opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 13h6m-3-3v6m-9 1V4a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
           </svg>
-          <p className="text-sm font-bold text-slate-300">No Analytics Data Available</p>
-          <p className="text-xs text-slate-500">There is no matching information in the database.</p>
+          <p className="text-sm font-bold text-[var(--text-primary)]">No Analytics Data Available</p>
+          <p className="text-xs text-[var(--text-muted)]">There is no matching information for this period.</p>
         </div>
       );
     }
@@ -83,16 +79,21 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   };
 
   return (
-    <div className="glass-panel p-6 min-h-[360px] flex flex-col justify-between font-sans">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-6 min-h-[360px] flex flex-col justify-between shadow-sm transition-all hover:shadow-md">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-base font-extrabold text-[var(--text-primary)]">{title}</h3>
-          {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
+          <h3 className="text-base font-bold text-[var(--text-primary)] font-heading tracking-tight">{title}</h3>
+          {subtitle && <p className="text-xs text-[var(--text-muted)] mt-0.5 font-body">{subtitle}</p>}
         </div>
-        {badgeText && <span className={`badge text-xs ${getBadgeClass()}`}>{badgeText}</span>}
+        {badgeText && (
+          <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${getBadgeClass()}`}>
+            {badgeText}
+          </span>
+        )}
       </div>
 
       <div className="w-full flex-1 flex flex-col justify-center">{renderContent()}</div>
     </div>
   );
 };
+

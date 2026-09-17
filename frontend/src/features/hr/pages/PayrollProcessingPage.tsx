@@ -10,9 +10,15 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress
 } from '@mui/material';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { payrollApi, PayrollRun } from '../../../api/endpoints/payroll.api';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
@@ -29,7 +35,7 @@ export default function PayrollProcessingPage() {
   });
 
   const createRunMutation = useMutation({
-    mutationFn: payrollApi.createPayrollRun,
+    mutationFn: (params: { month: number; year: number }) => payrollApi.createPayrollRun(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payrollRuns'] });
       setIsCreateModalOpen(false);
@@ -47,57 +53,13 @@ export default function PayrollProcessingPage() {
   });
 
   const handleCreateRun = () => {
-    createRunMutation.mutate({ periodStart, periodEnd });
+    const startDate = new Date(periodStart);
+    const month = startDate.getMonth() + 1;
+    const year = startDate.getFullYear();
+    createRunMutation.mutate({ month, year });
   };
 
-  const columns: GridColDef[] = [
-    { field: 'id', headerName: 'Run ID', width: 280 },
-    { field: 'periodStart', headerName: 'Period Start', width: 130 },
-    { field: 'periodEnd', headerName: 'Period End', width: 130 },
-    { field: 'runDate', headerName: 'Run Date', width: 200, valueGetter: (params: any) => new Date(params.value || params.row.runDate).toLocaleString() },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 130,
-      renderCell: (params) => {
-        let color: 'default' | 'primary' | 'success' = 'default';
-        if (params.value === 'DRAFT') color = 'default';
-        if (params.value === 'PROCESSED') color = 'primary';
-        if (params.value === 'FINALIZED') color = 'success';
-        return <Chip label={params.value} color={color} size="small" />;
-      }
-    },
-    {
-      field: 'actions',
-      headerName: 'Actions',
-      width: 250,
-      renderCell: (params) => (
-        <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-          {params.row.status === 'DRAFT' && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => generatePayslipsMutation.mutate(params.row.id)}
-              disabled={generatePayslipsMutation.isPending}
-            >
-              Generate Payslips
-            </Button>
-          )}
-          {params.row.status === 'PROCESSED' && (
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => finalizeRunMutation.mutate(params.row.id)}
-              disabled={finalizeRunMutation.isPending}
-            >
-              Finalize Run
-            </Button>
-          )}
-        </Stack>
-      )
-    }
-  ];
+  const rows: PayrollRun[] = Array.isArray(runs?.data) ? runs.data : (Array.isArray(runs) ? runs : []);
 
   return (
     <Box>
@@ -108,14 +70,80 @@ export default function PayrollProcessingPage() {
         </Button>
       </Stack>
 
-      <Paper sx={{ height: 600, width: '100%' }}>
-        <DataGrid
-          rows={runs?.data || []}
-          columns={columns}
-          loading={isLoading}
-          disableRowSelectionOnClick
-          pageSizeOptions={[10, 25, 50]}
-        />
+      <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+        <TableContainer sx={{ maxHeight: 600 }}>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Run ID</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Period Start</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Period End</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Run Date</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                    <CircularProgress size={32} />
+                  </TableCell>
+                </TableRow>
+              ) : rows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.secondary' }}>
+                    No payroll runs found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rows.map((row) => {
+                  let color: 'default' | 'primary' | 'success' = 'default';
+                  if (row.status === 'DRAFT') color = 'default';
+                  if (row.status === 'CALCULATED' || row.status === 'VALIDATED') color = 'primary';
+                  if (row.status === 'FINALIZED' || row.status === 'APPROVED') color = 'success';
+
+                  return (
+                    <TableRow key={row.id} hover>
+                      <TableCell>{row.id}</TableCell>
+                      <TableCell>{row.periodStart}</TableCell>
+                      <TableCell>{row.periodEnd}</TableCell>
+                      <TableCell>{new Date(row.runDate).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Chip label={row.status} color={color} size="small" />
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1}>
+                          {row.status === 'DRAFT' && (
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => generatePayslipsMutation.mutate(row.id)}
+                              disabled={generatePayslipsMutation.isPending}
+                            >
+                              Generate Payslips
+                            </Button>
+                          )}
+                          {(row.status === 'CALCULATED' || row.status === 'VALIDATED') && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              size="small"
+                              onClick={() => finalizeRunMutation.mutate(row.id)}
+                              disabled={finalizeRunMutation.isPending}
+                            >
+                              Finalize Run
+                            </Button>
+                          )}
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Paper>
 
       <Dialog open={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>

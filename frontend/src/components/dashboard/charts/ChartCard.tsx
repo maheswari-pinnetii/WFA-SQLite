@@ -6,6 +6,7 @@ import { ChartSkeleton } from './ChartSkeleton';
 import { ChartEmptyState } from './ChartEmptyState';
 import { ChartErrorState } from './ChartErrorState';
 import { DashboardChartConfig } from './chart.types';
+import { selectChartData } from './chart-selectors';
 
 interface ChartCardProps {
   config: DashboardChartConfig;
@@ -28,11 +29,11 @@ export const ChartCard: React.FC<ChartCardProps> = ({
   className = '',
   actionSlot,
 }) => {
-  const hasData = data && data.length > 0;
+  const chartData = (data && data.length > 0) ? data : selectChartData(config, null);
 
   return (
     <div
-      className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-lg p-4 sm:p-5 shadow-2xs flex flex-col justify-between ${className}`}
+      className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-lg p-4 sm:p-5 shadow-2xs flex flex-col justify-between w-full min-w-0 ${className}`}
     >
       <div>
         <ChartHeader
@@ -42,20 +43,18 @@ export const ChartCard: React.FC<ChartCardProps> = ({
           actionSlot={actionSlot}
         />
 
-        <div className="mt-3 min-h-[190px]">
+        <div className="mt-3 min-h-[190px] w-full min-w-0">
           {loading ? (
             <ChartSkeleton height={height} />
           ) : error ? (
             <ChartErrorState message={error} onRetry={onRetry} />
-          ) : !hasData ? (
-            <ChartEmptyState height={height} />
           ) : (
-            <ChartRenderer config={config} data={data} height={height} />
+            <ChartRenderer config={config} data={chartData} height={height} />
           )}
         </div>
       </div>
 
-      {hasData && !loading && !error && config.series.length > 1 && (
+      {!loading && !error && config.series.length > 1 && (
         <ChartLegend series={config.series} colors={config.colors} />
       )}
     </div>

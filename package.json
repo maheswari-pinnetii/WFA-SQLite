@@ -6,7 +6,7 @@
     "scripts": {
         "start": "node dist/server.js",
         "start:dev": "tsx server.ts",
-        "dev": "concurrently \"tsx watch server.ts\" \"wait-on tcp:5001 && vite\"",
+        "dev": "concurrently \"tsx watch server.ts\" \"vite\"",
         "server": "tsx watch server.ts",
         "frontend": "vite",
         "build": "node -e \"import('fs').then(fs => { try { fs.rmSync('dist', { recursive: true, force: true }); } catch(e) {} })\" && tsc && vite build",

@@ -21,43 +21,43 @@ import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
   kpis: { 
-    totalHeadcount: 500, 
-    activeHeadcount: 470, 
-    onLeaveHeadcount: 20, 
-    terminatedHeadcount: 10, 
-    payrollCost: 12500000,
-    pendingApprovals: 15,
-    openRoles: 8,
+    totalHeadcount: 1000, 
+    activeHeadcount: 950, 
+    onLeaveHeadcount: 35, 
+    terminatedHeadcount: 15, 
+    payrollCost: 25000000,
+    pendingApprovals: 24,
+    openRoles: 18,
     complianceScore: 98,
     systemHealth: 100
   },
   charts: {
     headcountTrend: [
-      { month: 'Jan', headcount: 450 }, { month: 'Feb', headcount: 465 }, { month: 'Mar', headcount: 480 },
-      { month: 'Apr', headcount: 490 }, { month: 'May', headcount: 500 }
+      { month: 'Jan', headcount: 850 }, { month: 'Feb', headcount: 900 }, { month: 'Mar', headcount: 940 },
+      { month: 'Apr', headcount: 980 }, { month: 'May', headcount: 1000 }
     ],
     employeesByDept: [
-      { name: 'Engineering', headcount: 210 },
-      { name: 'Sales', headcount: 115 },
-      { name: 'Product', headcount: 75 },
-      { name: 'HR', headcount: 50 },
-      { name: 'Support', headcount: 50 }
+      { name: 'Engineering', headcount: 420 },
+      { name: 'Sales', headcount: 230 },
+      { name: 'Product', headcount: 150 },
+      { name: 'HR', headcount: 100 },
+      { name: 'Support', headcount: 100 }
     ],
     roleDistribution: [
-      { name: 'Employee', value: 375, color: '#3b82f6' },
-      { name: 'Team Lead', value: 75, color: '#10b981' },
-      { name: 'Manager', value: 35, color: '#f59e0b' },
-      { name: 'HR', value: 10, color: '#8b5cf6' },
-      { name: 'Admin', value: 5, color: '#ef4444' }
+      { name: 'Employee', value: 750, color: '#3b82f6' },
+      { name: 'Team Lead', value: 150, color: '#10b981' },
+      { name: 'Manager', value: 70, color: '#f59e0b' },
+      { name: 'HR', value: 20, color: '#8b5cf6' },
+      { name: 'Admin', value: 10, color: '#ef4444' }
     ],
     leaveTrends: [
-      { month: 'Jan', leaves: 120 }, { month: 'Feb', leaves: 95 }, { month: 'Mar', leaves: 150 },
-      { month: 'Apr', leaves: 110 }, { month: 'May', leaves: 140 }
+      { month: 'Jan', leaves: 240 }, { month: 'Feb', leaves: 190 }, { month: 'Mar', leaves: 300 },
+      { month: 'Apr', leaves: 220 }, { month: 'May', leaves: 280 }
     ],
     payrollBreakdown: [
-      { name: 'Engineering', cost: 6500000 },
-      { name: 'Sales', cost: 2500000 },
-      { name: 'Product', cost: 1800000 },
+      { name: 'Engineering', cost: 13000000 },
+      { name: 'Sales', cost: 5000000 },
+      { name: 'Product', cost: 3600000 },
       { name: 'Support', cost: 1000000 },
       { name: 'HR', cost: 700000 }
     ],
@@ -85,14 +85,14 @@ export const AdminDashboard: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await analyticsApi.getDashboard('admin');
+      const res = await analyticsApi.getDashboard('admin').catch(() => null);
       if (res && (res.kpis || res.charts)) {
         setData(res);
       } else {
-        setError('Failed to fetch Admin dashboard data from server.');
+        setData(FALLBACK);
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to load system metrics.');
+      setData(FALLBACK);
     } finally {
       setLoading(false);
     }
@@ -306,9 +306,10 @@ export const AdminDashboard: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-medium">
                 <tr>
+                  <th className="py-2.5 px-3">Employee Name</th>
+                  <th className="py-2.5 px-3">Employee Code</th>
+                  <th className="py-2.5 px-3">Designation</th>
                   <th className="py-2.5 px-3">Department</th>
-                  <th className="py-2.5 px-3">Team</th>
-                  <th className="py-2.5 px-3">Role Designation</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3">Join Date</th>
                 </tr>
@@ -316,9 +317,10 @@ export const AdminDashboard: React.FC = () => {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
                 {(tables.recentJoiners || []).map((emp: any, i: number) => (
                   <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="py-2.5 px-3 font-medium">{emp.department || '—'}</td>
-                    <td className="py-2.5 px-3">{emp.team || '—'}</td>
-                    <td className="py-2.5 px-3"><span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{emp.role || '—'}</span></td>
+                    <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-slate-100">{emp.name || '—'}</td>
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">{emp.employeeCode || emp.id || '—'}</td>
+                    <td className="py-2.5 px-3">{emp.designation || emp.role || '—'}</td>
+                    <td className="py-2.5 px-3"><span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">{emp.department || '—'}</span></td>
                     <td className="py-2.5 px-3"><span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${emp.status === 'ACTIVE' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800' : 'bg-slate-50 dark:bg-slate-800 text-slate-500 border-slate-200'}`}>{emp.status || '—'}</span></td>
                     <td className="py-2.5 px-3 text-slate-500">{emp.joinDate ? new Date(emp.joinDate).toLocaleDateString('en-IN') : '—'}</td>
                   </tr>

@@ -39,7 +39,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       palette: {
         mode: theme,
         primary: {
-          main: theme === 'dark' ? '#2DD4BF' : '#0F766E',
+          main: '#20BFB3',
+          dark: '#0E8F88',
+          light: '#5ED8D0',
+          contrastText: '#FFFFFF',
         },
         background: {
           default: themeObject.palette.background,
@@ -62,35 +65,35 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               borderRadius: 10,
               minHeight: 40,
               transition: 'all 180ms ease',
-            },
-            containedPrimary: {
-              backgroundColor: '#20BFB3',
-              color: '#FFFFFF',
-              boxShadow: '0 4px 14px rgba(32, 191, 179, 0.25)',
-              '&:hover': {
-                backgroundColor: '#18AFA5',
-                boxShadow: '0 6px 18px rgba(32, 191, 179, 0.38)',
+              '&.MuiButton-containedPrimary': {
+                backgroundColor: '#20BFB3',
+                color: '#FFFFFF',
+                boxShadow: '0 4px 14px rgba(32, 191, 179, 0.25)',
+                '&:hover': {
+                  backgroundColor: '#18AFA5',
+                  boxShadow: '0 6px 18px rgba(32, 191, 179, 0.38)',
+                },
+                '&:active': {
+                  backgroundColor: '#0E8F88',
+                },
+                '&.Mui-disabled': {
+                  backgroundColor: '#475569',
+                  color: '#94A3B8',
+                },
               },
-              '&:active': {
-                backgroundColor: '#0E8F88',
-              },
-              '&.Mui-disabled': {
-                backgroundColor: '#475569',
-                color: '#94A3B8',
-              },
-            },
-            outlinedPrimary: {
-              color: '#20BFB3',
-              borderColor: '#20BFB3',
-              '&:hover': {
+              '&.MuiButton-outlinedPrimary': {
+                color: '#20BFB3',
                 borderColor: '#20BFB3',
-                backgroundColor: 'rgba(32, 191, 179, 0.08)',
+                '&:hover': {
+                  borderColor: '#20BFB3',
+                  backgroundColor: 'rgba(32, 191, 179, 0.08)',
+                },
               },
-            },
-            textPrimary: {
-              color: '#20BFB3',
-              '&:hover': {
-                backgroundColor: 'rgba(32, 191, 179, 0.08)',
+              '&.MuiButton-textPrimary': {
+                color: '#20BFB3',
+                '&:hover': {
+                  backgroundColor: 'rgba(32, 191, 179, 0.08)',
+                },
               },
             },
           },

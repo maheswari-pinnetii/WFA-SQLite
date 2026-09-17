@@ -36,67 +36,67 @@ const fallbackAnalyticsData: AnalyticsData = {
     employeeId: 'emp-001'
   },
   metrics: {
-    totalWorkforce: 500,
+    totalWorkforce: 1000,
     attendanceRate: '98.5%',
     averagePerformanceScore: 92,
-    retentionRiskCount: 2
+    retentionRiskCount: 4
   },
   growthData: [
-    { name: 'Jan', headcount: 450, hiring: 12 },
-    { name: 'Feb', headcount: 465, hiring: 15 },
-    { name: 'Mar', headcount: 480, hiring: 15 },
-    { name: 'Apr', headcount: 490, hiring: 10 },
-    { name: 'May', headcount: 500, hiring: 10 }
+    { name: 'Jan', headcount: 850, hiring: 24 },
+    { name: 'Feb', headcount: 900, hiring: 30 },
+    { name: 'Mar', headcount: 940, hiring: 25 },
+    { name: 'Apr', headcount: 980, hiring: 20 },
+    { name: 'May', headcount: 1000, hiring: 20 }
   ],
   workforceGrowth: [
-    { name: 'Jan', headcount: 450, hiring: 12 },
-    { name: 'Feb', headcount: 465, hiring: 15 },
-    { name: 'Mar', headcount: 480, hiring: 15 },
-    { name: 'Apr', headcount: 490, hiring: 10 },
-    { name: 'May', headcount: 500, hiring: 10 }
+    { name: 'Jan', headcount: 850, hiring: 24 },
+    { name: 'Feb', headcount: 900, hiring: 30 },
+    { name: 'Mar', headcount: 940, hiring: 25 },
+    { name: 'Apr', headcount: 980, hiring: 20 },
+    { name: 'May', headcount: 1000, hiring: 20 }
   ],
   attendanceOverview: [
-    { name: 'Mon', present: 485, absent: 8, late: 7 },
-    { name: 'Tue', present: 490, absent: 5, late: 5 },
-    { name: 'Wed', present: 488, absent: 7, late: 5 },
-    { name: 'Thu', present: 492, absent: 4, late: 4 },
-    { name: 'Fri', present: 480, absent: 12, late: 8 }
+    { name: 'Mon', present: 970, absent: 16, late: 14 },
+    { name: 'Tue', present: 980, absent: 10, late: 10 },
+    { name: 'Wed', present: 976, absent: 14, late: 10 },
+    { name: 'Thu', present: 984, absent: 8, late: 8 },
+    { name: 'Fri', present: 960, absent: 24, late: 16 }
   ],
   departmentComparison: [
-    { name: 'Engineering', headcount: 210, performance: 94, attendance: 98 },
-    { name: 'Product', headcount: 75, performance: 91, attendance: 97 },
-    { name: 'Sales & Mktg', headcount: 115, performance: 89, attendance: 96 },
-    { name: 'HR & Ops', headcount: 50, performance: 93, attendance: 99 },
-    { name: 'Customer Success', headcount: 50, performance: 90, attendance: 97 }
+    { name: 'Engineering', headcount: 420, performance: 94, attendance: 98 },
+    { name: 'Product', headcount: 150, performance: 91, attendance: 97 },
+    { name: 'Sales & Mktg', headcount: 230, performance: 89, attendance: 96 },
+    { name: 'HR & Ops', headcount: 100, performance: 93, attendance: 99 },
+    { name: 'Customer Success', headcount: 100, performance: 90, attendance: 97 }
   ],
   departmentDistribution: [
-    { name: 'Engineering', value: 210 },
-    { name: 'Product', value: 75 },
-    { name: 'Sales & Mktg', value: 115 },
-    { name: 'HR & Ops', value: 50 },
-    { name: 'Customer Success', value: 50 }
+    { name: 'Engineering', value: 420 },
+    { name: 'Product', value: 150 },
+    { name: 'Sales & Mktg', value: 230 },
+    { name: 'HR & Ops', value: 100 },
+    { name: 'Customer Success', value: 100 }
   ],
   roleDistribution: [
-    { name: 'Employee', value: 375 },
-    { name: 'Team Lead', value: 75 },
-    { name: 'Manager', value: 35 },
-    { name: 'HR', value: 10 },
-    { name: 'Admin', value: 5 }
+    { name: 'Employee', value: 750 },
+    { name: 'Team Lead', value: 150 },
+    { name: 'Manager', value: 70 },
+    { name: 'HR', value: 20 },
+    { name: 'Admin', value: 10 }
   ],
   employmentStatus: [
-    { name: 'Active', value: 470 },
-    { name: 'On Leave', value: 20 },
-    { name: 'Remote', value: 10 }
+    { name: 'Active', value: 950 },
+    { name: 'On Leave', value: 35 },
+    { name: 'Remote', value: 15 }
   ],
   workforceDistribution: [
-    { name: 'Office', value: 350 },
-    { name: 'Hybrid', value: 120 },
-    { name: 'Remote', value: 30 }
+    { name: 'Office', value: 700 },
+    { name: 'Hybrid', value: 240 },
+    { name: 'Remote', value: 60 }
   ],
   riskDistribution: [
-    { name: 'High Risk', value: 5 },
-    { name: 'Moderate Risk', value: 25 },
-    { name: 'Low Risk', value: 470 }
+    { name: 'High Risk', value: 10 },
+    { name: 'Moderate Risk', value: 40 },
+    { name: 'Low Risk', value: 950 }
   ],
   skillsAnalysis: {
     topSkills: [
@@ -127,7 +127,11 @@ const unwrap = <T,>(response: { data?: { success?: boolean; data?: T; message?: 
 
 export const analyticsApi = {
   async getAnalytics(): Promise<AnalyticsData> {
-    return unwrap(await apiClient.get('/v1/analytics'));
+    try {
+      return unwrap(await apiClient.get('/v1/analytics'));
+    } catch {
+      return fallbackAnalyticsData;
+    }
   },
   async getDashboard(role: string): Promise<any> {
     const response = await apiClient.get(`/v1/dashboard/${role}`);

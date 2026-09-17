@@ -24,6 +24,7 @@ import * as hrDashboardController from '../controllers/hr-dashboard.controller.j
 import * as managerDashboardController from '../controllers/manager-dashboard.controller.js';
 import * as teamLeadDashboardController from '../controllers/team-lead-dashboard.controller.js';
 import * as employeeDashboardController from '../controllers/employee-dashboard.controller.js';
+import * as jobRoleController from '../controllers/job-role.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { tenantScope } from '../middleware/tenantScope.js';
 import { uploadMiddleware } from '../middleware/fileUpload.js';
@@ -207,8 +208,14 @@ router.get('/teams/:id/members', authenticateToken, enforceScope, validateIdPara
 // Org, Dept & RBAC Route mappings
 router.get('/departments', authenticateToken, authenticatedUserLimiter, organizationController.getDepartments);
 router.get('/organizations', authenticateToken, authenticatedUserLimiter, organizationController.getOrganizations);
+// Roles & Permissions
 router.get('/roles', authenticateToken, authenticatedUserLimiter, organizationController.getRoles);
 router.get('/permissions', authenticateToken, authenticatedUserLimiter, organizationController.getPermissions);
+
+// Job Families & Job Roles
+router.get('/job-families', authenticateToken, authenticatedUserLimiter, jobRoleController.getJobFamilies);
+router.get('/job-roles', authenticateToken, authenticatedUserLimiter, jobRoleController.getJobRoles);
+router.get('/analytics/job-roles', authenticateToken, authenticatedUserLimiter, jobRoleController.getJobRoleAnalytics);
 
 // Locations — full CRUD (Admin + HR)
 router.get('/locations', authenticateToken, authenticatedUserLimiter, organizationController.getLocations);

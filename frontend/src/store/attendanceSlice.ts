@@ -54,9 +54,9 @@ export const fetchAttendanceDataThunk = createAsyncThunk(
       console.warn('Offline or unable to fetch from server, fallback to local storage cache.', err);
       isOffline = true;
       // Fallback to local storage if offline
-      records = attendanceService.getRecords();
-      corrections = attendanceService.getCorrections();
-      auditLogs = attendanceService.getAuditLogs();
+      records = await attendanceService.getRecords();
+      corrections = await attendanceService.getCorrections();
+      auditLogs = await attendanceService.getAuditLogs();
     }
 
     return { records, corrections, auditLogs, isOffline, employeeId };
@@ -66,7 +66,11 @@ export const fetchAttendanceDataThunk = createAsyncThunk(
 export const syncLocalDataThunk = createAsyncThunk(
   'attendance/syncLocalData',
   async (employeeId: string, { dispatch }) => {
-    dispatch(syncLocalData({ employeeId }));
+    const records = await attendanceService.getRecords();
+    const corrections = await attendanceService.getCorrections();
+    const auditLogs = await attendanceService.getAuditLogs();
+    const queue = await attendanceService.getOfflineQueue();
+    dispatch(syncLocalData({ employeeId, records, corrections, auditLogs, offlineQueueLength: queue.length }));
     return true;
   }
 );
@@ -78,11 +82,11 @@ const attendanceSlice = createSlice({
     setOfflineState(state, action: PayloadAction<boolean>) {
       state.isOffline = action.payload;
     },
-    syncLocalData(state, action: PayloadAction<{ employeeId: string }>) {
-      state.records = attendanceService.getRecords();
-      state.corrections = attendanceService.getCorrections();
-      state.auditLogs = attendanceService.getAuditLogs();
-      state.offlineQueueLength = attendanceService.getOfflineQueue().length;
+    syncLocalData(state, action: PayloadAction<{ employeeId: string; records: AttendanceRecord[]; corrections: CorrectionRequest[]; auditLogs: AuditLog[]; offlineQueueLength: number }>) {
+      state.records = action.payload.records;
+      state.corrections = action.payload.corrections;
+      state.auditLogs = action.payload.auditLogs;
+      state.offlineQueueLength = action.payload.offlineQueueLength;
       
       const active = state.records.find((r) => r.employeeId === action.payload.employeeId && r.status !== 'Checked Out');
       state.activeRecord = active || null;
@@ -111,7 +115,6 @@ const attendanceSlice = createSlice({
         state.corrections = action.payload.corrections;
         state.auditLogs = action.payload.auditLogs;
         state.isOffline = action.payload.isOffline;
-        state.offlineQueueLength = attendanceService.getOfflineQueue().length;
         
         const active = state.records.find((r) => r.employeeId === action.payload.employeeId && r.status !== 'Checked Out');
         state.activeRecord = active || null;

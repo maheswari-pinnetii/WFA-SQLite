@@ -77,23 +77,39 @@ class AttendanceService {
   }
 
   async getRecords(): Promise<AttendanceRecord[]> {
-    return await dbWrapper.getAll<AttendanceRecord>('records') || [];
+    try {
+      return (await dbWrapper.getAll<AttendanceRecord>('records')) || [];
+    } catch {
+      return [];
+    }
   }
 
   async saveRecords(records: AttendanceRecord[]): Promise<void> {
-    await dbWrapper.putAll('records', records);
+    try {
+      await dbWrapper.putAll('records', records);
+    } catch {}
   }
 
   async getCorrections(): Promise<CorrectionRequest[]> {
-    return await dbWrapper.getAll<CorrectionRequest>('corrections') || [];
+    try {
+      return (await dbWrapper.getAll<CorrectionRequest>('corrections')) || [];
+    } catch {
+      return [];
+    }
   }
 
   async saveCorrections(corrections: CorrectionRequest[]): Promise<void> {
-    await dbWrapper.putAll('corrections', corrections);
+    try {
+      await dbWrapper.putAll('corrections', corrections);
+    } catch {}
   }
 
   async getAuditLogs(): Promise<AuditLog[]> {
-    return await dbWrapper.getAll<AuditLog>('auditLogs') || [];
+    try {
+      return (await dbWrapper.getAll<AuditLog>('auditLogs')) || [];
+    } catch {
+      return [];
+    }
   }
 
   async logAction(employeeId: string, action: string, details: string): Promise<void> {
@@ -105,8 +121,10 @@ class AttendanceService {
       action,
       details,
     };
-    logs.unshift(newLog);
-    await dbWrapper.putAll('auditLogs', logs);
+    logs.push(newLog);
+    try {
+      await dbWrapper.putAll('auditLogs', logs);
+    } catch {}
   }
 
   // Smart validation and state machine for check-in

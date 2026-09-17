@@ -157,13 +157,6 @@ const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: strin
     }
   };
 
-  // Dynamic calculations for days and starting weekday
-  const daysInMonth = new Date(yearNum, monthIndex + 1, 0).getDate();
-  const firstDayOfWeek = new Date(yearNum, monthIndex, 1).getDay(); // 0: Sun, 1: Mon, etc.
-
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  const emptySlots = Array.from({ length: firstDayOfWeek });
-
   useEffect(() => {
     fetchMfaStatus();
     fetchTrustedDevices();
