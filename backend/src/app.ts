@@ -167,6 +167,26 @@ if (process.env.NODE_ENV !== 'test') {
   });
 }
 
+// Serve frontend static assets in production if available
+import path from 'path';
+import fs from 'fs';
+
+const frontendDist = path.resolve('dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('*', (req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/v1') || req.path.startsWith('/socket.io')) {
+      return next();
+    }
+    const indexPath = path.join(frontendDist, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      next();
+    }
+  });
+}
+
 // Global Error Handler — standard AppError format, never leaks internals
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   sendError(res, err, req);
