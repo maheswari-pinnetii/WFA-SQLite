@@ -21,7 +21,7 @@ import { DashboardChartConfig } from './chart.types';
 import { EMERALD_CHART_COLORS, formatValue } from './chart.utils';
 
 const chartTickStyle = {
-  fontFamily: '"Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
   fontSize: 12,
   fill: '#64748b',
 };

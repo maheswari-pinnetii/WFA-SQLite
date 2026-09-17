@@ -34,19 +34,19 @@ interface Series {
   color: string;
 }
 
-const INTER_FONT = '"Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+const FONT_FAMILY = "'Plus Jakarta Sans', sans-serif";
 
 const tooltipStyle = {
   backgroundColor: 'var(--bg-secondary)',
   borderColor: 'var(--border-color)',
   borderRadius: '8px',
   color: 'var(--text-primary)',
-  fontFamily: INTER_FONT,
+  fontFamily: FONT_FAMILY,
   fontSize: '12px',
 };
 
 const tickStyle = {
-  fontFamily: INTER_FONT,
+  fontFamily: FONT_FAMILY,
   fontSize: 12,
 };
 
@@ -60,7 +60,7 @@ export const AnalyticsLineChart: React.FC<BaseChartProps & { xKey: string; serie
         <XAxis dataKey={xKey} stroke="var(--text-muted)" tick={tickStyle} />
         <YAxis stroke="var(--text-muted)" tick={tickStyle} />
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend wrapperStyle={{ fontSize: '12px', fontFamily: INTER_FONT, color: 'var(--text-muted)' }} />
+        <Legend wrapperStyle={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: 'var(--text-muted)' }} />
         {series.map((item) => <Line key={item.key} type="monotone" dataKey={item.key} name={item.name} stroke={item.color} strokeWidth={3} dot={{ r: 3 }} />)}
       </LineChart>
     </ResponsiveContainer>
@@ -76,7 +76,7 @@ export const AnalyticsBarChart: React.FC<BaseChartProps & { xKey: string; series
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
         {layout === 'vertical' ? <><XAxis type="number" stroke="var(--text-muted)" tick={tickStyle} /><YAxis dataKey={xKey} type="category" width={110} stroke="var(--text-muted)" tick={{ ...tickStyle, fontSize: 11 }} /></> : <><XAxis dataKey={xKey} stroke="var(--text-muted)" tick={{ ...tickStyle, fontSize: 11 }} /><YAxis stroke="var(--text-muted)" tick={tickStyle} /></>}
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend wrapperStyle={{ fontSize: '12px', fontFamily: INTER_FONT, color: 'var(--text-muted)' }} />
+        <Legend wrapperStyle={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: 'var(--text-muted)' }} />
         {series.map((item) => <Bar key={item.key} dataKey={item.key} name={item.name} fill={item.color} radius={[6, 6, 0, 0]} />)}
       </BarChart>
     </ResponsiveContainer>
@@ -93,7 +93,7 @@ export const AnalyticsDonutChart: React.FC<BaseChartProps & { nameKey?: string; 
           {data.map((_, index) => <Cell key={`slice-${index}`} fill={colors[index % colors.length]} />)}
         </Pie>
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend verticalAlign="bottom" height={30} wrapperStyle={{ fontSize: '12px', fontFamily: INTER_FONT, color: 'var(--text-muted)' }} />
+        <Legend verticalAlign="bottom" height={30} wrapperStyle={{ fontSize: '12px', fontFamily: FONT_FAMILY, color: 'var(--text-muted)' }} />
       </PieChart>
     </ResponsiveContainer>
   </AnalyticsChartContainer>

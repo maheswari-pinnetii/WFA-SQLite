@@ -1,29 +1,29 @@
-const FONT_STACK = '"Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+const FONT_STACK = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 export const muiTypography = {
   fontFamily: FONT_STACK,
   h1: {
     fontFamily: FONT_STACK,
     fontSize: '28px',
-    fontWeight: 650,
+    fontWeight: 700,
     lineHeight: '36px',
   },
   h2: {
     fontFamily: FONT_STACK,
-    fontSize: '20px',
-    fontWeight: 650,
-    lineHeight: '28px',
+    fontSize: '18px',
+    fontWeight: 700,
+    lineHeight: '26px',
   },
   h3: {
     fontFamily: FONT_STACK,
     fontSize: '17px',
-    fontWeight: 600,
+    fontWeight: 700,
     lineHeight: '24px',
   },
   h4: {
     fontFamily: FONT_STACK,
     fontSize: '15px',
-    fontWeight: 600,
+    fontWeight: 700,
     lineHeight: '22px',
   },
   h5: {
@@ -47,7 +47,7 @@ export const muiTypography = {
   body2: {
     fontFamily: FONT_STACK,
     fontSize: '13px',
-    fontWeight: 400,
+    fontWeight: 500,
     lineHeight: '19px',
   },
   button: {
@@ -60,7 +60,7 @@ export const muiTypography = {
   caption: {
     fontFamily: FONT_STACK,
     fontSize: '12px',
-    fontWeight: 400,
+    fontWeight: 700,
     lineHeight: '18px',
   },
 };
@@ -72,7 +72,7 @@ export const typography = {
     sm: '13px',
     base: '14px',
     lg: '17px',
-    xl: '20px',
+    xl: '18px',
     '2xl': '28px',
     '3xl': '32px'
   },
@@ -80,7 +80,8 @@ export const typography = {
     normal: '400',
     medium: '500',
     semibold: '600',
-    emphasis: '650'
+    bold: '700',
+    kpi: '800'
   },
   mui: muiTypography
 };

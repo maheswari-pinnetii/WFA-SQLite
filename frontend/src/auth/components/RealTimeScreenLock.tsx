@@ -82,7 +82,7 @@ export const RealTimeScreenLock: React.FC<RealTimeScreenLockProps> = ({
             color: '#ffffff',
             letterSpacing: '-0.02em',
             lineHeight: 1,
-            fontFamily: '"Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
             fontVariantNumeric: 'tabular-nums',
           }}
         >
