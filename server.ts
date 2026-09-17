@@ -41,31 +41,53 @@ if (process.env.NODE_ENV !== 'test') {
     featureFlagService.initDefaults().catch(() => undefined);
   });
 
-  server.on('error', (err: any) => {
-    if (err.code === 'EADDRINUSE') {
-      logger.error('server.port_in_use', `Port ${PORT} is already in use by another process. Please free port ${PORT} or configure a different PORT in .env.`);
-      process.exit(1);
-    } else {
-      logger.error('server.error', 'Server error occurred', { error: err.message });
-      process.exit(1);
-    }
-  });
+  const startServer = (currentPort: number, maxRetries: number = 5) => {
+    let attempts = 0;
 
-  server.listen(PORT, () => {
-    const env = process.env.NODE_ENV || 'development';
-    console.log('');
-    console.log('┌─────────────────────────────────────────────────┐');
-    console.log('│         Stackly WFA Backend — RUNNING            │');
-    console.log('├─────────────────────────────────────────────────┤');
-    console.log(`│  Environment : ${env.padEnd(32)}│`);
-    console.log(`│  Server      : http://localhost:${PORT}             │`);
-    console.log(`│  Health      : http://localhost:${PORT}/api/health   │`);
-    console.log(`│  API         : http://localhost:${PORT}/api/v1       │`);
-    console.log('│  Database    : SQLite (WAL mode)                 │');
-    console.log('└─────────────────────────────────────────────────┘');
-    console.log('');
-    logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${PORT}`);
-  });
+    const listenOnPort = (port: number) => {
+      const onError = (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          logger.warn('server.port_in_use', `Port ${port} is currently in use.`);
+          if (attempts < maxRetries) {
+            attempts++;
+            const nextPort = port + 1;
+            logger.info('server.port_retry', `Attempting to bind to alternative port ${nextPort} (${attempts}/${maxRetries})...`);
+            server.removeListener('error', onError);
+            listenOnPort(nextPort);
+          } else {
+            logger.error('server.port_in_use_fatal', `Failed to find an available port after ${maxRetries} retries starting from ${currentPort}.`);
+            process.exit(1);
+          }
+        } else {
+          logger.error('server.error', 'Server error occurred', { error: err.message });
+          process.exit(1);
+        }
+      };
+
+      server.once('error', onError);
+
+      server.listen(port, () => {
+        server.removeListener('error', onError);
+        const env = process.env.NODE_ENV || 'development';
+        console.log('');
+        console.log('┌─────────────────────────────────────────────────┐');
+        console.log('│         Stackly WFA Backend — RUNNING            │');
+        console.log('├─────────────────────────────────────────────────┤');
+        console.log(`│  Environment : ${env.padEnd(32)}│`);
+        console.log(`│  Server      : http://localhost:${port}             │`);
+        console.log(`│  Health      : http://localhost:${port}/api/health   │`);
+        console.log(`│  API         : http://localhost:${port}/api/v1       │`);
+        console.log('│  Database    : SQLite (WAL mode)                 │');
+        console.log('└─────────────────────────────────────────────────┘');
+        console.log('');
+        logger.info('server.startup', `Backend API with Socket.io running on http://localhost:${port}`);
+      });
+    };
+
+    listenOnPort(currentPort);
+  };
+
+  startServer(PORT);
 } else {
   server = http.createServer(app);
 }
