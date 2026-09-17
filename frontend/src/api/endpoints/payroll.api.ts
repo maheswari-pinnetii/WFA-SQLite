@@ -108,11 +108,17 @@ export const payrollApi = {
   getPayrollRuns: () =>
     apiClient.get('/payroll/runs').then((res: any) => res.data?.data ?? res.data),
 
-  createRun: (month: number, year: number) =>
-    apiClient.post('/payroll/runs', { month, year }).then((res: any) => res.data?.data ?? res.data),
+  createRun: (params: { month: number; year: number } | number, year?: number) => {
+    const m = typeof params === 'object' ? params.month : params;
+    const y = typeof params === 'object' ? params.year : (year as number);
+    return apiClient.post('/payroll/runs', { month: m, year: y }).then((res: any) => res.data?.data ?? res.data);
+  },
 
-  createPayrollRun: (month: number, year: number) =>
-    apiClient.post('/payroll/runs', { month, year }).then((res: any) => res.data?.data ?? res.data),
+  createPayrollRun: (params: { month: number; year: number } | number, year?: number) => {
+    const m = typeof params === 'object' ? params.month : params;
+    const y = typeof params === 'object' ? params.year : (year as number);
+    return apiClient.post('/payroll/runs', { month: m, year: y }).then((res: any) => res.data?.data ?? res.data);
+  },
 
   calculateRun: (runId: string) =>
     apiClient.post(`/payroll/runs/${runId}/calculate`).then((res: any) => res.data?.data ?? res.data),

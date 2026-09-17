@@ -47,7 +47,10 @@ export default function PayrollProcessingPage() {
   });
 
   const handleCreateRun = () => {
-    createRunMutation.mutate({ periodStart, periodEnd });
+    const startDate = new Date(periodStart);
+    const month = startDate.getMonth() + 1;
+    const year = startDate.getFullYear();
+    createRunMutation.mutate({ month, year });
   };
 
   const columns: GridColDef[] = [
