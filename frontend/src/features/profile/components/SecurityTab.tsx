@@ -183,53 +183,12 @@ const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: strin
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const emptySlots = Array.from({ length: firstDayOfWeek });
 
-  const handlePrevMonth = () => {
-    if (monthIndex === 0) {
-      setSelectedMonth('December');
-      setSelectedYear((prev) => (parseInt(prev, 10) - 1).toString());
-    } else {
-      setSelectedMonth(MONTHS[monthIndex - 1]);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (monthIndex === 11) {
-      setSelectedMonth('January');
-      setSelectedYear((prev) => (parseInt(prev, 10) + 1).toString());
-    } else {
-      setSelectedMonth(MONTHS[monthIndex + 1]);
-    }
-  };
-
-  const handleGoToToday = () => {
-    const today = new Date();
-    setSelectedMonth(MONTHS[today.getMonth()]);
-    setSelectedYear(today.getFullYear().toString());
-  };
-
-  const [clientId, setClientId] = useState(() => localStorage.getItem('google_calendar_client_id') || '');
-  const [accessToken, setAccessToken] = useState(() => localStorage.getItem('google_calendar_token') || '');
-  const [events, setEvents] = useState<any[]>([]);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-
-  useEffect(() => {
-    if (document.getElementById('google-gsi-client')) {
-      return;
-    }
-    const script = document.createElement('script');
-    script.id = 'google-gsi-client';
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-    
   useEffect(() => {
     fetchMfaStatus();
     fetchTrustedDevices();
   }, []);
 
-return (
+  return (
 
           <div className="space-y-6 text-xs animate-fadeIn text-[var(--text-primary)]">
             <h4 className="text-sm font-extrabold border-b border-[var(--border-color)] pb-2 flex items-center gap-1.5">
