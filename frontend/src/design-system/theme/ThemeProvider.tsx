@@ -39,7 +39,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       palette: {
         mode: theme,
         primary: {
-          main: theme === 'dark' ? '#2DD4BF' : '#0F766E',
+          main: '#20BFB3',
+          dark: '#0E8F88',
+          light: '#5ED8D0',
+          contrastText: '#FFFFFF',
         },
         background: {
           default: themeObject.palette.background,
