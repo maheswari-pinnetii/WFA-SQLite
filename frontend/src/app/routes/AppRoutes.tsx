@@ -60,7 +60,7 @@ import { TeamLeadSprintsPage } from '../../features/team-lead/pages/TeamLeadSpri
 
 // Employee Dashboards & Pages
 import { EmployeeDashboard } from '../../features/employee/dashboard/EmployeeDashboard';
-import { Profile } from '../../features/employee/pages/Profile';
+import { ProfileRouter as Profile } from '../../features/profile/ProfileRouter';
 import { MyAttendance } from '../../features/employee/pages/MyAttendance';
 import { MyPerformance } from '../../features/employee/pages/MyPerformance';
 import { EmployeeRequestsPage } from '../../features/employee/pages/EmployeeRequestsPage';

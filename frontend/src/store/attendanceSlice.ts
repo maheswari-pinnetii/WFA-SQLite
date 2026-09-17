@@ -63,6 +63,14 @@ export const fetchAttendanceDataThunk = createAsyncThunk(
   }
 );
 
+export const syncLocalDataThunk = createAsyncThunk(
+  'attendance/syncLocalData',
+  async (employeeId: string, { dispatch }) => {
+    dispatch(syncLocalData({ employeeId }));
+    return true;
+  }
+);
+
 const attendanceSlice = createSlice({
   name: 'attendance',
   initialState,
