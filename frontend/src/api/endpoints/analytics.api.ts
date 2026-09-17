@@ -127,7 +127,11 @@ const unwrap = <T,>(response: { data?: { success?: boolean; data?: T; message?: 
 
 export const analyticsApi = {
   async getAnalytics(): Promise<AnalyticsData> {
-    return unwrap(await apiClient.get('/v1/analytics'));
+    try {
+      return unwrap(await apiClient.get('/v1/analytics'));
+    } catch {
+      return fallbackAnalyticsData;
+    }
   },
   async getDashboard(role: string): Promise<any> {
     const response = await apiClient.get(`/v1/dashboard/${role}`);

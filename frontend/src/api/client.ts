@@ -117,6 +117,8 @@ apiClient.interceptors.response.use(
 
     if (error.response?.data?.message) {
       error.message = error.response.data.message;
+    } else if (error.code === 'ERR_NETWORK' || !error.response) {
+      error.message = 'Unable to connect to server. Please check your connection or backend server status.';
     }
 
     return Promise.reject(error);

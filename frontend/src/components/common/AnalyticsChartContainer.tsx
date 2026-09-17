@@ -66,7 +66,7 @@ export const AnalyticsChartContainer: React.FC<AnalyticsChartContainerProps> = (
         )}
 
         {!isLoading && !error && !isEmpty && (
-          <div className="w-full h-full min-h-[260px]">
+          <div className="w-full min-w-0 flex-1 min-h-[260px]">
             {children}
           </div>
         )}

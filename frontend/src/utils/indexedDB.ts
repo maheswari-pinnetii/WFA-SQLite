@@ -10,6 +10,9 @@ export class IndexedDBWrapper {
   }
 
   private async openDB(): Promise<IDBDatabase> {
+    if (typeof indexedDB === 'undefined') {
+      return Promise.reject(new Error('IndexedDB is not supported in this environment'));
+    }
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
 

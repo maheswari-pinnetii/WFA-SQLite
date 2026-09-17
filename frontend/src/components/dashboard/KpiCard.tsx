@@ -229,6 +229,8 @@ export function KpiCard({
           sx={{
             width: 42,
             height: 42,
+            minWidth: 42,
+            minHeight: 42,
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
@@ -236,10 +238,17 @@ export function KpiCard({
             mb: 2.5,
             background: 'linear-gradient(135deg, #20bfb3, #0ea5a0)',
             boxShadow: '0 4px 12px rgba(32, 191, 179, 0.4)',
+            color: '#ffffff',
+            transition: 'transform 180ms ease, box-shadow 180ms ease',
             '& svg': {
               width: 20,
               height: 20,
               color: '#ffffff',
+              flexShrink: 0,
+            },
+            '&:hover': {
+              transform: 'scale(1.05)',
+              boxShadow: '0 6px 18px rgba(32, 191, 179, 0.5)',
             },
           }}
         >
