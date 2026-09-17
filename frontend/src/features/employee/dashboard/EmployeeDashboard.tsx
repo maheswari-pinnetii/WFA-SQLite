@@ -3,66 +3,16 @@ import { useAuth } from '../../../auth/hooks/useAuth';
 import { PageContainer } from '../../../components/layout/PageContainer';
 import { PageHeader } from '../../../components/layout/PageHeader';
 import { FilterBar, FilterState } from '../../../components/layout/FilterBar';
-import { ExceptionsSection, ExceptionItem } from '../../../components/dashboard/widgets/ExceptionsSection';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { AnalyticsBarChart, AnalyticsDonutChart, AnalyticsLineChart } from '../../../components/charts/AnalyticsCharts';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
+import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWidget';
 import { Clock, Calendar, DollarSign, Award, RefreshCw, AlertCircle, Layers, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const FALLBACK: any = {
-  kpis: { 
-    hoursLogged: '152.5', 
-    overtime: '6.5', 
-    leaveBalance: '14', 
-    pendingLeaves: '2',
-    tasksAssigned: '12',
-    tasksCompleted: '8',
-    upcomingHolidays: '1',
-    nextReview: 'Oct 15'
-  },
-  charts: {
-    myAttendanceTrend: [
-      { day: 'Mon', hours: 8.5 }, { day: 'Tue', hours: 8.2 }, { day: 'Wed', hours: 9.0 },
-      { day: 'Thu', hours: 8.0 }, { day: 'Fri', hours: 8.5 }
-    ],
-    taskProgress: [
-      { name: 'To Do', value: 3, color: '#94a3b8' },
-      { name: 'In Progress', value: 4, color: '#059669' },
-      { name: 'Review', value: 2, color: '#f59e0b' },
-      { name: 'Done', value: 8, color: '#10b981' }
-    ],
-    leaveUsage: [
-      { type: 'Casual', used: 2, remaining: 10 },
-      { type: 'Sick', used: 1, remaining: 11 },
-      { type: 'Earned', used: 5, remaining: 13 }
-    ],
-    overtimeHistory: [
-      { month: 'Jun', hours: 12 }, { month: 'Jul', hours: 15 }, { month: 'Aug', hours: 8 }, { month: 'Sep', hours: 6.5 }
-    ],
-    peerFeedbackScore: [
-      { category: 'Teamwork', score: 4.5 },
-      { category: 'Communication', score: 4.2 },
-      { category: 'Initiative', score: 4.8 }
-    ],
-    skillProgression: [
-      { name: 'React', level: 85 },
-      { name: 'Node.js', level: 70 },
-      { name: 'SQL', level: 90 }
-    ]
-  },
-  tables: { 
-    roster: [
-      { task: 'Implement biometric check-in', date: 'Sep 14', status: 'Done' },
-      { task: 'Fix Payroll Export bug', date: 'Sep 15', status: 'In Progress' },
-      { task: 'Update API Docs', date: 'Sep 16', status: 'Pending' }
-    ]
-  },
-};
-
 export const EmployeeDashboard: React.FC = () => {
   const { user } = useAuth();
-  const [data, setData] = useState<any>(FALLBACK);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,8 +23,11 @@ export const EmployeeDashboard: React.FC = () => {
     setError(null);
     try {
       const res = await analyticsApi.getDashboard('employee');
-      if (res) setData(res);
-      else setError('Dashboard returned empty data. Showing personal baseline.');
+      if (res) {
+        setData(res);
+      } else {
+        setError('No employee dashboard data returned from server.');
+      }
     } catch (err: any) {
       setError(err?.message || 'Could not load your workspace metrics.');
     } finally {
@@ -84,30 +37,9 @@ export const EmployeeDashboard: React.FC = () => {
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
-  const kpis = data?.kpis || FALLBACK.kpis;
-  const charts = data?.charts || FALLBACK.charts;
-  const tables = data?.tables || FALLBACK.tables;
-
-  const myExceptions: ExceptionItem[] = [
-    {
-      id: 'emp-1',
-      title: 'Pending Leave Approvals',
-      subtitle: '2 leave applications submitted awaiting manager review',
-      count: 2,
-      severity: 'warning',
-      actionLabel: 'My Leave',
-      actionPath: '/leave/my',
-    },
-    {
-      id: 'emp-2',
-      title: 'Assigned Work Items',
-      subtitle: '4 active tasks assigned in current sprint',
-      count: 4,
-      severity: 'info',
-      actionLabel: 'My Tasks',
-      actionPath: '/employee/work',
-    },
-  ];
+  const kpis = data?.kpis || {};
+  const charts = data?.charts || {};
+  const tables = data?.tables || {};
 
   return (
     <PageContainer>
@@ -145,12 +77,17 @@ export const EmployeeDashboard: React.FC = () => {
 
       {/* Error Banner */}
       {error && (
-        <div className="flex items-center gap-3 p-3.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs">
+        <div className="flex items-center gap-3 p-3.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs mb-4">
           <AlertCircle size={15} className="shrink-0 text-amber-600 dark:text-amber-400" />
           <span>{error}</span>
           <button onClick={fetchDashboard} className="ml-auto text-xs underline font-medium hover:no-underline">Retry</button>
         </div>
       )}
+
+      {/* Live Punch Check-In / Break / Check-Out Widget */}
+      <div className="mb-4">
+        <LiveCheckInWidget />
+      </div>
 
       {/* Employment Overview & Shift Widget */}
       {data?.employee && (

@@ -130,12 +130,11 @@ export const analyticsApi = {
     return unwrap(await apiClient.get('/v1/analytics'));
   },
   async getDashboard(role: string): Promise<any> {
-    try {
-      return unwrap(await apiClient.get(`/v1/dashboard/${role}`));
-    } catch (err) {
-      console.warn(`[Analytics API] Failed to fetch dashboard for ${role}:`, err);
-      return null;
+    const response = await apiClient.get(`/v1/dashboard/${role}`);
+    if (response.data?.success && response.data.data !== undefined) {
+      return response.data.data;
     }
+    throw new Error(response.data?.message || `Failed to retrieve ${role} dashboard.`);
   },
   async getShifts(): Promise<Array<{ name: 'Regular' | 'Flexible' | 'Overnight'; startTime: string; endTime: string }>> {
     try {

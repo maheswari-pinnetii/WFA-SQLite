@@ -6,16 +6,27 @@ export class EmployeeDashboardService {
     const orgId = user.organizationId || 'org-stackly';
     const employeeId = user.id;
     
-    // Employee details & Employment Metadata
-    const employeeRows = await query(`
+    // Employee details & Employment Metadata - search employees first, then users
+    let employeeRows = await query(`
       SELECT e.*, d.name as departmentName, des.name as designationName, loc.name as locationName
       FROM employees e
       LEFT JOIN departments d ON e.department = d.id OR e.department = d.name
       LEFT JOIN designations des ON e.designation = des.id OR e.designation = des.name
       LEFT JOIN locations loc ON e.location = loc.id OR e.location = loc.name
-      WHERE e.id = ? AND e.organizationId = ?
+      WHERE e.id = ? AND (e.organizationId = ? OR e.organizationId IS NULL)
     `, [employeeId, orgId]);
-    const employee = employeeRows[0] || {};
+
+    if (employeeRows.length === 0) {
+      const userRows = await query(`
+        SELECT u.id, u.name, u.email, u.role, u.department, u.team, u.location, u.title as designation, u.organizationId, u.createdAt
+        FROM users u
+        WHERE u.id = ?
+      `, [employeeId]);
+      if (userRows.length > 0) {
+        employeeRows = userRows;
+      }
+    }
+    const employee = employeeRows[0] || { id: user.id, name: user.name, department: user.department, designation: user.title || user.role, location: user.location };
     
     // Attendance
     const today = new Date().toISOString().split('T')[0];

@@ -180,7 +180,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setSearchFocused(true)}
-            placeholder="Search employees, departments, reports..."
+            placeholder={role === 'EMPLOYEE' ? "Search your work, leave, payroll, policies, documents..." : "Search employees, departments, reports..."}
             style={{ paddingLeft: '2.25rem' }}
             className={`w-full rounded-lg pr-4 py-1.5 text-xs transition-all outline-none border ${
               isDark

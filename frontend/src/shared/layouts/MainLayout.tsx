@@ -115,7 +115,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
           {/* Small footprint dashboard footer */}
           <footer className="app-footer mt-auto shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-secondary)] px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
-            <span>&copy; {new Date().getFullYear()} Workforce Analytics. All rights reserved.</span>
+            <span>&copy; {new Date().getFullYear()} Stackly Workforce Analytics. All rights reserved.</span>
             <div className="flex items-center gap-4 flex-wrap">
               <button
                 onClick={() => setOnboardingOpen(true)}
