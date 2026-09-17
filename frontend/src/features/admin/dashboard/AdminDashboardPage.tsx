@@ -332,6 +332,26 @@ export const AdminDashboardPage: React.FC = () => {
           setStatusFilter={setStatusFilter}
         />
 
+        {/* Executive Needs Attention Operational Alert Banner */}
+        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+              <ShieldCheck size={18} />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Executive Attention Required</h4>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                <span className="font-semibold text-amber-600 dark:text-amber-400">12 Pending Approvals</span> • <span className="font-semibold text-rose-500">8 Late Arrivals</span> • <span className="font-semibold text-emerald-600 dark:text-emerald-400">2 Statutory Compliance Actions</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link to="/admin/approvals" className="px-3 py-1.5 rounded-md bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition-colors">
+              Review Approvals
+            </Link>
+          </div>
+        </div>
+
         {/* Enterprise KPI Grid */}
         <KpiGrid
           role={Role.ADMIN}
