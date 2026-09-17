@@ -16,6 +16,7 @@ export const AuditLog = new ModelShim('audit_logs');
 export const RefreshToken = new ModelShim('refreshtokens');
 export const Session = new ModelShim('sessions');
 export const LeaveRequest = new ModelShim('leaverequests');
+export const LeaveBalance = new ModelShim('leavebalances');
 export const Task = new ModelShim('tasks');
 export const Notification = new ModelShim('notifications');
 export const PerformanceRecord = new ModelShim('performancerecords');
