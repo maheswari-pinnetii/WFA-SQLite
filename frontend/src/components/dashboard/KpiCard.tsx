@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Box, Typography, IconButton, Menu, MenuItem } from '@mui/material';
+import { Box, Typography, IconButton, Menu, MenuItem, Chip } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import RemoveIcon from '@mui/icons-material/Remove';
 import Skeleton from '@mui/material/Skeleton';
 
 export interface KpiCardProps {
@@ -45,273 +48,215 @@ export function KpiCard({
     return (
       <Box
         sx={{
-          p: '1px',
+          p: 3,
           borderRadius: '16px',
-          position: 'relative',
-          width: '100%',
+          bgcolor: 'var(--bg-card)',
+          border: '1px solid var(--border-color)',
+          boxShadow: 'var(--shadow-sm)',
           height: '100%',
-          background: 'linear-gradient(135deg, rgba(32, 191, 179, 0.35), rgba(32, 191, 179, 0.12) 45%, rgba(32, 191, 179, 0.4))',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          minHeight: 160,
         }}
       >
-        <Box
-          sx={{
-            position: 'relative',
-            minHeight: 165,
-            height: '100%',
-            width: '100%',
-            p: 2.5,
-            borderRadius: '15px',
-            background: `
-              radial-gradient(
-                140px circle at 100% 0%,
-                rgba(32, 191, 179, 0.20),
-                transparent 72%
-              ),
-              linear-gradient(
-                145deg,
-                #151D25,
-                #10161D
-              )
-            `,
-            boxShadow: '0 12px 28px rgba(0, 0, 0, 0.28)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Box sx={{ width: 42, height: 42, borderRadius: '50%', overflow: 'hidden', mb: 2 }}>
-            <Skeleton variant="circular" width={42} height={42} sx={{ bgcolor: 'rgba(32, 191, 179, 0.15)' }} />
-          </Box>
-          <Box>
-            <Skeleton variant="text" width="60%" height={36} sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
-            <Skeleton variant="text" width="40%" height={20} sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
-          </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Skeleton variant="circular" width={42} height={42} />
+          <Skeleton variant="rounded" width={60} height={24} />
+        </Box>
+        <Box>
+          <Skeleton variant="text" width="50%" height={38} />
+          <Skeleton variant="text" width="70%" height={20} />
         </Box>
       </Box>
     );
   }
 
-  const getTrendColor = () => {
-    if (!trend?.direction || trend.direction === 'up') return '#20BFB3';
-    if (trend.direction === 'down') return '#f87171';
-    return '#94A3B8';
-  };
+  const isPositiveTrend = !trend?.direction || trend.direction === 'up';
+  const isNegativeTrend = trend?.direction === 'down';
 
   return (
     <Box
-      className="kpi-card-wrapper"
+      className="kpi-card-wrapper transition-all duration-200"
       sx={{
-        p: '1px',
-        borderRadius: '24px',
         position: 'relative',
         width: '100%',
         height: '100%',
-        background: 'linear-gradient(135deg, rgba(32, 191, 179, 0.45), rgba(32, 191, 179, 0.10) 50%, rgba(32, 191, 179, 0.35))',
-        transition: 'all 240ms ease-in-out',
+        bgcolor: 'var(--bg-card)',
+        borderRadius: '16px',
+        border: '1px solid var(--border-color)',
+        boxShadow: 'var(--shadow-sm)',
+        p: 2.75,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        minHeight: 160,
+        '&:hover': {
+          boxShadow: 'var(--shadow-md)',
+          borderColor: 'var(--stackly-border-strong)',
+          transform: 'translateY(-1px)',
+        },
       }}
     >
-      <Box
-        className="kpi-card"
-        sx={{
-          position: 'relative',
-          minHeight: 165,
-          height: '100%',
-          width: '100%',
-          p: 2.75,
-          borderRadius: '23px',
-          background: `
-            radial-gradient(
-              220px circle at 95% 5%,
-              rgba(32, 191, 179, 0.32),
-              transparent 75%
-            ),
-            linear-gradient(
-              145deg,
-              #131C24 0%,
-              #0D131A 100%
-            )
-          `,
-          boxShadow: '0 14px 30px rgba(0, 0, 0, 0.35)',
-          color: '#FFFFFF',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          transition: 'transform 240ms ease, box-shadow 240ms ease, background 240ms ease',
-          '&:hover': {
-            transform: 'translateY(-3px)',
-            background: `
-              radial-gradient(
-                260px circle at 90% 5%,
-                rgba(32, 191, 179, 0.55),
-                rgba(14, 165, 160, 0.25) 55%,
-                transparent 85%
-              ),
-              linear-gradient(
-                145deg,
-                #15202A 0%,
-                #0E161F 100%
-              )
-            `,
-            boxShadow: `
-              0 20px 40px rgba(0, 0, 0, 0.45),
-              0 0 25px rgba(32, 191, 179, 0.22)
-            `,
-          },
-        }}
-      >
-        {/* Action Button */}
-        <IconButton
-          className="kpi-card-menu"
-          aria-label={`${title} actions`}
-          onClick={handleOpenMenu}
-          sx={{
-            position: 'absolute',
-            top: 14,
-            right: 14,
-            color: '#64748B',
-            transition: 'color 180ms ease, background-color 180ms ease',
-            '&:hover': {
-              color: '#20BFB3',
-              backgroundColor: 'rgba(32, 191, 179, 0.12)',
-            },
-          }}
-        >
-          <MoreVertIcon fontSize="small" />
-        </IconButton>
-
-        {/* Action Dropdown Menu */}
-        {menuItems && menuItems.length > 0 && (
-          <Menu
-            anchorEl={anchorEl}
-            open={isMenuOpen}
-            onClose={handleCloseMenu}
-            slotProps={{
-              paper: {
-                sx: {
-                  bgcolor: '#131C24',
-                  color: '#FFFFFF',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(32, 191, 179, 0.35)',
-                  boxShadow: '0 12px 28px rgba(0, 0, 0, 0.45)',
-                },
-              },
-            }}
-          >
-            {menuItems.map((item, i) => (
-              <MenuItem
-                key={i}
-                onClick={() => {
-                  handleCloseMenu();
-                  item.action();
-                }}
-                sx={{
-                  fontSize: '0.8rem',
-                  fontFamily: "'Plus Jakarta Sans', sans-serif",
-                  '&:hover': { bgcolor: 'rgba(32, 191, 179, 0.15)' },
-                }}
-              >
-                {item.label}
-              </MenuItem>
-            ))}
-          </Menu>
-        )}
-
-        {/* Circular Icon with Drop Glow */}
+      {/* Top row: Icon Badge & Trend/Menu */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+        {/* Human Icon Shell */}
         <Box
-          className="kpi-card-icon"
           sx={{
             width: 44,
             height: 44,
-            minWidth: 44,
-            minHeight: 44,
-            borderRadius: '50%',
+            borderRadius: '12px',
+            bgcolor: 'var(--stackly-brand-subtle)',
+            color: 'var(--stackly-brand-primary)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            mb: 2.25,
-            background: 'linear-gradient(135deg, #00C49F 0%, #20BFB3 100%)',
-            boxShadow: '0 0 20px rgba(32, 191, 179, 0.6), 0 4px 12px rgba(32, 191, 179, 0.35)',
-            color: '#FFFFFF',
-            transition: 'transform 200ms ease, box-shadow 200ms ease',
+            flexShrink: 0,
             '& svg': {
               width: 22,
               height: 22,
-              color: '#FFFFFF',
-              flexShrink: 0,
-            },
-            '&:hover': {
-              transform: 'scale(1.06)',
-              boxShadow: '0 0 25px rgba(32, 191, 179, 0.8), 0 6px 16px rgba(32, 191, 179, 0.45)',
             },
           }}
         >
           {icon}
         </Box>
 
-        {/* Content Box */}
-        <Box sx={{ mt: 'auto' }}>
-          <Typography
-            className="kpi-card-value"
-            sx={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: '1.75rem',
-              lineHeight: 1.15,
-              fontWeight: 800,
-              letterSpacing: '-0.025em',
-              color: '#FFFFFF',
-              mb: 0.5,
-            }}
-          >
-            {value ?? '—'}
-          </Typography>
-
-          <Typography
-            className="kpi-card-title"
-            sx={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              color: '#CBD5E1',
-              mb: 0.25,
-            }}
-          >
-            {title}
-          </Typography>
-
+        {/* Action Menu or Trend */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {trend && (
-            <Typography
-              className={`kpi-card-trend ${trend.direction || 'up'}`}
+            <Chip
+              size="small"
+              icon={
+                isPositiveTrend ? (
+                  <TrendingUpIcon style={{ fontSize: 14, color: 'inherit' }} />
+                ) : isNegativeTrend ? (
+                  <TrendingDownIcon style={{ fontSize: 14, color: 'inherit' }} />
+                ) : (
+                  <RemoveIcon style={{ fontSize: 14, color: 'inherit' }} />
+                )
+              }
+              label={trend.value}
               sx={{
-                mt: 0.25,
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                fontSize: '0.78rem',
                 fontWeight: 600,
-                color: getTrendColor(),
+                fontSize: '0.75rem',
+                height: 24,
+                bgcolor: isPositiveTrend
+                  ? 'rgba(21, 128, 61, 0.1)'
+                  : isNegativeTrend
+                  ? 'rgba(185, 28, 28, 0.1)'
+                  : 'rgba(100, 116, 139, 0.1)',
+                color: isPositiveTrend
+                  ? 'var(--stackly-status-success)'
+                  : isNegativeTrend
+                  ? 'var(--stackly-status-error)'
+                  : 'var(--text-muted)',
+                border: 'none',
+                '& .MuiChip-icon': {
+                  marginLeft: '4px',
+                },
               }}
-            >
-              {trend.value}
-            </Typography>
+            />
           )}
 
-          {meta && (
-            <Typography
-              className="kpi-card-meta"
-              sx={{
-                mt: 0.25,
-                fontFamily: "'Plus Jakarta Sans', sans-serif",
-                fontSize: '0.78rem',
-                fontWeight: 500,
-                color: '#94A3B8',
-              }}
-            >
-              {meta}
-            </Typography>
+          {menuItems && menuItems.length > 0 && (
+            <>
+              <IconButton
+                size="small"
+                aria-label={`${title} options`}
+                onClick={handleOpenMenu}
+                sx={{
+                  color: 'var(--text-muted)',
+                  '&:hover': {
+                    color: 'var(--text-primary)',
+                    bgcolor: 'var(--bg-hover)',
+                  },
+                }}
+              >
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={isMenuOpen}
+                onClose={handleCloseMenu}
+                slotProps={{
+                  paper: {
+                    sx: {
+                      bgcolor: 'var(--bg-card)',
+                      color: 'var(--text-primary)',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-color)',
+                      boxShadow: 'var(--shadow-md)',
+                    },
+                  },
+                }}
+              >
+                {menuItems.map((item, i) => (
+                  <MenuItem
+                    key={i}
+                    onClick={() => {
+                      handleCloseMenu();
+                      item.action();
+                    }}
+                    sx={{
+                      fontSize: '0.8125rem',
+                      fontFamily: 'var(--font-body)',
+                      '&:hover': { bgcolor: 'var(--bg-hover)' },
+                    }}
+                  >
+                    {item.label}
+                  </MenuItem>
+                ))}
+              </Menu>
+            </>
           )}
         </Box>
+      </Box>
+
+      {/* Main Content: Value, Title, Meta */}
+      <Box sx={{ mt: 'auto' }}>
+        <Typography
+          sx={{
+            fontFamily: 'var(--font-heading)',
+            fontSize: '1.75rem',
+            fontWeight: 800,
+            lineHeight: 1.2,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.02em',
+            mb: 0.5,
+          }}
+        >
+          {value ?? '—'}
+        </Typography>
+
+        <Typography
+          sx={{
+            fontFamily: 'var(--font-body)',
+            fontSize: '0.84rem',
+            fontWeight: 600,
+            color: 'var(--text-secondary)',
+            lineHeight: 1.3,
+          }}
+        >
+          {title}
+        </Typography>
+
+        {meta && (
+          <Typography
+            sx={{
+              mt: 0.5,
+              fontFamily: 'var(--font-body)',
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              color: 'var(--text-muted)',
+            }}
+          >
+            {meta}
+          </Typography>
+        )}
       </Box>
     </Box>
   );
 }
 
 export default KpiCard;
+
