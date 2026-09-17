@@ -7,7 +7,7 @@ import {
   TrendingUp,
   BarChart3,
   Sliders,
-  Zap,
+  GraduationCap,
   User,
   FileText,
   Layers,
@@ -15,28 +15,25 @@ import {
   History,
   Briefcase,
   ClipboardList,
-  UserCog,
-  Network,
-  Globe,
+  UserCheck,
   Calendar,
   CalendarDays,
-  Timer,
   CheckSquare,
-  ShieldAlert,
-  Compass,
+  Bell,
   Target,
-  Map,
   Activity,
-  Key,
   ShieldCheck,
   MapPin,
   HelpCircle,
   Award,
-  AlertTriangle,
   Star,
-  Palmtree,
   Settings,
-  Banknote
+  DollarSign,
+  Banknote,
+  FolderKanban,
+  Code2,
+  Globe2,
+  Database
 } from 'lucide-react';
 import { Role } from '../../../security/roles/roles';
 
@@ -135,7 +132,7 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
   {
     id: 'leave',
     label: 'Leave',
-    icon: <Palmtree size={18} strokeWidth={2} />,
+    icon: <Calendar size={18} strokeWidth={2} />,
     roles: ALL_ROLES,
     children: [
       { id: 'leave.overview', label: 'Overview', path: '/leave/overview', roles: HR_ADMIN_ROLES },
@@ -311,7 +308,7 @@ export const EMPLOYEE_NAVIGATION: NavigationItem[] = [
   {
     id: 'emp.leave',
     label: 'Leave',
-    icon: <Palmtree size={18} strokeWidth={2} />,
+    icon: <Calendar size={18} strokeWidth={2} />,
     roles: [Role.EMPLOYEE],
     children: [
       { id: 'emp.leave.overview', label: 'Leave Overview', path: '/employee/leave/overview', roles: [Role.EMPLOYEE] },
@@ -363,7 +360,7 @@ export const EMPLOYEE_NAVIGATION: NavigationItem[] = [
   {
     id: 'emp.learning',
     label: 'Learning',
-    icon: <Zap size={18} strokeWidth={2} />,
+    icon: <GraduationCap size={18} strokeWidth={2} />,
     roles: [Role.EMPLOYEE],
     children: [
       { id: 'emp.learning.training', label: 'Training', path: '/employee/learning/training', roles: [Role.EMPLOYEE] },
@@ -424,7 +421,7 @@ export const EMPLOYEE_NAVIGATION: NavigationItem[] = [
   {
     id: 'emp.notifications',
     label: 'Notifications',
-    icon: <ShieldAlert size={18} strokeWidth={2} />,
+    icon: <Bell size={18} strokeWidth={2} />,
     path: '/employee/notifications',
     roles: [Role.EMPLOYEE]
   },
