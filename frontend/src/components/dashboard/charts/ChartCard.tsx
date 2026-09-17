@@ -6,6 +6,7 @@ import { ChartSkeleton } from './ChartSkeleton';
 import { ChartEmptyState } from './ChartEmptyState';
 import { ChartErrorState } from './ChartErrorState';
 import { DashboardChartConfig } from './chart.types';
+import { selectChartData } from './chart-selectors';
 
 interface ChartCardProps {
   config: DashboardChartConfig;
