@@ -1,20 +1,27 @@
 version: '3.8'
 
 services:
-  app:
+  stackly-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: wfa_sqlite_app
-    restart: unless-stopped
+    container_name: stackly_enterprise_platform
     ports:
-      - "8080:8080"
+      - "5000:5000"
     environment:
+      - PORT=5000
       - NODE_ENV=production
-      - PORT=8080
-      - JWT_SECRET=wfa_super_secret_for_docker_deployment_1234
+      - DB_TYPE=sqlite
     volumes:
-      - sqlite_data:/app/backend/database/sqlite
+      - stackly_data:/app/database/sqlite
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 volumes:
-  sqlite_data:
+  stackly_data:
+    driver: local

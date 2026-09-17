@@ -13,7 +13,7 @@ export const SkillGapsPage: React.FC = () => {
   ];
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE]}>
+    <>
       <div className="space-y-6 animate-fadeIn pb-10">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-[var(--border-color)] pb-4">
@@ -67,6 +67,6 @@ export const SkillGapsPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

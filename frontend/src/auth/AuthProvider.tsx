@@ -18,8 +18,8 @@ export interface AuthContextType {
   // Dummy stubs to stop TS errors for components we haven't rewritten yet
   login: (email: string, password: string) => Promise<any>;
   signup: (params: any) => Promise<any>;
-  verifyMfa: (challengeId: string, code: string) => Promise<any>;
-  resendMfa: (challengeId: string, mfaMethod?: string) => Promise<any>;
+  verifyMfa: (code: string) => Promise<any>;
+  resendMfa: () => Promise<any>;
   setSession: (sessionData: any) => void;
   initializeAuth: () => void;
 }
@@ -34,56 +34,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [permissions, setPermissions] = useState<Permission[]>([]);
 
   useEffect(() => {
-    const initializeSession = async () => {
-      try {
-        let storedSession = authService.getStoredSession();
-        
-        // If no stored session, try silent refresh with HttpOnly cookie
-        if (!storedSession) {
-          try {
-            // Race the silent refresh against a 5-second timeout so a slow/offline
-            // backend never blocks the loading state for more than 5 seconds.
-            const refreshTimeout = new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error('refresh-timeout')), 5000)
-            );
-            const refreshResult = await Promise.race([
-              authService.refreshSilent(),
-              refreshTimeout,
-            ]);
-            if (refreshResult?.token) {
-              // Need to fetch user data after successful refresh since refresh token only returns token
-              const userResponse = await fetch('/api/v1/auth/me', {
-                headers: { Authorization: `Bearer ${refreshResult.token}` }
-              });
-              if (userResponse.ok) {
-                const userData = await userResponse.json();
-                if (userData?.success && userData?.data) {
-                  authService.setStoredSession({ user: userData.data, token: refreshResult.token });
-                  storedSession = { user: userData.data, token: refreshResult.token };
-                }
-              }
-            }
-          } catch {
-            // Silent refresh failed (no cookie, expired, or backend timeout) — proceed unauthenticated
-          }
-        }
-
-        if (storedSession) {
-          setSessionState(storedSession);
-          setAppUser(storedSession.user as User);
-          setRole(storedSession.user.role as Role);
-          setPermissions((storedSession.user.permissions || []) as Permission[]);
-        }
-      } catch (e) {
-        // Any unexpected error during initialization — log and proceed unauthenticated
-        console.error('[AuthProvider] Session initialization failed:', e);
-      } finally {
-        // Always clear loading state — never leave the app stuck on a spinner
-        setLoading(false);
-      }
-    };
-
-    initializeSession();
+    const storedSession = authService.getStoredSession();
+    if (storedSession) {
+      setSessionState(storedSession);
+      setAppUser(storedSession.user as User);
+      setRole(storedSession.user.role as Role);
+      setPermissions((storedSession.user.permissions || []) as Permission[]);
+    }
+    setLoading(false);
 
     const handleSessionExpired = () => {
       setSessionState(null);
@@ -115,20 +73,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = async () => {
-    try {
-      await authService.logout();
-    } catch (e) {
-      console.error('Logout error', e);
-    }
+    await authService.logout();
+    // Clear any app-level flags so the next login starts fresh
+    sessionStorage.removeItem('wfa_initialized_role');
+    // Reset React state
     setSessionState(null);
     setAppUser(null);
     setRole(Role.EMPLOYEE);
     setPermissions([]);
-    
-    // Hard redirect to clear all in-memory states including Redux
-    if (window.location.pathname !== '/login') {
-      window.location.href = '/login';
-    }
   };
 
   const login = async (email: string, password: string) => {
@@ -164,12 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signOut,
       login,
       signup,
-      verifyMfa: async (challengeId: string, code: string) => {
-        const result = await authService.verifyMfa(challengeId, code);
-        setSession({ user: result.user, token: result.token });
-        return result;
-      },
-      resendMfa: async (challengeId: string, mfaMethod?: string) => authService.resendMfa(challengeId, mfaMethod),
+      verifyMfa: async () => undefined,
+      resendMfa: async () => undefined,
       setSession,
       initializeAuth: () => {}
     }}>

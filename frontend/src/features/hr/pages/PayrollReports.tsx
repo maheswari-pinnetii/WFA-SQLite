@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DollarSign,
@@ -38,6 +39,7 @@ import { AnimatedTabs } from '../../../components/ui/tabs';
 import { DeltaBadge, Callout, ProgressBar } from '../../../components/cards/tremor-kpi';
 import { Avatar } from '../../../components/ui/avatar';
 import { Skeleton } from '../../../components/ui/skeleton';
+import { payrollApi } from '../../../api/endpoints/payroll.api';
 
 export interface EmployeePayrollRecord {
   employeeId: string;
@@ -58,6 +60,9 @@ export interface EmployeePayrollRecord {
   manualBonus: number;
   manualDeduction: number;
   grossPay: number;
+  pfAmount: number;
+  esiAmount: number;
+  ptAmount: number;
   taxWithheld: number;
   netPay: number;
 }
@@ -73,153 +78,64 @@ export interface PayrollRunHistory {
   status: 'DRAFT' | 'CALCULATED' | 'LOCKED' | 'EXPORTED';
 }
 
-const INITIAL_PAYROLL_DATA: EmployeePayrollRecord[] = [
-  {
-    employeeId: 'EMP-001',
-    employeeName: 'Sarah Connor',
-    department: 'Engineering',
-    baseSalary: 14500,
-    totalDays: 30,
-    payableDays: 30,
-    regularHours: 160,
-    overtimeHours: 12,
-    overtimePay: 1087.5,
-    paidLeaves: 2,
-    unpaidLeaves: 0,
-    unpaidLeaveDeduction: 0,
-    lateArrivalCount: 0,
-    lateDeduction: 0,
-    nightShiftAllowance: 450,
-    manualBonus: 1000,
-    manualDeduction: 0,
-    grossPay: 17037.5,
-    taxWithheld: 3407.5,
-    netPay: 13630.0
-  },
-  {
-    employeeId: 'EMP-002',
-    employeeName: 'Elena Rostova',
-    department: 'Human Resources',
-    baseSalary: 11000,
-    totalDays: 30,
-    payableDays: 29,
-    regularHours: 152,
-    overtimeHours: 0,
-    overtimePay: 0,
-    paidLeaves: 1,
-    unpaidLeaves: 1,
-    unpaidLeaveDeduction: 366.67,
-    lateArrivalCount: 1,
-    lateDeduction: 0,
-    nightShiftAllowance: 0,
-    manualBonus: 500,
-    manualDeduction: 0,
-    grossPay: 11133.33,
-    taxWithheld: 2226.67,
-    netPay: 8906.66
-  },
-  {
-    employeeId: 'EMP-003',
-    employeeName: 'David Sterling',
-    department: 'Management',
-    baseSalary: 16000,
-    totalDays: 30,
-    payableDays: 30,
-    regularHours: 160,
-    overtimeHours: 8,
-    overtimePay: 800,
-    paidLeaves: 0,
-    unpaidLeaves: 0,
-    unpaidLeaveDeduction: 0,
-    lateArrivalCount: 0,
-    lateDeduction: 0,
-    nightShiftAllowance: 0,
-    manualBonus: 1500,
-    manualDeduction: 0,
-    grossPay: 18300,
-    taxWithheld: 3660,
-    netPay: 14640
-  },
-  {
-    employeeId: 'EMP-004',
-    employeeName: 'Ananya Sharma',
-    department: 'Product',
-    baseSalary: 12500,
-    totalDays: 30,
-    payableDays: 28,
-    regularHours: 144,
-    overtimeHours: 4,
-    overtimePay: 312.5,
-    paidLeaves: 2,
-    unpaidLeaves: 2,
-    unpaidLeaveDeduction: 833.33,
-    lateArrivalCount: 3,
-    lateDeduction: 150,
-    nightShiftAllowance: 200,
-    manualBonus: 0,
-    manualDeduction: 0,
-    grossPay: 12029.17,
-    taxWithheld: 2405.83,
-    netPay: 9623.34
-  },
-  {
-    employeeId: 'EMP-005',
-    employeeName: 'Marcus Vance',
-    department: 'Engineering',
-    baseSalary: 13000,
-    totalDays: 30,
-    payableDays: 30,
-    regularHours: 160,
-    overtimeHours: 16,
-    overtimePay: 1300,
-    paidLeaves: 0,
-    unpaidLeaves: 0,
-    unpaidLeaveDeduction: 0,
-    lateArrivalCount: 0,
-    lateDeduction: 0,
-    nightShiftAllowance: 600,
-    manualBonus: 750,
-    manualDeduction: 0,
-    grossPay: 15650,
-    taxWithheld: 3130,
-    netPay: 12520
-  },
-  {
-    employeeId: 'EMP-006',
-    employeeName: 'Aarav Sharma',
-    department: 'Engineering',
-    baseSalary: 10500,
-    totalDays: 30,
-    payableDays: 30,
-    regularHours: 160,
-    overtimeHours: 6,
-    overtimePay: 393.75,
-    paidLeaves: 1,
-    unpaidLeaves: 0,
-    unpaidLeaveDeduction: 0,
-    lateArrivalCount: 1,
-    lateDeduction: 0,
-    nightShiftAllowance: 300,
-    manualBonus: 300,
-    manualDeduction: 0,
-    grossPay: 11493.75,
-    taxWithheld: 2298.75,
-    netPay: 9195.0
-  }
-];
 
-const INITIAL_RUN_HISTORY: PayrollRunHistory[] = [
-  { runId: 'PR-2026-08', period: 'August 2026', processedAt: '2026-08-31 18:00', lockedBy: 'Sarah Connor', employeeCount: 500, totalGrossPayout: 5850000, totalNetPayout: 4680000, status: 'LOCKED' },
-  { runId: 'PR-2026-07', period: 'July 2026', processedAt: '2026-07-31 17:30', lockedBy: 'Sarah Connor', employeeCount: 492, totalGrossPayout: 5760000, totalNetPayout: 4608000, status: 'LOCKED' },
-  { runId: 'PR-2026-06', period: 'June 2026', processedAt: '2026-06-30 18:15', lockedBy: 'David Sterling', employeeCount: 485, totalGrossPayout: 5680000, totalNetPayout: 4544000, status: 'LOCKED' }
-];
 
 export const PayrollReports: React.FC = () => {
-  const [payrollPeriod, setPayrollPeriod] = useState('September 2026');
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'current' | 'history' | 'adjustments'>('current');
-  const [records, setRecords] = useState<EmployeePayrollRecord[]>(INITIAL_PAYROLL_DATA);
-  const [history, setHistory] = useState<PayrollRunHistory[]>(INITIAL_RUN_HISTORY);
-  const [isLocked, setIsLocked] = useState(false);
+  const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
+
+  // Queries
+  const { data: runs = [], isLoading: runsLoading } = useQuery({
+    queryKey: ['payroll-runs'],
+    queryFn: payrollApi.getRuns,
+  });
+
+  // Automatically select the latest run
+  useEffect(() => {
+    if (runs.length > 0 && !selectedRunId) {
+      setSelectedRunId(runs[0].id);
+    }
+  }, [runs, selectedRunId]);
+
+  const { data: payslips = [], isLoading: payslipsLoading } = useQuery({
+    queryKey: ['payroll-payslips', selectedRunId],
+    queryFn: () => payrollApi.getRunPayslips(selectedRunId!),
+    enabled: !!selectedRunId,
+  });
+
+  const activeRun = runs.find((r: any) => r.id === selectedRunId);
+  const isLocked = activeRun?.status === 'LOCKED' || activeRun?.status === 'FINALIZED';
+  const payrollPeriod = activeRun?.periodStart ? `Run ${activeRun.periodStart}` : 'Current';
+
+  // Map backend payslips to UI records
+  const records: EmployeePayrollRecord[] = useMemo(() => {
+    return payslips.map((p: any) => ({
+      employeeId: p.employeeId,
+      employeeName: `${p.firstName || ''} ${p.lastName || ''}`.trim() || p.employeeId,
+      department: p.department || 'General',
+      baseSalary: p.basicPay,
+      totalDays: 30, // Simplified for UI
+      payableDays: 30 - (p.lopDays || 0),
+      regularHours: 160,
+      overtimeHours: 0,
+      overtimePay: p.overtimePay || 0,
+      paidLeaves: 0,
+      unpaidLeaves: p.lopDays || 0,
+      unpaidLeaveDeduction: 0,
+      lateArrivalCount: 0,
+      lateDeduction: 0,
+      nightShiftAllowance: 0,
+      manualBonus: 0,
+      manualDeduction: 0,
+      grossPay: p.totalEarnings,
+      pfAmount: p.pfAmount || 0,
+      esiAmount: p.esiAmount || 0,
+      ptAmount: p.ptAmount || 0,
+      taxWithheld: p.tdsAmount || 0,
+      netPay: p.netPay
+    }));
+  }, [payslips]);
   const [isCalculating, setIsCalculating] = useState(false);
   const [calculationProgress, setCalculationProgress] = useState(0);
 
@@ -253,55 +169,58 @@ export const PayrollReports: React.FC = () => {
     });
   }, [records, searchQuery, selectedDept]);
 
+  const createRunMutation = useMutation({
+    mutationFn: () => {
+      // Basic date manipulation to get first/last of month based on selected string
+      // Just sending generic strings to keep it simple
+      const d = new Date();
+      return payrollApi.createRun(d.getMonth() + 1, d.getFullYear());
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
+      setSelectedRunId(data.id);
+    }
+  });
+
+  const generateMutation = useMutation({
+    mutationFn: () => payrollApi.generatePayslips(selectedRunId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-payslips', selectedRunId] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
+      setIsCalculating(false);
+      setCalculationProgress(100);
+    },
+  });
+
   // Run Calculation Routine
   const handleCalculatePayroll = () => {
     if (isLocked) {
       alert('This payroll cycle is locked. Unlock the cycle before re-calculating.');
       return;
     }
-    setIsCalculating(true);
-    setCalculationProgress(15);
+    if (!selectedRunId) return;
 
-    setTimeout(() => setCalculationProgress(45), 300);
-    setTimeout(() => setCalculationProgress(80), 700);
-    setTimeout(() => {
-      setCalculationProgress(100);
-      setIsCalculating(false);
-      // Re-calculate live records with slight updates
-      setRecords(prev => prev.map(r => {
-        const gross = r.baseSalary + r.overtimePay + r.nightShiftAllowance + r.manualBonus - r.unpaidLeaveDeduction - r.lateDeduction - r.manualDeduction;
-        const tax = gross * 0.20;
-        return {
-          ...r,
-          grossPay: Number(gross.toFixed(2)),
-          taxWithheld: Number(tax.toFixed(2)),
-          netPay: Number((gross - tax).toFixed(2))
-        };
-      }));
-    }, 1100);
+    setIsCalculating(true);
+    setCalculationProgress(30);
+
+    setTimeout(() => setCalculationProgress(70), 500);
+    generateMutation.mutate();
   };
+
+  const finalizeMutation = useMutation({
+    mutationFn: () => payrollApi.finalizeRun(selectedRunId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
+    }
+  });
 
   // Lock / Unlock Payroll
   const handleToggleLock = () => {
     if (isLocked) {
-      if (window.confirm('Unlock payroll cycle? This will re-enable manual edits and attendance recalculations.')) {
-        setIsLocked(false);
-      }
+      alert('Cannot unlock a finalized payroll cycle.');
     } else {
-      if (window.confirm(`Lock and finalize payroll for ${payrollPeriod}? This will freeze attendance inputs and seal the financial ledger.`)) {
-        setIsLocked(true);
-        // Add to history
-        const newRun: PayrollRunHistory = {
-          runId: `PR-2026-09`,
-          period: payrollPeriod,
-          processedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-          lockedBy: 'Sarah Connor (Admin)',
-          employeeCount: records.length,
-          totalGrossPayout: totals.totalGross,
-          totalNetPayout: totals.totalNet,
-          status: 'LOCKED'
-        };
-        setHistory([newRun, ...history]);
+      if (window.confirm(`Lock and finalize payroll? This will freeze inputs and seal the financial ledger.`)) {
+        finalizeMutation.mutate();
       }
     }
   };
@@ -320,32 +239,13 @@ export const PayrollReports: React.FC = () => {
 
   // Save Adjustment
   const handleSaveAdjustment = () => {
-    if (!adjustmentModalRecord) return;
-    const bonus = parseFloat(bonusInput) || 0;
-    const deduction = parseFloat(deductionInput) || 0;
-
-    setRecords(prev => prev.map(r => {
-      if (r.employeeId === adjustmentModalRecord.employeeId) {
-        const gross = r.baseSalary + r.overtimePay + r.nightShiftAllowance + bonus - r.unpaidLeaveDeduction - r.lateDeduction - deduction;
-        const tax = gross * 0.20;
-        return {
-          ...r,
-          manualBonus: bonus,
-          manualDeduction: deduction,
-          grossPay: Number(gross.toFixed(2)),
-          taxWithheld: Number(tax.toFixed(2)),
-          netPay: Number((gross - tax).toFixed(2))
-        };
-      }
-      return r;
-    }));
-
+    alert('Manual adjustments require Phase 5 Integration to save.');
     setAdjustmentModalRecord(null);
   };
 
   // CSV Export
   const handleExportCsv = () => {
-    const headers = ['Employee ID', 'Name', 'Department', 'Base Salary', 'Payable Days', 'Regular Hours', 'Overtime Hours', 'OT Pay', 'Night Shift', 'Late Penalty', 'Unpaid Leave Deduction', 'Bonus', 'Gross Pay', 'Tax Withheld', 'Net Pay'];
+    const headers = ['Employee ID', 'Name', 'Department', 'Base Salary', 'Payable Days', 'Regular Hours', 'Overtime Hours', 'OT Pay', 'Night Shift', 'Late Penalty', 'Unpaid Leave Deduction', 'Bonus', 'Gross Pay', 'PF', 'ESI', 'PT', 'TDS', 'Net Pay'];
     const rows = records.map(r => [
       r.employeeId,
       r.employeeName,
@@ -360,6 +260,9 @@ export const PayrollReports: React.FC = () => {
       r.unpaidLeaveDeduction,
       r.manualBonus,
       r.grossPay,
+      r.pfAmount,
+      r.esiAmount,
+      r.ptAmount,
       r.taxWithheld,
       r.netPay
     ]);
@@ -386,7 +289,7 @@ export const PayrollReports: React.FC = () => {
   };
 
   return (
-    <RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}>
+    <>
       <div className="space-y-6 max-w-7xl mx-auto">
         {/* Top Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -409,16 +312,20 @@ export const PayrollReports: React.FC = () => {
             <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800">
               <Calendar size={14} className="text-slate-400 ml-2" />
               <select
-                value={payrollPeriod}
-                onChange={(e) => setPayrollPeriod(e.target.value)}
+                value={selectedRunId || ''}
+                onChange={(e) => setSelectedRunId(e.target.value)}
                 className="h-8 bg-transparent text-xs font-bold text-slate-200 focus:outline-none pr-3"
               >
-                <option value="September 2026">September 2026 (Active)</option>
-                <option value="August 2026">August 2026</option>
-                <option value="July 2026">July 2026</option>
-                <option value="June 2026">June 2026</option>
+                <option value="" disabled>Select Run</option>
+                {runs.map((r: any) => (
+                  <option key={r.id} value={r.id}>Run {r.periodStart}</option>
+                ))}
               </select>
             </div>
+            
+            <Button variant="outline" size="sm" onClick={() => createRunMutation.mutate()} disabled={createRunMutation.isPending}>
+              <Plus size={14} className="mr-1.5 text-emerald-400" /> New Run
+            </Button>
 
             {/* Calculate Button */}
             <Button
@@ -589,6 +496,10 @@ export const PayrollReports: React.FC = () => {
                       <th className="py-3.5 px-4">Allowances</th>
                       <th className="py-3.5 px-4">Deductions</th>
                       <th className="py-3.5 px-4">Gross Pay</th>
+                      <th className="py-3.5 px-4 text-center">PF</th>
+                      <th className="py-3.5 px-4 text-center">ESI</th>
+                      <th className="py-3.5 px-4 text-center">PT</th>
+                      <th className="py-3.5 px-4 text-center">TDS</th>
                       <th className="py-3.5 px-4">Net Payout</th>
                       <th className="py-3.5 px-4 text-right">Adjust</th>
                     </tr>
@@ -631,6 +542,18 @@ export const PayrollReports: React.FC = () => {
                         </td>
                         <td className="py-3.5 px-4 font-mono font-bold text-white">
                           ${r.grossPay.toLocaleString()}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-center text-rose-400">
+                          {r.pfAmount > 0 ? `-$${r.pfAmount}` : '-'}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-center text-rose-400">
+                          {r.esiAmount > 0 ? `-$${r.esiAmount}` : '-'}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-center text-rose-400">
+                          {r.ptAmount > 0 ? `-$${r.ptAmount}` : '-'}
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-center text-rose-400">
+                          {r.taxWithheld > 0 ? `-$${r.taxWithheld}` : '-'}
                         </td>
                         <td className="py-3.5 px-4 font-mono font-black text-emerald-400 text-sm">
                           ${r.netPay.toLocaleString()}
@@ -678,15 +601,15 @@ export const PayrollReports: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
-                    {history.map((h) => (
-                      <tr key={h.runId} className="hover:bg-slate-800/20">
-                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{h.runId}</td>
+                    {runs.map((h: any, idx: number) => (
+                      <tr key={h.id} className={`border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors ${idx % 2 === 0 ? 'bg-slate-900/10' : ''}`}>
+                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">{h.id}</td>
                         <td className="py-3.5 px-4 font-bold text-white">{h.period}</td>
                         <td className="py-3.5 px-4 font-mono text-slate-400">{h.processedAt}</td>
                         <td className="py-3.5 px-4 text-slate-300 font-semibold">{h.lockedBy}</td>
                         <td className="py-3.5 px-4 font-mono text-slate-200">{h.employeeCount} Heads</td>
-                        <td className="py-3.5 px-4 font-mono text-slate-200">${h.totalGrossPayout.toLocaleString()}</td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">${h.totalNetPayout.toLocaleString()}</td>
+                        <td className="py-3.5 px-4 font-mono text-slate-200">${(h.totalGrossPayout || 0).toLocaleString()}</td>
+                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">${(h.totalNetPayout || 0).toLocaleString()}</td>
                         <td className="py-3.5 px-4">
                           <span className="inline-flex items-center gap-1 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full text-xs font-bold">
                             <CheckCircle2 size={12} /> {h.status}
@@ -805,6 +728,6 @@ export const PayrollReports: React.FC = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </RoleGuard>
+    </>
   );
 };

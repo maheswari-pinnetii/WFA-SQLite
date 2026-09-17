@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { query, execute } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
+import { jobScheduler } from './jobScheduler.service.js';
 
 export const leaveEngineService = {
 
@@ -127,5 +128,138 @@ export const leaveEngineService = {
       cursor.setDate(cursor.getDate() + 1);
     }
     return count;
+  },
+
+  /** ─── LEAVE REQUESTS ────────────────────────────── */
+  async getLeaveRequests(filters: { employeeId?: string; organizationId: string; status?: string }) {
+    let sql = `SELECT lr.*, e.name as employeeName, lt.name as leaveTypeName 
+               FROM leaverequests lr
+               JOIN employees e ON lr.employeeId = e.id
+               JOIN leave_types lt ON lr.type = lt.id
+               WHERE lr.organizationId = ?`;
+    const params: any[] = [filters.organizationId];
+
+    if (filters.employeeId) {
+      sql += ` AND lr.employeeId = ?`;
+      params.push(filters.employeeId);
+    }
+    if (filters.status) {
+      sql += ` AND lr.status = ?`;
+      params.push(filters.status);
+    }
+    
+    sql += ` ORDER BY lr.createdAt DESC`;
+    return query(sql, params);
+  },
+
+  async createLeaveRequest(data: {
+    organizationId: string;
+    employeeId: string;
+    leaveTypeId: string;
+    startDate: string;
+    endDate: string;
+    isHalfDay?: boolean;
+    halfDayPeriod?: string;
+    reason?: string;
+  }) {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    await execute(
+      `INSERT INTO leaverequests (
+        id, organizationId, employeeId, type, 
+        startDate, endDate, isHalfDay, halfDayPeriod, 
+        status, reason, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?)`,
+      [
+        id, data.organizationId, data.employeeId, data.leaveTypeId,
+        data.startDate, data.endDate, data.isHalfDay ? 1 : 0, data.halfDayPeriod || null,
+        data.reason || null, now, now
+      ]
+    );
+    return this.getLeaveRequest(id, data.organizationId);
+  },
+
+  async getLeaveRequest(id: string, organizationId: string) {
+    const rows = await query(
+      `SELECT lr.*, e.name as employeeName, lt.name as leaveTypeName 
+       FROM leave_requests lr
+       JOIN employees e ON lr.employeeId = e.id
+       JOIN leave_types lt ON lr.leaveTypeId = lt.id
+       WHERE lr.id = ? AND lr.organizationId = ?`,
+      [id, organizationId]
+    );
+    return rows[0];
+  },
+
+  async updateLeaveRequestStatus(id: string, organizationId: string, status: string, approvedBy: string) {
+    const request = await this.getLeaveRequest(id, organizationId);
+    if (!request) throw new Error('Leave request not found');
+
+    const now = new Date().toISOString();
+    await execute(
+      `UPDATE leaverequests 
+       SET status = ?, approvedBy = ?, approvedAt = ?, updatedAt = ? 
+       WHERE id = ? AND organizationId = ?`,
+      [status, approvedBy, now, now, id, organizationId]
+    );
+
+    // Automatic leave balance deduction if APPROVED
+    if (status === 'APPROVED' && request.status !== 'APPROVED') {
+      let daysToDeduct = 1;
+      if (!request.isHalfDay) {
+        daysToDeduct = await this.calculateWorkingDays(request.startDate, request.endDate, organizationId);
+      } else {
+        daysToDeduct = 0.5;
+      }
+      
+      try {
+        await this.deductLeaveBalance(request.employeeId, request.type, daysToDeduct, organizationId);
+      } catch (err: any) {
+        logger.error(`[LeaveEngine] Failed to deduct leave balance for request ${id}: ${err.message}`);
+        // Consider reverting status or handling error in production
+      }
+    } else if (status === 'REJECTED' && request.status === 'APPROVED') {
+        // Handle restoration if previously approved then rejected (edge case)
+        let daysToRestore = 1;
+        if (!request.isHalfDay) {
+          daysToRestore = await this.calculateWorkingDays(request.startDate, request.endDate, organizationId);
+        } else {
+          daysToRestore = 0.5;
+        }
+        await this.restoreLeaveBalance(request.employeeId, request.type, daysToRestore, organizationId);
+    }
+
+    return this.getLeaveRequest(id, organizationId);
+  },
+
+  /** ─── AUTOMATION ────────────────────────────────── */
+  async runMonthlyAccruals() {
+    logger.info('[LeaveEngine] Running monthly leave accruals (Earned Leave) +1.5 days');
+    const year = new Date().getFullYear();
+    const activeEmployees = await query(
+      `SELECT id, organizationId FROM employees WHERE status = 'ACTIVE'`
+    );
+
+    let processed = 0;
+    for (const emp of activeEmployees as any[]) {
+      const leaveTypes = await this.getLeaveTypes(emp.organizationId) as any[];
+      // Assuming 'Earned Leave' or 'Paid Leave' is the type we accrue
+      const earnedLeaveType = leaveTypes.find(lt => lt.name === 'Earned Leave' || lt.name === 'Paid Leave');
+      if (earnedLeaveType) {
+        await execute(
+          `UPDATE leave_balances 
+           SET allocated = allocated + 1.5 
+           WHERE employeeId = ? AND leaveTypeId = ? AND year = ?`,
+          [emp.id, earnedLeaveType.id, year]
+        );
+        processed++;
+      }
+    }
+    logger.info(`[LeaveEngine] Completed monthly leave accruals for ${processed} employees.`);
   }
 };
+
+// Register Job
+jobScheduler.registerHandler('MONTHLY_LEAVE_ACCRUAL', async () => {
+  await leaveEngineService.runMonthlyAccruals();
+});

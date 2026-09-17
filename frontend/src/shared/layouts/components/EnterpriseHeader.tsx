@@ -6,12 +6,12 @@ import { ROLE_LABELS } from '../../../security/roles/roles';
 import { getRoleBadgeClass } from '../../utils/helpers';
 import { StacklyLogo } from '../../../components/common/StacklyLogo';
 import { LogoutModal } from '../../../auth/components/LogoutModal';
+import LightModeOutlined from '@mui/icons-material/LightModeOutlined';
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import {
   Menu,
   Search,
   Bell,
-  Sun,
-  Moon,
   User,
   Settings,
   Shield,
@@ -27,12 +27,13 @@ import {
 import { RealtimeStatusBadge } from '../../../components/common/RealtimeStatusBadge';
 import { useRealtimeNotifications } from '../../../hooks/useRealtimeNotifications';
 import { connectSocket } from '../../../websocket/socket';
-import { NotificationCenter } from '../../../components/common/NotificationCenter';
+import { Breadcrumbs } from '../../../components/common/Breadcrumbs';
 
 interface EnterpriseHeaderProps {
   onToggleSidebar: () => void;
   onOpenHelp?: () => void;
 }
+
 
 export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSidebar, onOpenHelp }) => {
   const { user, role, logout, permissions } = useAuth();
@@ -45,8 +46,17 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchCategory, setSearchCategory] = useState<'all' | 'employees' | 'departments' | 'reports' | 'security'>('all');
 
+  // Notifications State
+  const [unreadCount, setUnreadCount] = useState(3);
+  const [hasNewNotification, setHasNewNotification] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: '1', title: 'Attendance Alert: 3 Late Check-Ins', subtitle: 'HR Operations', time: '5m ago', type: 'warning', path: '/hr/attendance', read: false },
+    { id: '2', title: 'Leave Request Pending Review', subtitle: 'Sarah Connor (Engineering)', time: '45m ago', type: 'info', path: '/manager/approvals', read: false },
+    { id: '3', title: 'System Security Audit Completed', subtitle: 'Compliance Stream', time: '2h ago', type: 'success', path: '/admin/audit-logs', read: false },
+  ]);
+
   // Dropdowns State
-  const [activeDropdown, setActiveDropdown] = useState<'profile' | 'role' | 'messages' | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<'profile' | 'role' | 'notif' | 'messages' | null>(null);
 
   // Scope & Modal States
   const [showPermissionsPreview, setShowPermissionsPreview] = useState(false);
@@ -59,6 +69,24 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
     }
   }, [user]);
 
+  // Real-time notifications listener - pulses only on new arrival
+  useRealtimeNotifications((newNotif: any) => {
+    setNotifications((prev) => [
+      {
+        id: newNotif.id || `notif-${Date.now()}`,
+        title: newNotif.title || 'Workforce Notification',
+        subtitle: newNotif.message || '',
+        time: 'Just now',
+        type: newNotif.type === 'WARNING' ? 'warning' : 'info',
+        path: '/hr/attendance',
+        read: false
+      },
+      ...prev
+    ]);
+    setUnreadCount((c) => c + 1);
+    setHasNewNotification(true);
+  });
+
   const searchResultsMap = [
     { title: 'Global Headcount & Department Analytics', category: 'reports', path: '/admin/analytics' },
     { title: 'User Management & Security Scopes', category: 'security', path: '/admin/users' },
@@ -70,8 +98,17 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
 
 
 
-  const toggleDropdown = (name: 'profile' | 'role' | 'messages') => {
+  const toggleDropdown = (name: 'profile' | 'role' | 'notif' | 'messages') => {
+    if (name === 'notif') {
+      setHasNewNotification(false);
+    }
     setActiveDropdown((prev) => (prev === name ? null : name));
+  };
+
+  const markAllNotificationsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setUnreadCount(0);
+    setHasNewNotification(false);
   };
 
   const handleSearchSubmit = (path: string) => {
@@ -80,10 +117,11 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
     navigate(path);
   };
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setShowLogoutModal(false);
     setActiveDropdown(null);
-    navigate('/logout');
+    await logout();
+    navigate('/login');
   };
 
   // Compute Breadcrumb Trail
@@ -130,21 +168,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         </Link>
 
         {/* Dynamic Breadcrumbs */}
-        <div className="hidden sm:flex items-center gap-1.5 text-xs min-w-0 pl-2 border-l border-slate-200 dark:border-slate-800">
-          <Link to="/" className="text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1">
-            <Home size={14} />
-          </Link>
-          {breadcrumbs.map((b, idx) => (
-            <React.Fragment key={b.path}>
-              <ChevronRight className="text-slate-400 dark:text-slate-600" size={13} />
-              <span className={`truncate max-w-[130px] ${
-                idx === breadcrumbs.length - 1 ? 'font-medium text-slate-900 dark:text-slate-100' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-              }`}>
-                {b.label}
-              </span>
-            </React.Fragment>
-          ))}
-        </div>
+        <Breadcrumbs className="hidden sm:flex pl-2 border-l border-slate-200 dark:border-slate-800" />
       </div>
 
       {/* CENTER SECTION: Global Command Search Surface */}
@@ -156,7 +180,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setSearchFocused(true)}
-            placeholder="Search employees, departments, reports..."
+            placeholder={role === 'EMPLOYEE' ? "Search your work, leave, payroll, policies, documents..." : "Search employees, departments, reports..."}
             style={{ paddingLeft: '2.25rem' }}
             className={`w-full rounded-lg pr-4 py-1.5 text-xs transition-all outline-none border ${
               isDark
@@ -238,8 +262,96 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         </button>
 
         {/* 1. Notifications Center */}
-        <NotificationCenter />
+        <div className="header-action-wrap relative">
+          <button
+            onClick={() => toggleDropdown('notif')}
+            aria-label={`View Notifications (${unreadCount} unread)`}
+            className={`p-2 rounded-lg border transition-all relative cursor-pointer ${
+              isDark
+                ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+                : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+            } ${hasNewNotification ? 'ring-2 ring-rose-500/40 text-rose-500' : ''}`}
+            title={hasNewNotification ? "New notification received!" : "Notifications & System Alerts"}
+          >
+            <Bell size={18} className={hasNewNotification ? "text-rose-500" : ""} />
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-3px',
+                  right: '-3px',
+                  minWidth: '15px',
+                  height: '15px',
+                  padding: '0 3px',
+                  backgroundColor: '#f43f5e',
+                  color: 'white',
+                  borderRadius: '9999px',
+                  fontSize: '9px',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
+          </button>
 
+          {/* Notifications Dropdown Panel */}
+          {activeDropdown === 'notif' && (
+            <div className="header-popover header-notifications absolute right-0 mt-2 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 shadow-lg z-50 rounded-lg text-xs text-slate-900 dark:text-slate-100 space-y-2 font-sans">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+                <span className="font-semibold text-sm text-slate-900 dark:text-slate-100">Notifications ({unreadCount})</span>
+                <button
+                  onClick={markAllNotificationsRead}
+                  className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline font-medium cursor-pointer"
+                >
+                  Mark All Read
+                </button>
+              </div>
+
+              <div className="space-y-1.5 max-h-72 overflow-y-auto">
+                {notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={() => {
+                      setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)));
+                      setActiveDropdown(null);
+                      navigate(n.path);
+                    }}
+                    className={`p-2.5 rounded-md border transition-all cursor-pointer ${
+                      n.read
+                        ? 'bg-slate-50 dark:bg-slate-950/60 border-slate-200 dark:border-slate-800/60 opacity-75'
+                        : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <p className="font-medium text-xs text-slate-900 dark:text-slate-100">{n.title}</p>
+                    <div className="flex items-center justify-between mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                      <span>{n.subtitle}</span>
+                      <span>{n.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 2. Messages Icon */}
+        <button
+          onClick={() => toggleDropdown('messages')}
+          aria-label="View Messages"
+          className={`p-2 rounded-lg border transition-all hidden sm:block cursor-pointer ${
+            isDark
+              ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+              : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
+          }`}
+          title="Team Messages"
+        >
+          <MessageSquare size={18} />
+        </button>
 
         {/* 3. Theme Toggle */}
         <button
@@ -250,9 +362,13 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
               ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
               : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
           }`}
-          title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+          title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
         >
-          {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-slate-600" />}
+          {isDark ? (
+            <LightModeOutlined sx={{ fontSize: 20 }} className="text-amber-400" />
+          ) : (
+            <DarkModeOutlined sx={{ fontSize: 20 }} className="text-slate-600" />
+          )}
         </button>
 
         {/* 4. Help Icon */}
@@ -324,7 +440,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                 {/* Profile Actions List */}
                 <div className="py-1 space-y-1 font-medium">
                   <button
-                    onClick={() => { navigate('/me/profile'); setActiveDropdown(null); }}
+                    onClick={() => { navigate('/employee/profile'); setActiveDropdown(null); }}
                     className="w-full text-left px-3 py-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2.5 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                   >
                     <User size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" /> View Profile

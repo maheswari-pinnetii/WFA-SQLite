@@ -1,5 +1,5 @@
 import React from 'react';
-import { Breadcrumbs, Typography } from '@mui/material';
+import { Breadcrumbs } from '@mui/material';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -23,9 +23,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, description, brea
             {breadcrumbs.map((crumb, index) => {
               const isLast = index === breadcrumbs.length - 1;
               return isLast || !crumb.href ? (
-                <Typography key={index} className="text-[13px] font-medium text-slate-500">
+                <span key={index} className="text-[13px] font-medium text-slate-500">
                   {crumb.label}
-                </Typography>
+                </span>
               ) : (
                 <Link key={index} to={crumb.href} className="text-[13px] font-medium text-slate-500 hover:text-slate-800 transition-colors">
                   {crumb.label}

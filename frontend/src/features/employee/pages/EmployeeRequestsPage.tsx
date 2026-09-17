@@ -7,7 +7,7 @@ export const EmployeeRequestsPage: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({ type: 'Annual Leave', startDate: '', endDate: '', reason: '' });
+  const [form, setForm] = useState({ type: 'Annual Leave', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDayPeriod: 'AM' });
 
   const loadRequests = async () => {
     setIsLoading(true);
@@ -27,7 +27,7 @@ export const EmployeeRequestsPage: React.FC = () => {
     event.preventDefault();
     try {
       await workforceApi.createLeaveRequest(form);
-      setForm({ type: 'Annual Leave', startDate: '', endDate: '', reason: '' });
+      setForm({ type: 'Annual Leave', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDayPeriod: 'AM' });
       setShowForm(false);
       await loadRequests();
     } catch (err) {
@@ -67,8 +67,23 @@ export const EmployeeRequestsPage: React.FC = () => {
             <input required type="date" value={form.startDate} onChange={(event) => setForm({ ...form, startDate: event.target.value })} className="input mt-1 w-full" />
           </label>
           <label className="text-xs font-bold text-[var(--text-muted)]">End date
-            <input required type="date" value={form.endDate} onChange={(event) => setForm({ ...form, endDate: event.target.value })} className="input mt-1 w-full" />
+            <input required type="date" value={form.endDate} onChange={(event) => setForm({ ...form, endDate: event.target.value })} className="input mt-1 w-full" disabled={form.isHalfDay} />
           </label>
+          <div className="md:col-span-2 flex items-center gap-4 mt-2">
+            <label className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)] cursor-pointer">
+              <input type="checkbox" checked={form.isHalfDay} onChange={(e) => {
+                const isHalf = e.target.checked;
+                setForm({ ...form, isHalfDay: isHalf, endDate: isHalf ? form.startDate : form.endDate });
+              }} className="accent-[var(--color-primary)] w-4 h-4" />
+              Half-Day Leave
+            </label>
+            {form.isHalfDay && (
+              <select value={form.halfDayPeriod} onChange={(e) => setForm({ ...form, halfDayPeriod: e.target.value })} className="input input-sm">
+                <option value="AM">First Half (AM)</option>
+                <option value="PM">Second Half (PM)</option>
+              </select>
+            )}
+          </div>
           <button type="submit" className="btn btn-primary md:col-span-2 flex items-center justify-center gap-2"><Send size={14} /> Submit for approval</button>
         </form>
       )}
@@ -86,7 +101,9 @@ export const EmployeeRequestsPage: React.FC = () => {
               <div>
                 <span className="font-mono text-[10px] text-slate-400">{r.id}</span>
                 <h4 className="font-bold text-sm text-[var(--text-primary)]">{r.type}</h4>
-                <p className="text-xs text-slate-400">{r.startDate} - {r.endDate} · {r.reason}</p>
+                <p className="text-xs text-slate-400">
+                  {r.startDate} {r.startDate !== r.endDate ? `- ${r.endDate}` : ''} {r.isHalfDay ? `(Half Day - ${r.halfDayPeriod})` : ''} · {r.reason}
+                </p>
               </div>
               <span className={`badge ${r.status === 'APPROVED' ? 'badge-success' : r.status === 'REJECTED' ? 'badge-danger' : 'badge-info'} text-[10px] uppercase font-bold`}>
                 {r.status}

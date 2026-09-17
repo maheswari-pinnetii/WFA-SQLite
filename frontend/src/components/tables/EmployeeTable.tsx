@@ -39,7 +39,8 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
 
   const { canAccessDepartment } = useDepartmentAccess();
 
-  const filteredEmployees = employees.filter((emp) => {
+  const safeEmployees = Array.isArray(employees) ? employees : (employees as any)?.employees || [];
+  const filteredEmployees = safeEmployees.filter((emp: any) => {
     const deptId = (emp as any).departmentId || emp.department || '';
     const hasDbacAccess = canAccessDepartment(deptId) || canAccessDepartment(emp.department);
 
@@ -91,14 +92,14 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 shadow-sm space-y-4 w-full max-w-full min-w-0 overflow-hidden">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg p-5 shadow-sm space-y-4 w-full max-w-full min-w-0 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Enterprise Workforce Directory</h3>
-            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">{employees.length.toLocaleString()} Total Records</span>
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Enterprise Workforce Directory</h3>
+            <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">{safeEmployees.length.toLocaleString()} Total Records</span>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Complete workforce directory with instant role controls & shift tracking</p>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">Complete workforce directory with instant role controls & shift tracking</p>
         </div>
         <Button icon={<UserPlus size={16} />}>Onboard Employee</Button>
       </div>
@@ -115,7 +116,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
               setPage(1);
             }}
             placeholder="Search 10,000 employees by name, code, email..."
-            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors"
+            className="w-full pl-9 pr-4 py-1.5 text-xs rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] focus:outline-none focus:border-emerald-500 transition-colors"
           />
         </div>
 
@@ -128,7 +129,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 setDepartmentFilter(e.target.value);
                 setPage(1);
               }}
-              className="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 w-full sm:w-auto cursor-pointer"
+              className="px-3 py-1.5 text-xs font-medium rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] w-full sm:w-auto cursor-pointer"
             >
               {departments.map((d) => (
                 <option key={d} value={d}>
@@ -138,7 +139,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
             <span>Rows:</span>
             <select
               value={pageSize}
@@ -146,7 +147,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              className="px-2 py-1 text-xs font-medium rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 cursor-pointer"
+              className="px-2 py-1 text-xs font-medium rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] cursor-pointer"
             >
               <option value={10}>10</option>
               <option value={25}>25</option>
@@ -158,9 +159,9 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
       </div>
 
       {/* Roster Table */}
-      <div className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 w-full max-w-full min-w-0">
+      <div className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] w-full max-w-full min-w-0">
         <table className="w-full text-left text-sm min-w-[1600px]">
-          <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 uppercase font-semibold text-[11px] tracking-wider">
+          <thead className="sticky top-0 z-10 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-b border-[var(--border-color)] uppercase font-semibold text-[11px] tracking-wider">
             <tr>
               <th className="py-3 px-4 w-[110px]">Employee ID</th>
               <th className="py-3 px-4 w-[180px]">Employee Name</th>

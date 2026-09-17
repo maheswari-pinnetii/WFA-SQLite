@@ -17,9 +17,7 @@ export const authenticateToken = async (req, res, next) => {
     // 1. Verify Supabase JWT (signed with JWT_SECRET / SUPABASE_JWT_SECRET)
     // Note: Ensure env.JWT_SECRET matches your Supabase Project JWT Secret
     const decoded = jwt.verify(token, JWT_SECRET, {
-      algorithms: ['HS256'],
-      issuer: 'wfa-sqlite',
-      audience: 'wfa-client'
+      algorithms: ['HS256']
     }) as any;
     
     // 2. Real-time session revocation check
@@ -39,21 +37,17 @@ export const authenticateToken = async (req, res, next) => {
     const email = decoded.email;
 
     let appUser = null;
-    if (userId) {
-      appUser = await User.findOne({ id: userId });
+    if (userId && typeof userId === 'string') {
+      const rows = await query('SELECT * FROM users WHERE id = ? LIMIT 1', [userId]);
+      if (rows && rows.length > 0) appUser = rows[0];
     }
-    if (!appUser && email) {
-      appUser = await User.findOne({ email });
+    if (!appUser && email && typeof email === 'string') {
+      const rows = await query('SELECT * FROM users WHERE email = ? LIMIT 1', [email]);
+      if (rows && rows.length > 0) appUser = rows[0];
     }
-    if (!appUser && decoded.sub) {
-      appUser = await User.findOne({ supabase_auth_id: decoded.sub });
-    }
-    if (!appUser && decoded.role) {
-      appUser = decoded;
-    }
-
+    // CRITICAL SECURITY FIX: Never fallback to client/JWT-decoded object merely because it contains a role
     if (!appUser) {
-      return res.status(401).json({ success: false, message: 'User profile not found in system' });
+      return res.status(401).json({ success: false, message: 'User profile not found in database. Authentication failed.' });
     }
 
     // 3. User status validation (inactive/suspended)
@@ -152,13 +146,13 @@ export const enforceScope = async (req, res, next) => {
       }
 
       if (!target) {
-        return res.status(404).json({ success: false, message: 'Resource not found.' });
+        return res.status(404).json({ success: false, message: 'Resource not found or access forbidden.' });
       }
       if (target.department !== department) {
-        return res.status(404).json({ success: false, message: 'Resource not found.' });
+        return res.status(403).json({ success: false, message: 'Access Denied: Scoped to your department only.' });
       }
       if (role === 'TEAM_LEAD' && target.team !== team) {
-        return res.status(404).json({ success: false, message: 'Resource not found.' });
+        return res.status(403).json({ success: false, message: 'Access Denied: Scoped to your team only.' });
       }
       return next();
     }

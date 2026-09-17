@@ -46,7 +46,7 @@ export const PermissionsManagement: React.FC = () => {
   const currentPermissions = rolePermissions[selectedRole] || [];
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN]}>
+    <>
       <div className="w-full space-y-6 animate-fadeIn font-sans pb-10">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -128,6 +128,6 @@ export const PermissionsManagement: React.FC = () => {
             })}
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

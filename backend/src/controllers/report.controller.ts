@@ -392,6 +392,180 @@ export const exportLeaveReport = async (req: any, res: any) => {
 };
 
 /**
+ * GET /api/v1/reports/payroll/export
+ * Export payroll register in CSV or JSON format
+ */
+export const exportPayrollReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv', month } = req.query;
+
+    let sql = `
+      SELECT 
+        p.id,
+        p.employeeId,
+        e.employeeCode,
+        e.name as employeeName,
+        e.department,
+        p.month,
+        p.basicPay,
+        p.hra,
+        p.specialAllowance,
+        p.grossEarnings,
+        p.pfDeduction,
+        p.esiDeduction,
+        p.ptDeduction,
+        p.tdsDeduction,
+        p.totalDeductions,
+        p.netPay,
+        p.status
+      FROM payslips p
+      LEFT JOIN employees e ON p.employeeId = e.id
+      WHERE (p.organizationId = ? OR p.companyId = ?)
+    `;
+    const params: any[] = [orgId, orgId];
+
+    if (month) {
+      sql += ` AND p.month = ?`;
+      params.push(month);
+    }
+
+    sql += ` ORDER BY p.month DESC, e.name ASC LIMIT 5000`;
+
+    const rawRecords = await query(sql, params) || [];
+
+    const formattedRecords = rawRecords.map((r: any) => ({
+      'Payslip ID': r.id,
+      'Employee ID': r.employeeCode || r.employeeId,
+      'Employee Name': r.employeeName || 'Unknown',
+      'Department': r.department || 'General',
+      'Month': r.month,
+      'Basic Pay': r.basicPay || 0,
+      'HRA': r.hra || 0,
+      'Special Allowance': r.specialAllowance || 0,
+      'Gross Earnings': r.grossEarnings || 0,
+      'PF Deduction': r.pfDeduction || 0,
+      'ESI Deduction': r.esiDeduction || 0,
+      'PT Deduction': r.ptDeduction || 0,
+      'TDS Deduction': r.tdsDeduction || 0,
+      'Total Deductions': r.totalDeductions || 0,
+      'Net Pay': r.netPay || 0,
+      'Status': r.status || 'DRAFT'
+    }));
+
+    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported payroll report (${formattedRecords.length} records, format: ${format})`, orgId);
+
+    const filenameDate = new Date().toISOString().slice(0, 10);
+    if (String(format).toLowerCase() === 'json') {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="payroll_report_' + filenameDate + '.json"');
+      return res.json({
+        success: true,
+        meta: {
+          exportedAt: new Date().toISOString(),
+          recordCount: formattedRecords.length,
+          organizationId: orgId,
+          generatedBy: req.user.id
+        },
+        data: formattedRecords
+      });
+    }
+
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="payroll_report_' + filenameDate + '.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportPayrollReport', 500, 'Failed to export payroll report.');
+  }
+};
+
+/**
+ * GET /api/v1/reports/statutory/export
+ * Export statutory compliance report in CSV or JSON format
+ */
+export const exportStatutoryReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv', month } = req.query;
+
+    let sql = `
+      SELECT 
+        p.employeeId,
+        e.employeeCode,
+        e.name as employeeName,
+        e.pf_number as pfNumber,
+        e.esi_number as esiNumber,
+        e.pan_reference as panReference,
+        p.month,
+        p.basicPay,
+        p.grossEarnings,
+        p.pfDeduction as employeePF,
+        p.pfDeduction as employerPF,
+        p.esiDeduction as employeeESI,
+        (p.esiDeduction * 3.25 / 0.75) as employerESI,
+        p.ptDeduction,
+        p.tdsDeduction
+      FROM payslips p
+      LEFT JOIN employees e ON p.employeeId = e.id
+      WHERE (p.organizationId = ? OR p.companyId = ?)
+    `;
+    const params: any[] = [orgId, orgId];
+
+    if (month) {
+      sql += ` AND p.month = ?`;
+      params.push(month);
+    }
+
+    sql += ` ORDER BY p.month DESC, e.name ASC LIMIT 5000`;
+
+    const rawRecords = await query(sql, params) || [];
+
+    const formattedRecords = rawRecords.map((r: any) => ({
+      'Employee Code': r.employeeCode || r.employeeId,
+      'Employee Name': r.employeeName || 'Unknown',
+      'PAN': r.panReference || 'N/A',
+      'PF Number': r.pfNumber || 'N/A',
+      'ESI Number': r.esiNumber || 'N/A',
+      'Month': r.month,
+      'Gross Wage': r.grossEarnings || 0,
+      'PF Wage': r.basicPay || 0,
+      'Employee PF (12%)': r.employeePF || 0,
+      'Employer PF (12%)': r.employerPF || 0,
+      'Employee ESI (0.75%)': r.employeeESI ? Math.round(r.employeeESI) : 0,
+      'Employer ESI (3.25%)': r.employerESI ? Math.round(r.employerESI) : 0,
+      'Professional Tax': r.ptDeduction || 0,
+      'TDS Deducted': r.tdsDeduction || 0
+    }));
+
+    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported statutory report (${formattedRecords.length} records, format: ${format})`, orgId);
+
+    const filenameDate = new Date().toISOString().slice(0, 10);
+    if (String(format).toLowerCase() === 'json') {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="statutory_report_' + filenameDate + '.json"');
+      return res.json({
+        success: true,
+        meta: {
+          exportedAt: new Date().toISOString(),
+          recordCount: formattedRecords.length,
+          organizationId: orgId,
+          generatedBy: req.user.id
+        },
+        data: formattedRecords
+      });
+    }
+
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="statutory_report_' + filenameDate + '.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportStatutoryReport', 500, 'Failed to export statutory report.');
+  }
+};
+
+/**
  * GET /api/v1/reports/metrics
  * Report catalog and live count statistics
  */

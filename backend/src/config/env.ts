@@ -39,10 +39,13 @@ const TOTP_ENCRYPTION_KEY = process.env.TOTP_ENCRYPTION_KEY || 'wfa_totp_dev_def
 
 if (NODE_ENV === 'production') {
   if (!process.env.TOTP_ENCRYPTION_KEY || process.env.TOTP_ENCRYPTION_KEY.length < 32) {
-    throw new Error('PRODUCTION ERROR: TOTP_ENCRYPTION_KEY must be a cryptographically secure key of at least 32 characters in production.');
+    throw new Error('FATAL SECURITY ERROR: TOTP_ENCRYPTION_KEY must be a cryptographically secure key of at least 32 characters in production.');
   }
-  if (!process.env.JWT_SECRET) {
-    throw new Error('PRODUCTION ERROR: JWT_SECRET is required in production.');
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+    throw new Error('FATAL SECURITY ERROR: JWT_SECRET must be set and at least 32 characters in production.');
+  }
+  if (!process.env.JWT_REFRESH_SECRET || process.env.JWT_REFRESH_SECRET.length < 32) {
+    throw new Error('FATAL SECURITY ERROR: JWT_REFRESH_SECRET must be set and at least 32 characters in production.');
   }
 }
 

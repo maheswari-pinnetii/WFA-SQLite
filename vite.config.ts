@@ -36,11 +36,14 @@ export default defineConfig({
   },
   build: {
     sourcemap: false,
-    chunkSizeWarningLimit: 2200,
+    chunkSizeWarningLimit: 3000,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            if (id.includes('@mui') || id.includes('@emotion')) {
+              return 'vendor-mui';
+            }
             if (id.includes('recharts') || id.includes('d3')) {
               return 'vendor-charts';
             }

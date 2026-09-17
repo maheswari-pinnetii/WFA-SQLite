@@ -7,7 +7,7 @@ export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
     <div
       ref={ref}
       className={cn(
-        'rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm transition-all',
+        'rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm transition-all',
         className
       )}
       {...props}
@@ -25,7 +25,7 @@ export const MotionCard = React.forwardRef<HTMLDivElement, HTMLMotionProps<'div'
       transition={{ duration: 0.2, ease: 'easeOut' }}
       whileHover={{ y: -2, transition: { duration: 0.15 } }}
       className={cn(
-        'rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md',
+        'rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm transition-all hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md',
         className
       )}
       {...props}

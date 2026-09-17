@@ -1,6 +1,6 @@
 import { apiClient } from '../client';
 
-export type ReportType = 'attendance' | 'workforce' | 'leave';
+export type ReportType = 'attendance' | 'workforce' | 'leave' | 'payroll' | 'statutory';
 export type ExportFormat = 'csv' | 'json';
 
 export interface ReportFilterParams {

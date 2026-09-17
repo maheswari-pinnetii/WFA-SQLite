@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { AppDispatch } from '../../../app/store';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
@@ -10,17 +11,9 @@ import { formatDate } from '../../../shared/utils/helpers';
 import { UserPlus, Search, Filter, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, X } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 import { employeeApi } from '../../../api/endpoints/employee.api';
-import { Skeleton } from '../../../components/common/Skeleton';
-import { EmptyState } from '../../../components/common/EmptyState';
-import { ErrorState } from '../../../components/common/ErrorState';
-import { useToast } from '../../../components/common/ToastContext';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../auth/hooks/useAuth';
 
 export const EmployeeManagement: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
   const [search, setSearch] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -59,12 +52,8 @@ export const EmployeeManagement: React.FC = () => {
   });
   const [isLoadingData, setIsLoadingData] = useState(false);
 
-  const { success, error: showError } = useToast();
-  const [error, setError] = useState<Error | null>(null);
-
   const fetchPaginatedEmployees = async () => {
     setIsLoadingData(true);
-    setError(null);
     try {
       const res = await employeeApi.getEmployees({
         page,
@@ -78,24 +67,10 @@ export const EmployeeManagement: React.FC = () => {
         sortBy: 'employeeCode',
         sortOrder: 'ASC'
       });
-      // Handle normalized pagination response { data, meta } from backend
-      const responseData = (res as any).data || res;
-      if (responseData && responseData.meta) {
-        setEmployeesData(responseData.data);
-        setPagination({
-          page: responseData.meta.page,
-          pageSize: responseData.meta.limit,
-          totalItems: responseData.meta.total,
-          totalPages: responseData.meta.totalPages
-        });
-      } else {
-        setEmployeesData(res.employees || []);
-        setPagination(res.pagination || { page: 1, pageSize: 25, totalItems: 0, totalPages: 1 });
-      }
-    } catch (err: any) {
+      setEmployeesData(res.employees);
+      setPagination(res.pagination);
+    } catch (err) {
       console.error("Failed to load paginated employees:", err);
-      setError(err);
-      showError(err.message || 'Failed to load employees.');
     } finally {
       setIsLoadingData(false);
     }
@@ -108,11 +83,9 @@ export const EmployeeManagement: React.FC = () => {
   const handleStatusChange = async (id: string, status: Employee['status']) => {
     try {
       await employeeApi.updateEmployeeStatus(id, status);
-      success(`Employee status updated to ${status}.`);
       fetchPaginatedEmployees();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to update status:", err);
-      showError(err.message || 'Failed to update status.');
     }
   };
 
@@ -147,13 +120,14 @@ export const EmployeeManagement: React.FC = () => {
         department: newEmployee.department,
         role: newEmployee.role,
       });
-      success(`${newEmployee.name.trim()} was added to the employee directory.`);
+      setCreateSuccess(`${newEmployee.name.trim()} was added to the employee directory.`);
       setNewEmployee({ id: '', name: '', email: '', department: 'Human Resources', role: 'HR' });
       setShowCreateForm(false);
       await fetchPaginatedEmployees();
-    } catch (err: any) {
+    } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Unable to create employee.');
-      showError(err instanceof Error ? err.message : 'Unable to create employee.');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -165,70 +139,92 @@ export const EmployeeManagement: React.FC = () => {
   const columns: Column<Employee>[] = [
     {
       header: 'Employee ID',
-      accessorKey: 'employeeCode',
-      sortable: true,
-      cell: (item: Employee) => (
-        <button
-          onClick={() => navigate(`/hr/employees/${item.id}`)}
-          className="text-emerald-500 hover:text-emerald-400 font-medium transition-colors"
-        >
-          {item.employeeCode || item.id.substring(0,8)}
-        </button>
-      ),
-    },
-    {
-      header: 'Name',
-      accessorKey: 'name',
-      sortable: true,
-      cell: (item: Employee) => (
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-slate-400 border border-slate-700">
-            {item.name ? item.name.charAt(0) : ''}
-          </div>
-          <span className="font-medium text-white">{item.name}</span>
-        </div>
-      ),
-    },
-    { header: 'Email', accessorKey: 'email' },
-    { header: 'Department', accessorKey: 'department', sortable: true },
-    { header: 'Designation', accessorKey: 'designation', sortable: true },
-    {
-      header: 'Status',
-      accessorKey: 'status',
-      sortable: true,
-      cell: (item: Employee) => {
-        const val = item.status;
-        const colors: Record<string, string> = {
-          ACTIVE: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-          REMOTE: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-          ON_LEAVE: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-          OFFLINE: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-        };
-        const activeColor = colors[val] || colors.OFFLINE;
+      cell: (emp: Employee) => {
         return (
-          <span className={`px-2 py-1 text-[10px] font-bold tracking-wider rounded border ${activeColor}`}>
-            {val}
+          <span className="font-mono font-bold text-slate-300">
+            {emp.employeeCode || emp.code || '—'}
           </span>
         );
-      },
+      }
     },
-    { header: 'Location', accessorKey: 'location', sortable: true },
-    { 
-      header: 'Joined', 
-      accessorKey: 'joiningDate', 
-      sortable: true,
-      cell: (item: Employee) => <>{formatDate(item.joinDate || item.joining_date || '')}</>
+    {
+      header: 'Employee Name',
+      cell: (emp: Employee) => (
+        <span className="font-bold text-slate-100">{emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`}</span>
+      ),
     },
+    { header: 'Department', accessorKey: 'department' },
+    { header: 'Designation', accessorKey: 'designation' },
+    {
+      header: 'Employment Status',
+      cell: (emp: Employee) => {
+        const status = emp.employment_status || 'Active';
+        const colorClass = status === 'Active' ? 'text-emerald-400' :
+                           status === 'Inactive' ? 'text-slate-400' :
+                           status === 'On Leave' ? 'text-amber-400' :
+                                                   'text-rose-400';
+        return (
+          <span className={`font-semibold text-xs flex items-center gap-1.5 ${colorClass}`}>
+            <span className="text-[10px]">●</span> {status}
+          </span>
+        );
+      }
+    },
+    { header: 'Email', accessorKey: 'email' },
+    {
+      header: 'Phone',
+      cell: (emp: Employee) => emp.phone || '—'
+    },
+    {
+      header: 'Location',
+      cell: (emp: Employee) => emp.location || '—'
+    },
+    {
+      header: 'Joining Date',
+      cell: (emp: Employee) => formatDate(emp.joining_date || emp.joinDate || '2025-01-01'),
+    },
+    {
+      header: 'Manager',
+      cell: (emp: Employee) => emp.manager_name || '—'
+    },
+    {
+      header: 'Attendance Status',
+      cell: (emp: Employee) => {
+        const att = emp.attendance_status || emp.status || 'Present';
+        const colorClass = att.toUpperCase() === 'PRESENT' || att.toUpperCase() === 'REMOTE' ? 'text-emerald-400' :
+                           att.toUpperCase() === 'LATE' ? 'text-amber-400' :
+                                                          'text-rose-400';
+        return (
+          <span className={`font-semibold text-xs flex items-center gap-1.5 ${colorClass}`}>
+            <span className="text-[10px]">●</span> {att}
+          </span>
+        );
+      }
+    },
+    {
+      header: 'Actions',
+      cell: (emp: Employee) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(`/hr/employees/${emp.id}`)}
+            className="text-xs px-2.5 py-1 rounded-lg font-medium transition-colors"
+            style={{ background: 'var(--role-light)', color: 'var(--role-primary)' }}
+            title="View full profile">
+            View Profile
+          </button>
+        </div>
+      )
+    }
   ];
 
-  const departments = ['ALL', 'Engineering', 'Human Resources', 'Sales', 'Marketing', 'Finance'];
-  const designations = ['ALL', 'Software Engineer', 'Senior Engineer', 'HR Manager', 'Sales Representative', 'Product Manager'];
+  const departments = ['ALL', 'Engineering', 'Product Management', 'Sales & Marketing', 'Human Resources', 'Customer Success', 'Finance & Operations'];
+  const designations = ['ALL', 'Senior Software Engineer', 'Product Manager', 'Account Executive', 'HR Operations Manager', 'Customer Success Director', 'Financial Analyst', 'Full Stack Developer', 'Specialist'];
   const statuses = ['ALL', 'ACTIVE', 'REMOTE', 'ON_LEAVE', 'OFFLINE'];
   const locations = ['ALL', 'Hyderabad', 'Visakhapatnam', 'Chennai', 'Bengaluru', 'Kochi'];
   const joiningYears = ['ALL', '2020', '2021', '2022', '2023', '2024', '2025', '2026'];
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR]} requiredPermission={Permission.EMPLOYEE_MANAGE}>
+    <>
       <div className="space-y-6">
         {/* Page Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -422,33 +418,11 @@ export const EmployeeManagement: React.FC = () => {
         {/* Directory List Panel */}
         <div className="glass-panel p-6 space-y-4 w-full max-w-full overflow-hidden">
           {isLoadingData ? (
-            <div className="space-y-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </div>
-          ) : error ? (
-            <ErrorState 
-              title="Failed to Load Employees" 
-              message={error.message || 'There was a problem loading the employee directory.'} 
-              onRetry={fetchPaginatedEmployees}
-            />
+            <div className="p-8 text-center text-slate-400">Loading workforce directory...</div>
           ) : employeesData.length === 0 ? (
-            <EmptyState 
-              title="No employees found" 
-              description="No employees match the current filters. Adjust your search criteria." 
-              icon={<Search className="w-12 h-12 text-slate-500" />}
-              action={
-                <button
-                  onClick={handleClearAll}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-md transition-colors"
-                >
-                  Clear Filters
-                </button>
-              }
-            />
+            <div className="p-8 text-center text-slate-400 font-semibold text-sm">
+              No employees found matching the selected filters.
+            </div>
           ) : (
             <>
               <DataTable
@@ -512,6 +486,6 @@ export const EmployeeManagement: React.FC = () => {
           )}
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

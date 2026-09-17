@@ -5,7 +5,7 @@ import { ExportReport } from '../../reports/components/ExportReport';
 
 export const TeamReports: React.FC = () => {
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}>
+    <>
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight">Team Reports & Exports</h2>
@@ -25,6 +25,6 @@ export const TeamReports: React.FC = () => {
           />
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

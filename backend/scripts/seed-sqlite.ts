@@ -26,6 +26,17 @@ export const seedSqlite = async () => {
     DROP TABLE IF EXISTS shifts;
     DROP TABLE IF EXISTS teams;
     DROP TABLE IF EXISTS departments;
+    DROP TABLE IF EXISTS payslips;
+    DROP TABLE IF EXISTS leave_balances;
+    DROP TABLE IF EXISTS leave_types;
+    DROP TABLE IF EXISTS holidays;
+    DROP TABLE IF EXISTS shift_assignments;
+    DROP TABLE IF EXISTS work_schedules;
+    DROP TABLE IF EXISTS overtime_records;
+    DROP TABLE IF EXISTS overtime_rules;
+    DROP TABLE IF EXISTS payroll_runs;
+    DROP TABLE IF EXISTS salary_components;
+    DROP TABLE IF EXISTS salary_structures;
     DROP TABLE IF EXISTS companies;
     PRAGMA foreign_keys = ON;
   `);
@@ -480,7 +491,110 @@ export const seedSqlite = async () => {
       }
       console.log(`Seeded ${totalInserted} Attendance Records for all 500 Employees.`);
     }
-  });
+
+    // 10. Seed Payroll Data (Salary Structures & Components)
+    const payrollCount = db.prepare('SELECT COUNT(*) as count FROM salary_structures').get().count;
+    if (payrollCount === 0) {
+      console.log('Seeding Salary Structures and Components...');
+      const employees = db.prepare('SELECT * FROM employees').all();
+      
+      const insertStructure = db.prepare(`
+        INSERT INTO salary_structures (id, employeeId, baseSalary, currency, effectiveDate, organizationId)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      
+      const insertComponent = db.prepare(`
+        INSERT INTO salary_components (id, salaryStructureId, componentName, type, amount)
+        VALUES (?, ?, ?, ?, ?)
+      `);
+
+      // We'll generate realistic salaries based on their performance score and id
+      employees.forEach((emp: any, index: number) => {
+        const structId = `sal-struct-${emp.id}`;
+        // Base salary between 40000 and 150000 based on hash
+        const hash = (emp.id.charCodeAt(emp.id.length - 1) * 17 + index) % 110;
+        const baseSalary = 40000 + (hash * 1000); 
+
+        insertStructure.run(
+          structId,
+          emp.id,
+          baseSalary,
+          'INR',
+          emp.joinDate || '2020-01-01',
+          ORGANIZATION_ID
+        );
+
+        // Standard Indian Components
+        // Basic Pay (50% of Base)
+        insertComponent.run(`comp-${structId}-1`, structId, 'Basic Pay', 'EARNING', baseSalary * 0.50);
+        // HRA (20% of Base)
+        insertComponent.run(`comp-${structId}-2`, structId, 'House Rent Allowance', 'EARNING', baseSalary * 0.20);
+        // Special Allowance (30% of Base)
+        insertComponent.run(`comp-${structId}-3`, structId, 'Special Allowance', 'EARNING', baseSalary * 0.30);
+        // Provident Fund Deduction (12% of Basic)
+        insertComponent.run(`comp-${structId}-4`, structId, 'Provident Fund', 'DEDUCTION', (baseSalary * 0.50) * 0.12);
+        // Professional Tax
+        insertComponent.run(`comp-${structId}-5`, structId, 'Professional Tax', 'DEDUCTION', 200);
+      });
+      console.log('Seeded Salary Structures and Components for 500 Employees.');
+    }
+      // 11. Seed Leave Policies and Balances
+      const leaveCount = db.prepare('SELECT COUNT(*) as count FROM leave_types').get().count;
+      if (leaveCount === 0) {
+        console.log('Seeding Leave Policies and Balances...');
+        const employees = db.prepare('SELECT * FROM employees').all();
+        
+        const insertLeaveType = db.prepare(`
+          INSERT INTO leave_types (id, organizationId, name, description, defaultDays, isPaid)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        
+        const insertLeaveBalance = db.prepare(`
+          INSERT INTO leave_balances (id, employeeId, leaveTypeId, year, allocated, used, organizationId)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        // Standard Indian Leaves
+        insertLeaveType.run('lt-casual', ORGANIZATION_ID, 'Casual Leave', 'For personal matters', 12, 1);
+        insertLeaveType.run('lt-sick', ORGANIZATION_ID, 'Sick Leave', 'For medical emergencies', 12, 1);
+        insertLeaveType.run('lt-earned', ORGANIZATION_ID, 'Earned Leave', 'Privilege leaves based on tenure', 15, 1);
+        insertLeaveType.run('lt-unpaid', ORGANIZATION_ID, 'Loss of Pay', 'Unpaid leave', 0, 0);
+
+        const currentYear = new Date().getFullYear();
+
+        employees.forEach((emp: any) => {
+          // Casual Leave
+          insertLeaveBalance.run(`lb-casual-${emp.id}`, emp.id, 'lt-casual', currentYear, 12, (emp.id.charCodeAt(0) % 12), ORGANIZATION_ID);
+          // Sick Leave
+          insertLeaveBalance.run(`lb-sick-${emp.id}`, emp.id, 'lt-sick', currentYear, 12, (emp.id.charCodeAt(1) % 5), ORGANIZATION_ID);
+          // Earned Leave
+          insertLeaveBalance.run(`lb-earned-${emp.id}`, emp.id, 'lt-earned', currentYear, 15, 0, ORGANIZATION_ID);
+          // Unpaid Leave
+          insertLeaveBalance.run(`lb-unpaid-${emp.id}`, emp.id, 'lt-unpaid', currentYear, 0, (emp.id.charCodeAt(2) % 3), ORGANIZATION_ID);
+        });
+        console.log('Seeded Leave Balances for 500 Employees.');
+      }
+      // 12. Seed Work Schedules and Shift Assignments
+      const shiftAssignCount = db.prepare('SELECT COUNT(*) as count FROM shift_assignments').get().count;
+      if (shiftAssignCount === 0) {
+        console.log('Seeding Work Schedules and Shift Assignments...');
+        const employees = db.prepare('SELECT * FROM employees').all();
+        
+        const insertSchedule = db.prepare(`\n          INSERT INTO work_schedules (id, employeeId, dayOfWeek, startTime, endTime, organizationId)\n          VALUES (?, ?, ?, ?, ?, ?)\n        `);
+
+        const insertShiftAssign = db.prepare(`\n          INSERT INTO shift_assignments (id, employeeId, shiftId, startDate, endDate, organizationId)\n          VALUES (?, ?, ?, ?, ?, ?)\n        `);
+
+        employees.forEach((emp: any, index: number) => {
+          for (let d = 1; d <= 5; d++) {
+            insertSchedule.run(`ws-${emp.id}-${d}`, emp.id, d, '09:00', '18:00', ORGANIZATION_ID);
+          }
+          const shiftId = 'shift-regular';
+          insertShiftAssign.run(`sa-${emp.id}`, emp.id, shiftId, emp.joinDate || '2020-01-01', null, ORGANIZATION_ID);
+        });
+
+        console.log('Seeded Work Schedules and Shift Assignments for 500 Employees.');
+      }
+    });
 
   transaction();
   try {

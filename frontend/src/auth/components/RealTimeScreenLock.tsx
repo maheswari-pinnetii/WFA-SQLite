@@ -82,7 +82,8 @@ export const RealTimeScreenLock: React.FC<RealTimeScreenLockProps> = ({
             color: '#ffffff',
             letterSpacing: '-0.02em',
             lineHeight: 1,
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+            fontVariantNumeric: 'tabular-nums',
           }}
         >
           {currentTime || '12:00'}

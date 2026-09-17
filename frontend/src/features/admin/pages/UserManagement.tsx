@@ -86,7 +86,7 @@ export const UserManagement: React.FC = () => {
   ];
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN]} requiredPermission={Permission.USERS_READ}>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -113,6 +113,6 @@ export const UserManagement: React.FC = () => {
           </div>
         )}
       </div>
-    </RoleGuard>
+    </>
   );
 };

@@ -113,8 +113,19 @@ export class AttendanceService {
           throw new AppError(ErrorCode.ATTENDANCE_ALREADY_CHECKED_IN, 'Active session already exists. Must check out first.', 409);
         }
 
-        const id = Math.random().toString(36).slice(2, 11);
         const date = getKolkataDate();
+        const todayRecord = await Attendance.findOne({
+          employeeId,
+          companyId: orgId,
+          date
+        });
+
+        if (todayRecord && todayRecord.status === 'Checked Out') {
+          notificationService.triggerAlarm(employeeId, identity.name, 'DUPLICATE_CHECKIN_ATTEMPT', 'Shift already completed today.');
+          throw new AppError(ErrorCode.ATTENDANCE_ALREADY_CHECKED_IN, 'You have already completed your shift for today.', 409);
+        }
+
+        const id = Math.random().toString(36).slice(2, 11);
         const checkInTime = new Date().toISOString();
 
         const record = await Attendance.create([{

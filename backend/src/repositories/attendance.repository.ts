@@ -236,10 +236,10 @@ export class AttendanceRepository {
       updatedAt: timestamp
     };
     await execute(`
-      INSERT INTO audit_logs (id, timestamp, employeeId, action, details, organizationId, companyId, createdAt, updatedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO audit_logs (id, createdAt, employeeId, action, details, organizationId, companyId, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [
-      data.id, data.timestamp, data.employeeId, data.action, data.details, data.organizationId, data.companyId, data.createdAt, data.updatedAt
+      data.id, data.createdAt, data.employeeId, data.action, data.details, data.organizationId, data.companyId, data.updatedAt
     ]);
     return data;
   }

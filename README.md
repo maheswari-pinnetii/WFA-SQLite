@@ -25,6 +25,8 @@
 - **Granular RBAC**: 5-Tier Role-Based Access Control (`ADMIN`, `HR`, `MANAGER`, `TEAM_LEAD`, `EMPLOYEE`).
 - **Real-Time Attendance**: Geofenced biometric punch tracking.
 - **Leave & Payroll Management**: Automated synchronization between live attendance, approved leaves, and payroll ledgers.
+- **Master Product Backlog**: 1,850-item audit checklist and feature roadmap available in [`docs/MASTER_PRODUCT_BACKLOG.md`](file:///c:/Users/91970/Downloads/WFA-SQLite/docs/MASTER_PRODUCT_BACKLOG.md).
+
 
 ## 3. Architecture Overview
 - **Backend**: Express.js REST API with zero-trust security and robust distributed system patterns (Circuit Breakers, Rate Limiting, Idempotency).
@@ -32,11 +34,12 @@
 - **Frontend**: React 18, TypeScript, and Zustand for state management.
 
 ## 4. Tech Stack
-- **Node.js & Express**: Core backend server
-- **SQLite**: Primary datastore
-- **React 18 & TypeScript**: Frontend UI
-- **TailwindCSS**: UI styling
-- **Argon2id & JWT**: Cryptography and session management
+- **Node.js & Express**: Core backend server with TypeScript
+- **SQLite (WAL)**: High-performance embedded datastore
+- **React 18 & TypeScript**: Component-driven frontend application
+- **MUI & Stackly Design System**: Custom Emerald tokens and responsive component library
+- **Bcryptjs & JWT**: Secure password hashing, session tokens, WebAuthn, and RBAC authorization
+
 
 ## 5. Quick Start
 ```bash

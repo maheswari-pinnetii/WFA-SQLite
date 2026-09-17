@@ -28,7 +28,7 @@ export const LocationsManagement: React.FC = () => {
   if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin text-emerald-500" size={32} /></div>;
 
   return (
-    <RoleGuard allowedRoles={[Role.ADMIN]}>
+    <>
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -72,6 +72,6 @@ export const LocationsManagement: React.FC = () => {
           ))}
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 };

@@ -3,7 +3,9 @@ import cors from 'cors';
 import apiRouter from './routes/api.routes.js';
 import { initDb, healthCheck } from './config/db.js';
 import { configureResilience } from './middleware/resilience.js';
+
 import { globalApiLimiter } from './middleware/rateLimiter.js';
+import { workflowService } from './services/workflow.service.js';
 import { inputSanitizer } from './middleware/validateInput.js';
 import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
 import { authenticateToken, authorizeRoles } from './middleware/auth.js';
@@ -42,15 +44,15 @@ if (process.env.NODE_ENV !== 'production') {
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server (no origin) and test environments
-    if (!origin || process.env.NODE_ENV === 'test') {
+    // Allow server-to-server requests (no origin header)
+    if (!origin) {
       return callback(null, true);
     }
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     logger.warn('security.cors.rejected', `Blocked CORS request from unlisted origin: ${origin}`);
-    callback(new Error('Not allowed by CORS'));
+    callback(AppError.forbidden(ErrorCode.AUTH_PERMISSION_DENIED));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'X-Idempotency-Key'],
@@ -89,9 +91,24 @@ app.get('/ready', async (req: Request, res: Response) => {
   }
 });
 
-// Generic Health Check
+// Generic Health Check — accessible without proxy at /health
 app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
+  res.status(200).json({ success: true, service: 'wfa-backend', status: 'UP', timestamp: new Date().toISOString() });
+});
+
+// /api/health — routed via Vite proxy in dev, same check with DB verification
+app.get('/api/health', async (req: Request, res: Response) => {
+  let dbConnected = false;
+  try {
+    dbConnected = await healthCheck();
+  } catch (_) {}
+  res.status(dbConnected ? 200 : 503).json({
+    success: dbConnected,
+    service: 'wfa-backend',
+    database: dbConnected ? 'connected' : 'unavailable',
+    status: dbConnected ? 'UP' : 'DEGRADED',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Detailed API Health Monitor & System Metrics (Protected)
@@ -140,22 +157,18 @@ app.use('/api/v1', apiRouter);
 app.use('/v1', apiRouter);
 app.use('/api', apiRouter);
 
-// Database initialization is now handled in server.ts to ensure it completes before jobs start
+// Database initialization
+if (process.env.NODE_ENV !== 'test') {
+  initDb().then(async () => {
+    logger.info('database.initialization', 'Database initialized successfully.');
+    await workflowService.seedWorkflows();
+  }).catch((err: any) => {
+    logger.error('database.initialization.failed', 'Failed to initialize database', { error: err.message });
+  });
+}
 
 // Global Error Handler — standard AppError format, never leaks internals
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  // express.json() throws a SyntaxError with status 400 for malformed JSON bodies.
-  // Intercept here before falling through to the generic 500 handler.
-  if (err instanceof SyntaxError && (err as any).status === 400 && 'body' in err) {
-    res.status(400).json({
-      success: false,
-      error: {
-        code: 'INVALID_JSON',
-        message: 'Request body contains invalid JSON.',
-      },
-    });
-    return;
-  }
   sendError(res, err, req);
 });
 

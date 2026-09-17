@@ -29,6 +29,7 @@ export const normalizeStatus = (raw: string | null | undefined): AttendanceStatu
   if (!raw) return 'NOT_STARTED';
   const s = raw.trim();
   if (s === 'Checked In'  || s === 'CHECKED_IN')  return 'CHECKED_IN';
+  if (s === 'Working'     || s === 'WORKING')     return 'CHECKED_IN';
   if (s === 'On Break'    || s === 'ON_BREAK')     return 'ON_BREAK';
   if (s === 'Checked Out' || s === 'CHECKED_OUT')  return 'CHECKED_OUT';
   if (s === 'NOT_STARTED')                          return 'NOT_STARTED';

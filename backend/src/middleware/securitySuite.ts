@@ -107,9 +107,7 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   }
 
   // Allow test environment bypass
-  if (process.env.NODE_ENV === 'test') {
-    return next();
-  }
+
 
   const origin = req.headers['origin'] || req.headers['referer'];
 
@@ -126,7 +124,28 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   ].filter(Boolean);
 
   if (origin) {
-    const isAllowed = allowed.some((allowedOrigin) => origin.startsWith(allowedOrigin!));
+    let normalizedOrigin: string;
+    try {
+      normalizedOrigin = new URL(origin).origin;
+    } catch {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'AUTH_PERMISSION_DENIED',
+          message: 'Forbidden: Invalid request origin header format.',
+          requestId: (res as any).locals?.requestId ?? 'unknown',
+        },
+      });
+    }
+
+    const isAllowed = allowed.some((allowedOrigin) => {
+      try {
+        return new URL(allowedOrigin).origin === normalizedOrigin;
+      } catch {
+        return allowedOrigin === normalizedOrigin;
+      }
+    });
+
     if (!isAllowed) {
       logger.warn('security.csrf.rejected', `Rejected state-changing request from untrusted origin: ${origin}`, {
         origin,

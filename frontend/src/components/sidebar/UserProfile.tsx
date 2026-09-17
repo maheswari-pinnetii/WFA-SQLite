@@ -28,9 +28,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
 
   if (!user) return null;
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setShowLogoutModal(false);
-    navigate('/logout');
+    await logout();
+    navigate('/login');
   };
 
   return (

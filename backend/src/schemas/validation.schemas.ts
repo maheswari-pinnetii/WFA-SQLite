@@ -37,10 +37,15 @@ export const registrationSchema = z.object({
     .refine((val) => /[^A-Za-z0-9]/.test(val), 'Password must contain a special character.')
     .refine((val) => !['password123', 'StacklyWFA2026!', 'qwertyuiop', '1234567890'].includes(val), 'Password is too common or easily guessed.')
     .optional(),
+  // Public self-registration — role is ALWAYS forced to EMPLOYEE server-side (anti-privilege-escalation)
   role: z.enum(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE']).optional(),
+  // Accept both 'department' and 'departmentId' from different form versions
+  department: z.string().trim().max(100).optional(),
   departmentId: z.string().trim().max(100).optional(),
+  team: z.string().trim().max(100).optional(),
+  title: z.string().trim().max(100).optional(),
   locationId: z.string().trim().max(100).optional(),
-  shiftId: z.string().trim().max(100).optional()
+  shiftId: z.string().trim().max(100).optional(),
 }).strict().refine(data => data.name || data.fullName, {
   message: 'Full name is required (at least 2 characters).',
   path: ['name']
@@ -249,8 +254,16 @@ export const createEmployeeSchema = z.object({
   email: z.string({ message: 'Company email is required.' }).trim().regex(EMAIL_REGEX, 'Valid email is required.').max(255),
   department: z.string({ message: 'Department is required.' }).trim().min(1).max(100),
   designation: z.string().trim().max(100).optional(),
+  grade: z.string().trim().max(50).optional(),
+  jobLevel: z.string().trim().max(50).optional(),
+  costCenter: z.string().trim().max(100).optional(),
+  workMode: z.enum(['Office', 'Remote', 'Hybrid']).optional(),
+  shiftId: z.string().trim().max(100).optional(),
+  employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN']).optional(),
   avatar: z.string().trim().max(500).optional(),
   joinDate: z.string().trim().max(50).optional(),
+  probationEndDate: z.string().trim().max(50).optional(),
+  confirmationDate: z.string().trim().max(50).optional(),
   team: z.string().trim().max(100).optional(),
   location: z.string().trim().max(100).optional()
 }).strict();
@@ -259,7 +272,16 @@ export const updateEmployeeSchema = z.object({
   name: z.string().trim().min(2).max(100).optional(),
   department: z.string().trim().max(100).optional(),
   designation: z.string().trim().max(100).optional(),
+  grade: z.string().trim().max(50).optional(),
+  jobLevel: z.string().trim().max(50).optional(),
+  costCenter: z.string().trim().max(100).optional(),
+  workMode: z.enum(['Office', 'Remote', 'Hybrid']).optional(),
+  shiftId: z.string().trim().max(100).optional(),
+  employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN']).optional(),
   avatar: z.string().trim().max(500).optional(),
+  joinDate: z.string().trim().max(50).optional(),
+  probationEndDate: z.string().trim().max(50).optional(),
+  confirmationDate: z.string().trim().max(50).optional(),
   team: z.string().trim().max(100).optional(),
   location: z.string().trim().max(100).optional(),
   performanceScore: z.number().min(0).max(100).optional(),

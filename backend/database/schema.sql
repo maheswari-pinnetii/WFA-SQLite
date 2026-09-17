@@ -112,18 +112,29 @@ CREATE TABLE IF NOT EXISTS employees (
   role TEXT NOT NULL DEFAULT 'EMPLOYEE',
   department TEXT,
   designation TEXT,
+  grade TEXT,
+  jobLevel TEXT,
+  costCenter TEXT,
+  workMode TEXT DEFAULT 'Office',
+  shiftId TEXT,
+  employmentType TEXT DEFAULT 'FULL_TIME',
   status TEXT NOT NULL DEFAULT 'ACTIVE',
   avatar TEXT,
   joinDate TEXT,
+  probationEndDate TEXT,
+  confirmationDate TEXT,
   performanceScore REAL NOT NULL DEFAULT 90,
   attendanceRate REAL NOT NULL DEFAULT 95,
   team TEXT,
   location TEXT,
   organizationId TEXT NOT NULL DEFAULT 'org-stackly',
   companyId TEXT NOT NULL DEFAULT 'org-stackly',
+  managerId TEXT,
   createdAt TEXT NOT NULL,
   updatedAt TEXT NOT NULL,
-  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
+  FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE,
+  FOREIGN KEY (shiftId) REFERENCES shifts(id) ON DELETE SET NULL,
+  FOREIGN KEY (managerId) REFERENCES employees(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS skills (
@@ -324,14 +335,13 @@ CREATE TABLE IF NOT EXISTS refreshtokens (
 
 CREATE TABLE IF NOT EXISTS audit_logs (
   id TEXT PRIMARY KEY,
-  timestamp TEXT NOT NULL,
-  employeeId TEXT,
-  action TEXT,
+  actorId TEXT NOT NULL,
+  action TEXT NOT NULL,
+  entityType TEXT NOT NULL,
+  entityId TEXT NOT NULL,
   details TEXT,
-  organizationId TEXT DEFAULT 'org-stackly',
-  companyId TEXT DEFAULT 'org-stackly',
-  createdAt TEXT,
-  updatedAt TEXT
+  ipAddress TEXT,
+  createdAt TEXT NOT NULL
 );
 
 -- Performance Indexes
@@ -345,7 +355,7 @@ CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_attendancerecords_date ON attendancerecords(date);
 CREATE INDEX IF NOT EXISTS idx_attendancerecords_emp_date ON attendancerecords(employeeId, date);
-CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(createdAt);
 
 -- Extra performance indexing for operational tables
 CREATE INDEX IF NOT EXISTS idx_skills_emp ON skills(employeeId);
@@ -620,6 +630,7 @@ CREATE TABLE IF NOT EXISTS payslips (
   totalEarnings REAL NOT NULL,
   totalDeductions REAL NOT NULL,
   netPay REAL NOT NULL,
+  lineItems TEXT,
   status TEXT DEFAULT 'GENERATED',
   FOREIGN KEY (payrollRunId) REFERENCES payroll_runs(id) ON DELETE CASCADE,
   FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
@@ -746,8 +757,13 @@ CREATE TABLE IF NOT EXISTS approval_steps (
   id TEXT PRIMARY KEY,
   workflowId TEXT NOT NULL,
   stepOrder INTEGER NOT NULL,
+  routingType TEXT DEFAULT 'SEQUENTIAL', 
+  approverType TEXT DEFAULT 'ROLE', 
   approverRole TEXT,
+  approverRelationship TEXT, 
   specificApproverId TEXT,
+  slaHours INTEGER,
+  escalationRole TEXT,
   FOREIGN KEY (workflowId) REFERENCES approval_workflows(id) ON DELETE CASCADE
 );
 
@@ -756,7 +772,7 @@ CREATE TABLE IF NOT EXISTS approval_requests (
   workflowId TEXT NOT NULL,
   entityId TEXT NOT NULL,
   requesterId TEXT NOT NULL,
-  status TEXT DEFAULT 'PENDING',
+  status TEXT DEFAULT 'PENDING_APPROVAL', 
   currentStepOrder INTEGER DEFAULT 1,
   createdAt TEXT NOT NULL,
   updatedAt TEXT NOT NULL,
@@ -768,8 +784,8 @@ CREATE TABLE IF NOT EXISTS approval_actions (
   id TEXT PRIMARY KEY,
   requestId TEXT NOT NULL,
   stepOrder INTEGER NOT NULL,
-  approverId TEXT NOT NULL,
-  action TEXT NOT NULL,
+  approverId TEXT,
+  action TEXT NOT NULL, 
   comments TEXT,
   actionAt TEXT NOT NULL,
   FOREIGN KEY (requestId) REFERENCES approval_requests(id) ON DELETE CASCADE,
@@ -862,3 +878,241 @@ CREATE TABLE IF NOT EXISTS training_enrollments (
 
 CREATE INDEX IF NOT EXISTS idx_training_enrollments_emp ON training_enrollments(employeeId);
 CREATE INDEX IF NOT EXISTS idx_training_enrollments_course ON training_enrollments(courseId, status);
+
+-- Phase 1: EMPLOYEE MASTER EXTENSION TABLES
+CREATE TABLE IF NOT EXISTS employee_bank_details (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL UNIQUE,
+  bankName TEXT NOT NULL,
+  accountName TEXT NOT NULL,
+  accountNumber TEXT NOT NULL,
+  routingNumber TEXT,
+  swiftCode TEXT,
+  branchName TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS employee_tax_info (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL UNIQUE,
+  panNumber TEXT,
+  aadhaarNumber TEXT,
+  taxRegime TEXT DEFAULT 'NEW',
+  pfNumber TEXT,
+  uanNumber TEXT,
+  esiNumber TEXT,
+  ptState TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS employee_emergency_contacts (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  name TEXT NOT NULL,
+  relationship TEXT NOT NULL,
+  phoneNumber TEXT NOT NULL,
+  altPhoneNumber TEXT,
+  address TEXT,
+  isPrimary INTEGER DEFAULT 0,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS employee_education (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  institution TEXT NOT NULL,
+  degree TEXT NOT NULL,
+  fieldOfStudy TEXT,
+  startDate TEXT,
+  endDate TEXT,
+  grade TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS employee_certifications (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  name TEXT NOT NULL,
+  issuingOrganization TEXT NOT NULL,
+  issueDate TEXT,
+  expirationDate TEXT,
+  credentialId TEXT,
+  credentialUrl TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS employee_experience (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  company TEXT NOT NULL,
+  title TEXT NOT NULL,
+  location TEXT,
+  startDate TEXT NOT NULL,
+  endDate TEXT,
+  isCurrentRole INTEGER DEFAULT 0,
+  description TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS lifecycle_events (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  eventType TEXT NOT NULL, -- TRANSFER, PROMOTION, SALARY_REVISION, PROBATION_COMPLETION, CONFIRMATION, RESIGNATION, TERMINATION, EXIT, REHIRE
+  effectiveDate TEXT NOT NULL,
+  details TEXT, -- JSON
+  status TEXT DEFAULT 'PENDING',
+  initiatedBy TEXT,
+  approvedBy TEXT,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+-- Phase 5: Indian Statutory Compliance
+CREATE TABLE IF NOT EXISTS statutory_config (
+  id TEXT PRIMARY KEY,
+  financialYear TEXT NOT NULL,
+  state TEXT NOT NULL,
+  pfWageLimit REAL DEFAULT 15000,
+  pfEmployeeRate REAL DEFAULT 12,
+  pfEmployerRate REAL DEFAULT 3.67,
+  pfEpsRate REAL DEFAULT 8.33,
+  esiWageLimit REAL DEFAULT 21000,
+  esiEmployeeRate REAL DEFAULT 0.75,
+  esiEmployerRate REAL DEFAULT 3.25,
+  ptSlabs TEXT,
+  updatedAt TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pf_esi_records (
+  id TEXT PRIMARY KEY,
+  payrollRunId TEXT NOT NULL,
+  employeeId TEXT NOT NULL,
+  pfWage REAL NOT NULL,
+  pfEmployeeContribution REAL NOT NULL,
+  pfEmployerContribution REAL NOT NULL,
+  pfEpsContribution REAL NOT NULL,
+  esiWage REAL NOT NULL,
+  esiEmployeeContribution REAL NOT NULL,
+  esiEmployerContribution REAL NOT NULL,
+  ptDeduction REAL NOT NULL,
+  tdsDeduction REAL NOT NULL,
+  FOREIGN KEY (payrollRunId) REFERENCES payroll_runs(id) ON DELETE CASCADE,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tax_declarations (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  financialYear TEXT NOT NULL,
+  regime TEXT DEFAULT 'NEW',
+  section80C REAL DEFAULT 0,
+  section80D REAL DEFAULT 0,
+  hraExemption REAL DEFAULT 0,
+  status TEXT DEFAULT 'PENDING',
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+-- Organization & Performance Expansion Tables
+CREATE TABLE IF NOT EXISTS legal_entities (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  code TEXT UNIQUE NOT NULL,
+  taxId TEXT,
+  registrationNumber TEXT,
+  currency TEXT DEFAULT 'INR',
+  country TEXT DEFAULT 'India',
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cost_centers (
+  id TEXT PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  name TEXT NOT NULL,
+  budget REAL DEFAULT 0,
+  managerId TEXT,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS okr_objectives (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  category TEXT DEFAULT 'INDIVIDUAL', -- INDIVIDUAL, TEAM, COMPANY
+  quarter TEXT DEFAULT 'Q1',
+  year INTEGER DEFAULT 2026,
+  progress REAL DEFAULT 0,
+  status TEXT DEFAULT 'IN_PROGRESS',
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS okr_key_results (
+  id TEXT PRIMARY KEY,
+  objectiveId TEXT NOT NULL,
+  title TEXT NOT NULL,
+  targetValue REAL NOT NULL,
+  currentValue REAL DEFAULT 0,
+  unit TEXT DEFAULT '%',
+  weight REAL DEFAULT 1.0,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (objectiveId) REFERENCES okr_objectives(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS appraisal_cycles (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  startDate TEXT NOT NULL,
+  endDate TEXT NOT NULL,
+  status TEXT DEFAULT 'DRAFT', -- DRAFT, ACTIVE, COMPLETED
+  type TEXT DEFAULT 'ANNUAL',
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS appraisal_reviews (
+  id TEXT PRIMARY KEY,
+  cycleId TEXT NOT NULL,
+  employeeId TEXT NOT NULL,
+  reviewerId TEXT NOT NULL,
+  selfRating REAL,
+  managerRating REAL,
+  finalScore REAL,
+  feedback TEXT,
+  status TEXT DEFAULT 'PENDING', -- PENDING, SUBMITTED, APPROVED
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (cycleId) REFERENCES appraisal_cycles(id) ON DELETE CASCADE,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id TEXT PRIMARY KEY,
+  actorId TEXT NOT NULL,
+  action TEXT NOT NULL,
+  entityType TEXT NOT NULL,
+  entityId TEXT NOT NULL,
+  details TEXT,
+  ipAddress TEXT,
+  createdAt TEXT NOT NULL
+);

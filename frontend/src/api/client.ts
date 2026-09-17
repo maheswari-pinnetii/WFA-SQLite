@@ -36,14 +36,14 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-// Configure automatic retries for idempotent requests (GET, PUT, DELETE, etc)
-// And also retry on Network Errors or 5xx status codes
+// Configure automatic retries — only for idempotent requests on 5xx server errors.
+// Do NOT retry on network errors (ECONNREFUSED) — that floods a down backend.
 axiosRetry(apiClient, {
-  retries: 3,
+  retries: 2,
   retryDelay: axiosRetry.exponentialDelay,
   retryCondition: (error) => {
-    // Retry on network errors or 5xx status codes
-    return axiosRetry.isNetworkOrIdempotentRequestError(error) || (error.response?.status ?? 0) >= 500;
+    // Only retry on 5xx server responses, NOT on network-level connection failures
+    return (error.response?.status ?? 0) >= 500;
   },
 });
 
