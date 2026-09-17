@@ -45,53 +45,42 @@ export function KpiCard({
     return (
       <Box
         sx={{
-          p: '2px',
-          borderRadius: '22px',
+          p: '1px',
+          borderRadius: '16px',
           position: 'relative',
           width: '100%',
           height: '100%',
-          background: `
-            radial-gradient(
-              150px circle at 90% 0%,
-              rgb(32 191 179 / 30%),
-              transparent 70%
-            ),
-            linear-gradient(
-              135deg,
-              #1a1e26,
-              #111317
-            )
-          `,
+          background: 'linear-gradient(135deg, rgba(32, 191, 179, 0.35), rgba(32, 191, 179, 0.12) 45%, rgba(32, 191, 179, 0.4))',
         }}
       >
         <Box
           sx={{
             position: 'relative',
-            minHeight: 175,
+            minHeight: 165,
             height: '100%',
             width: '100%',
-            p: 3,
-            borderRadius: '20px',
+            p: 2.5,
+            borderRadius: '15px',
             background: `
               radial-gradient(
-                150px circle at 90% 0%,
-                rgba(32, 191, 179, 0.2),
-                transparent 80%
+                140px circle at 100% 0%,
+                rgba(32, 191, 179, 0.20),
+                transparent 72%
               ),
               linear-gradient(
-                135deg,
-                #1a1e26,
-                #111317
+                145deg,
+                #151D25,
+                #10161D
               )
             `,
-            boxShadow: '0 20px 30px rgba(0, 0, 0, 0.6)',
+            boxShadow: '0 12px 28px rgba(0, 0, 0, 0.28)',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
           }}
         >
           <Box sx={{ width: 42, height: 42, borderRadius: '50%', overflow: 'hidden', mb: 2 }}>
-            <Skeleton variant="circular" width={42} height={42} sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
+            <Skeleton variant="circular" width={42} height={42} sx={{ bgcolor: 'rgba(32, 191, 179, 0.15)' }} />
           </Box>
           <Box>
             <Skeleton variant="text" width="60%" height={36} sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
@@ -103,67 +92,57 @@ export function KpiCard({
   }
 
   const getTrendColor = () => {
-    if (!trend?.direction || trend.direction === 'up') return '#20bfb3';
+    if (!trend?.direction || trend.direction === 'up') return '#20BFB3';
     if (trend.direction === 'down') return '#f87171';
-    return '#94a3b8';
+    return '#94A3B8';
   };
 
   return (
     <Box
       className="kpi-card-wrapper"
       sx={{
-        p: '2px',
-        borderRadius: '22px',
+        p: '1px',
+        borderRadius: '16px',
         position: 'relative',
         width: '100%',
         height: '100%',
-        background: `
-          radial-gradient(
-            150px circle at 90% 0%,
-            rgb(32 191 179),
-            transparent 70%
-          ),
-          linear-gradient(
-            135deg,
-            #1a1e26,
-            #111317
-          )
-        `,
+        background: 'linear-gradient(135deg, rgba(32, 191, 179, 0.35), rgba(32, 191, 179, 0.12) 45%, rgba(32, 191, 179, 0.4))',
+        transition: 'border-color 180ms ease, box-shadow 180ms ease',
       }}
     >
       <Box
         className="kpi-card"
         sx={{
           position: 'relative',
-          minHeight: 175,
+          minHeight: 165,
           height: '100%',
           width: '100%',
-          p: 3,
-          borderRadius: '20px',
+          p: 2.5,
+          borderRadius: '15px',
           background: `
             radial-gradient(
-              150px circle at 90% 0%,
-              rgba(32, 191, 179, 0.35),
-              transparent 80%
+              140px circle at 100% 0%,
+              rgba(32, 191, 179, 0.20),
+              transparent 72%
             ),
             linear-gradient(
-              135deg,
-              #1a1e26,
-              #111317
+              145deg,
+              #151D25,
+              #10161D
             )
           `,
-          boxShadow: '0 20px 30px rgba(0, 0, 0, 0.6)',
-          color: '#ffffff',
+          boxShadow: '0 12px 28px rgba(0, 0, 0, 0.28)',
+          color: '#FFFFFF',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
           transition: 'transform 180ms ease, box-shadow 180ms ease',
           '&:hover': {
-            transform: 'translateY(-3px)',
+            transform: 'translateY(-2px)',
             boxShadow: `
-              0 22px 35px rgba(0, 0, 0, 0.55),
-              0 0 25px rgba(32, 191, 179, 0.12)
+              0 16px 32px rgba(0, 0, 0, 0.34),
+              0 0 18px rgba(32, 191, 179, 0.10)
             `,
           },
         }}
@@ -177,10 +156,10 @@ export function KpiCard({
             position: 'absolute',
             top: 10,
             right: 10,
-            color: '#606f85',
+            color: '#94A3B8',
             '&:hover': {
-              color: '#20bfb3',
-              backgroundColor: 'rgba(32, 191, 179, 0.08)',
+              color: '#20BFB3',
+              backgroundColor: 'rgba(32, 191, 179, 0.10)',
             },
           }}
         >
@@ -196,10 +175,10 @@ export function KpiCard({
             slotProps={{
               paper: {
                 sx: {
-                  bgcolor: '#1a1e26',
-                  color: '#ffffff',
-                  border: '1px solid rgba(32, 191, 179, 0.2)',
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                  bgcolor: '#151D25',
+                  color: '#FFFFFF',
+                  border: '1px solid rgba(32, 191, 179, 0.35)',
+                  boxShadow: '0 12px 28px rgba(0, 0, 0, 0.45)',
                 },
               },
             }}
@@ -235,20 +214,20 @@ export function KpiCard({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            mb: 2.5,
-            background: 'linear-gradient(135deg, #20bfb3, #0ea5a0)',
-            boxShadow: '0 4px 12px rgba(32, 191, 179, 0.4)',
-            color: '#ffffff',
+            mb: 2,
+            background: 'linear-gradient(135deg, #20BFB3, #0EA5A0)',
+            boxShadow: '0 6px 18px rgba(32, 191, 179, 0.28)',
+            color: '#FFFFFF',
             transition: 'transform 180ms ease, box-shadow 180ms ease',
             '& svg': {
               width: 20,
               height: 20,
-              color: '#ffffff',
+              color: '#FFFFFF',
               flexShrink: 0,
             },
             '&:hover': {
               transform: 'scale(1.05)',
-              boxShadow: '0 6px 18px rgba(32, 191, 179, 0.5)',
+              boxShadow: '0 6px 18px rgba(32, 191, 179, 0.45)',
             },
           }}
         >
@@ -258,30 +237,31 @@ export function KpiCard({
         {/* Content Box */}
         <Box sx={{ mt: 'auto' }}>
           <Typography
-            className="kpi-card-value"
-            sx={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: '1.75rem',
-              lineHeight: 1.2,
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              color: '#ffffff',
-              mb: 0.5,
-            }}
-          >
-            {value ?? '—'}
-          </Typography>
-
-          <Typography
             className="kpi-card-title"
             sx={{
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               fontSize: '0.82rem',
-              fontWeight: 500,
-              color: '#94a3b8',
+              fontWeight: 600,
+              color: '#CBD5E1',
+              mb: 0.25,
             }}
           >
             {title}
+          </Typography>
+
+          <Typography
+            className="kpi-card-value"
+            sx={{
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontSize: '1.5rem',
+              lineHeight: 1.2,
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              color: '#FFFFFF',
+              mb: 0.25,
+            }}
+          >
+            {value ?? '—'}
           </Typography>
 
           {trend && (
@@ -303,8 +283,10 @@ export function KpiCard({
               className="kpi-card-meta"
               sx={{
                 mt: 0.5,
+                fontFamily: "'Plus Jakarta Sans', sans-serif",
                 fontSize: '0.75rem',
-                color: '#64748b',
+                fontWeight: 500,
+                color: '#94A3B8',
               }}
             >
               {meta}
