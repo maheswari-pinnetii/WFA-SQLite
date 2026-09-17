@@ -21,14 +21,14 @@ import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
   kpis: { 
-    totalHeadcount: 500, 
-    presentToday: 475, 
-    onLeaveToday: 20, 
-    newHires: 12, 
+    totalHeadcount: 1000, 
+    presentToday: 950, 
+    onLeaveToday: 35, 
+    newHires: 24, 
     turnoverRate: 4.5,
-    openReqs: 18,
-    trainingCompletion: 85,
-    employeeSatisfaction: 4.2
+    openReqs: 36,
+    trainingCompletion: 88,
+    employeeSatisfaction: 4.4
   },
   charts: { 
     hiringTrend: [
@@ -175,7 +175,7 @@ export const HrDashboard: React.FC = () => {
         {[
           {
             title: 'Total Employees',
-            value: kpis.totalHeadcount ?? 500,
+            value: kpis.totalHeadcount ?? 1000,
             meta: 'Current workforce',
             trend: { value: '↑ 2.4% vs last month', direction: 'up' as const },
             icon: <PeopleAltIcon />,

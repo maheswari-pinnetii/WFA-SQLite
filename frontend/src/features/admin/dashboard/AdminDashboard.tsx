@@ -21,43 +21,43 @@ import { Link } from 'react-router-dom';
 
 const FALLBACK: any = {
   kpis: { 
-    totalHeadcount: 500, 
-    activeHeadcount: 470, 
-    onLeaveHeadcount: 20, 
-    terminatedHeadcount: 10, 
-    payrollCost: 12500000,
-    pendingApprovals: 15,
-    openRoles: 8,
+    totalHeadcount: 1000, 
+    activeHeadcount: 950, 
+    onLeaveHeadcount: 35, 
+    terminatedHeadcount: 15, 
+    payrollCost: 25000000,
+    pendingApprovals: 24,
+    openRoles: 18,
     complianceScore: 98,
     systemHealth: 100
   },
   charts: {
     headcountTrend: [
-      { month: 'Jan', headcount: 450 }, { month: 'Feb', headcount: 465 }, { month: 'Mar', headcount: 480 },
-      { month: 'Apr', headcount: 490 }, { month: 'May', headcount: 500 }
+      { month: 'Jan', headcount: 850 }, { month: 'Feb', headcount: 900 }, { month: 'Mar', headcount: 940 },
+      { month: 'Apr', headcount: 980 }, { month: 'May', headcount: 1000 }
     ],
     employeesByDept: [
-      { name: 'Engineering', headcount: 210 },
-      { name: 'Sales', headcount: 115 },
-      { name: 'Product', headcount: 75 },
-      { name: 'HR', headcount: 50 },
-      { name: 'Support', headcount: 50 }
+      { name: 'Engineering', headcount: 420 },
+      { name: 'Sales', headcount: 230 },
+      { name: 'Product', headcount: 150 },
+      { name: 'HR', headcount: 100 },
+      { name: 'Support', headcount: 100 }
     ],
     roleDistribution: [
-      { name: 'Employee', value: 375, color: '#3b82f6' },
-      { name: 'Team Lead', value: 75, color: '#10b981' },
-      { name: 'Manager', value: 35, color: '#f59e0b' },
-      { name: 'HR', value: 10, color: '#8b5cf6' },
-      { name: 'Admin', value: 5, color: '#ef4444' }
+      { name: 'Employee', value: 750, color: '#3b82f6' },
+      { name: 'Team Lead', value: 150, color: '#10b981' },
+      { name: 'Manager', value: 70, color: '#f59e0b' },
+      { name: 'HR', value: 20, color: '#8b5cf6' },
+      { name: 'Admin', value: 10, color: '#ef4444' }
     ],
     leaveTrends: [
-      { month: 'Jan', leaves: 120 }, { month: 'Feb', leaves: 95 }, { month: 'Mar', leaves: 150 },
-      { month: 'Apr', leaves: 110 }, { month: 'May', leaves: 140 }
+      { month: 'Jan', leaves: 240 }, { month: 'Feb', leaves: 190 }, { month: 'Mar', leaves: 300 },
+      { month: 'Apr', leaves: 220 }, { month: 'May', leaves: 280 }
     ],
     payrollBreakdown: [
-      { name: 'Engineering', cost: 6500000 },
-      { name: 'Sales', cost: 2500000 },
-      { name: 'Product', cost: 1800000 },
+      { name: 'Engineering', cost: 13000000 },
+      { name: 'Sales', cost: 5000000 },
+      { name: 'Product', cost: 3600000 },
       { name: 'Support', cost: 1000000 },
       { name: 'HR', cost: 700000 }
     ],
