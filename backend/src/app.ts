@@ -174,8 +174,8 @@ import fs from 'fs';
 const frontendDist = path.resolve('dist');
 if (fs.existsSync(frontendDist)) {
   app.use(express.static(frontendDist));
-  app.get('*', (req: Request, res: Response, next: NextFunction) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/v1') || req.path.startsWith('/socket.io')) {
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.startsWith('/v1') || req.path.startsWith('/socket.io')) {
       return next();
     }
     const indexPath = path.join(frontendDist, 'index.html');
