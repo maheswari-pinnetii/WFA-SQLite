@@ -51,6 +51,127 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         },
       },
       typography: muiTypography,
+      components: {
+        MuiButton: {
+          styleOverrides: {
+            root: {
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontWeight: 600,
+              fontSize: '13px',
+              textTransform: 'none',
+              borderRadius: 10,
+              minHeight: 40,
+              transition: 'all 180ms ease',
+            },
+            containedPrimary: {
+              backgroundColor: '#20BFB3',
+              color: '#FFFFFF',
+              boxShadow: '0 4px 14px rgba(32, 191, 179, 0.25)',
+              '&:hover': {
+                backgroundColor: '#18AFA5',
+                boxShadow: '0 6px 18px rgba(32, 191, 179, 0.38)',
+              },
+              '&:active': {
+                backgroundColor: '#0E8F88',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: '#475569',
+                color: '#94A3B8',
+              },
+            },
+            outlinedPrimary: {
+              color: '#20BFB3',
+              borderColor: '#20BFB3',
+              '&:hover': {
+                borderColor: '#20BFB3',
+                backgroundColor: 'rgba(32, 191, 179, 0.08)',
+              },
+            },
+            textPrimary: {
+              color: '#20BFB3',
+              '&:hover': {
+                backgroundColor: 'rgba(32, 191, 179, 0.08)',
+              },
+            },
+          },
+        },
+        MuiIconButton: {
+          styleOverrides: {
+            root: {
+              transition: 'all 180ms ease',
+              '&:hover': {
+                color: '#20BFB3',
+                backgroundColor: 'rgba(32, 191, 179, 0.08)',
+              },
+            },
+          },
+        },
+        MuiCheckbox: {
+          styleOverrides: {
+            root: {
+              color: '#64748B',
+              '&.Mui-checked': {
+                color: '#20BFB3',
+              },
+            },
+          },
+        },
+        MuiRadio: {
+          styleOverrides: {
+            root: {
+              color: '#64748B',
+              '&.Mui-checked': {
+                color: '#20BFB3',
+              },
+            },
+          },
+        },
+        MuiSwitch: {
+          styleOverrides: {
+            switchBase: {
+              '&.Mui-checked': {
+                color: '#20BFB3',
+                '& + .MuiSwitch-track': {
+                  backgroundColor: '#20BFB3',
+                  opacity: 0.5,
+                },
+              },
+            },
+          },
+        },
+        MuiTab: {
+          styleOverrides: {
+            root: {
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              fontWeight: 600,
+              fontSize: '13px',
+              textTransform: 'none',
+              color: '#94A3B8',
+              '&.Mui-selected': {
+                color: '#20BFB3',
+                backgroundColor: 'rgba(32, 191, 179, 0.06)',
+              },
+              '&:hover': {
+                color: '#20BFB3',
+              },
+            },
+          },
+        },
+        MuiPaginationItem: {
+          styleOverrides: {
+            root: {
+              fontFamily: "'Plus Jakarta Sans', sans-serif",
+              '&.Mui-selected': {
+                backgroundColor: '#20BFB3 !important',
+                color: '#FFFFFF',
+              },
+              '&:hover': {
+                backgroundColor: 'rgba(32, 191, 179, 0.12)',
+              },
+            },
+          },
+        },
+      },
     });
   }, [theme, themeObject]);
 
