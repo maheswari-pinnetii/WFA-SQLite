@@ -26,7 +26,7 @@ const FALLBACK_EMPLOYEES: Employee[] = [
     status: 'ACTIVE',
     performanceScore: 95,
     attendanceRate: 98,
-    joiningDate: '2024-01-15',
+    joining_date: '2024-01-15',
     location: 'Bangalore HQ',
     team: 'Frontend Architecture'
   },
@@ -41,7 +41,7 @@ const FALLBACK_EMPLOYEES: Employee[] = [
     status: 'ACTIVE',
     performanceScore: 92,
     attendanceRate: 99,
-    joiningDate: '2024-03-01',
+    joining_date: '2024-03-01',
     location: 'Bangalore HQ',
     team: 'Talent Acquisition'
   },
@@ -56,7 +56,7 @@ const FALLBACK_EMPLOYEES: Employee[] = [
     status: 'ACTIVE',
     performanceScore: 90,
     attendanceRate: 96,
-    joiningDate: '2024-05-10',
+    joining_date: '2024-05-10',
     location: 'Mumbai Hub',
     team: 'Core Product'
   },
@@ -71,7 +71,7 @@ const FALLBACK_EMPLOYEES: Employee[] = [
     status: 'ACTIVE',
     performanceScore: 94,
     attendanceRate: 97,
-    joiningDate: '2024-06-18',
+    joining_date: '2024-06-18',
     location: 'Hyderabad R&D',
     team: 'API & Microservices'
   },
@@ -86,7 +86,7 @@ const FALLBACK_EMPLOYEES: Employee[] = [
     status: 'ACTIVE',
     performanceScore: 88,
     attendanceRate: 95,
-    joiningDate: '2024-08-01',
+    joining_date: '2024-08-01',
     location: 'Delhi NCR',
     team: 'Enterprise Sales'
   }
