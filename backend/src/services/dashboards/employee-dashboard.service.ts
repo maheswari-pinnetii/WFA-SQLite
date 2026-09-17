@@ -57,10 +57,10 @@ export class EmployeeDashboardService {
     let leaveBalance = 15;
     try {
       const balanceRows = await query(`
-        SELECT remainingDays FROM leavebalances WHERE employeeId = ? AND organizationId = ?
+        SELECT allocated, used FROM leave_balances WHERE employeeId = ? AND organizationId = ?
       `, [employeeId, orgId]);
       if (balanceRows.length > 0) {
-        leaveBalance = balanceRows.reduce((acc: number, r: any) => acc + (r.remainingDays || 0), 0);
+        leaveBalance = balanceRows.reduce((acc: number, r: any) => acc + ((r.allocated || 0) - (r.used || 0)), 0);
       }
     } catch {
       leaveBalance = 15;
