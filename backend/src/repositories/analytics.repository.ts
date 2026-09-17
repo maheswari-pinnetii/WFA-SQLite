@@ -232,6 +232,26 @@ export class AnalyticsRepository {
     `, params);
     return rows;
   }
+
+  async getTasksSummary(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT id, status, priority, points, createdAt, updatedAt
+      FROM tasks
+      ${clause}
+    `, params);
+    return rows;
+  }
+
+  async getLeaveRequestsSummary(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT id, status, type, startDate, endDate, createdAt, updatedAt
+      FROM leaverequests
+      ${clause}
+    `, params);
+    return rows;
+  }
 }
 
 export const analyticsRepository = new AnalyticsRepository();

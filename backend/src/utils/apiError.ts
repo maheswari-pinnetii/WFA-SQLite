@@ -75,13 +75,15 @@ export class AppError extends Error {
   public readonly code: ErrorCodeType;
   public readonly statusCode: number;
   public readonly isOperational: boolean;
+  public readonly details?: any[];
 
-  constructor(code: ErrorCodeType, message: string, statusCode = 400, isOperational = true) {
+  constructor(code: ErrorCodeType, message: string, statusCode = 400, isOperational = true, details?: any[]) {
     super(message);
     this.name = 'AppError';
     this.code = code;
     this.statusCode = statusCode;
     this.isOperational = isOperational;
+    this.details = details;
     Error.captureStackTrace(this, this.constructor);
   }
 
@@ -97,8 +99,8 @@ export class AppError extends Error {
     return new AppError(code, message, 409);
   }
 
-  static badRequest(code: ErrorCodeType, message: string) {
-    return new AppError(code, message, 400);
+  static badRequest(code: ErrorCodeType, message: string, details?: any[]) {
+    return new AppError(code, message, 400, true, details);
   }
 
   static internal(message = 'An internal error occurred.') {
@@ -111,13 +113,13 @@ export const sendError = (res: Response, err: unknown, req?: Request): void => {
   const requestId = (res as any).locals?.requestId ?? (req as any)?.requestId ?? 'unknown';
 
   if (err instanceof AppError) {
-    logger.error('api.error', err.message, { code: err.code, requestId, statusCode: err.statusCode });
+    logger.error('api.error', err.message, { code: err.code, requestId, statusCode: err.statusCode, details: err.details });
     res.status(err.statusCode).json({
       success: false,
       error: {
         code: err.code,
         message: err.message,
-        requestId,
+        details: err.details ?? [],
       },
     });
     return;
@@ -133,7 +135,7 @@ export const sendError = (res: Response, err: unknown, req?: Request): void => {
     error: {
       code: ErrorCode.INTERNAL_SERVER_ERROR,
       message: 'An unexpected error occurred. Please try again later.',
-      requestId,
+      details: [],
     },
   });
 };

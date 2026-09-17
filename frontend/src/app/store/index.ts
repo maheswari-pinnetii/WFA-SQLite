@@ -5,6 +5,7 @@ import hrReducer from '../../features/hr/store/hrSlice';
 import themeReducer from '../../store/themeSlice';
 import sidebarReducer from '../../store/sidebarSlice';
 import attendanceReducer from '../../store/attendanceSlice';
+import notificationReducer from '../../store/notificationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     theme: themeReducer,
     sidebar: sidebarReducer,
     attendance: attendanceReducer,
+    notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

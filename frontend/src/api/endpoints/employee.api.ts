@@ -30,7 +30,7 @@ export const employeeApi = {
       if (response.data.data && response.data.data.employees) {
         return response.data.data.employees;
       }
-      return response.data.data;
+      return Array.isArray(response.data.data) ? response.data.data : [];
     }
     throw new Error(response.data?.message || 'Unable to load employees.');
   },
@@ -40,6 +40,12 @@ export const employeeApi = {
     if (response.data?.success) return response.data.data;
     const employees = await employeeApi.getEmployees();
     return employees.find((employee: any) => employee.id === id);
+  },
+
+  getEmployee360: async (id: string): Promise<any> => {
+    const response = await apiClient.get(`/v1/employees/${id}/360`);
+    if (response.data?.success) return response.data.data;
+    throw new Error(response.data?.message || 'Unable to retrieve Employee 360 data.');
   },
 
   createEmployee: async (employee: Partial<Employee> & { id: string; name: string; email: string; department: string }): Promise<Employee> => {

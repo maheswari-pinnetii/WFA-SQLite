@@ -51,6 +51,8 @@ export const getSafeErrorMessage = (err: any, fallbackMessage: string = 'An unex
   return message;
 };
 
+import { AppError, sendError, ErrorCode } from './apiError.js';
+
 /**
  * Standardized controller error responder.
  * Logs full error stack and diagnostic context server-side while
@@ -64,12 +66,16 @@ export const handleControllerError = (
   statusCode: number = 500,
   safeFallback: string = 'An unexpected error occurred. Please try again later.'
 ) => {
+  if (err instanceof AppError) {
+    return sendError(res, err, req);
+  }
+
   const requestId = (req as any)?.requestId || 'unknown';
   const method = req.method || 'UNKNOWN';
   const route = req.originalUrl || req.url || 'unknown';
 
   // Server-side: Log full internal details, stack trace, and diagnostic context
-  console.error("DEBUG_ERROR", err); logger.error(`${contextName}.error`, err?.message || 'Unexpected server error', {
+  logger.error(`${contextName}.error`, err?.message || 'Unexpected server error', {
     requestId,
     method,
     route,
@@ -81,10 +87,7 @@ export const handleControllerError = (
 
   const safeMessage = getSafeErrorMessage(err, safeFallback);
 
-  return res.status(statusCode).json({
-    success: false,
-    message: safeMessage
-  });
+  return sendError(res, new AppError(ErrorCode.INTERNAL_SERVER_ERROR, safeMessage, statusCode, false), req);
 };
 
 

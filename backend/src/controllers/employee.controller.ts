@@ -6,10 +6,14 @@ import { handleControllerError } from '../utils/errorHandler.js';
 
 const getOrganizationId = (req: any) => req.user?.organizationId || 'org-stackly';
 
+import { getPaginationParams, buildPaginatedResponse } from '../utils/pagination.js';
+
 export const getEmployees = async (req: any, res: any) => {
   try {
-    const data = await employeeService.getEmployees(req.user, req.query);
-    return res.json({ success: true, data });
+    const { page, limit, offset } = getPaginationParams(req);
+    const { employees, totalItems } = await employeeService.getEmployees(req.user, req.query, limit, offset);
+    const paginated = buildPaginatedResponse(employees, totalItems, page, limit);
+    return res.json({ success: true, data: paginated });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'employee.getEmployees', 500, 'Failed to retrieve employees.');
   }
@@ -28,6 +32,65 @@ export const getEmployeeById = async (req: any, res: any) => {
   }
 };
 
+export const getEmployee360 = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const orgId = getOrganizationId(req);
+    const employee = await employeeService.getEmployeeById(id, orgId);
+    
+    if (!employee) {
+      return res.status(404).json({ success: false, message: 'Employee not found.' });
+    }
+
+    const isPrivileged = ['ADMIN', 'HR'].includes(req.user.role);
+    const isSelf = req.user.id === id;
+
+    // Fetch related data
+    let attendance = [];
+    try {
+      attendance = await query('SELECT id, date, checkInTime, checkOutTime, status, workMode, shiftType FROM attendancerecords WHERE employeeId = ? ORDER BY date DESC LIMIT 30', [id]);
+    } catch {}
+
+    let leaves = [];
+    try {
+      leaves = await query('SELECT id, type, startDate, endDate, status, reason FROM leaverequests WHERE employeeId = ? ORDER BY createdAt DESC LIMIT 20', [id]);
+    } catch {}
+
+    let auditLogs = [];
+    try {
+      auditLogs = await query('SELECT id, timestamp, action, details FROM audit_logs WHERE employeeId = ? ORDER BY timestamp DESC LIMIT 50', [id]);
+    } catch {}
+
+    let documents = [];
+    try {
+      documents = await query('SELECT id, type, title, url, uploadedAt FROM employee_documents WHERE employeeId = ? ORDER BY uploadedAt DESC', [id]);
+    } catch {}
+
+    let salary = null;
+    if (isPrivileged || isSelf) {
+      try {
+        const salaryRecords = await query('SELECT * FROM salaries WHERE employeeId = ? ORDER BY effectiveDate DESC LIMIT 1', [id]);
+        salary = salaryRecords.length > 0 ? salaryRecords[0] : null;
+      } catch {}
+    }
+
+    // Build the 360 payload
+    const data360 = {
+      profile: employee,
+      attendance,
+      leaves,
+      auditLogs,
+      documents,
+      salary
+    };
+
+    return res.json({ success: true, data: data360 });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.getEmployee360', 500, 'Failed to retrieve Employee 360 data.');
+  }
+};
+
+
 export const createEmployee = async (req: any, res: any) => {
   try {
     const body = req.body || {};
@@ -39,6 +102,7 @@ export const createEmployee = async (req: any, res: any) => {
     const orgId = getOrganizationId(req);
     const newEmp = await employeeService.createEmployee({
       id, name, email, department, designation, avatar, joinDate, team, location,
+      managerId: body.managerId, departmentId: body.departmentId, teamId: body.teamId, locationId: body.locationId, designationId: body.designationId,
       organizationId: orgId,
       companyId: orgId
     });
@@ -60,7 +124,7 @@ export const updateEmployee = async (req: any, res: any) => {
       return res.status(403).json({ success: false, message: 'Forbidden: You can only update your own profile.' });
     }
 
-    const { name, department, designation, avatar, team, location, performanceScore, attendanceRate } = req.body;
+    const { name, department, designation, avatar, team, location, performanceScore, attendanceRate, managerId, departmentId, teamId, locationId, designationId } = req.body;
     
     const updateData: any = { avatar, location };
     
@@ -71,6 +135,11 @@ export const updateEmployee = async (req: any, res: any) => {
       if (team !== undefined) updateData.team = team;
       if (performanceScore !== undefined) updateData.performanceScore = performanceScore;
       if (attendanceRate !== undefined) updateData.attendanceRate = attendanceRate;
+      if (managerId !== undefined) updateData.managerId = managerId;
+      if (departmentId !== undefined) updateData.departmentId = departmentId;
+      if (teamId !== undefined) updateData.teamId = teamId;
+      if (locationId !== undefined) updateData.locationId = locationId;
+      if (designationId !== undefined) updateData.designationId = designationId;
     }
 
     Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);

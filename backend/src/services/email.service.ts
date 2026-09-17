@@ -243,3 +243,77 @@ export const sendSecurityAlertEmail = async (
   await sendEmail(to, subject, html);
 };
 
+// ─── Notification Emails ───────────────────────────────────────────────────────
+export const getLeaveNotificationEmail = (name: string, type: string, status: string, details: string) => {
+  const safeName = escapeHtml(name || 'User');
+  const safeType = escapeHtml(type);
+  const safeStatus = escapeHtml(status);
+  const safeDetails = escapeHtml(details);
+  
+  const subject = `Leave Request ${safeStatus} — Stackly Workforce`;
+  const body = baseTemplate(subject, `
+    <h2 style="color:#e2e8f0;font-size:20px;margin:0 0 16px;">Leave Request Update</h2>
+    <p style="color:#94a3b8;line-height:1.6;margin:0 0 16px;">Hi ${safeName},</p>
+    <p style="color:#94a3b8;line-height:1.6;margin:0 0 24px;">
+      Your request for <strong style="color:#e2e8f0;">${safeType}</strong> has been marked as <strong style="color:#e2e8f0;">${safeStatus}</strong>.
+    </p>
+    <p style="color:#94a3b8;line-height:1.6;margin:0 0 24px;">
+      <strong>Details:</strong><br/>
+      ${safeDetails}
+    </p>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/employee/absence"
+         style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;
+                padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;display:inline-block;">
+        View Request
+      </a>
+    </div>
+  `);
+  return { subject, body };
+};
+
+export const getApprovalNotificationEmail = (name: string, entityType: string, action: string) => {
+  const safeName = escapeHtml(name || 'User');
+  const safeEntity = escapeHtml(entityType);
+  const safeAction = escapeHtml(action);
+  
+  const subject = `Action Required: ${safeEntity} ${safeAction}`;
+  const body = baseTemplate(subject, `
+    <h2 style="color:#e2e8f0;font-size:20px;margin:0 0 16px;">Workflow Update</h2>
+    <p style="color:#94a3b8;line-height:1.6;margin:0 0 16px;">Hi ${safeName},</p>
+    <p style="color:#94a3b8;line-height:1.6;margin:0 0 24px;">
+      There is an update on your workflow for <strong style="color:#e2e8f0;">${safeEntity}</strong>: <strong style="color:#e2e8f0;">${safeAction}</strong>.
+    </p>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/employee/approvals"
+         style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;
+                padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;display:inline-block;">
+        View Workflow
+      </a>
+    </div>
+  `);
+  return { subject, body };
+};
+
+export const getPayrollNotificationEmail = (name: string, period: string) => {
+  const safeName = escapeHtml(name || 'User');
+  const safePeriod = escapeHtml(period);
+  
+  const subject = `Payslip Available: ${safePeriod}`;
+  const body = baseTemplate(subject, `
+    <h2 style="color:#e2e8f0;font-size:20px;margin:0 0 16px;">Payslip Generated</h2>
+    <p style="color:#94a3b8;line-height:1.6;margin:0 0 16px;">Hi ${safeName},</p>
+    <p style="color:#94a3b8;line-height:1.6;margin:0 0 24px;">
+      Your payslip for the period <strong style="color:#e2e8f0;">${safePeriod}</strong> is now available in your Stackly Workforce portal.
+    </p>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/employee/payroll"
+         style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;text-decoration:none;
+                padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;display:inline-block;">
+        View Payslip
+      </a>
+    </div>
+  `);
+  return { subject, body };
+};
+

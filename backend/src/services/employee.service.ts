@@ -2,14 +2,8 @@ import { employeeRepository } from '../repositories/employee.repository.js';
 import { userRepository } from '../repositories/auth.repository.js';
 
 export class EmployeeService {
-  async getEmployees(reqUser: any, queryParams: any) {
+  async getEmployees(reqUser: any, queryParams: any, limit: number, skip: number) {
     const { role, id: userId, department: userDept, team: userTeam, organizationId } = reqUser;
-
-    const page = Math.max(1, parseInt(queryParams.page, 10) || 1);
-    let limit = parseInt(queryParams.pageSize || queryParams.limit, 10) || 25;
-    if (limit > 100) limit = 100;
-    if (limit <= 0) limit = 25;
-    const skip = (page - 1) * limit;
 
     const query: any = { organizationId: organizationId || 'org-stackly' };
 
@@ -66,18 +60,24 @@ export class EmployeeService {
 
     return {
       employees,
-      pagination: {
-        page,
-        pageSize: limit,
-        totalItems,
-        totalPages: Math.ceil(totalItems / limit)
-      }
+      totalItems
     };
   }
 
   async getEmployeeById(id: string, orgId: string) {
     return employeeRepository.findById(id, orgId);
   }
+
+  async getEmployee360(id: string, orgId: string, reqUser: any) {
+    const employee = await employeeRepository.findById(id, orgId);
+    if (!employee) return null;
+
+    // We can fetch attendance, leave, performance here, or rely on controller
+    // Let's rely on controller to stitch together via different services if we want,
+    // or we can do it here via raw query for simplicity, as in exportEmployeeData
+    return employee;
+  }
+
 
   async createEmployee(employeeData: any) {
     return employeeRepository.create(employeeData);

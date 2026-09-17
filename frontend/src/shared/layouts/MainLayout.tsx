@@ -4,6 +4,7 @@ import { EnterpriseHeader } from './components/EnterpriseHeader';
 import { Sidebar } from './components/Sidebar';
 import { SupportModal } from '../components/SupportModal';
 import { ShortcutsModal } from '../components/ShortcutsModal';
+import { DashboardShell } from '../components/dashboard';
 import { OnboardingTourModal } from '../components/OnboardingTourModal';
 import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
 import { BetaFeedbackModal } from '../components/BetaFeedbackModal';
@@ -31,8 +32,14 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // Initialize collapsed state from localStorage (default to false / expanded on desktop)
   const [collapsed, setCollapsed] = useState<boolean>(() => {
-    const saved = localStorage.getItem('sidebar_collapsed');
-    return saved !== null ? JSON.parse(saved) : false;
+    try {
+      const saved = localStorage.getItem('sidebar_collapsed');
+      if (saved === null) return false;
+      const parsed = JSON.parse(saved);
+      return parsed === true; // strictly boolean coerce — any non-boolean falls back to false
+    } catch {
+      return false; // corrupted localStorage value — safe default
+    }
   });
 
   // Save collapsed state changes to localStorage

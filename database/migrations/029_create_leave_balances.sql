@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS leave_balances (
+  id TEXT PRIMARY KEY,
+  companyId TEXT,
+  employeeId TEXT NOT NULL,
+  leaveTypeId TEXT NOT NULL,
+  totalDays REAL DEFAULT 0,
+  usedDays REAL DEFAULT 0,
+  pendingDays REAL DEFAULT 0,
+  year INTEGER NOT NULL,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (leaveTypeId) REFERENCES leave_types(id) ON DELETE CASCADE,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);

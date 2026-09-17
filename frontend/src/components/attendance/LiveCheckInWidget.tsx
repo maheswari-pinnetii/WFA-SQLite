@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Play, Coffee, Wifi, WifiOff, CheckCircle2, CheckSquare, ShieldCheck, AlertTriangle, RefreshCw, Radio } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth';
 import { attendanceService, OFFICE_COORDS } from '../../services/attendance.service';
-import { syncLocalData, addNotification, fetchAttendanceDataThunk } from '../../store/attendanceSlice';
+import { syncLocalDataThunk, addNotification, fetchAttendanceDataThunk } from '../../store/attendanceSlice';
 import { RootState, AppDispatch } from '../../app/store';
 import { analyticsApi } from '../../api/endpoints/analytics.api';
 import { GeofenceStatusIcon, SyncStatusIcon } from '../common/RealtimeIcons';
@@ -72,6 +72,25 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
 
   // Handle Action dispatchers (with geofencing & offline checks)
   const handleCheckIn = async () => {
+    let finalLat = OFFICE_COORDS.lat;
+    let finalLng = OFFICE_COORDS.lng;
+
+    if (workMode === 'Office' && !useCustomLocation) {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
+        });
+        finalLat = position.coords.latitude;
+        finalLng = position.coords.longitude;
+      } catch (err: any) {
+        dispatch(addNotification({ message: 'Failed to get real location. Ensure location permissions are granted for Office Check-In.', type: 'warning' }));
+        return;
+      }
+    } else if (useCustomLocation) {
+      finalLat = lat;
+      finalLng = lng;
+    }
+
     const idempotencyKey = Math.random().toString(36).substr(2, 9);
     const payload = {
       employeeId,
@@ -79,19 +98,19 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
       department,
       shiftType,
       workMode,
-      latitude: useCustomLocation ? lat : OFFICE_COORDS.lat,
-      longitude: useCustomLocation ? lng : OFFICE_COORDS.lng,
+      latitude: finalLat,
+      longitude: finalLng,
       accuracy: 5,
       idempotencyKey,
     };
 
     if (isOfflineMode) {
-      attendanceService.enqueueOfflineAction({
+      await attendanceService.enqueueOfflineAction({
         type: 'CHECK_IN',
         payload,
       });
       dispatch(addNotification({ message: 'Offline: Check-in queued locally.', type: 'warning' }));
-      dispatch(syncLocalData({ employeeId }));
+      dispatch(syncLocalDataThunk(employeeId));
       return;
     }
 
@@ -113,12 +132,12 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
 
   const handleTakeBreak = async () => {
     if (isOfflineMode) {
-      attendanceService.enqueueOfflineAction({
+      await attendanceService.enqueueOfflineAction({
         type: 'BREAK_START',
         payload: { employeeId },
       });
       dispatch(addNotification({ message: 'Offline: Break start queued locally.', type: 'warning' }));
-      dispatch(syncLocalData({ employeeId }));
+      dispatch(syncLocalDataThunk(employeeId));
       return;
     }
 
@@ -133,12 +152,12 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
 
   const handleResume = async () => {
     if (isOfflineMode) {
-      attendanceService.enqueueOfflineAction({
+      await attendanceService.enqueueOfflineAction({
         type: 'BREAK_END',
         payload: { employeeId },
       });
       dispatch(addNotification({ message: 'Offline: Resume queued locally.', type: 'warning' }));
-      dispatch(syncLocalData({ employeeId }));
+      dispatch(syncLocalDataThunk(employeeId));
       return;
     }
 
@@ -153,12 +172,12 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
 
   const handleCheckOut = async () => {
     if (isOfflineMode) {
-      attendanceService.enqueueOfflineAction({
+      await attendanceService.enqueueOfflineAction({
         type: 'CHECK_OUT',
         payload: { employeeId },
       });
       dispatch(addNotification({ message: 'Offline: Check-out queued locally.', type: 'warning' }));
-      dispatch(syncLocalData({ employeeId }));
+      dispatch(syncLocalDataThunk(employeeId));
       return;
     }
 
