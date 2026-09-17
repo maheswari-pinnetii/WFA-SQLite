@@ -6,12 +6,12 @@ import { ROLE_LABELS } from '../../../security/roles/roles';
 import { getRoleBadgeClass } from '../../utils/helpers';
 import { StacklyLogo } from '../../../components/common/StacklyLogo';
 import { LogoutModal } from '../../../auth/components/LogoutModal';
+import LightModeOutlined from '@mui/icons-material/LightModeOutlined';
+import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import {
   Menu,
   Search,
   Bell,
-  Sun,
-  Moon,
   User,
   Settings,
   Shield,
@@ -362,9 +362,13 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
               ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
               : 'bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
           }`}
-          title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+          title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
         >
-          {isDark ? <Sun size={18} className="text-amber-400" /> : <Moon size={18} className="text-slate-600" />}
+          {isDark ? (
+            <LightModeOutlined sx={{ fontSize: 20 }} className="text-amber-400" />
+          ) : (
+            <DarkModeOutlined sx={{ fontSize: 20 }} className="text-slate-600" />
+          )}
         </button>
 
         {/* 4. Help Icon */}

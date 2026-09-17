@@ -45,15 +45,9 @@ export const authenticateToken = async (req, res, next) => {
     if (!appUser && email) {
       appUser = await User.findOne({ email });
     }
-    if (!appUser && decoded.sub) {
-      appUser = await User.findOne({ supabase_auth_id: decoded.sub });
-    }
-    if (!appUser && decoded.role) {
-      appUser = decoded;
-    }
-
+    // CRITICAL SECURITY FIX: Never fallback to client/JWT-decoded object merely because it contains a role
     if (!appUser) {
-      return res.status(401).json({ success: false, message: 'User profile not found in system' });
+      return res.status(401).json({ success: false, message: 'User profile not found in database. Authentication failed.' });
     }
 
     // 3. User status validation (inactive/suspended)

@@ -20,6 +20,12 @@ import {
 import { DashboardChartConfig } from './chart.types';
 import { EMERALD_CHART_COLORS, formatValue } from './chart.utils';
 
+const chartTickStyle = {
+  fontFamily: '"Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  fontSize: 12,
+  fill: '#64748b',
+};
+
 interface ChartRendererProps {
   config: DashboardChartConfig;
   data: any[];
@@ -102,8 +108,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         {config.type === 'line' ? (
           <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.6} />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
-            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
+            <XAxis dataKey={xKey} tick={chartTickStyle} stroke="#cbd5e1" />
+            <YAxis tick={chartTickStyle} stroke="#cbd5e1" />
             <Tooltip content={<CustomTooltip />} />
             {config.series.map((s, idx) => (
               <Line
@@ -121,8 +127,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         ) : config.type === 'bar' || config.type === 'stacked-bar' ? (
           <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.6} />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
-            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
+            <XAxis dataKey={xKey} tick={chartTickStyle} stroke="#cbd5e1" />
+            <YAxis tick={chartTickStyle} stroke="#cbd5e1" />
             <Tooltip content={<CustomTooltip />} />
             {config.series.map((s, idx) => (
               <Bar
@@ -149,8 +155,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
               })}
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.6} />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
-            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
+            <XAxis dataKey={xKey} tick={chartTickStyle} stroke="#cbd5e1" />
+            <YAxis tick={chartTickStyle} stroke="#cbd5e1" />
             <Tooltip content={<CustomTooltip />} />
             {config.series.map((s, idx) => (
               <Area
@@ -168,8 +174,8 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
         ) : (
           <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.6} />
-            <XAxis dataKey={xKey} tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
-            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} stroke="#cbd5e1" />
+            <XAxis dataKey={xKey} tick={chartTickStyle} stroke="#cbd5e1" />
+            <YAxis tick={chartTickStyle} stroke="#cbd5e1" />
             <Tooltip content={<CustomTooltip />} />
             {config.series.map((s, idx) => {
               const color = s.color || colors[idx % colors.length];

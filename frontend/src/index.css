@@ -1,5 +1,5 @@
 :root {
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   
   --header-height: 4rem;
   --footer-height: 52px;
@@ -31,29 +31,29 @@
   --stackly-text-tertiary: #64748B;
   --stackly-text-disabled: #94A3B8;
 
-  --stackly-brand-primary: #059669;
-  --stackly-brand-hover: #047857;
-  --stackly-brand-active: #065F46;
-  --stackly-brand-subtle: #ECFDF5;
+  --stackly-brand-primary: #0F766E;
+  --stackly-brand-hover: #115E59;
+  --stackly-brand-active: #134E4A;
+  --stackly-brand-subtle: #CCFBF1;
 
   --stackly-border-default: #E2E8F0;
   --stackly-border-strong: #CBD5E1;
-  --stackly-border-focus: #059669;
+  --stackly-border-focus: #0F766E;
 
-  --stackly-status-success: #10B981;
-  --stackly-status-warning: #F59E0B;
-  --stackly-status-error: #EF4444;
-  --stackly-status-info: #3B82F6;
+  --stackly-status-success: #15803D;
+  --stackly-status-warning: #B45309;
+  --stackly-status-error: #B91C1C;
+  --stackly-status-info: #0369A1;
   --stackly-status-neutral: #64748B;
 
-  /* Role-aware accent system */
-  --role-primary:       #059669;
-  --role-hover:         #047857;
-  --role-light:         #ECFDF5;
+  /* Unified Stackly Brand System (No Role Divergence) */
+  --role-primary:       #0F766E;
+  --role-hover:         #115E59;
+  --role-light:         #CCFBF1;
   --role-bg:            #F8FAFC;
   --role-text:          #0F172A;
-  --role-shadow:        rgba(5, 150, 105, 0.08);
-  --role-border:        rgba(5, 150, 105, 0.15);
+  --role-shadow:        rgba(15, 118, 110, 0.08);
+  --role-border:        rgba(15, 118, 110, 0.15);
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
@@ -62,58 +62,69 @@
 
 [data-theme='dark'] {
   /* Stackly Enterprise — Dark Slate Base */
-  --bg-primary: #0B1120;
-  --bg-secondary: #1E293B;
-  --bg-tertiary: #0F172A;
-  --bg-card: #1E293B;
-  --bg-hover: #334155;
+  --bg-primary: #0F1419;
+  --bg-secondary: #151B21;
+  --bg-tertiary: #1B222A;
+  --bg-card: #151B21;
+  --bg-hover: #222B34;
   
-  --border-color: #334155;
-  --border-subtle: #1E293B;
+  --border-color: #2B3640;
+  --border-subtle: #1F2730;
   
-  --text-primary: #F8FAFC;
+  --text-primary: #F1F5F9;
   --text-secondary: #CBD5E1;
   --text-muted: #94A3B8;
 
   /* Stackly Semantic System Tokens — Dark */
-  --stackly-bg-page: #0B1120;
-  --stackly-bg-surface: #1E293B;
-  --stackly-bg-elevated: #1E293B;
-  --stackly-bg-muted: #0F172A;
+  --stackly-bg-page: #0F1419;
+  --stackly-bg-surface: #151B21;
+  --stackly-bg-elevated: #1B222A;
+  --stackly-bg-muted: #1F2730;
 
-  --stackly-text-primary: #F8FAFC;
+  --stackly-text-primary: #F1F5F9;
   --stackly-text-secondary: #CBD5E1;
   --stackly-text-tertiary: #94A3B8;
   --stackly-text-disabled: #64748B;
 
-  --stackly-brand-primary: #10B981;
-  --stackly-brand-hover: #059669;
-  --stackly-brand-active: #047857;
-  --stackly-brand-subtle: rgba(16, 185, 129, 0.15);
+  --stackly-brand-primary: #2DD4BF;
+  --stackly-brand-hover: #5EEAD4;
+  --stackly-brand-active: #14B8A6;
+  --stackly-brand-subtle: #134E4A;
 
-  --stackly-border-default: #334155;
-  --stackly-border-strong: #475569;
-  --stackly-border-focus: #10B981;
+  --stackly-border-default: #2B3640;
+  --stackly-border-strong: #3A4652;
+  --stackly-border-focus: #2DD4BF;
 
-  --stackly-status-success: #34D399;
+  --stackly-status-success: #4ADE80;
   --stackly-status-warning: #FBBF24;
   --stackly-status-error: #F87171;
-  --stackly-status-info: #60A5FA;
+  --stackly-status-info: #38BDF8;
   --stackly-status-neutral: #94A3B8;
 
-  --role-primary:       #10B981;
-  --role-hover:         #059669;
-  --role-light:         rgba(16, 185, 129, 0.15);
-  --role-bg:            #0B1120;
-  --role-text:          #F8FAFC;
-  --role-shadow:        rgba(16, 185, 129, 0.1);
-  --role-border:        rgba(16, 185, 129, 0.2);
+  --role-primary:       #2DD4BF;
+  --role-hover:         #5EEAD4;
+  --role-light:         #134E4A;
+  --role-bg:            #0F1419;
+  --role-text:          #F1F5F9;
+  --role-shadow:        rgba(45, 212, 191, 0.1);
+  --role-border:        rgba(45, 212, 191, 0.2);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: inherit;
+}
+
+svg, svg * {
+  font-family: initial;
+}
+
+html,
+body,
+#root {
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 a {
@@ -126,7 +137,7 @@ a:hover {
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
@@ -470,22 +481,6 @@ input::-webkit-credentials-auto-fill-button {
   --brand-mint: #34d399;
 }
 
-[data-theme='dark'] {
-  --bg-primary: #0F172A;
-  --bg-secondary: #1E293B;
-  --bg-tertiary: #334155;
-  --bg-card: #1E293B;
-  --bg-hover: #334155;
-  --surface: #1E293B;
-  --surface-raised: #334155;
-  --surface-soft: #0F172A;
-  --line: #334155;
-  --line-strong: #475569;
-  --text-primary: #F8FAFC;
-  --text-secondary: #CBD5E1;
-  --text-muted: #94A3B8;
-}
-
 html { scroll-behavior: smooth; }
 
 body {
@@ -504,80 +499,42 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 /* ==========================================================================
-   ROLE IDENTITY SYSTEM
-   Each [data-role] block sets --role-* custom properties.
-   Sidebar active, btn-primary, dashboard hero, badges, KPI accents all
-   consume these tokens automatically — keeping the rest of the UI neutral.
+   ROLE IDENTITY SYSTEM — UNIFIED STACKLY EMERALD + SLATE BRAND
    ========================================================================== */
 
-/* 👑 Admin — Purple: Authority, control, system */
-[data-role='ADMIN'] {
-  --role-primary:  #7C3AED;
-  --role-hover:    #6D28D9;
-  --role-light:    #F3E8FF;
-  --role-bg:       #FAF5FF;
-  --role-text:     #581C87;
-  --role-shadow:   rgba(124, 58, 237, 0.22);
-  --role-border:   rgba(124, 58, 237, 0.28);
-  --dashboard-accent:       #7C3AED;
-  --dashboard-accent-strong: #6D28D9;
-  --dashboard-accent-soft:  rgba(124, 58, 237, 0.12);
-}
-
-/* 👩‍💼 HR — Rose: People, care, engagement */
-[data-role='HR'] {
-  --role-primary:  #E11D48;
-  --role-hover:    #BE123C;
-  --role-light:    #FFE4E6;
-  --role-bg:       #FFF1F2;
-  --role-text:     #881337;
-  --role-shadow:   rgba(225, 29, 72, 0.22);
-  --role-border:   rgba(225, 29, 72, 0.28);
-  --dashboard-accent:       #E11D48;
-  --dashboard-accent-strong: #BE123C;
-  --dashboard-accent-soft:  rgba(225, 29, 72, 0.10);
-}
-
-/* 📊 Manager — Blue: Leadership, analytics */
-[data-role='MANAGER'] {
-  --role-primary:  #2563EB;
-  --role-hover:    #1D4ED8;
-  --role-light:    #DBEAFE;
-  --role-bg:       #EFF6FF;
-  --role-text:     #1E3A8A;
-  --role-shadow:   rgba(37, 99, 235, 0.22);
-  --role-border:   rgba(37, 99, 235, 0.28);
-  --dashboard-accent:       #2563EB;
-  --dashboard-accent-strong: #1D4ED8;
-  --dashboard-accent-soft:  rgba(37, 99, 235, 0.12);
-}
-
-/* 🎯 Team Lead — Emerald: Growth, teamwork, execution */
-[data-role='TEAM_LEAD'] {
-  --role-primary:  #059669;
-  --role-hover:    #047857;
-  --role-light:    #D1FAE5;
-  --role-bg:       #ECFDF5;
-  --role-text:     #064E3B;
-  --role-shadow:   rgba(5, 150, 105, 0.22);
-  --role-border:   rgba(5, 150, 105, 0.28);
-  --dashboard-accent:       #059669;
-  --dashboard-accent-strong: #047857;
-  --dashboard-accent-soft:  rgba(5, 150, 105, 0.12);
-}
-
-/* 👤 Employee — Amber: Productivity, activity, recognition */
+[data-role='ADMIN'],
+[data-role='HR'],
+[data-role='MANAGER'],
+[data-role='TEAM_LEAD'],
 [data-role='EMPLOYEE'] {
-  --role-primary:  #D97706;
-  --role-hover:    #B45309;
-  --role-light:    #FEF3C7;
-  --role-bg:       #FFFBEB;
-  --role-text:     #78350F;
-  --role-shadow:   rgba(217, 119, 6, 0.22);
-  --role-border:   rgba(217, 119, 6, 0.28);
-  --dashboard-accent:       #D97706;
-  --dashboard-accent-strong: #B45309;
-  --dashboard-accent-soft:  rgba(217, 119, 6, 0.12);
+  --role-primary:             #0F766E;
+  --role-hover:               #115E59;
+  --role-light:               #CCFBF1;
+  --role-bg:                  #F8FAFC;
+  --role-text:                #0F172A;
+  --role-shadow:              rgba(15, 118, 110, 0.08);
+  --role-border:              rgba(15, 118, 110, 0.15);
+  --dashboard-accent:         #0F766E;
+  --dashboard-accent-strong:  #115E59;
+  --dashboard-accent-soft:    rgba(15, 118, 110, 0.12);
+}
+
+[data-theme='dark'] [data-role='ADMIN'],
+[data-theme='dark'] [data-role='HR'],
+[data-theme='dark'] [data-role='MANAGER'],
+[data-theme='dark'] [data-role='TEAM_LEAD'],
+[data-theme='dark'] [data-role='EMPLOYEE'],
+[data-theme='dark'] {
+  --role-primary:             #2DD4BF;
+  --role-hover:               #5EEAD4;
+  --role-light:               #134E4A;
+  --role-bg:                  #0F1419;
+  --role-text:                #F1F5F9;
+  --role-shadow:              rgba(45, 212, 191, 0.15);
+  --role-border:              rgba(45, 212, 191, 0.2);
+  --dashboard-accent:         #2DD4BF;
+  --dashboard-accent-strong:  #5EEAD4;
+  --dashboard-accent-soft:    rgba(45, 212, 191, 0.15);
 }
 
 /* ---- Role-aware active nav link ---- */
@@ -1585,279 +1542,27 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   background-color: var(--dashboard-accent-strong) !important;
 }
 
-/* 1. Teal Theme (HR - Calm & Communicative Teal Theme) */
-.earth-theme {
-  --dashboard-accent: #00897B;
-  --dashboard-accent-strong: #00695c;
-  --dashboard-accent-soft: rgba(0, 137, 123, 0.12);
-}
-[data-theme='light'] .earth-theme, .earth-theme[data-theme='light'] {
-  --bg-primary: #f2f7f7 !important;
-  --bg-secondary: #ffffff !important;
-  --bg-tertiary: #e0f2f1 !important;
-  --text-primary: #004d40 !important;
-  --text-muted: #00796b !important;
-}
-[data-theme='dark'] .earth-theme, .earth-theme[data-theme='dark'] {
-  --dashboard-accent: #26a69a;
-  --dashboard-accent-strong: #00796b;
-  --dashboard-accent-soft: rgba(38, 166, 154, 0.15);
-  --bg-primary: #060c0c !important;
-  --bg-secondary: #0b1414 !important;
-  --bg-tertiary: #0e1e1e !important;
-}
-.earth-theme .app-sidebar {
-  border-right: 2px solid var(--dashboard-accent-soft) !important;
-}
-.earth-theme .dashboard-hero {
-  background: linear-gradient(135deg, #004d40 0%, #00695c 52%, #00897b 100%) !important;
-  border-color: rgba(0, 137, 123, 0.35) !important;
-}
-.earth-theme [class*="text-blue-"],
-.earth-theme [class*="text-indigo-"],
-.earth-theme [class*="text-purple-"],
-.earth-theme [class*="text-cyan-"],
-.earth-theme [class*="text-teal-"] {
-  color: var(--dashboard-accent) !important;
-}
-.earth-theme [class*="border-blue-"],
-.earth-theme [class*="border-indigo-"],
-.earth-theme [class*="border-purple-"],
-.earth-theme [class*="border-cyan-"],
-.earth-theme [class*="border-teal-"] {
-  border-color: rgba(0, 137, 123, 0.3) !important;
-}
-.earth-theme [class*="bg-blue-"],
-.earth-theme [class*="bg-indigo-"],
-.earth-theme [class*="bg-purple-"],
-.earth-theme [class*="bg-cyan-"],
-.earth-theme [class*="bg-teal-"] {
-  background-color: var(--dashboard-accent-soft) !important;
-}
-.earth-theme [class*="bg-blue-600"],
-.earth-theme [class*="bg-indigo-600"],
-.earth-theme [class*="bg-purple-600"] {
-  background-color: var(--dashboard-accent-strong) !important;
-}
-
-/* 2. Emerald Theme (Employee - Clean & Dependable Green Theme) */
-.arctic-theme {
-  --dashboard-accent: #43A047;
-  --dashboard-accent-strong: #2e7d32;
-  --dashboard-accent-soft: rgba(67, 160, 71, 0.12);
-}
-[data-theme='light'] .arctic-theme, .arctic-theme[data-theme='light'] {
-  --bg-primary: #f4fbf4 !important;
-  --bg-secondary: #ffffff !important;
-  --bg-tertiary: #e8f5e9 !important;
-  --text-primary: #1b5e20 !important;
-  --text-muted: #388e3c !important;
-}
-[data-theme='dark'] .arctic-theme, .arctic-theme[data-theme='dark'] {
-  --dashboard-accent: #66bb6a;
-  --dashboard-accent-strong: #388e3c;
-  --dashboard-accent-soft: rgba(102, 187, 106, 0.15);
-  --bg-primary: #060d07 !important;
-  --bg-secondary: #0b1a0e !important;
-  --bg-tertiary: #122c17 !important;
-}
-.arctic-theme .app-sidebar {
-  border-right: 2px solid var(--dashboard-accent-soft) !important;
-}
-.arctic-theme .dashboard-hero {
-  background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 52%, #43a047 100%) !important;
-  border-color: rgba(67, 160, 71, 0.35) !important;
-}
-.arctic-theme [class*="text-blue-"],
-.arctic-theme [class*="text-indigo-"],
-.arctic-theme [class*="text-purple-"],
-.arctic-theme [class*="text-cyan-"],
-.arctic-theme [class*="text-teal-"] {
-  color: var(--dashboard-accent) !important;
-}
-.arctic-theme [class*="border-blue-"],
-.arctic-theme [class*="border-indigo-"],
-.arctic-theme [class*="border-purple-"],
-.arctic-theme [class*="border-cyan-"],
-.arctic-theme [class*="border-teal-"] {
-  border-color: rgba(67, 160, 71, 0.3) !important;
-}
-.arctic-theme [class*="bg-blue-"],
-.arctic-theme [class*="bg-indigo-"],
-.arctic-theme [class*="bg-purple-"],
-.arctic-theme [class*="bg-cyan-"],
-.arctic-theme [class*="bg-teal-"] {
-  background-color: var(--dashboard-accent-soft) !important;
-}
-.arctic-theme [class*="bg-blue-600"],
-.arctic-theme [class*="bg-indigo-600"],
-.arctic-theme [class*="bg-purple-600"] {
-  background-color: var(--dashboard-accent-strong) !important;
-}
-
-/* 3. Vibrant Orange Theme (Team Lead - Energetic Orange Theme) */
-.midnight-theme {
-  --dashboard-accent: #F57C00;
-  --dashboard-accent-strong: #e65100;
-  --dashboard-accent-soft: rgba(245, 124, 0, 0.12);
-}
-[data-theme='light'] .midnight-theme, .midnight-theme[data-theme='light'] {
-  --bg-primary: #fffaf5 !important;
-  --bg-secondary: #ffffff !important;
-  --bg-tertiary: #ffe0b2 !important;
-  --text-primary: #e65100 !important;
-  --text-muted: #f57c00 !important;
-}
-[data-theme='dark'] .midnight-theme, .midnight-theme[data-theme='dark'] {
-  --dashboard-accent: #ffa726;
-  --dashboard-accent-strong: #f57c00;
-  --dashboard-accent-soft: rgba(255, 167, 38, 0.15);
-  --bg-primary: #0f0902 !important;
-  --bg-secondary: #1a1005 !important;
-  --bg-tertiary: #2e1c08 !important;
-}
-.midnight-theme .app-sidebar {
-  border-right: 2px solid var(--dashboard-accent-soft) !important;
-}
-.midnight-theme .dashboard-hero {
-  background: linear-gradient(135deg, #5d2500 0%, #e65100 52%, #f57c00 100%) !important;
-  border-color: rgba(245, 124, 0, 0.35) !important;
-}
-.midnight-theme [class*="text-blue-"],
-.midnight-theme [class*="text-indigo-"],
-.midnight-theme [class*="text-purple-"],
-.midnight-theme [class*="text-cyan-"],
-.midnight-theme [class*="text-teal-"] {
-  color: var(--dashboard-accent) !important;
-}
-.midnight-theme [class*="border-blue-"],
-.midnight-theme [class*="border-indigo-"],
-.midnight-theme [class*="border-purple-"],
-.midnight-theme [class*="border-cyan-"],
-.midnight-theme [class*="border-teal-"] {
-  border-color: rgba(245, 124, 0, 0.3) !important;
-}
-.midnight-theme [class*="bg-blue-"],
-.midnight-theme [class*="bg-indigo-"],
-.midnight-theme [class*="bg-purple-"],
-.midnight-theme [class*="bg-cyan-"],
-.midnight-theme [class*="bg-teal-"] {
-  background-color: var(--dashboard-accent-soft) !important;
-}
-.midnight-theme [class*="bg-blue-600"],
-.midnight-theme [class*="bg-indigo-600"],
-.midnight-theme [class*="bg-purple-600"] {
-  background-color: var(--dashboard-accent-strong) !important;
-}
-
-/* 4. Navy Blue Theme (Manager - Responsible Navy Blue Theme) */
-.indigo-theme {
-  --dashboard-accent: #1976D2;
-  --dashboard-accent-strong: #1565c0;
-  --dashboard-accent-soft: rgba(25, 118, 210, 0.12);
-}
-[data-theme='light'] .indigo-theme, .indigo-theme[data-theme='light'] {
-  --bg-primary: #f4f8fc !important;
-  --bg-secondary: #ffffff !important;
-  --bg-tertiary: #bbdefb !important;
-  --text-primary: #0d47a1 !important;
-  --text-muted: #1565c0 !important;
-}
-[data-theme='dark'] .indigo-theme, .indigo-theme[data-theme='dark'] {
-  --dashboard-accent: #64b5f6;
-  --dashboard-accent-strong: #1976d2;
-  --dashboard-accent-soft: rgba(100, 181, 246, 0.15);
-  --bg-primary: #030811 !important;
-  --bg-secondary: #071224 !important;
-  --bg-tertiary: #0c203b !important;
-}
-.indigo-theme .app-sidebar {
-  border-right: 2px solid var(--dashboard-accent-soft) !important;
-}
-.indigo-theme .dashboard-hero {
-  background: linear-gradient(135deg, #0d47a1 0%, #1565c0 52%, #1976d2 100%) !important;
-  border-color: rgba(25, 118, 210, 0.35) !important;
-}
-.indigo-theme [class*="text-blue-"],
-.indigo-theme [class*="text-indigo-"],
-.indigo-theme [class*="text-purple-"],
-.indigo-theme [class*="text-cyan-"],
-.indigo-theme [class*="text-teal-"] {
-  color: var(--dashboard-accent) !important;
-}
-.indigo-theme [class*="border-blue-"],
-.indigo-theme [class*="border-indigo-"],
-.indigo-theme [class*="border-purple-"],
-.indigo-theme [class*="border-cyan-"],
-.indigo-theme [class*="border-teal-"] {
-  border-color: rgba(25, 118, 210, 0.3) !important;
-}
-.indigo-theme [class*="bg-blue-"],
-.indigo-theme [class*="bg-indigo-"],
-.indigo-theme [class*="bg-purple-"],
-.indigo-theme [class*="bg-cyan-"],
-.indigo-theme [class*="bg-teal-"] {
-  background-color: var(--dashboard-accent-soft) !important;
-}
-.indigo-theme [class*="bg-blue-600"],
-.indigo-theme [class*="bg-indigo-600"],
-.indigo-theme [class*="bg-purple-600"] {
-  background-color: var(--dashboard-accent-strong) !important;
-}
-
-/* 5. Deep Purple Theme (Admin - High Authority Deep Purple Theme) */
+/* Unified Stackly Emerald visual language for all role dashboards */
+.emerald-theme,
+.earth-theme,
+.arctic-theme,
+.midnight-theme,
+.indigo-theme,
 .sunset-theme {
-  --dashboard-accent: #5E35B1;
-  --dashboard-accent-strong: #4527a0;
-  --dashboard-accent-soft: rgba(94, 53, 177, 0.12);
+  --dashboard-accent: #0F766E;
+  --dashboard-accent-strong: #115E59;
+  --dashboard-accent-soft: rgba(15, 118, 110, 0.12);
 }
-[data-theme='light'] .sunset-theme, .sunset-theme[data-theme='light'] {
-  --bg-primary: #f6f3fc !important;
-  --bg-secondary: #ffffff !important;
-  --bg-tertiary: #d1c4e9 !important;
-  --text-primary: #311b92 !important;
-  --text-muted: #5e35b1 !important;
-}
-[data-theme='dark'] .sunset-theme, .sunset-theme[data-theme='dark'] {
-  --dashboard-accent: #b39ddb;
-  --dashboard-accent-strong: #5e35b1;
-  --dashboard-accent-soft: rgba(179, 157, 219, 0.15);
-  --bg-primary: #07040e !important;
-  --bg-secondary: #0e081c !important;
-  --bg-tertiary: #190f33 !important;
-}
-.sunset-theme .app-sidebar {
-  border-right: 2px solid var(--dashboard-accent-soft) !important;
-}
-.sunset-theme .dashboard-hero {
-  background: linear-gradient(135deg, #311b92 0%, #4527a0 52%, #5e35b1 100%) !important;
-  border-color: rgba(94, 53, 177, 0.35) !important;
-}
-.sunset-theme [class*="text-blue-"],
-.sunset-theme [class*="text-indigo-"],
-.sunset-theme [class*="text-purple-"],
-.sunset-theme [class*="text-cyan-"],
-.sunset-theme [class*="text-teal-"] {
-  color: var(--dashboard-accent) !important;
-}
-.sunset-theme [class*="border-blue-"],
-.sunset-theme [class*="border-indigo-"],
-.sunset-theme [class*="border-purple-"],
-.sunset-theme [class*="border-cyan-"],
-.sunset-theme [class*="border-teal-"] {
-  border-color: rgba(94, 53, 177, 0.3) !important;
-}
-.sunset-theme [class*="bg-blue-"],
-.sunset-theme [class*="bg-indigo-"],
-.sunset-theme [class*="bg-purple-"],
-.sunset-theme [class*="bg-cyan-"],
-.sunset-theme [class*="bg-teal-"] {
-  background-color: var(--dashboard-accent-soft) !important;
-}
-.sunset-theme [class*="bg-blue-600"],
-.sunset-theme [class*="bg-indigo-600"],
-.sunset-theme [class*="bg-purple-600"] {
-  background-color: var(--dashboard-accent-strong) !important;
+
+[data-theme='dark'] .emerald-theme,
+[data-theme='dark'] .earth-theme,
+[data-theme='dark'] .arctic-theme,
+[data-theme='dark'] .midnight-theme,
+[data-theme='dark'] .indigo-theme,
+[data-theme='dark'] .sunset-theme {
+  --dashboard-accent: #2DD4BF;
+  --dashboard-accent-strong: #5EEAD4;
+  --dashboard-accent-soft: rgba(45, 212, 191, 0.15);
 }
 
 /* Precise Layout Redesign CSS Grid Systems */

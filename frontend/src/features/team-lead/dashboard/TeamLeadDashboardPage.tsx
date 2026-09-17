@@ -16,17 +16,17 @@ import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
 export const TeamLeadDashboardOverview: React.FC = () => (
-  <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div className="p-6 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div className="flex items-center gap-4">
       <div className="w-11 h-11 rounded-lg bg-teal-50 text-teal-600 border border-teal-200 dark:bg-teal-950/50 dark:text-teal-400 dark:border-teal-800/80 flex items-center justify-center shrink-0">
         <GitPullRequest size={22} />
       </div>
       <div>
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">Team Lead Operational Command</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">Team Lead Operational Command</h2>
           <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal-50 text-teal-700 border border-teal-200 dark:bg-teal-950/40 dark:text-teal-400 dark:border-teal-800">FRONTEND SQUAD</span>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal">
+        <p className="text-xs text-[var(--text-secondary)] mt-1 font-normal">
           Direct reports tracking, sprint task velocity, daily attendance tracking & developer feedback.
         </p>
       </div>
@@ -41,14 +41,14 @@ export const TeamLeadDashboardOverview: React.FC = () => (
         </Link>
       </div>
       <div className="flex items-center gap-1.5 flex-wrap text-xs">
-        <Link to="/attendance/regularization" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Regularization</Link>
-        <Link to="/leave/requests" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Leave Requests</Link>
-        <Link to="/payroll/payslips" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">My Payroll</Link>
-        <Link to="/payroll/ctc-calculator" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">CTC Calculator</Link>
-        <Link to="/payroll/revisions" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Salary Revisions</Link>
-        <Link to="/performance/okrs" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">OKRs</Link>
-        <Link to="/performance/360-feedback" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">360 Feedback</Link>
-        <Link to="/expenses/claims" className="px-2.5 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-teal-400 font-medium">Claims</Link>
+        <Link to="/attendance/regularization" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">Regularization</Link>
+        <Link to="/leave/requests" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">Leave Requests</Link>
+        <Link to="/payroll/payslips" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">My Payroll</Link>
+        <Link to="/payroll/ctc-calculator" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">CTC Calculator</Link>
+        <Link to="/payroll/revisions" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">Salary Revisions</Link>
+        <Link to="/performance/okrs" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">OKRs</Link>
+        <Link to="/performance/360-feedback" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">360 Feedback</Link>
+        <Link to="/expenses/claims" className="px-2.5 py-1 rounded bg-[var(--bg-tertiary)] text-[var(--text-secondary)] hover:text-teal-400 font-medium">Claims</Link>
       </div>
     </div>
   </div>
@@ -63,26 +63,26 @@ export const TeamLeadDashboardFilters: React.FC<{
   setStatusFilter: (val: string) => void;
   directReports: Employee[];
 }> = (props) => (
-  <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider">
+  <div className="p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-3">
+    <div className="flex items-center gap-2 text-[var(--text-primary)] text-xs font-semibold uppercase tracking-wider">
       <Filter size={15} className="text-teal-600 dark:text-teal-400" /> Scoped Team Filters
     </div>
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Date</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Date</label>
         <input
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500 font-normal"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500 font-normal"
         />
       </div>
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Employee</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Employee</label>
         <select
           value={props.employeeFilter}
           onChange={(e) => props.setEmployeeFilter(e.target.value)}
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500 font-normal cursor-pointer"
         >
           <option value="All">All Team Members</option>
           {props.directReports.map(emp => (
@@ -91,11 +91,11 @@ export const TeamLeadDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Status</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Status</label>
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
@@ -107,16 +107,16 @@ export const TeamLeadDashboardFilters: React.FC<{
 );
 
 export const TeamLeadSprintBoard: React.FC<{ sprintTasks: Task[] }> = ({ sprintTasks }) => (
-  <div className="p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-    <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-      <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+  <div className="p-5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-4">
+    <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
         <Layers size={16} className="text-teal-600 dark:text-teal-400" /> Team Sprint
       </h3>
       <span className="px-2 py-0.5 rounded text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800">FRONTEND SPRINT</span>
     </div>
-    <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+    <div className="overflow-x-auto rounded-md border border-[var(--border-color)] bg-[var(--bg-card)]">
       <table className="w-full text-left text-xs min-w-[800px]">
-        <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 uppercase font-semibold text-[11px]">
+        <thead className="bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-b border-[var(--border-color)] uppercase font-semibold text-[11px]">
           <tr>
             <th className="py-2.5 px-4">Task</th>
             <th className="py-2.5 px-4">Assignee</th>

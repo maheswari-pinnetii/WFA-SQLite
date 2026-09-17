@@ -19,17 +19,17 @@ import { Link } from 'react-router-dom';
 import { TeamLeaveCalendar } from '../components/TeamLeaveCalendar';
 
 export const HrDashboardOverview: React.FC<{ getGreeting: () => string; firstName: string }> = ({ getGreeting, firstName }) => (
-  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
+  <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
     <div className="flex items-center gap-4">
       <div className="w-11 h-11 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50 flex items-center justify-center shrink-0">
         <UserCheck size={22} />
       </div>
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">{getGreeting()}, {firstName}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">{getGreeting()}, {firstName}</h1>
           <span className="badge badge-hr">HR Operations</span>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-sm text-[var(--text-secondary)] mt-1">
           Workforce lifecycle, candidate recruitment, payroll analysis & employee attendance oversight.
         </p>
       </div>
@@ -59,26 +59,26 @@ export const HrDashboardFilters: React.FC<{
   statusFilter: string;
   setStatusFilter: (val: string) => void;
 }> = (props) => (
-  <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-medium uppercase tracking-wider">
+  <div className="p-4 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm space-y-3">
+    <div className="flex items-center gap-2 text-[var(--text-primary)] text-xs font-medium uppercase tracking-wider">
       <Filter size={14} className="text-emerald-500" /> HR Operational Filters
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Date</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Date</label>
         <input
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal"
         />
       </div>
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Location</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Location</label>
         <select
           value={props.locationFilter}
           onChange={(e) => props.setLocationFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Locations</option>
           <option value="Bangalore">Bangalore</option>
@@ -87,11 +87,11 @@ export const HrDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Department</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Department</label>
         <select
           value={props.deptFilter}
           onChange={(e) => props.setDeptFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Departments</option>
           <option value="Engineering">Engineering</option>
@@ -100,11 +100,11 @@ export const HrDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Team</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Team</label>
         <select
           value={props.teamFilter}
           onChange={(e) => props.setTeamFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Teams</option>
           <option value="Frontend">Frontend</option>
@@ -112,11 +112,11 @@ export const HrDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Emp Type</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Emp Type</label>
         <select
           value={props.empTypeFilter}
           onChange={(e) => props.setEmpTypeFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Types</option>
           <option value="Full-time">Full-time</option>
@@ -124,11 +124,11 @@ export const HrDashboardFilters: React.FC<{
         </select>
       </div>
       <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Status</label>
+        <label className="text-xs text-[var(--text-muted)] font-medium block mb-1">Status</label>
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>

@@ -1,5 +1,52 @@
+const FONT_STACK = '"Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+
+export const muiTypography = {
+  fontFamily: FONT_STACK,
+  h1: {
+    fontFamily: FONT_STACK,
+    fontWeight: 600,
+  },
+  h2: {
+    fontFamily: FONT_STACK,
+    fontWeight: 600,
+  },
+  h3: {
+    fontFamily: FONT_STACK,
+    fontWeight: 600,
+  },
+  h4: {
+    fontFamily: FONT_STACK,
+    fontWeight: 600,
+  },
+  h5: {
+    fontFamily: FONT_STACK,
+    fontWeight: 600,
+  },
+  h6: {
+    fontFamily: FONT_STACK,
+    fontWeight: 600,
+  },
+  body1: {
+    fontFamily: FONT_STACK,
+    fontWeight: 400,
+  },
+  body2: {
+    fontFamily: FONT_STACK,
+    fontWeight: 400,
+  },
+  button: {
+    fontFamily: FONT_STACK,
+    fontWeight: 500,
+    textTransform: 'none' as const,
+  },
+  caption: {
+    fontFamily: FONT_STACK,
+    fontWeight: 400,
+  },
+};
+
 export const typography = {
-  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  fontFamily: FONT_STACK,
   fontSize: {
     xs: '0.75rem',
     sm: '0.875rem',
@@ -14,5 +61,7 @@ export const typography = {
     medium: '500',
     semibold: '600',
     bold: '700'
-  }
+  },
+  mui: muiTypography
 };
+

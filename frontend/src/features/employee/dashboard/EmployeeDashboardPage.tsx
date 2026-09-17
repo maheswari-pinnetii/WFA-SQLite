@@ -67,16 +67,16 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
   const initials = (user?.name || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+    <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
       <div className="flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-semibold text-sm shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-[var(--bg-tertiary)] flex items-center justify-center text-[var(--text-primary)] font-semibold text-sm shrink-0">
           {initials}
         </div>
         <div>
-          <h1 className="text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-base font-semibold tracking-tight text-[var(--text-primary)]">
             {user?.name || 'My Workspace'}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-sm text-[var(--text-secondary)] mt-0.5">
             {[user?.role, user?.department].filter(Boolean).join(' · ')}
           </p>
         </div>
@@ -91,31 +91,31 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
         </a>
         <Link
           to="/payroll/payslips"
-          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+          className="px-3 py-1.5 rounded-md bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-medium text-xs flex items-center gap-1 transition-colors border border-[var(--border-color)]"
         >
           <FileText size={13} className="text-emerald-400" /> My Payroll
         </Link>
         <Link
           to="/employee/profile"
-          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+          className="px-3 py-1.5 rounded-md bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-medium text-xs flex items-center gap-1 transition-colors border border-[var(--border-color)]"
         >
           <Compass size={13} className="text-blue-400" /> My Documents
         </Link>
         <Link
           to="/payroll/ctc-calculator"
-          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+          className="px-3 py-1.5 rounded-md bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-medium text-xs flex items-center gap-1 transition-colors border border-[var(--border-color)]"
         >
           <Zap size={13} className="text-amber-400" /> CTC Calculator
         </Link>
         <Link
           to="/leave/my"
-          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+          className="px-3 py-1.5 rounded-md bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-medium text-xs flex items-center gap-1 transition-colors border border-[var(--border-color)]"
         >
           <Calendar size={13} className="text-teal-400" /> Leave Requests
         </Link>
         <Link
           to="/payroll/revisions"
-          className="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium text-xs flex items-center gap-1 transition-colors border border-slate-200 dark:border-slate-700"
+          className="px-3 py-1.5 rounded-md bg-[var(--bg-tertiary)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-medium text-xs flex items-center gap-1 transition-colors border border-[var(--border-color)]"
         >
           <TrendingUp size={13} className="text-indigo-400" /> Salary Revisions
         </Link>

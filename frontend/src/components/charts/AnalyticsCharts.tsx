@@ -34,11 +34,20 @@ interface Series {
   color: string;
 }
 
+const INTER_FONT = '"Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+
 const tooltipStyle = {
   backgroundColor: 'var(--bg-secondary)',
   borderColor: 'var(--border-color)',
-  borderRadius: '12px',
-  color: 'var(--text-primary)'
+  borderRadius: '8px',
+  color: 'var(--text-primary)',
+  fontFamily: INTER_FONT,
+  fontSize: '12px',
+};
+
+const tickStyle = {
+  fontFamily: INTER_FONT,
+  fontSize: 12,
 };
 
 export const AnalyticsLineChart: React.FC<BaseChartProps & { xKey: string; series: Series[] }> = ({
@@ -48,10 +57,10 @@ export const AnalyticsLineChart: React.FC<BaseChartProps & { xKey: string; serie
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 12, right: 12, left: -18, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-        <XAxis dataKey={xKey} stroke="var(--text-muted)" tick={{ fontSize: 11 }} />
-        <YAxis stroke="var(--text-muted)" tick={{ fontSize: 11 }} />
+        <XAxis dataKey={xKey} stroke="var(--text-muted)" tick={tickStyle} />
+        <YAxis stroke="var(--text-muted)" tick={tickStyle} />
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
+        <Legend wrapperStyle={{ fontSize: '12px', fontFamily: INTER_FONT, color: 'var(--text-muted)' }} />
         {series.map((item) => <Line key={item.key} type="monotone" dataKey={item.key} name={item.name} stroke={item.color} strokeWidth={3} dot={{ r: 3 }} />)}
       </LineChart>
     </ResponsiveContainer>
@@ -65,9 +74,9 @@ export const AnalyticsBarChart: React.FC<BaseChartProps & { xKey: string; series
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout={layout === 'vertical' ? 'vertical' : 'horizontal'} margin={{ top: 12, right: 12, left: layout === 'vertical' ? 36 : -18, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
-        {layout === 'vertical' ? <><XAxis type="number" stroke="var(--text-muted)" tick={{ fontSize: 11 }} /><YAxis dataKey={xKey} type="category" width={110} stroke="var(--text-muted)" tick={{ fontSize: 10 }} /></> : <><XAxis dataKey={xKey} stroke="var(--text-muted)" tick={{ fontSize: 10 }} /><YAxis stroke="var(--text-muted)" tick={{ fontSize: 11 }} /></>}
+        {layout === 'vertical' ? <><XAxis type="number" stroke="var(--text-muted)" tick={tickStyle} /><YAxis dataKey={xKey} type="category" width={110} stroke="var(--text-muted)" tick={{ ...tickStyle, fontSize: 11 }} /></> : <><XAxis dataKey={xKey} stroke="var(--text-muted)" tick={{ ...tickStyle, fontSize: 11 }} /><YAxis stroke="var(--text-muted)" tick={tickStyle} /></>}
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend wrapperStyle={{ fontSize: '11px', color: 'var(--text-muted)' }} />
+        <Legend wrapperStyle={{ fontSize: '12px', fontFamily: INTER_FONT, color: 'var(--text-muted)' }} />
         {series.map((item) => <Bar key={item.key} dataKey={item.key} name={item.name} fill={item.color} radius={[6, 6, 0, 0]} />)}
       </BarChart>
     </ResponsiveContainer>
@@ -75,7 +84,7 @@ export const AnalyticsBarChart: React.FC<BaseChartProps & { xKey: string; series
 );
 
 export const AnalyticsDonutChart: React.FC<BaseChartProps & { nameKey?: string; valueKey?: string; colors?: string[] }> = ({
-  title, subtitle, data = [], isLoading, error, onRetry, height = 260, nameKey = 'name', valueKey = 'value', colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444']
+  title, subtitle, data = [], isLoading, error, onRetry, height = 260, nameKey = 'name', valueKey = 'value', colors = ['#0F766E', '#64748B', '#94A3B8', '#14B8A6', '#475569', '#334155']
 }) => (
   <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={!data.length} onRetry={onRetry} minHeight={height + 100}>
     <ResponsiveContainer width="100%" height={height}>
@@ -84,7 +93,7 @@ export const AnalyticsDonutChart: React.FC<BaseChartProps & { nameKey?: string; 
           {data.map((_, index) => <Cell key={`slice-${index}`} fill={colors[index % colors.length]} />)}
         </Pie>
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend verticalAlign="bottom" height={30} wrapperStyle={{ fontSize: '10px', color: 'var(--text-muted)' }} />
+        <Legend verticalAlign="bottom" height={30} wrapperStyle={{ fontSize: '12px', fontFamily: INTER_FONT, color: 'var(--text-muted)' }} />
       </PieChart>
     </ResponsiveContainer>
   </AnalyticsChartContainer>

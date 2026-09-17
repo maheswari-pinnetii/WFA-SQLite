@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
+import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
 import { STORAGE_KEYS } from '../../shared/constants/constants';
 import { lightTheme } from './lightTheme.js';
 import { darkTheme } from './darkTheme.js';
+import { muiTypography } from './typography.js';
 
 type ThemeMode = 'light' | 'dark';
 
@@ -26,6 +28,26 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const themeObject = theme === 'light' ? lightTheme : darkTheme;
+
+  const muiTheme = useMemo(() => {
+    return createTheme({
+      palette: {
+        mode: theme,
+        primary: {
+          main: theme === 'dark' ? '#2DD4BF' : '#0F766E',
+        },
+        background: {
+          default: themeObject.palette.background,
+          paper: themeObject.palette.card,
+        },
+        text: {
+          primary: themeObject.palette.textPrimary,
+          secondary: themeObject.palette.textSecondary,
+        },
+      },
+      typography: muiTypography,
+    });
+  }, [theme, themeObject]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -108,7 +130,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme, themeObject }}>
-      {children}
+      <MuiThemeProvider theme={muiTheme}>
+        {children}
+      </MuiThemeProvider>
     </ThemeContext.Provider>
   );
 };

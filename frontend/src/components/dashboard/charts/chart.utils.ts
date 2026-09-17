@@ -1,12 +1,10 @@
 export const EMERALD_CHART_COLORS = [
-  '#10b981', // Emerald
-  '#06b6d4', // Cyan
-  '#8b5cf6', // Purple
-  '#f59e0b', // Amber
-  '#3b82f6', // Blue
-  '#f43f5e', // Rose
-  '#6366f1', // Indigo
-  '#14b8a6', // Teal
+  '#0F766E', // Primary Stackly Emerald
+  '#64748B', // Slate 500
+  '#94A3B8', // Slate 400
+  '#14B8A6', // Primary Light
+  '#475569', // Slate 600
+  '#334155', // Slate 700
 ];
 
 export const formatDateIST = (dateStr: string): string => {

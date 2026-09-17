@@ -36,18 +36,18 @@ export const AdminDashboardOverview: React.FC<{
   firstName: string;
   user: any;
 }> = ({ currentDateFormatted, getGreeting, firstName, user }) => (
-  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
+  <div className="bg-[var(--bg-card)] rounded-lg border border-[var(--border-color)] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
     <div className="space-y-1">
-      <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+      <div className="flex items-center gap-2 text-xs font-medium text-[var(--text-muted)]">
         <Calendar size={13} className="text-slate-400" />
         <span>{currentDateFormatted}</span>
         <span>•</span>
         <span className="text-emerald-600 dark:text-emerald-400 font-medium">System Administrator</span>
       </div>
-      <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+      <h1 className="text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
         {getGreeting()}, {firstName}
       </h1>
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-sm text-[var(--text-secondary)]">
         Workforce analytics, live attendance governance, and enterprise shift oversight.
       </p>
     </div>
@@ -77,26 +77,26 @@ export const AdminDashboardFilters: React.FC<{
   statusFilter: string;
   setStatusFilter: (val: string) => void;
 }> = (props) => (
-  <div className="p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
-    <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 text-xs font-medium uppercase tracking-wider">
+  <div className="p-3.5 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm flex flex-wrap items-center gap-4">
+    <div className="flex items-center gap-2 text-[var(--text-primary)] text-xs font-semibold uppercase tracking-wider shrink-0 mr-1">
       <Filter size={14} className="text-emerald-500" /> Executive Analytics Scopes
     </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-      <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Date</label>
+    <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
+      <div className="flex items-center gap-2 flex-1 min-w-[150px]">
+        <label className="text-xs text-[var(--text-muted)] font-medium shrink-0">Date:</label>
         <input
           type="date"
           value={props.dateFilter}
           onChange={(e) => props.setDateFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-normal"
         />
       </div>
-      <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Location</label>
+      <div className="flex items-center gap-2 flex-1 min-w-[150px]">
+        <label className="text-xs text-[var(--text-muted)] font-medium shrink-0">Location:</label>
         <select
           value={props.locationFilter}
           onChange={(e) => props.setLocationFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Locations</option>
           <option value="Bengaluru">Bengaluru</option>
@@ -104,12 +104,12 @@ export const AdminDashboardFilters: React.FC<{
           <option value="Salem">Salem</option>
         </select>
       </div>
-      <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Department</label>
+      <div className="flex items-center gap-2 flex-1 min-w-[160px]">
+        <label className="text-xs text-[var(--text-muted)] font-medium shrink-0">Department:</label>
         <select
           value={props.deptFilter}
           onChange={(e) => props.setDeptFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Departments</option>
           <option value="Engineering">Engineering</option>
@@ -118,12 +118,12 @@ export const AdminDashboardFilters: React.FC<{
           <option value="Sales">Sales & Marketing</option>
         </select>
       </div>
-      <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Team</label>
+      <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+        <label className="text-xs text-[var(--text-muted)] font-medium shrink-0">Team:</label>
         <select
           value={props.teamFilter}
           onChange={(e) => props.setTeamFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Teams</option>
           <option value="Frontend">Frontend Devs</option>
@@ -131,12 +131,12 @@ export const AdminDashboardFilters: React.FC<{
           <option value="QA">Quality Assurance</option>
         </select>
       </div>
-      <div>
-        <label className="text-xs text-slate-500 dark:text-slate-400 font-medium block mb-1">Status</label>
+      <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+        <label className="text-xs text-[var(--text-muted)] font-medium shrink-0">Status:</label>
         <select
           value={props.statusFilter}
           onChange={(e) => props.setStatusFilter(e.target.value)}
-          className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs rounded-md px-3 py-2 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
+          className="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] text-xs rounded-md px-2.5 py-1.5 focus:outline-none focus:border-emerald-500 font-normal cursor-pointer"
         >
           <option value="All">All Statuses</option>
           <option value="Active">Active</option>
