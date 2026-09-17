@@ -67,7 +67,7 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
     // We handle the role-based routing dynamically inside the Sidebar component or rely on Outlet,
     // but here we can define the base path or rely on redirect logic.
     // For now, let's keep it abstract or use a relative path that redirects.
-    path: '/dashboard', 
+    path: '/dashboard',
     roles: ALL_ROLES
   },
   {
@@ -276,12 +276,197 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
   }
 ];
 
+export const EMPLOYEE_NAVIGATION: NavigationItem[] = [
+  {
+    id: 'emp.dashboard',
+    label: 'Dashboard',
+    icon: <LayoutDashboard size={18} strokeWidth={2} />,
+    path: '/employee/dashboard',
+    roles: [Role.EMPLOYEE]
+  },
+  {
+    id: 'emp.work',
+    label: 'My Work',
+    icon: <Briefcase size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.work.tasks', label: 'My Tasks', path: '/employee/work/tasks', roles: [Role.EMPLOYEE] },
+      { id: 'emp.work.projects', label: 'My Projects', path: '/employee/work/projects', roles: [Role.EMPLOYEE] },
+      { id: 'emp.work.sprints', label: 'My Sprints', path: '/employee/work/sprints', roles: [Role.EMPLOYEE] },
+      { id: 'emp.work.logs', label: 'Work Logs', path: '/employee/work/logs', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.attendance',
+    label: 'Attendance',
+    icon: <Clock size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.attendance.today', label: "Today's Attendance", path: '/employee/attendance/today', roles: [Role.EMPLOYEE] },
+      { id: 'emp.attendance.history', label: 'Attendance History', path: '/employee/attendance/history', roles: [Role.EMPLOYEE] },
+      { id: 'emp.attendance.hours', label: 'Work Hours', path: '/employee/attendance/hours', roles: [Role.EMPLOYEE] },
+      { id: 'emp.attendance.corrections', label: 'Attendance Corrections', path: '/employee/attendance/corrections', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.leave',
+    label: 'Leave',
+    icon: <Palmtree size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.leave.overview', label: 'Leave Overview', path: '/employee/leave/overview', roles: [Role.EMPLOYEE] },
+      { id: 'emp.leave.apply', label: 'Apply Leave', path: '/employee/leave/apply', roles: [Role.EMPLOYEE] },
+      { id: 'emp.leave.balance', label: 'Leave Balance', path: '/employee/leave/balance', roles: [Role.EMPLOYEE] },
+      { id: 'emp.leave.history', label: 'Leave History', path: '/employee/leave/history', roles: [Role.EMPLOYEE] },
+      { id: 'emp.leave.policies', label: 'Leave Policies', path: '/employee/leave/policies', roles: [Role.EMPLOYEE] },
+      { id: 'emp.leave.holidays', label: 'Holiday Calendar', path: '/employee/holidays', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.payroll',
+    label: 'Payroll',
+    icon: <FileSpreadsheet size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.payroll.overview', label: 'Payroll Overview', path: '/employee/payroll/overview', roles: [Role.EMPLOYEE] },
+      { id: 'emp.payroll.salary', label: 'Salary Details', path: '/employee/payroll/salary', roles: [Role.EMPLOYEE] },
+      { id: 'emp.payroll.payslips', label: 'Payslips', path: '/employee/payroll/payslips', roles: [Role.EMPLOYEE] },
+      { id: 'emp.payroll.history', label: 'Payroll History', path: '/employee/payroll/history', roles: [Role.EMPLOYEE] },
+      { id: 'emp.payroll.tax', label: 'Tax & Statutory', path: '/employee/payroll/tax', roles: [Role.EMPLOYEE] },
+      { id: 'emp.payroll.reimbursements', label: 'Reimbursements', path: '/employee/payroll/reimbursements', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.benefits',
+    label: 'Benefits',
+    icon: <Award size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.benefits.overview', label: 'Benefits Overview', path: '/employee/benefits/overview', roles: [Role.EMPLOYEE] },
+      { id: 'emp.benefits.health', label: 'Health Benefits', path: '/employee/benefits/health', roles: [Role.EMPLOYEE] },
+      { id: 'emp.benefits.insurance', label: 'Insurance', path: '/employee/benefits/insurance', roles: [Role.EMPLOYEE] },
+      { id: 'emp.benefits.other', label: 'Other Benefits', path: '/employee/benefits/other', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.performance',
+    label: 'Performance',
+    icon: <Star size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.performance.overview', label: 'My Performance', path: '/employee/performance/overview', roles: [Role.EMPLOYEE] },
+      { id: 'emp.performance.goals', label: 'Goals', path: '/employee/performance/goals', roles: [Role.EMPLOYEE] },
+      { id: 'emp.performance.reviews', label: 'Reviews', path: '/employee/performance/reviews', roles: [Role.EMPLOYEE] },
+      { id: 'emp.performance.feedback', label: 'Feedback', path: '/employee/performance/feedback', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.learning',
+    label: 'Learning',
+    icon: <Zap size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.learning.training', label: 'Training', path: '/employee/learning/training', roles: [Role.EMPLOYEE] },
+      { id: 'emp.learning.courses', label: 'Courses', path: '/employee/learning/courses', roles: [Role.EMPLOYEE] },
+      { id: 'emp.learning.certifications', label: 'Certifications', path: '/employee/learning/certifications', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.documents',
+    label: 'Documents',
+    icon: <FileText size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.documents.my', label: 'My Documents', path: '/employee/documents/my', roles: [Role.EMPLOYEE] },
+      { id: 'emp.documents.company', label: 'Company Documents', path: '/employee/documents/company', roles: [Role.EMPLOYEE] },
+      { id: 'emp.documents.policies', label: 'Policy Documents', path: '/employee/documents/policies', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.requests',
+    label: 'Requests',
+    icon: <ClipboardList size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.requests.my', label: 'My Requests', path: '/employee/requests/my', roles: [Role.EMPLOYEE] },
+      { id: 'emp.requests.new', label: 'New Request', path: '/employee/requests/new', roles: [Role.EMPLOYEE] },
+      { id: 'emp.requests.history', label: 'Request History', path: '/employee/requests/history', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.assets',
+    label: 'Assets',
+    icon: <Building2 size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.assets.my', label: 'My Assets', path: '/employee/assets/my', roles: [Role.EMPLOYEE] },
+      { id: 'emp.assets.requests', label: 'Asset Requests', path: '/employee/assets/requests', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.expenses',
+    label: 'Expenses',
+    icon: <Banknote size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.expenses.my', label: 'My Expenses', path: '/employee/expenses/my', roles: [Role.EMPLOYEE] },
+      { id: 'emp.expenses.submit', label: 'Submit Expense', path: '/employee/expenses/submit', roles: [Role.EMPLOYEE] },
+      { id: 'emp.expenses.history', label: 'Expense History', path: '/employee/expenses/history', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.analytics',
+    label: 'Analytics',
+    icon: <Activity size={18} strokeWidth={2} />,
+    path: '/employee/analytics',
+    roles: [Role.EMPLOYEE]
+  },
+  {
+    id: 'emp.notifications',
+    label: 'Notifications',
+    icon: <ShieldAlert size={18} strokeWidth={2} />,
+    path: '/employee/notifications',
+    roles: [Role.EMPLOYEE]
+  },
+  {
+    id: 'emp.profile',
+    label: 'My Profile',
+    icon: <User size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.profile.personal', label: 'Personal Information', path: '/employee/profile/personal', roles: [Role.EMPLOYEE] },
+      { id: 'emp.profile.employment', label: 'Employment Information', path: '/employee/profile/employment', roles: [Role.EMPLOYEE] },
+      { id: 'emp.profile.emergency', label: 'Emergency Contacts', path: '/employee/profile/emergency-contacts', roles: [Role.EMPLOYEE] },
+      { id: 'emp.profile.bank', label: 'Bank Details', path: '/employee/profile/bank', roles: [Role.EMPLOYEE] },
+      { id: 'emp.profile.statutory', label: 'Statutory Details', path: '/employee/profile/statutory', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.security',
+    label: 'Security',
+    icon: <ShieldCheck size={18} strokeWidth={2} />,
+    path: '/employee/security',
+    roles: [Role.EMPLOYEE]
+  },
+  {
+    id: 'emp.settings',
+    label: 'Settings',
+    icon: <Settings size={18} strokeWidth={2} />,
+    path: '/employee/settings',
+    roles: [Role.EMPLOYEE]
+  }
+];
+
 export const hasRoleAccess = (item: NavigationItem, userRole: Role): boolean => {
   if (!item.roles || item.roles.length === 0) return true;
   return item.roles.includes(userRole);
 };
 
 export const getNavigationForRole = (userRole: Role): NavigationItem[] => {
+  if (userRole === Role.EMPLOYEE) {
+    return EMPLOYEE_NAVIGATION;
+  }
+
   const filterItems = (items: NavigationItem[]): NavigationItem[] => {
     return items
       .filter((item) => hasRoleAccess(item, userRole))
