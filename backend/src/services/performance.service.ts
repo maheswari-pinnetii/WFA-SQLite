@@ -2,6 +2,66 @@ import { query, execute } from '../database/sqlite-cloud.js';
 import { randomUUID } from 'crypto';
 
 export class PerformanceService {
+  async getCycles(organizationId: string = 'org-stackly') {
+    return query(`SELECT * FROM performance_cycles WHERE organizationId = ? ORDER BY startDate DESC`, [organizationId]);
+  }
+
+  async createCycle(organizationId: string, data: { name: string; startDate: string; endDate: string }) {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    await execute(
+      `INSERT INTO performance_cycles (id, name, startDate, endDate, status, organizationId, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, 'ACTIVE', ?, ?, ?)`,
+      [id, data.name, data.startDate, data.endDate, organizationId, now, now]
+    );
+    return { id, ...data, status: 'ACTIVE' };
+  }
+
+  async getGoals(employeeId: string, cycleId: string) {
+    return query(`SELECT * FROM goals WHERE employeeId = ? AND performanceCycleId = ? ORDER BY createdAt DESC`, [employeeId, cycleId]);
+  }
+
+  async createGoal(data: { employeeId: string; performanceCycleId: string; title: string; description?: string }) {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    await execute(
+      `INSERT INTO goals (id, employeeId, performanceCycleId, title, description, progress, status, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, 0, 'IN_PROGRESS', ?, ?)`,
+      [id, data.employeeId, data.performanceCycleId, data.title, data.description || '', now, now]
+    );
+    return { id, ...data, progress: 0, status: 'IN_PROGRESS' };
+  }
+
+  async updateGoalProgress(goalId: string, progress: number) {
+    const now = new Date().toISOString();
+    const status = progress >= 100 ? 'COMPLETED' : 'IN_PROGRESS';
+    await execute(`UPDATE goals SET progress = ?, status = ?, updatedAt = ? WHERE id = ?`, [progress, status, now, goalId]);
+    return { success: true };
+  }
+
+  async getReviews(employeeId: string, cycleId: string) {
+    return query(`SELECT * FROM performance_reviews WHERE employeeId = ? AND performanceCycleId = ?`, [employeeId, cycleId]);
+  }
+
+  async submitReview(reviewId: string, rating: number, feedback: string) {
+    const now = new Date().toISOString();
+    await execute(`UPDATE performance_reviews SET rating = ?, feedback = ?, status = 'COMPLETED', updatedAt = ? WHERE id = ?`, [rating, feedback, now, reviewId]);
+    return { success: true };
+  }
+
+  async getCycleAnalytics(cycleId: string, organizationId: string = 'org-stackly') {
+    const totalGoals = await query(`SELECT COUNT(*) as count FROM goals WHERE performanceCycleId = ?`, [cycleId]).then(r => r[0]?.count || 0);
+    const completedGoals = await query(`SELECT COUNT(*) as count FROM goals WHERE performanceCycleId = ? AND status = 'COMPLETED'`, [cycleId]).then(r => r[0]?.count || 0);
+    const reviews = await query(`SELECT AVG(rating) as avgRating FROM performance_reviews WHERE performanceCycleId = ?`, [cycleId]).then(r => r[0]?.avgRating || 0);
+    return {
+      cycleId,
+      totalGoals,
+      completedGoals,
+      completionRate: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0,
+      averageRating: Math.round((reviews || 0) * 10) / 10
+    };
+  }
+
   static async getObjectives(employeeId?: string, organizationId: string = 'org-stackly') {
     let sql = `SELECT o.*, e.name as employeeName FROM okr_objectives o JOIN employees e ON o.employeeId = e.id WHERE o.organizationId = ?`;
     const params: any[] = [organizationId];

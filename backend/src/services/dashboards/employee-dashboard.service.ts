@@ -285,6 +285,8 @@ export class EmployeeDashboardService {
       { time: '11:15 AM', date: 'Sep 14', action: 'Submitted Casual Leave application for Sep 28', category: 'Leave' }
     ];
 
+    const tables = { recentActivity, assetSummary };
+
     return { 
       employee: employmentDetails,
       shiftInfo,

@@ -126,7 +126,7 @@ export const listFnFSettlements = async (req: Request, res: Response) => {
 
 export const approveFnFSettlement = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const user = getUser(req);
     const { FullFinalSettlementService } = await import('../services/full-final-settlement.service.js');
     const result = await FullFinalSettlementService.approveFnFSettlement(id, user.id);

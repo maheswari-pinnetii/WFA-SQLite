@@ -30,6 +30,11 @@
     "tests",
     "playwright",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "backend/src/services/shift.service.ts",
+    "backend/src/services/attendanceWorkflow.service.ts",
+    "backend/src/controllers/attendanceWorkflow.controller.ts",
+    "backend/src/controllers/shift.controller.ts",
+    "backend/src/controllers/performance.controller.ts"
   ]
 }

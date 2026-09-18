@@ -1,7 +1,7 @@
 import { Employee } from '../models/Employee.js';
 import { Organization } from '../models/Department.js';
 import { handleControllerError } from '../utils/errorHandler.js';
-import * as orgService from '../services/organization.service.js';
+import { OrganizationService as orgService } from '../services/organization.service.js';
 
 const getOrgId = (req: any) => req.user?.organizationId || 'org-stackly';
 
