@@ -222,12 +222,39 @@ export const workflowService = {
          AND (
            (s.approverType = 'SPECIFIC_USER' AND s.specificApproverId = ?) OR 
            (s.approverType = 'ROLE' AND s.approverRole = ?) OR
-           (s.approverType = 'RELATIONSHIP' AND s.approverRelationship = 'DIRECT_MANAGER' AND req.managerId = ?)
+           (s.approverType = 'RELATIONSHIP' AND s.approverRelationship = 'DIRECT_MANAGER' AND (req.managerId = ? OR req.managerId IN (
+             SELECT delegatorId FROM approval_delegations WHERE delegateId = ? AND date('now') BETWEEN startDate AND endDate
+           )))
          )`,
-      [approverId, role, approverId]
+      [approverId, role, approverId, approverId]
     );
     return requests;
   },
+
+  /**
+   * Set approval delegation for a manager/approver.
+   */
+  async setDelegatedApprover(delegatorId: string, delegateId: string, startDate: string, endDate: string) {
+    const id = randomUUID();
+    await execute(
+      `CREATE TABLE IF NOT EXISTS approval_delegations (
+        id TEXT PRIMARY KEY,
+        delegatorId TEXT NOT NULL,
+        delegateId TEXT NOT NULL,
+        startDate TEXT NOT NULL,
+        endDate TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )`
+    );
+    await execute(
+      `INSERT INTO approval_delegations (id, delegatorId, delegateId, startDate, endDate, createdAt)
+       VALUES (?, ?, ?, ?, ?, datetime('now'))`,
+      [id, delegatorId, delegateId, startDate, endDate]
+    );
+    logger.info(`[Workflow] Set approval delegation from ${delegatorId} to ${delegateId} between ${startDate} and ${endDate}`);
+    return { id, delegatorId, delegateId, startDate, endDate };
+  },
+
 
   /**
    * Seed default workflows.
