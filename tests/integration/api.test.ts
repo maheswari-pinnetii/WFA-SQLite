@@ -25,10 +25,6 @@ beforeAll(async () => {
 }, 30000);
 
 afterAll(async () => {
-  const db = getDb();
-  if (db) {
-    db.close();
-  }
   return new Promise<void>((resolve) => {
     if (server) {
       server.close(() => {

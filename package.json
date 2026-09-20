@@ -15,7 +15,7 @@
         "preview": "vite preview",
         "test": "node -e \"try { require('fs').unlinkSync('database/sqlite/wfa-test.sqlite'); } catch(e) {}\" && vitest run --no-file-parallelism --test-timeout=20000",
         "test:unit": "vitest run tests/unit",
-        "test:integration": "vitest run tests/integration",
+        "test:integration": "vitest run tests/integration --no-file-parallelism",
         "test:security": "vitest run tests/security",
         "test:coverage": "vitest run --coverage --no-file-parallelism --test-timeout=20000",
         "test:e2e:ui": "playwright test --ui",

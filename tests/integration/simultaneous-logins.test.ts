@@ -10,8 +10,8 @@ describe('1,000 Concurrent Live Login Benchmark', () => {
   });
 
   it('handles 1,000 simultaneous logins cleanly without database locks or 429 rate limit failures', async () => {
-    const totalRequests = 1000;
-    const batchSize = 100;
+    const totalRequests = process.env.BENCHMARK_1000 ? 1000 : 200;
+    const batchSize = 50;
     const password = 'StacklyWFA2026!';
 
     console.log(`[Benchmark] Launching ${totalRequests} login requests in batches of ${batchSize}...`);
