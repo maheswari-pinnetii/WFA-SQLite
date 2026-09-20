@@ -16,7 +16,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../backend/src/app.js';
-import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase, query } from '../../backend/src/database/sqlite-cloud.js';
 
 const PASSWORD = 'StacklyWFA2026!';
 
@@ -97,6 +97,20 @@ describe('1. Concurrent Read Operations (WAL Mode)', () => {
 // 2. Concurrent Idempotent Check-Ins (same key = replay, no duplicate)
 // ────────────────────────────────────────────────────────────────────────────
 describe('2. Concurrent Idempotent Check-In (Same Key)', () => {
+  beforeAll(async () => {
+    // Directly clear any active attendance session for this employee via SQL
+    // so the concurrent check-ins below start from a clean slate regardless of
+    // prior test-run residue.
+    try {
+      await query(
+        `UPDATE attendancerecords SET status = 'Checked Out', checkOutTime = ? WHERE employeeId IN (SELECT id FROM users WHERE email = ?) AND status != 'Checked Out'`,
+        [new Date().toISOString(), 'employee@thestackly.com']
+      );
+    } catch (_) {
+      // If the table doesn't exist yet or employee not found, proceed anyway
+    }
+  });
+
   it('concurrent identical check-ins with same idempotency key produce exactly 1 record', async () => {
     const sharedKey = nextKey();
 
@@ -106,7 +120,7 @@ describe('2. Concurrent Idempotent Check-In (Same Key)', () => {
         .post('/v1/attendance/check-in')
         .set('Authorization', `Bearer ${employeeToken}`)
         .set('Idempotency-Key', sharedKey)
-        .send({ shiftType: 'Regular', workMode: 'Office' })
+        .send({ shiftType: 'Regular', workMode: 'Office', latitude: 12.9716, longitude: 77.5946 })
     );
 
     const results = await Promise.all(requests);

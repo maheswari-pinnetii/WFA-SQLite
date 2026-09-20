@@ -103,8 +103,14 @@ export const createLeaveRequest = async (req, res) => {
     if (!finalLeaveTypeId && requestedType) {
       const lTypes = await leaveEngineService.getLeaveTypes(orgId);
       const matched = (lTypes as any[]).find(lt => lt.name.toUpperCase().includes(requestedType.toUpperCase()) || lt.name.toUpperCase() === requestedType.toUpperCase() || lt.name === requestedType);
+      console.log('--- LEAVE TYPE MATCHING ---');
+      console.log('requestedType:', requestedType);
+      console.log('lTypes:', lTypes);
+      console.log('matched:', matched);
       if (matched) finalLeaveTypeId = matched.id;
       else finalLeaveTypeId = requestedType;
+      console.log('finalLeaveTypeId:', finalLeaveTypeId);
+      console.log('---------------------------');
     }
     
     if (!finalLeaveTypeId) {

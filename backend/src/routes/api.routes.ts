@@ -250,10 +250,10 @@ router.post('/org-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']),
 
 // Attendance Punch & Session Routes
 router.get('/attendance/today', authenticateToken, tenantScope, authenticatedUserLimiter, attendanceController.getTodayAttendance);
-router.post('/attendance/check-in', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.checkIn);
-router.post('/attendance/break', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.takeBreak);
-router.post('/attendance/resume', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.resumeWork);
-router.post('/attendance/check-out', authenticateToken, tenantScope, enforceScope, validateAttendanceAction, idempotencyMiddleware, authenticatedUserLimiter, attendanceController.checkOut);
+router.post('/attendance/check-in', authenticateToken, tenantScope, enforceScope, idempotencyMiddleware, validateAttendanceAction, authenticatedUserLimiter, attendanceController.checkIn);
+router.post('/attendance/break', authenticateToken, tenantScope, enforceScope, idempotencyMiddleware, validateAttendanceAction, authenticatedUserLimiter, attendanceController.takeBreak);
+router.post('/attendance/resume', authenticateToken, tenantScope, enforceScope, idempotencyMiddleware, validateAttendanceAction, authenticatedUserLimiter, attendanceController.resumeWork);
+router.post('/attendance/check-out', authenticateToken, tenantScope, enforceScope, idempotencyMiddleware, validateAttendanceAction, authenticatedUserLimiter, attendanceController.checkOut);
 router.get('/attendance/records', authenticateToken, tenantScope, enforceScope, authenticatedUserLimiter, attendanceController.getRecords);
 router.get('/attendance/shifts', publicApiLimiter, attendanceController.getShifts);
 router.get('/attendance/holidays', publicApiLimiter, attendanceController.getPublicHolidays);

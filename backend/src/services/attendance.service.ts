@@ -107,6 +107,10 @@ export class AttendanceService {
         });
 
         if (activeSession) {
+          if (idempotencyKey && activeSession.idempotencyKey === idempotencyKey) {
+            result = { success: true, data: activeSession };
+            return;
+          }
           // Enforce state machine: CHECKED_IN → CHECKED_IN is invalid
           assertValidTransition(activeSession.status, 'CHECKED_IN');
           notificationService.triggerAlarm(employeeId, identity.name, 'DUPLICATE_CHECKIN_ATTEMPT', 'Active session already exists.');
