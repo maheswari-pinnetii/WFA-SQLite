@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Phone, Mail, Globe, Loader2, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react';
+import { Phone, Mail, Globe, Loader2, ArrowUp, ArrowDown, ChevronsUpDown, ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface MeteorCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -720,6 +720,114 @@ export const DataTable4: React.FC<DataTable4Props> = ({
     </section>
   );
 };
+
+export interface FaqItem {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface Faq3Props {
+  heading?: string;
+  description?: string;
+  items?: FaqItem[];
+  className?: string;
+}
+
+const defaultFaqItems: FaqItem[] = [
+  {
+    id: 'faq-1',
+    question: 'What is Stackly WFA-SQLite?',
+    answer:
+      'Stackly WFA-SQLite is an enterprise workforce automation platform powered by high-performance SQLite database architecture, offering real-time attendance, shifts, leave management, and payroll.',
+  },
+  {
+    id: 'faq-2',
+    question: 'How does Role-Based Access Control (RBAC) work in Stackly?',
+    answer:
+      'Stackly features 5 distinct user roles (ADMIN, HR, MANAGER, TEAM_LEAD, EMPLOYEE) with granular permissions enforcing DBAC department scoping across all application endpoints.',
+  },
+  {
+    id: 'faq-3',
+    question: 'Is multi-device biometric authentication supported?',
+    answer:
+      'Yes, Stackly supports biometric device registration including FIDO2 WebAuthn, Face Recognition, Fingerprint scan, Homescreen Lock, and Device PIN authentication.',
+  },
+  {
+    id: 'faq-4',
+    question: 'What benefits does local SQLite database offer?',
+    answer:
+      'Local SQLite provides ultra-fast microsecond queries, zero-network latency for core operations, high-concurrency WAL mode, automated backups, and complete data ownership.',
+  },
+  {
+    id: 'faq-5',
+    question: 'How are shift rosters and overtime calculated?',
+    answer:
+      'Shift rosters support General Shift, Night Shift, and Custom Timings with automatic grace periods, overtime rules, split-shift detection, and real-time punch sync.',
+  },
+];
+
+export const Faq3: React.FC<Faq3Props> = ({
+  heading = 'Frequently asked questions',
+  description = "Find answers to common questions about Stackly WFA-SQLite. Can't find what you're looking for? Contact our support team.",
+  items = defaultFaqItems,
+  className,
+}) => {
+  const [openId, setOpenId] = React.useState<string | null>('faq-1');
+
+  const toggleItem = (id: string) => {
+    setOpenId((prev) => (prev === id ? null : id));
+  };
+
+  return (
+    <section className={cn('py-12 text-slate-100', className)}>
+      <div className="max-w-4xl mx-auto px-4 space-y-8">
+        <div className="flex flex-col text-left md:text-center space-y-2">
+          <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl lg:text-4xl">
+            {heading}
+          </h2>
+          <p className="text-slate-400 text-xs md:text-sm lg:text-base max-w-2xl mx-auto">
+            {description}
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {items.map((item) => {
+            const isOpen = openId === item.id;
+            return (
+              <div
+                key={item.id}
+                className="rounded-xl border border-slate-800 bg-slate-900/90 overflow-hidden backdrop-blur-xl transition-colors duration-200"
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleItem(item.id)}
+                  className="w-full py-4 px-5 text-left flex items-center justify-between gap-4 font-semibold text-sm text-slate-100 hover:text-emerald-400 transition-colors cursor-pointer"
+                  aria-expanded={isOpen}
+                >
+                  <span>{item.question}</span>
+                  <ChevronDown
+                    className={cn(
+                      'w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200',
+                      isOpen && 'rotate-180 text-emerald-400'
+                    )}
+                  />
+                </button>
+
+                {isOpen && (
+                  <div className="px-5 pb-4 pt-1 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60">
+                    {item.answer}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 
 
 
