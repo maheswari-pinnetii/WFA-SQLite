@@ -1165,6 +1165,71 @@ export const InviteUser1: React.FC<InviteUser1Props> = ({
   );
 };
 
+export interface LeaderboardItem {
+  name: string;
+  value: number;
+  maxValue?: number;
+}
+
+export interface Leaderboard1Props {
+  title?: string;
+  description?: string;
+  items?: LeaderboardItem[];
+  valuePrefix?: string;
+  className?: string;
+}
+
+const defaultLeaderboardItems: LeaderboardItem[] = [
+  { name: 'Engineering & Tech', value: 4520 },
+  { name: 'Product Operations', value: 3210 },
+  { name: 'Customer Support & Success', value: 2890 },
+  { name: 'Human Resources & Talent', value: 1890 },
+  { name: 'Finance & Administration', value: 1240 },
+];
+
+export const Leaderboard1: React.FC<Leaderboard1Props> = ({
+  title = 'Top Departments',
+  description = 'Workforce active logs by department',
+  items = defaultLeaderboardItems,
+  valuePrefix = '',
+  className,
+}) => {
+  const maxValue = items[0]?.value || 1;
+
+  return (
+    <div className={cn('w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900/90 p-6 text-slate-100 backdrop-blur-xl shadow-xl', className)}>
+      <div className="mb-5">
+        <h3 className="text-base font-bold text-white">{title}</h3>
+        <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+      </div>
+
+      <div className="space-y-4">
+        {items.map((item, index) => {
+          const pct = Math.min(Math.max((item.value / maxValue) * 100, 0), 100);
+          return (
+            <div key={index} className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-slate-200">{item.name}</span>
+                <span className="font-mono text-slate-400">
+                  {valuePrefix}
+                  {item.value.toLocaleString()}
+                </span>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-800/80 p-0.5">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+
 
 
 
