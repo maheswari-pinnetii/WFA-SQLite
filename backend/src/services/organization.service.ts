@@ -2,6 +2,19 @@ import { query, execute } from '../database/sqlite-cloud.js';
 import { randomUUID } from 'crypto';
 
 export class OrganizationService {
+  static async createDepartment(organizationId: string, data: { name: string; code?: string }) {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    try {
+      await execute(
+        `INSERT INTO departments (id, name, code, organizationId, createdAt, updatedAt)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [id, data.name, data.code || data.name.toUpperCase().slice(0, 10), organizationId, now, now]
+      );
+    } catch (_) {}
+    return { id, name: data.name, code: data.code, organizationId };
+  }
+
   static async getLegalEntities(organizationId: string = 'org-stackly') {
     return query(`SELECT * FROM legal_entities WHERE organizationId = ? ORDER BY name ASC`, [organizationId]);
   }

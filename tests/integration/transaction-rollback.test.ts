@@ -185,8 +185,8 @@ describe('3. Idempotency Record Consistency', () => {
 
     // Verify no idempotency record was persisted
     const records = await query(
-      `SELECT id FROM idempotency_records WHERE key = ?`,
-      [failKey]
+      `SELECT key FROM idempotencyrecords WHERE key = ? UNION SELECT idempotencyKey AS key FROM idempotency_records WHERE key = ? OR idempotencyKey = ?`,
+      [failKey, failKey, failKey]
     );
     expect(records.length).toBe(0);
   });
@@ -204,8 +204,8 @@ describe('3. Idempotency Record Consistency', () => {
     if (res.status === 200 || res.status === 201) {
       // Verify idempotency record was created
       const records = await query(
-        `SELECT id FROM idempotency_records WHERE key = ?`,
-        [successKey]
+        `SELECT key FROM idempotencyrecords WHERE key = ? UNION SELECT idempotencyKey AS key FROM idempotency_records WHERE key = ? OR idempotencyKey = ?`,
+        [successKey, successKey, successKey]
       );
       expect(records.length).toBe(1);
     }

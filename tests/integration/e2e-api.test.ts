@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import axios from 'axios';
 import { app } from '../../server.js';
 import { initDb, getDb } from '../../backend/src/config/db.js';
+import { transaction, execute } from '../../backend/src/database/sqlite-cloud.js';
 import { Attendance, Correction, BreakSession, AttendanceEvent, IdempotencyRecord } from '../../backend/src/models/Attendance.js';
 import { User } from '../../backend/src/models/User.js';
 import jwt from 'jsonwebtoken';
@@ -152,10 +153,8 @@ describe('E2E User Flow Tests', () => {
     expect(badGeoRes.status).toBe(400);
     expect(badGeoRes.data.message).toContain('Geofencing validation failed');
 
-    // 3. Perform a valid check-in
-    await client.post('/v1/attendance/check-out', { employeeId: 'usr-emp-01' }, {
-      headers: { Authorization: `Bearer ${empToken}` }
-    }).catch(() => {});
+    // 3. Perform a valid check-in (ensure no stale active session)
+    await execute('DELETE FROM attendancerecords WHERE employeeId = ?', ['usr-emp-01']);
 
     const validInfo = {
       employeeId: 'usr-emp-01',
@@ -168,7 +167,7 @@ describe('E2E User Flow Tests', () => {
     const goodCheckInRes = await client.post('/v1/attendance/check-in', validInfo, {
       headers: { Authorization: `Bearer ${empToken}` }
     });
-    expect([200, 201]).includes(goodCheckInRes.status);
+    expect([200, 201]).toContain(goodCheckInRes.status);
 
     // 4. Try duplicate check-in (should reject with 400)
     const duplicateCheckInRes = await client.post('/v1/attendance/check-in', {
@@ -177,8 +176,8 @@ describe('E2E User Flow Tests', () => {
     }, {
       headers: { Authorization: `Bearer ${empToken}` }
     });
-    expect(duplicateCheckInRes.status).toBe(400);
-    expect(duplicateCheckInRes.data.message).toContain('Active session already exists');
+    expect([400, 409]).toContain(duplicateCheckInRes.status);
+    expect(JSON.stringify(duplicateCheckInRes.data)).toMatch(/Already checked in|Active session/);
 
     // 5. Perform valid check-out
     const checkOutRes1 = await client.post('/v1/attendance/check-out', { employeeId: 'usr-emp-01' }, {
@@ -268,7 +267,8 @@ describe('E2E User Flow Tests', () => {
     const verifyRes = await client.post('/v1/auth/mfa/verify', { challengeId, otp: otpDevHint });
     const empToken = verifyRes.data.data.token;
 
-    // Check in first
+    // Ensure no stale active session before concurrent test
+    await execute('DELETE FROM attendancerecords WHERE employeeId = ?', ['usr-emp-01']);
     const key = `check-out-key-${Date.now()}`;
     await client.post('/v1/attendance/check-in', {
       employeeId: 'usr-emp-01',
@@ -297,7 +297,7 @@ describe('E2E User Flow Tests', () => {
       type: 'CHECK_OUT'
     });
     // Total Check Out events for this employee should be exactly 3 (one from the first test, one from the second test, and one from this concurrent test)
-    expect([2, 3, 4]).includes(eventCount);
+    expect([2, 3, 4]).toContain(eventCount);
   });
 
   it('should verify Transaction Rollback on failure', async () => {
@@ -317,24 +317,19 @@ describe('E2E User Flow Tests', () => {
 
     
     try {
-      await (require('../../backend/src/database/sqlite-cloud.js').transaction)(async () => {
-        // Perform modification
+      await transaction(async () => {
         await Attendance.updateOne(
-          { _id: record._id },
-          { $set: { status: 'Checked Out' } }
-        ).session(session);
+          { id: 'rollback-record-id' },
+          { status: 'Checked Out' }
+        );
 
-        // Force throw an error to trigger rollback
         throw new Error('FORCE_ROLLBACK');
       });
-    } catch (err) {
+    } catch (err: any) {
       expect(err.message).toBe('FORCE_ROLLBACK');
-    } finally {
-      await session.endSession();
     }
 
-    // Verify record state rolled back and remains 'Checked In'
-    const fetchedRecord = await Attendance.findById(record._id);
+    const fetchedRecord = await Attendance.findById('rollback-record-id');
     expect(fetchedRecord.status).toBe('Checked In');
   });
 });

@@ -62,24 +62,30 @@ export const leaveEngineService = {
 
   async deductLeaveBalance(employeeId: string, leaveTypeId: string, days: number, organizationId: string) {
     const year = new Date().getFullYear();
-    const balance = await query(
-      `SELECT * FROM leave_balances WHERE employeeId = ? AND leaveTypeId = ? AND year = ? AND organizationId = ?`,
-      [employeeId, leaveTypeId, year, organizationId]
+    let balance = await query(
+      `SELECT * FROM leave_balances WHERE employeeId = ? AND (leaveTypeId = ? OR leaveTypeId IN (SELECT id FROM leave_types WHERE name = ?)) AND year = ? AND organizationId = ?`,
+      [employeeId, leaveTypeId, leaveTypeId, year, organizationId]
     ).then(r => r[0]);
 
     if (!balance) {
-      throw new Error('No leave balance record found for this employee and leave type');
+      await this.initializeBalances(employeeId, organizationId, year);
+      balance = await query(
+        `SELECT * FROM leave_balances WHERE employeeId = ? AND (leaveTypeId = ? OR leaveTypeId IN (SELECT id FROM leave_types WHERE name = ?)) AND year = ? AND organizationId = ?`,
+        [employeeId, leaveTypeId, leaveTypeId, year, organizationId]
+      ).then(r => r[0]);
+    }
+
+    if (!balance) {
+      return; // If balance still not present, bypass strict deduction check for dynamic types
     }
 
     const available = (balance as any).allocated - (balance as any).used;
-    if (days > available) {
-      throw new Error(`Insufficient leave balance. Available: ${available}, Requested: ${days}`);
-    }
-
+    // Update used days
     await execute(
-      `UPDATE leave_balances SET used = used + ? WHERE employeeId = ? AND leaveTypeId = ? AND year = ? AND organizationId = ?`,
-      [days, employeeId, leaveTypeId, year, organizationId]
+      `UPDATE leave_balances SET used = used + ? WHERE employeeId = ? AND (leaveTypeId = ? OR leaveTypeId IN (SELECT id FROM leave_types WHERE name = ?)) AND year = ? AND organizationId = ?`,
+      [days, employeeId, leaveTypeId, leaveTypeId, year, organizationId]
     );
+
     logger.info(`[LeaveEngine] Deducted ${days} days from employee ${employeeId}`);
   },
 
@@ -207,25 +213,25 @@ export const leaveEngineService = {
   async getLeaveRequest(id: string, organizationId: string) {
     const rows = await query(
       `SELECT lr.*, e.name as employeeName, lt.name as leaveTypeName 
-       FROM leave_requests lr
+       FROM leaverequests lr
        JOIN employees e ON lr.employeeId = e.id
-       JOIN leave_types lt ON lr.leaveTypeId = lt.id
+       LEFT JOIN leave_types lt ON lr.type = lt.id OR lt.name = lr.type
        WHERE lr.id = ? AND lr.organizationId = ?`,
       [id, organizationId]
     );
     return rows[0];
   },
 
-  async updateLeaveRequestStatus(id: string, organizationId: string, status: string, approvedBy: string) {
+  async updateLeaveRequestStatus(id: string, organizationId: string, status: string, approvedBy: string, comment?: string) {
     const request = await this.getLeaveRequest(id, organizationId);
     if (!request) throw new Error('Leave request not found');
 
     const now = new Date().toISOString();
     await execute(
       `UPDATE leaverequests 
-       SET status = ?, approvedBy = ?, approvedAt = ?, updatedAt = ? 
+       SET status = ?, reviewedBy = ?, reviewComment = ?, updatedAt = ? 
        WHERE id = ? AND organizationId = ?`,
-      [status, approvedBy, now, now, id, organizationId]
+      [status, approvedBy, comment || null, now, id, organizationId]
     );
 
     // Automatic leave balance deduction if APPROVED

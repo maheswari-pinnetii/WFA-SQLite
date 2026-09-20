@@ -36,84 +36,98 @@ describe('Smart Attendance Service Unit & Integration Tests', () => {
   });
 
   describe('Punch Check-In & Check-Out State Transitions', () => {
-    const empInfo = {
-      employeeId: 'emp-999',
-      employeeName: 'John Doe',
-      department: 'Engineering & Technology',
-      shiftType: 'Regular' as const,
-      workMode: 'Office' as const,
-      latitude: OFFICE_COORDS.lat,
-      longitude: OFFICE_COORDS.lng
-    };
-
-    it('should allow normal check-in and check-out transition', () => {
-      const checkedIn = attendanceService.checkIn(empInfo);
+    it('should allow normal check-in and check-out transition', async () => {
+      const empInfo = {
+        employeeId: 'emp-transition-1',
+        employeeName: 'John Doe',
+        department: 'Engineering & Technology',
+        shiftType: 'Regular' as const,
+        workMode: 'Office' as const,
+        latitude: OFFICE_COORDS.lat,
+        longitude: OFFICE_COORDS.lng
+      };
+      const checkedIn = await attendanceService.checkIn(empInfo);
       expect(checkedIn.status).toBe('Checked In');
       expect(checkedIn.checkOutTime).toBeNull();
 
-      attendanceService.checkOut('emp-999');
-      const records = attendanceService.getRecords();
-      expect(records[0].status).toBe('Checked Out');
-      expect(records[0].checkOutTime).not.toBeNull();
+      await attendanceService.checkOut('emp-transition-1');
+      const records = await attendanceService.getRecords();
+      const rec = records.find(r => r.employeeId === 'emp-transition-1');
+      expect(rec?.status).toBe('Checked Out');
+      expect(rec?.checkOutTime).not.toBeNull();
     });
 
-    it('should reject duplicate check-in attempts', () => {
-      attendanceService.checkIn(empInfo);
-      expect(() => {
-        attendanceService.checkIn(empInfo);
-      }).toThrowError('Active session already exists. Must check out first.');
+    it('should reject duplicate check-in attempts', async () => {
+      const empInfo = {
+        employeeId: 'emp-duplicate-1',
+        employeeName: 'John Doe',
+        department: 'Engineering & Technology',
+        shiftType: 'Regular' as const,
+        workMode: 'Office' as const,
+        latitude: OFFICE_COORDS.lat,
+        longitude: OFFICE_COORDS.lng
+      };
+      await attendanceService.checkIn(empInfo);
+      await expect(attendanceService.checkIn(empInfo))
+        .rejects.toThrowError('Active session already exists. Must check out first.');
     });
 
-    it('should reject check-out before check-in', () => {
-      expect(() => {
-        attendanceService.checkOut('emp-unregistered');
-      }).toThrowError('Check-out-before-check-in rejection. No active session found.');
+    it('should reject check-out before check-in', async () => {
+      await expect(attendanceService.checkOut('emp-unregistered'))
+        .rejects.toThrowError('Check-out-before-check-in rejection. No active session found.');
     });
 
-    it('should support take break and resume cycle', () => {
-      attendanceService.checkIn(empInfo);
-      attendanceService.takeBreak('emp-999');
+    it('should support take break and resume cycle', async () => {
+      const empInfo = {
+        employeeId: 'emp-break-1',
+        employeeName: 'John Doe',
+        department: 'Engineering & Technology',
+        shiftType: 'Regular' as const,
+        workMode: 'Office' as const,
+        latitude: OFFICE_COORDS.lat,
+        longitude: OFFICE_COORDS.lng
+      };
+      await attendanceService.checkIn(empInfo);
+      await attendanceService.takeBreak('emp-break-1');
       
-      let records = attendanceService.getRecords();
-      expect(records[0].status).toBe('On Break');
-      expect(records[0].breaks[0].end).toBeNull();
+      let records = await attendanceService.getRecords();
+      let rec = records.find(r => r.employeeId === 'emp-break-1');
+      expect(rec?.status).toBe('On Break');
+      expect(rec?.breaks[0].end).toBeNull();
 
-      attendanceService.resumeWork('emp-999');
-      records = attendanceService.getRecords();
-      expect(records[0].status).toBe('Working');
-      expect(records[0].breaks[0].end).not.toBeNull();
+      await attendanceService.resumeWork('emp-break-1');
+      records = await attendanceService.getRecords();
+      rec = records.find(r => r.employeeId === 'emp-break-1');
+      expect(rec?.status).toBe('Working');
+      expect(rec?.breaks[0].end).not.toBeNull();
     });
   });
 
   describe('Geofencing Access Enforcements', () => {
-    it('should reject check-in if coordinates are missing for In-Office mode', () => {
-      expect(() => {
-        attendanceService.checkIn({
-          employeeId: 'emp-geofence',
-          employeeName: 'Jane Smith',
-          department: 'HR Ops',
-          shiftType: 'Regular',
-          workMode: 'Office'
-        });
-      }).toThrowError('Location permissions are required for In-Office check-in.');
+    it('should reject check-in if coordinates are missing for In-Office mode', async () => {
+      await expect(attendanceService.checkIn({
+        employeeId: 'emp-geofence',
+        employeeName: 'Jane Smith',
+        department: 'HR Ops',
+        shiftType: 'Regular',
+        workMode: 'Office'
+      })).rejects.toThrowError('Location permissions are required for In-Office check-in.');
     });
 
-    it('should reject check-in if coordinates are outside Bengaluru office radius', () => {
-      expect(() => {
-        attendanceService.checkIn({
-          employeeId: 'emp-geofence-2',
-          employeeName: 'Jane Smith',
-          department: 'HR Ops',
-          shiftType: 'Regular',
-          workMode: 'Office',
-          latitude: 12.9000,
-          longitude: 77.5000
-        });
-      }).toThrowError(/Geofencing validation failed/);
+    it('should reject check-in if coordinates are outside Bengaluru office radius', async () => {
+      await expect(attendanceService.checkIn({
+        employeeId: 'emp-geofence-2',
+        employeeName: 'Jane Smith',
+        department: 'HR Ops',
+        shiftType: 'Regular',
+        workMode: 'Office',
+        latitude: 12.9000,
+        longitude: 77.5000
+      })).rejects.toThrowError(/Geofencing validation failed/);
     });
 
-    it('should allow check-in if coordinates are within office bounds', () => {
-      const record = attendanceService.checkIn({
+    it('should allow check-in if coordinates are within office bounds', async () => {
+      const record = await attendanceService.checkIn({
         employeeId: 'emp-geofence-3',
         employeeName: 'Jane Smith',
         department: 'HR Ops',
@@ -170,8 +184,8 @@ describe('Smart Attendance Service Unit & Integration Tests', () => {
   });
 
   describe('Offline Queue & Synchronization', () => {
-    it('should queue attendance actions offline and process them upon synchronization', () => {
-      attendanceService.enqueueOfflineAction({
+    it('should queue attendance actions offline and process them upon synchronization', async () => {
+      await attendanceService.enqueueOfflineAction({
         type: 'CHECK_IN',
         payload: {
           employeeId: 'emp-off',
@@ -182,14 +196,14 @@ describe('Smart Attendance Service Unit & Integration Tests', () => {
         }
       });
 
-      let queue = attendanceService.getOfflineQueue();
+      let queue = await attendanceService.getOfflineQueue();
       expect(queue.length).toBe(1);
       expect(queue[0].type).toBe('CHECK_IN');
 
-      const result = attendanceService.syncOfflineActions();
+      const result = await attendanceService.syncOfflineActions();
       expect(result.syncedCount).toBe(1);
 
-      const records = attendanceService.getRecords();
+      const records = await attendanceService.getRecords();
       expect(records.find((r) => r.employeeId === 'emp-off')).toBeDefined();
     });
   });

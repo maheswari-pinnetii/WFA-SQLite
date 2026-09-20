@@ -9,9 +9,11 @@ export class IndexedDBWrapper {
     this.storeNames = storeNames;
   }
 
-  private async openDB(): Promise<IDBDatabase> {
+  private inMemoryFallback: Map<string, any[]> = new Map();
+
+  private async openDB(): Promise<IDBDatabase | null> {
     if (typeof indexedDB === 'undefined') {
-      return Promise.reject(new Error('IndexedDB is not supported in this environment'));
+      return null;
     }
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, this.dbVersion);
@@ -34,6 +36,10 @@ export class IndexedDBWrapper {
 
   async get<T>(storeName: string, id: IDBValidKey): Promise<T | undefined> {
     const db = await this.openDB();
+    if (!db) {
+      const items = this.inMemoryFallback.get(storeName) || [];
+      return items.find((i: any) => i.id === id);
+    }
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readonly');
       const store = transaction.objectStore(storeName);
@@ -46,6 +52,9 @@ export class IndexedDBWrapper {
 
   async getAll<T>(storeName: string): Promise<T[]> {
     const db = await this.openDB();
+    if (!db) {
+      return (this.inMemoryFallback.get(storeName) || []) as T[];
+    }
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readonly');
       const store = transaction.objectStore(storeName);
@@ -58,6 +67,13 @@ export class IndexedDBWrapper {
 
   async put<T>(storeName: string, item: T): Promise<IDBValidKey> {
     const db = await this.openDB();
+    if (!db) {
+      const items = this.inMemoryFallback.get(storeName) || [];
+      const itemWithId = { id: Date.now(), ...(item as any) };
+      items.push(itemWithId);
+      this.inMemoryFallback.set(storeName, items);
+      return itemWithId.id;
+    }
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
       const store = transaction.objectStore(storeName);
@@ -70,6 +86,10 @@ export class IndexedDBWrapper {
 
   async putAll<T>(storeName: string, items: T[]): Promise<void> {
     const db = await this.openDB();
+    if (!db) {
+      this.inMemoryFallback.set(storeName, [...items]);
+      return;
+    }
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
       const store = transaction.objectStore(storeName);
@@ -86,6 +106,11 @@ export class IndexedDBWrapper {
 
   async delete(storeName: string, id: IDBValidKey): Promise<void> {
     const db = await this.openDB();
+    if (!db) {
+      const items = this.inMemoryFallback.get(storeName) || [];
+      this.inMemoryFallback.set(storeName, items.filter((i: any) => i.id !== id));
+      return;
+    }
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
       const store = transaction.objectStore(storeName);
@@ -98,6 +123,10 @@ export class IndexedDBWrapper {
 
   async clear(storeName: string): Promise<void> {
     const db = await this.openDB();
+    if (!db) {
+      this.inMemoryFallback.set(storeName, []);
+      return;
+    }
     return new Promise((resolve, reject) => {
       const transaction = db.transaction(storeName, 'readwrite');
       const store = transaction.objectStore(storeName);

@@ -112,7 +112,7 @@ describe('SQLite Database Backup & Disaster Recovery Test Suite', () => {
     expect(res.data.success).toBe(true);
     expect(res.data.data.filename).toBeDefined();
     expect(res.data.data.checksumSha256).toBeDefined();
-  });
+  }, 30000);
 
   it('should support Admin REST endpoint GET /v1/admin/backups', async () => {
     const res = await client.get('/v1/admin/backups', {

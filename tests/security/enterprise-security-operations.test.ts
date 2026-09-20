@@ -5,6 +5,8 @@ import { app } from '../../backend/src/app.js';
 import { execute, query } from '../../backend/src/database/sqlite-cloud.js';
 import { env } from '../../backend/src/config/env.js';
 
+import { initDb } from '../../backend/src/config/db.js';
+
 const JWT_SECRET = env.JWT_SECRET || 'stackly_wfa_super_secret_jwt_key_2026';
 
 describe('Enterprise Security Operations & Data Privacy Suite', () => {
@@ -20,12 +22,24 @@ describe('Enterprise Security Operations & Data Privacy Suite', () => {
   let employeeToken: string;
   let peerToken: string;
 
+  beforeAll(async () => {
+    await initDb();
+    const now = new Date().toISOString();
+    await execute(`
+      INSERT INTO companies (id, name, domain, status, createdAt, updatedAt)
+      VALUES ('org-stackly', 'Stackly Corp', 'thestackly.com', 'ACTIVE', ?, ?)
+      ON CONFLICT(id) DO NOTHING
+    `, [now, now]);
+  });
+
   beforeEach(async () => {
     const now = new Date().toISOString();
     // Clean up
+    await execute('PRAGMA foreign_keys = OFF');
     await execute('DELETE FROM sessions WHERE userId IN (?, ?, ?)', [adminId, employeeId, peerId]);
-    await execute('DELETE FROM users WHERE id IN (?, ?, ?)', [adminId, employeeId, peerId]);
     await execute('DELETE FROM employees WHERE id IN (?, ?, ?)', [adminId, employeeId, peerId]);
+    await execute('DELETE FROM users WHERE id IN (?, ?, ?)', [adminId, employeeId, peerId]);
+    await execute('PRAGMA foreign_keys = ON');
 
     // Insert Admin
     await execute(`

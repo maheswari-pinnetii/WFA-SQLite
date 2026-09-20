@@ -227,6 +227,7 @@ export class AnalyticsService {
       },
       metrics: {
         totalEmployees,
+        totalWorkforce: totalEmployees,
         activeEmployees,
         presentToday: activePresent,
         attendanceRate: `${attendanceRate}%`,

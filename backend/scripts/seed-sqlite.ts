@@ -30,6 +30,8 @@ export const seedSqlite = async () => {
   try { db.exec("ALTER TABLE failed_logins ADD COLUMN lockReason TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE employees ADD COLUMN jobFamilyId TEXT;"); } catch (e) {}
   try { db.exec("ALTER TABLE employees ADD COLUMN jobRoleId TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE audit_logs ADD COLUMN employeeId TEXT;"); } catch (e) {}
+  try { db.exec("ALTER TABLE audit_logs ADD COLUMN timestamp TEXT;"); } catch (e) {}
 
   console.log('[SQLite Seeder] Starting database seeding transaction...');
 

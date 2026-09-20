@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS employees (
   id TEXT PRIMARY KEY,
   employeeCode TEXT UNIQUE,
   name TEXT NOT NULL,
-  email TEXT UNIQUE,
+  email TEXT UNIQUE NOT NULL,
   role TEXT NOT NULL DEFAULT 'EMPLOYEE',
   department TEXT,
   designation TEXT,
@@ -241,6 +241,8 @@ CREATE TABLE IF NOT EXISTS leaverequests (
   type TEXT,
   startDate TEXT,
   endDate TEXT,
+  isHalfDay INTEGER DEFAULT 0,
+  halfDayPeriod TEXT,
   reason TEXT,
   status TEXT DEFAULT 'PENDING',
   reviewedBy TEXT,
@@ -276,6 +278,20 @@ CREATE TABLE IF NOT EXISTS user_notification_preferences (
   createdAt TEXT NOT NULL,
   updatedAt TEXT NOT NULL,
   FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS attendance (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  date TEXT NOT NULL,
+  checkInTime TEXT,
+  checkOutTime TEXT,
+  status TEXT DEFAULT 'Checked In',
+  organizationId TEXT DEFAULT 'org-stackly',
+  companyId TEXT DEFAULT 'org-stackly',
+  createdAt TEXT,
+  updatedAt TEXT,
+  UNIQUE(employeeId, date)
 );
 
 CREATE TABLE IF NOT EXISTS attendancerecords (
@@ -353,6 +369,28 @@ CREATE TABLE IF NOT EXISTS idempotencyrecords (
   PRIMARY KEY (companyId, key)
 );
 
+CREATE TABLE IF NOT EXISTS idempotency_records (
+  id TEXT PRIMARY KEY,
+  idempotencyKey TEXT UNIQUE,
+  responseBody TEXT,
+  statusCode INTEGER,
+  employeeId TEXT,
+  createdAt TEXT,
+  companyId TEXT DEFAULT 'org-stackly',
+  key TEXT UNIQUE,
+  response TEXT,
+  expiresAt TEXT,
+  updatedAt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS user_sessions (
+  id TEXT PRIMARY KEY,
+  userId TEXT NOT NULL,
+  token TEXT UNIQUE NOT NULL,
+  expiresAt TEXT NOT NULL,
+  createdAt TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS sessions (
   id TEXT PRIMARY KEY,
   userId TEXT NOT NULL,
@@ -377,14 +415,18 @@ CREATE TABLE IF NOT EXISTS refreshtokens (
   updatedAt TEXT
 );
 
+
+
 CREATE TABLE IF NOT EXISTS audit_logs (
   id TEXT PRIMARY KEY,
-  actorId TEXT NOT NULL,
+  actorId TEXT,
+  employeeId TEXT,
   action TEXT NOT NULL,
-  entityType TEXT NOT NULL,
-  entityId TEXT NOT NULL,
+  entityType TEXT,
+  entityId TEXT,
   details TEXT,
   ipAddress TEXT,
+  timestamp TEXT,
   createdAt TEXT NOT NULL
 );
 
@@ -657,13 +699,92 @@ CREATE TABLE IF NOT EXISTS salary_components (
   FOREIGN KEY (salaryStructureId) REFERENCES salary_structures(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS employee_salary_structures (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  organizationId TEXT DEFAULT 'org-stackly',
+  salaryStructureId TEXT,
+  annualCtc REAL,
+  monthlyGross REAL,
+  currency TEXT DEFAULT 'INR',
+  effectiveFrom TEXT NOT NULL,
+  effectiveTo TEXT,
+  revisionReason TEXT,
+  isActive INTEGER DEFAULT 1,
+  createdBy TEXT,
+  createdAt TEXT,
+  updatedAt TEXT,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS salary_revisions (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  organizationId TEXT DEFAULT 'org-stackly',
+  previousCtc REAL,
+  newCtc REAL,
+  previousStructureId TEXT,
+  newStructureId TEXT,
+  effectiveDate TEXT NOT NULL,
+  revisionPercentage REAL,
+  reason TEXT,
+  createdBy TEXT,
+  approvedBy TEXT,
+  createdTimestamp TEXT,
+  approvalTimestamp TEXT,
+  status TEXT DEFAULT 'APPROVED',
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS payroll_runs (
   id TEXT PRIMARY KEY,
   organizationId TEXT DEFAULT 'org-stackly',
-  periodStart TEXT NOT NULL,
-  periodEnd TEXT NOT NULL,
-  runDate TEXT NOT NULL,
-  status TEXT DEFAULT 'DRAFT'
+  month INTEGER,
+  year INTEGER,
+  periodStart TEXT,
+  periodEnd TEXT,
+  runDate TEXT,
+  status TEXT DEFAULT 'DRAFT',
+  totalEmployees INTEGER DEFAULT 0,
+  totalGrossPay REAL DEFAULT 0,
+  totalDeductions REAL DEFAULT 0,
+  totalNetPay REAL DEFAULT 0,
+  description TEXT,
+  createdBy TEXT,
+  createdAt TEXT,
+  updatedAt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS payroll_run_employees (
+  id TEXT PRIMARY KEY,
+  payrollRunId TEXT NOT NULL,
+  employeeId TEXT NOT NULL,
+  grossPay REAL DEFAULT 0,
+  deductions REAL DEFAULT 0,
+  netPay REAL DEFAULT 0,
+  status TEXT DEFAULT 'CALCULATED',
+  FOREIGN KEY (payrollRunId) REFERENCES payroll_runs(id) ON DELETE CASCADE,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS expenses (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT,
+  userId TEXT,
+  amount REAL NOT NULL,
+  status TEXT DEFAULT 'PENDING',
+  payrollProcessed INTEGER DEFAULT 0,
+  paidStatus TEXT DEFAULT 'UNPAID',
+  createdAt TEXT
+);
+
+CREATE TABLE IF NOT EXISTS payroll_run_logs (
+  id TEXT PRIMARY KEY,
+  payrollRunId TEXT NOT NULL,
+  level TEXT DEFAULT 'INFO',
+  message TEXT NOT NULL,
+  createdAt TEXT NOT NULL,
+  FOREIGN KEY (payrollRunId) REFERENCES payroll_runs(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS payslips (

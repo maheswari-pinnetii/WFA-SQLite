@@ -75,9 +75,10 @@ export const createLeaveRequest = async (req, res) => {
   try {
     const body = req.body || {};
     const employeeId = req.user.role === 'EMPLOYEE' ? req.user.id : body.employeeId;
-    const { leaveTypeId, type, startDate, endDate, reason, isHalfDay, halfDayPeriod } = body;
+    const { leaveTypeId, type, leaveType, startDate, endDate, reason, isHalfDay, halfDayPeriod } = body;
+    const requestedType = type || leaveType;
     
-    if (!employeeId || (!type && !leaveTypeId) || !startDate || !endDate || !reason?.trim()) {
+    if (!employeeId || (!requestedType && !leaveTypeId) || !startDate || !endDate || !reason?.trim()) {
       return res.status(400).json({ success: false, message: 'Leave type, dates and reason are required.' });
     }
     if (new Date(endDate) < new Date(startDate)) {
@@ -99,10 +100,11 @@ export const createLeaveRequest = async (req, res) => {
 
     // Resolve leaveTypeId if frontend sent a type string instead of ID
     let finalLeaveTypeId = leaveTypeId;
-    if (!finalLeaveTypeId && type) {
+    if (!finalLeaveTypeId && requestedType) {
       const lTypes = await leaveEngineService.getLeaveTypes(orgId);
-      const matched = (lTypes as any[]).find(lt => lt.name.toUpperCase() === type.toUpperCase() || lt.name === type);
+      const matched = (lTypes as any[]).find(lt => lt.name.toUpperCase().includes(requestedType.toUpperCase()) || lt.name.toUpperCase() === requestedType.toUpperCase() || lt.name === requestedType);
       if (matched) finalLeaveTypeId = matched.id;
+      else finalLeaveTypeId = requestedType;
     }
     
     if (!finalLeaveTypeId) {
@@ -161,7 +163,8 @@ export const createLeaveRequest = async (req, res) => {
 
 export const reviewLeaveRequest = async (req, res) => {
   try {
-    const { status, reviewComment = '' } = req.body || {};
+    const { status, comment, reviewComment } = req.body || {};
+    const finalComment = comment || reviewComment || '';
     if (!['APPROVED', 'REJECTED'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Status must be APPROVED or REJECTED.' });
     }
@@ -176,36 +179,14 @@ export const reviewLeaveRequest = async (req, res) => {
     }
 
     const identity = await findIdentity(request.employeeId, orgId);
-    if (req.user.role === 'MANAGER' && identity.department !== req.user.department) {
+    if (req.user.role === 'MANAGER' && identity && identity.department && req.user.department && identity.department !== req.user.department) {
       return res.status(403).json({ success: false, message: 'Leave request is outside your department.' });
     }
-    if (req.user.role === 'TEAM_LEAD' && identity.team !== req.user.team) {
+    if (req.user.role === 'TEAM_LEAD' && identity && identity.team && req.user.team && identity.team !== req.user.team) {
       return res.status(403).json({ success: false, message: 'Leave request is outside your team.' });
     }
 
-    if (status === 'APPROVED') {
-      try {
-        const startDate = new Date(request.startDate);
-        const endDate = new Date(request.endDate);
-        
-        let days = 0;
-        if (request.isHalfDay) {
-          days = 0.5;
-        } else {
-          try {
-            days = await leaveEngineService.calculateWorkingDays(request.startDate, request.endDate, orgId);
-          } catch {
-            days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-          }
-        }
-        
-        await leaveEngineService.deductLeaveBalance(request.employeeId, request.leaveTypeId, days, orgId);
-      } catch (balanceErr: any) {
-        return res.status(400).json({ success: false, message: `Leave balance error: ${balanceErr.message}` });
-      }
-    }
-
-    const updatedRequest = await leaveEngineService.updateLeaveRequestStatus(request.id, orgId, status, req.user.name);
+    const updatedRequest = await leaveEngineService.updateLeaveRequestStatus(request.id, orgId, status, req.user.name, finalComment);
 
     logAudit(request.employeeId, `LEAVE_${status}`, `${req.user.name} reviewed leave request ${request.id}`, orgId);
 

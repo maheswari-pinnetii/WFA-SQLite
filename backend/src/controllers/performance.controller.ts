@@ -106,10 +106,11 @@ export const getLeaveTypes = async (req: Request, res: Response) => {
 
 export const createLeaveType = async (req: Request, res: Response) => {
   try {
-    const { name, description, defaultDays, isPaid } = req.body;
-    if (!name || defaultDays === undefined)
-      return res.status(400).json({ success: false, message: 'name and defaultDays required' });
-    const data = await leaveEngineService.createLeaveType(u(req).organizationId, { name, description, defaultDays, isPaid });
+    const { name, description, defaultDays, maxDaysPerYear, isPaid } = req.body;
+    const days = defaultDays !== undefined ? defaultDays : (maxDaysPerYear !== undefined ? maxDaysPerYear : 10);
+    if (!name)
+      return res.status(400).json({ success: false, message: 'name is required' });
+    const data = await leaveEngineService.createLeaveType(u(req).organizationId, { name, description, defaultDays: days, isPaid });
     res.status(201).json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });
@@ -119,7 +120,8 @@ export const createLeaveType = async (req: Request, res: Response) => {
 export const getLeaveBalances = async (req: Request, res: Response) => {
   try {
     const year = req.query.year ? parseInt(req.query.year as string) : undefined;
-    const data = await leaveEngineService.getLeaveBalances(req.params.employeeId as string, u(req).organizationId, year);
+    const empId = (req.params.employeeId || (req as any).user?.employeeId || (req as any).user?.id) as string;
+    const data = await leaveEngineService.getLeaveBalances(empId, u(req).organizationId, year);
     res.json({ success: true, data });
   } catch (err: any) {
     res.status(500).json({ success: false, message: err.message });

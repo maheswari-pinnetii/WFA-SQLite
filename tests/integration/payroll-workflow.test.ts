@@ -90,7 +90,7 @@ describe('1. Salary Structure', () => {
 
   it('EMPLOYEE cannot view salary structures of others', async () => {
     const res = await request(app)
-      .get(`/v1/payroll/salary/${testEmployeeId}`)
+      .get('/v1/payroll/salary/other-emp-id-99999')
       .set('Authorization', `Bearer ${employeeToken}`);
     expect([401, 403]).toContain(res.status);
   });

@@ -35,6 +35,9 @@ jobs:
     - name: Run Integration Tests
       run: npm run test:integration
 
+    - name: Run Security Tests
+      run: npm run test:security
+
     - name: Production Build
       run: npm run build
 

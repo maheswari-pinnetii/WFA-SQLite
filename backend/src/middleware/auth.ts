@@ -124,7 +124,8 @@ export const enforceScope = async (req, res, next) => {
     const targetTeam = (req.query && req.query.team) || (req.body && req.body.team) || (req.params && req.params.team);
 
     if (role === 'EMPLOYEE') {
-      if (targetEmployeeId && targetEmployeeId !== userId) {
+      const userEmployeeId = req.user?.employeeId || userId;
+      if (targetEmployeeId && targetEmployeeId !== userId && targetEmployeeId !== userEmployeeId) {
         return res.status(403).json({ success: false, message: 'Access Denied: You can only access your own records.' });
       }
       return next();

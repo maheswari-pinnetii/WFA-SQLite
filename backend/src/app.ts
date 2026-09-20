@@ -60,6 +60,12 @@ app.use(cors({
 }));
 app.use(requestTimeoutGuard(30000));
 app.use(express.json({ limit: '10mb' }));
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err && (err instanceof SyntaxError || err.type === 'entity.parse.failed' || err.status === 400)) {
+    return res.status(400).json({ success: false, message: 'Invalid or malformed JSON payload.' });
+  }
+  next(err);
+});
 app.use(prototypePollutionGuard);
 app.use(inputSanitizer);
 app.use(csrfProtection);

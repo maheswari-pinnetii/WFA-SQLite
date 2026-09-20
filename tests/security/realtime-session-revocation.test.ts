@@ -5,12 +5,18 @@ import { app } from '../../backend/src/app.js';
 import { execute, query } from '../../backend/src/database/sqlite-cloud.js';
 import { env } from '../../backend/src/config/env.js';
 
+import { initDb } from '../../backend/src/config/db.js';
+
 const JWT_SECRET = env.JWT_SECRET || 'stackly_wfa_super_secret_jwt_key_2026';
 
 describe('Real-Time Session Revocation & Lockout Enforcement Suite', () => {
   const testUserId = 'usr-test-security-001';
   const testEmail = 'security.test@thestackly.com';
   const testSessionId = 'sess-test-security-999';
+
+  beforeAll(async () => {
+    await initDb();
+  });
 
   beforeEach(async () => {
     // Clean up test data

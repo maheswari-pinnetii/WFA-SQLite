@@ -79,7 +79,7 @@ export const createShift = async (req: any, res: any) => {
     return res.status(201).json({ success: true, data });
   } catch (err: any) {
     console.error('[createShift Error]:', err);
-    if (err.message?.includes('required')) return res.status(400).json({ success: false, message: err.message });
+    if (err.message?.includes('required') || err.message?.includes('Invalid') || err.message?.includes('format')) return res.status(400).json({ success: false, message: err.message });
     return handleControllerError(err, req, res, 'attendanceP2.createShift', 500, 'Failed to create shift.');
   }
 };

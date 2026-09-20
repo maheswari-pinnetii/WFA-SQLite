@@ -25,6 +25,7 @@ import * as managerDashboardController from '../controllers/manager-dashboard.co
 import * as teamLeadDashboardController from '../controllers/team-lead-dashboard.controller.js';
 import * as employeeDashboardController from '../controllers/employee-dashboard.controller.js';
 import * as jobRoleController from '../controllers/job-role.controller.js';
+import * as notificationController from '../controllers/notification.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { tenantScope } from '../middleware/tenantScope.js';
 import { uploadMiddleware } from '../middleware/fileUpload.js';
@@ -207,6 +208,7 @@ router.get('/teams/:id/members', authenticateToken, enforceScope, validateIdPara
 
 // Org, Dept & RBAC Route mappings
 router.get('/departments', authenticateToken, authenticatedUserLimiter, organizationController.getDepartments);
+router.post('/departments', authenticateToken, authorizeRoles(['ADMIN', 'HR']), organizationController.createDepartment);
 router.get('/organizations', authenticateToken, authenticatedUserLimiter, organizationController.getOrganizations);
 // Roles & Permissions
 router.get('/roles', authenticateToken, authenticatedUserLimiter, organizationController.getRoles);
@@ -262,6 +264,7 @@ router.get('/leave-requests', authenticateToken, enforceScope, authenticatedUser
 router.post('/leave-requests', authenticateToken, enforceScope, validateLeaveRequest, idempotencyMiddleware, authenticatedUserLimiter, workforceController.createLeaveRequest);
 router.post('/leave-requests/bulk-review', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), authenticatedUserLimiter, workforceController.bulkReviewLeaveRequests);
 router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewLeaveRequest, workforceController.reviewLeaveRequest);
+router.put('/leave-requests/:id/review', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewLeaveRequest, workforceController.reviewLeaveRequest);
 
 router.get('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), workforceController.getLeavePolicies);
 router.post('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), workforceController.createLeavePolicy);
@@ -297,6 +300,13 @@ router.post('/work-configs', authenticateToken, authorizeRoles(['ADMIN', 'HR']),
 
 // Phase 2: Employee Shift Assignments
 router.post('/employees/:id/shift-assignment', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, attendanceP2.assignShift);
+
+// Notifications
+router.get('/notifications', authenticateToken, authenticatedUserLimiter, notificationController.getNotifications);
+router.put('/notifications/read-all', authenticateToken, authenticatedUserLimiter, notificationController.markAllAsRead);
+router.put('/notifications/:id/read', authenticateToken, validateIdParam, authenticatedUserLimiter, notificationController.markAsRead);
+router.get('/notifications/preferences', authenticateToken, authenticatedUserLimiter, notificationController.getPreferences);
+router.put('/notifications/preferences', authenticateToken, authenticatedUserLimiter, notificationController.updatePreferences);
 router.get('/employees/:id/shift-assignment', authenticateToken, enforceScope, validateIdParam, authenticatedUserLimiter, attendanceP2.getCurrentShift);
 
 // Analytics
@@ -323,7 +333,7 @@ router.get('/analytics/performance', authenticateToken, enforceScope, authentica
 
 // Compliance & Intelligence Reports Streaming (CSV / JSON)
 router.get('/reports/attendance/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportAttendanceReport);
-router.get('/reports/workforce/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), reportController.exportWorkforceReport);
+router.get('/reports/workforce/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportWorkforceReport);
 router.get('/reports/leave/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportLeaveReport);
 router.get('/reports/payroll/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportPayrollReport);
 router.get('/reports/statutory/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportStatutoryReport);
@@ -384,8 +394,11 @@ router.post('/payroll/fnf/:id/approve', authenticateToken, authorizeRoles(['ADMI
 
 // ─── Leave Engine (Step 3) ───────────────────────────────────────────────────
 router.get('/leave/types', authenticateToken, authenticatedUserLimiter, performanceController.getLeaveTypes);
+router.get('/leave-types', authenticateToken, authenticatedUserLimiter, performanceController.getLeaveTypes);
 router.post('/leave/types', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.createLeaveType);
+router.post('/leave-types', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.createLeaveType);
 router.get('/leave/balances/:employeeId', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.getLeaveBalances);
+router.get('/leave-balances', authenticateToken, enforceScope, authenticatedUserLimiter, performanceController.getLeaveBalances);
 router.get('/leave/holidays', authenticateToken, authenticatedUserLimiter, performanceController.getHolidays);
 router.post('/leave/holidays', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.addHoliday);
 
@@ -421,6 +434,7 @@ router.post('/payroll/ctc/calculate', authenticateToken, authorizeRoles(['ADMIN'
 router.get('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.getPayrollRuns);
 router.post('/payroll/runs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.createPayrollRun);
 router.post('/payroll/runs/:runId/calculate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.calculatePayrollRun);
+router.post('/payroll/runs/:runId/generate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.calculatePayrollRun);
 router.post('/payroll/runs/:runId/validate', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.validatePayrollRun);
 router.post('/payroll/runs/:runId/submit', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.submitPayrollRun);
 router.post('/payroll/runs/:runId/approve', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.approvePayrollRun);

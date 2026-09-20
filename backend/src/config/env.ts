@@ -61,7 +61,7 @@ export const env = {
   RATE_LIMIT_LOGIN_WINDOW_MS: parseInt(process.env.RATE_LIMIT_LOGIN_WINDOW_MS || '900000', 10),
   RATE_LIMIT_SIGNUP_MAX: parseInt(process.env.RATE_LIMIT_SIGNUP_MAX || '2000', 10),
   RATE_LIMIT_SIGNUP_WINDOW_MS: parseInt(process.env.RATE_LIMIT_SIGNUP_WINDOW_MS || '3600000', 10), // 1 hour
-  RATE_LIMIT_RESET_MAX: parseInt(process.env.RATE_LIMIT_RESET_MAX || '50', 10),
+  RATE_LIMIT_RESET_MAX: parseInt(process.env.RATE_LIMIT_RESET_MAX || '3', 10),
   RATE_LIMIT_RESET_WINDOW_MS: parseInt(process.env.RATE_LIMIT_RESET_WINDOW_MS || '900000', 10),
   RATE_LIMIT_OTP_MAX: parseInt(process.env.RATE_LIMIT_OTP_MAX || '2000', 10),
   RATE_LIMIT_OTP_WINDOW_MS: parseInt(process.env.RATE_LIMIT_OTP_WINDOW_MS || '3600000', 10),

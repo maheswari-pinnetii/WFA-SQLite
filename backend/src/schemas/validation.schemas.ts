@@ -114,21 +114,30 @@ export const attendanceActionSchema = z.object({
   employeeName: z.string().trim().max(255).optional(),
   department: z.string().trim().max(100).optional(),
   shiftType: z.string().trim().max(100).optional(),
-  workMode: z.string().trim().max(100).optional(),
+  workMode: z.enum(['Office', 'Remote', 'Hybrid']).optional(),
   idempotencyKey: z.string().trim().max(255).optional()
 }).passthrough();
 
 export const leaveRequestSchema = z.object({
-  startDate: z.string({ message: 'Start date is required.' }).refine(val => !isNaN(Date.parse(val)), {
-    message: 'Start date must be a valid ISO date.'
-  }),
-  endDate: z.string({ message: 'End date is required.' }).refine(val => !isNaN(Date.parse(val)), {
-    message: 'End date must be a valid ISO date.'
-  }),
+  startDate: z.string({ message: 'Start date is required.' })
+    .regex(/^\d{4}-\d{2}-\d{2}/, 'Start date must be a valid ISO date.')
+    .refine(val => !isNaN(Date.parse(val)), { message: 'Start date must be a valid ISO date.' }),
+  endDate: z.string({ message: 'End date is required.' })
+    .regex(/^\d{4}-\d{2}-\d{2}/, 'End date must be a valid ISO date.')
+    .refine(val => !isNaN(Date.parse(val)), { message: 'End date must be a valid ISO date.' }),
   type: z.enum(['ANNUAL', 'SICK', 'CASUAL', 'UNPAID', 'MATERNITY', 'PATERNITY', 'EMERGENCY'], {
     message: 'Invalid leave type.'
-  }),
-  reason: z.string().trim().min(3, 'Reason is required (at least 3 characters).').max(500)
+  }).optional(),
+  leaveType: z.enum(['ANNUAL', 'SICK', 'CASUAL', 'UNPAID', 'MATERNITY', 'PATERNITY', 'EMERGENCY'], {
+    message: 'Invalid leave type.'
+  }).optional(),
+  reason: z.string().trim().min(3, 'Reason is required (at least 3 characters).').max(500),
+  duration: z.enum(['FULL_DAY', 'HALF_DAY', 'HALF_DAY_FIRST_HALF', 'HALF_DAY_SECOND_HALF', 'QUARTER_DAY'], {
+    message: 'Invalid duration.'
+  }).optional()
+}).passthrough().refine(data => data.type || data.leaveType, {
+  message: 'Leave type is required.',
+  path: ['leaveType']
 }).refine(data => new Date(data.startDate) <= new Date(data.endDate), {
   message: 'Start date cannot be after end date.',
   path: ['endDate']
@@ -138,8 +147,10 @@ export const reviewLeaveRequestSchema = z.object({
   status: z.enum(['APPROVED', 'REJECTED'], {
     message: 'Status must be either APPROVED or REJECTED.'
   }),
-  comments: z.string().trim().max(500).optional()
-}).strict();
+  comments: z.string().trim().max(500).optional(),
+  comment: z.string().trim().max(500).optional(),
+  reviewComment: z.string().trim().max(500).optional()
+});
 
 export const correctionRequestSchema = z.object({
   attendanceId: z.string({ message: 'Attendance record ID is required.' }).trim().min(1).max(100),
@@ -266,7 +277,9 @@ export const createEmployeeSchema = z.object({
   confirmationDate: z.string().trim().max(50).optional(),
   team: z.string().trim().max(100).optional(),
   location: z.string().trim().max(100).optional(),
-  role: z.string().trim().max(50).optional(),
+  role: z.enum(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE'], {
+    message: 'Invalid role specified.'
+  }).optional(),
   employeeCode: z.string().trim().max(100).optional(),
   status: z.string().trim().max(50).optional(),
   managerId: z.string().trim().max(100).optional(),

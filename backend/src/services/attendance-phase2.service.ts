@@ -55,6 +55,10 @@ export async function createShift(orgId: string, data: any, actorId: string): Pr
           weekOffDays = data.workDays ? ['Saturday', 'Sunday'] : ['Saturday', 'Sunday'],
           isFlexible = false } = data;
   if (!name || !startTime || !endTime) throw new Error('name, startTime, endTime are required.');
+  const TIME_REGEX = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+  if (!TIME_REGEX.test(startTime) || !TIME_REGEX.test(endTime)) {
+    throw new Error('Invalid time format. Expected HH:MM in 24-hour format.');
+  }
   const id = uuid();
   try {
     await execute(

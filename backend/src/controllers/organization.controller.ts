@@ -30,6 +30,20 @@ export const getDepartments = async (req: any, res: any) => {
   }
 };
 
+export const createDepartment = async (req: any, res: any) => {
+  try {
+    const { name, code } = req.body || {};
+    if (!name || name.trim().length < 2) {
+      return res.status(400).json({ success: false, message: 'Department name is required (at least 2 characters).' });
+    }
+    const orgId = getOrgId(req);
+    const dept = await orgService.createDepartment(orgId, { name, code });
+    return res.status(201).json({ success: true, data: dept });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'org.createDepartment', 500, 'Failed to create department.');
+  }
+};
+
 // ─── Locations ────────────────────────────────────────────────────────────────
 
 export const getLocations = async (req: any, res: any) => {

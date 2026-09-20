@@ -19,7 +19,11 @@ export const getSalaryStructure = async (req: Request, res: Response) => {
 export const setSalaryStructure = async (req: Request, res: Response) => {
   try {
     const { employeeId } = req.params;
-    const { baseSalary, annualCtc, currency, effectiveDate, effectiveFrom, revisionReason, components } = req.body;
+    const { baseSalary, basicSalary, annualCtc, currency, effectiveDate, effectiveFrom, revisionReason, components } = req.body;
+    const salaryVal = basicSalary !== undefined ? basicSalary : baseSalary;
+    if (salaryVal !== undefined && (typeof salaryVal !== 'number' || salaryVal <= 0)) {
+      return res.status(400).json({ success: false, error: 'Basic salary must be greater than zero.' });
+    }
     const user = (req as any).user;
     const organizationId = user?.organizationId || 'org-stackly';
     const actorId = user?.id || 'system';
@@ -27,14 +31,14 @@ export const setSalaryStructure = async (req: Request, res: Response) => {
     const structure = await payrollService.setSalaryStructure({
       employeeId: employeeId as string,
       organizationId,
-      baseSalary,
+      baseSalary: baseSalary || 0,
       annualCtc,
       currency,
       effectiveDate,
       effectiveFrom,
       revisionReason,
       actorId,
-      components
+      components: components || []
     });
     return res.json({ success: true, data: structure });
   } catch (err: any) {
@@ -74,12 +78,24 @@ export const getPayrollRuns = async (req: Request, res: Response) => {
 
 export const createPayrollRun = async (req: Request, res: Response) => {
   try {
-    const { month, year } = req.body;
+    let { month, year, period } = req.body;
     const user = (req as any).user;
     const organizationId = user?.organizationId || 'org-stackly';
 
-    if (!month || !year) {
-      return res.status(400).json({ success: false, error: 'Month and year are required' });
+    if (period) {
+      if (typeof period !== 'string' || !/^\d{4}-(?:0[1-9]|1[0-2])$/.test(period)) {
+        return res.status(400).json({ success: false, error: 'Invalid period format. Expected YYYY-MM.' });
+      }
+    }
+
+    if (period && (!month || !year)) {
+      const parts = String(period).split('-');
+      year = Number(parts[0]);
+      month = Number(parts[1]);
+    }
+
+    if (!month || !year || Number(month) < 1 || Number(month) > 12 || Number(year) < 1900 || Number(year) > 2100) {
+      return res.status(400).json({ success: false, error: 'Month (1-12) and year are required' });
     }
 
     const runId = await payrollService.createPayrollRun({
@@ -90,7 +106,8 @@ export const createPayrollRun = async (req: Request, res: Response) => {
     });
     return res.status(201).json({ success: true, data: { id: runId, message: 'Payroll run created successfully' } });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
+    const status = err.message?.includes('already exists') ? 409 : 500;
+    return res.status(status).json({ success: false, error: err.message });
   }
 };
 
@@ -101,7 +118,8 @@ export const calculatePayrollRun = async (req: Request, res: Response) => {
     const result = await payrollService.calculatePayrollRun(runId as string, user?.id, user?.role);
     return res.json({ success: true, data: result });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
+    const status = err.message?.includes('not found') ? 404 : 500;
+    return res.status(status).json({ success: false, error: err.message });
   }
 };
 
@@ -167,7 +185,8 @@ export const finalizePayrollRun = async (req: Request, res: Response) => {
     const result = await payrollService.finalizePayrollRun(runId as string, user?.id, user?.role);
     return res.json({ success: true, data: result });
   } catch (err: any) {
-    return res.status(500).json({ success: false, error: err.message });
+    const status = err.message?.includes('not found') ? 404 : err.message?.includes('must be') ? 400 : 500;
+    return res.status(status).json({ success: false, error: err.message });
   }
 };
 
