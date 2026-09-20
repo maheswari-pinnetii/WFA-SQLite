@@ -109,3 +109,71 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
     </div>
   );
 };
+
+export interface Banner2Props {
+  title?: string;
+  description?: string;
+  linkText?: string;
+  linkUrl?: string;
+  defaultVisible?: boolean;
+  className?: string;
+  onClose?: () => void;
+}
+
+export const Banner2: React.FC<Banner2Props> = ({
+  title = 'Version 2.0 is now available!',
+  description = 'Read the full release notes',
+  linkText = 'here',
+  linkUrl = '#',
+  defaultVisible = true,
+  className,
+  onClose,
+}) => {
+  const [isVisible, setIsVisible] = React.useState(defaultVisible);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    onClose?.();
+  };
+
+  if (!isVisible) return null;
+
+  return (
+    <section
+      className={cn(
+        'w-full bg-slate-900/90 text-slate-100 border-b border-slate-800 px-4 py-2.5 backdrop-blur-md transition-all duration-300',
+        className
+      )}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 text-xs font-medium">
+        <div className="flex-1 flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
+          <span className="font-semibold text-emerald-400">{title}</span>
+          <span className="text-slate-300">
+            {description}{' '}
+            <a
+              href={linkUrl}
+              className="underline underline-offset-2 hover:text-white transition-colors"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {linkText}
+            </a>
+            .
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Dismiss banner"
+          className="p-1 rounded-md hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </section>
+  );
+};
+
