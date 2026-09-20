@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '../../lib/utils';
 
 export interface MeteorCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -176,4 +177,63 @@ export const Banner2: React.FC<Banner2Props> = ({
     </section>
   );
 };
+
+export interface ChartCard1Props {
+  title?: string;
+  description?: string;
+  data?: { month: string; value: number }[];
+  className?: string;
+}
+
+const defaultChartData = [
+  { month: 'Jan', value: 186 },
+  { month: 'Feb', value: 305 },
+  { month: 'Mar', value: 237 },
+  { month: 'Apr', value: 273 },
+  { month: 'May', value: 209 },
+  { month: 'Jun', value: 214 },
+  { month: 'Jul', value: 286 },
+  { month: 'Aug', value: 320 },
+  { month: 'Sep', value: 298 },
+  { month: 'Oct', value: 342 },
+  { month: 'Nov', value: 375 },
+  { month: 'Dec', value: 410 },
+];
+
+export const ChartCard1: React.FC<ChartCard1Props> = ({
+  title = 'Revenue Over Time',
+  description = 'Monthly revenue for the current year',
+  data = defaultChartData,
+  className,
+}) => {
+  return (
+    <div className={cn('w-full max-w-2xl rounded-xl border border-slate-800 bg-slate-900/90 p-6 text-slate-100 backdrop-blur-xl shadow-xl', className)}>
+      <div className="mb-4">
+        <h3 className="text-base font-semibold text-slate-100">{title}</h3>
+        <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+      </div>
+      <div className="h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="chartGradientEmerald" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+            <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={8} fontSize={12} stroke="#94a3b8" />
+            <YAxis axisLine={false} tickLine={false} tickMargin={8} fontSize={12} stroke="#94a3b8" tickFormatter={(value) => `$${value}`} />
+            <Tooltip
+              contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.5rem', color: '#f8fafc' }}
+              itemStyle={{ color: '#10b981' }}
+            />
+            <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fill="url(#chartGradientEmerald)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
 
