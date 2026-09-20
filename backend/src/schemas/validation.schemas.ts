@@ -249,7 +249,7 @@ export const sendVerificationSchema = z.object({
 }).strict();
 
 export const createEmployeeSchema = z.object({
-  id: z.string({ message: 'Employee ID is required.' }).trim().min(2).max(100),
+  id: z.string({ message: 'Employee ID is required.' }).trim().min(2).max(100).optional(),
   name: z.string({ message: 'Full name is required.' }).trim().min(2).max(100),
   email: z.string({ message: 'Company email is required.' }).trim().regex(EMAIL_REGEX, 'Valid email is required.').max(255),
   department: z.string({ message: 'Department is required.' }).trim().min(1).max(100),
@@ -265,7 +265,15 @@ export const createEmployeeSchema = z.object({
   probationEndDate: z.string().trim().max(50).optional(),
   confirmationDate: z.string().trim().max(50).optional(),
   team: z.string().trim().max(100).optional(),
-  location: z.string().trim().max(100).optional()
+  location: z.string().trim().max(100).optional(),
+  role: z.string().trim().max(50).optional(),
+  employeeCode: z.string().trim().max(100).optional(),
+  status: z.string().trim().max(50).optional(),
+  managerId: z.string().trim().max(100).optional(),
+  departmentId: z.string().trim().max(100).optional(),
+  teamId: z.string().trim().max(100).optional(),
+  locationId: z.string().trim().max(100).optional(),
+  designationId: z.string().trim().max(100).optional()
 }).strict();
 
 export const updateEmployeeSchema = z.object({
@@ -289,9 +297,10 @@ export const updateEmployeeSchema = z.object({
 }).strict();
 
 export const updateEmployeeStatusSchema = z.object({
-  status: z.enum(['ACTIVE', 'PRESENT', 'REMOTE', 'ON_LEAVE', 'OFFLINE', 'TERMINATED'], {
+  status: z.enum(['ACTIVE', 'INACTIVE', 'PRESENT', 'REMOTE', 'ON_LEAVE', 'OFFLINE', 'TERMINATED'], {
     message: 'Invalid employee status.'
-  })
+  }),
+  reason: z.string().trim().max(255).optional()
 }).strict();
 
 export const updateTaskSchema = z.object({

@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { employeeService } from '../services/employee.service.js';
 import { logAudit } from '../config/db.js';
 import { emitToOrg, emitToUser, SOCKET_EVENTS } from '../sockets/index.js';
@@ -94,14 +95,20 @@ export const getEmployee360 = async (req: any, res: any) => {
 export const createEmployee = async (req: any, res: any) => {
   try {
     const body = req.body || {};
-    const { id, name, email, department, designation, avatar, joinDate, team, location } = body;
-    if (!id || !name || !email || !department) {
-      return res.status(400).json({ success: false, message: 'Required fields: id, name, email, department.' });
+    const { name, email, department, designation, avatar, joinDate, team, location, role, employeeCode, status } = body;
+    if (!name || !email || !department) {
+      return res.status(400).json({ success: false, message: 'Required fields: name, email, department.' });
     }
+    const id = body.id || `emp-${randomUUID().slice(0, 8)}`;
 
     const orgId = getOrganizationId(req);
+    const existing = await employeeService.getEmployeeByEmail(email, orgId);
+    if (existing) {
+      return res.status(409).json({ success: false, message: 'An employee with this email already exists.' });
+    }
+
     const newEmp = await employeeService.createEmployee({
-      id, name, email, department, designation, avatar, joinDate, team, location,
+      id, name, email, department, designation, avatar, joinDate, team, location, role, employeeCode, status,
       managerId: body.managerId, departmentId: body.departmentId, teamId: body.teamId, locationId: body.locationId, designationId: body.designationId,
       organizationId: orgId,
       companyId: orgId
@@ -165,7 +172,7 @@ export const updateEmployeeStatus = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
-    if (!['ACTIVE', 'PRESENT', 'REMOTE', 'ON_LEAVE', 'OFFLINE', 'TERMINATED'].includes(status)) {
+    if (!['ACTIVE', 'INACTIVE', 'PRESENT', 'REMOTE', 'ON_LEAVE', 'OFFLINE', 'TERMINATED'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid employee status.' });
     }
 

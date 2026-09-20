@@ -4,6 +4,9 @@ import { Badge } from './badge';
 import { Switch } from './switch';
 import { Input } from './input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './dialog';
+import { MeteorCard, SpotlightCard } from './rare-cards';
+import { ShimmerButton } from './shimmer-button';
+import { NumberTicker } from './number-ticker';
 
 export interface UIComponentShowcaseProps {
   className?: string;
@@ -207,6 +210,43 @@ export const UIComponentShowcase: React.FC<UIComponentShowcaseProps> = ({ classN
             </div>
           </CardContent>
         </Card>
+
+        {/* 11. Rare UI Showcase Section */}
+        <div className="col-span-1 md:col-span-2 lg:col-span-3 mt-6 border-t border-slate-800 pt-6">
+          <h3 className="text-xl font-bold text-sky-400 mb-4 flex items-center gap-2">
+            <span>✨ Rare UI Modern Primitives Showcase</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <MeteorCard glowColor="rgba(59, 130, 246, 0.2)">
+              <div className="space-y-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">Meteor Card Effect</span>
+                <h4 className="text-lg font-bold text-white">Real-Time Anomaly Stream</h4>
+                <p className="text-xs text-slate-400">
+                  Dynamic particle meteor animations tailored for high-priority security notifications and alert centers.
+                </p>
+                <div className="pt-2 flex items-center gap-3">
+                  <ShimmerButton shimmerColor="#60a5fa" className="text-xs px-4 py-2">
+                    Investigate Alert
+                  </ShimmerButton>
+                </div>
+              </div>
+            </MeteorCard>
+
+            <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.2)">
+              <div className="space-y-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Cursor Spotlight Effect</span>
+                <h4 className="text-lg font-bold text-white">Live Workforce Metric Ticker</h4>
+                <p className="text-xs text-slate-400">
+                  Interactive radial glow that tracks mouse movement across KPI indicators.
+                </p>
+                <div className="pt-2 text-2xl font-black text-emerald-400 flex items-center gap-2">
+                  <span>Active Employees:</span>
+                  <NumberTicker value={1428} prefix="#" />
+                </div>
+              </div>
+            </SpotlightCard>
+          </div>
+        </div>
       </div>
     </div>
   );

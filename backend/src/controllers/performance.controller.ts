@@ -145,3 +145,34 @@ export const addHoliday = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+export const deleteHoliday = async (req: Request, res: Response) => {
+  try {
+    await leaveEngineService.deleteHoliday(req.params.id as string, u(req).organizationId);
+    res.json({ success: true, message: 'Holiday deleted.' });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const getWorkConfigs = async (req: Request, res: Response) => {
+  try {
+    const data = await leaveEngineService.getWorkConfigs(u(req).organizationId);
+    res.json({ success: true, data });
+  } catch (err: any) {
+    console.error('[getWorkConfigs Error]:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const createWorkConfig = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ success: false, message: 'name is required' });
+    const data = await leaveEngineService.createWorkConfig(u(req).organizationId, req.body);
+    res.status(201).json({ success: true, data });
+  } catch (err: any) {
+    console.error('[createWorkConfig Error]:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

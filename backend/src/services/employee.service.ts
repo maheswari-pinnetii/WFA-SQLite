@@ -68,6 +68,10 @@ export class EmployeeService {
     return employeeRepository.findById(id, orgId);
   }
 
+  async getEmployeeByEmail(email: string, orgId: string) {
+    return employeeRepository.findByEmail(email, orgId);
+  }
+
   async getEmployee360(id: string, orgId: string, reqUser: any) {
     const employee = await employeeRepository.findById(id, orgId);
     if (!employee) return null;

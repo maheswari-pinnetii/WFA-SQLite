@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { AppDispatch, RootState } from '../../app/store';
 import { fetchEmployeesThunk, updateEmployeeStatusThunk } from '../../features/hr/store/hrSlice';
 import { Employee } from '../../shared/types/common.types';
 import { getRoleBadgeClass, formatDate } from '../../shared/utils/helpers';
-import { Search, ChevronLeft, ChevronRight, UserPlus, Filter, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, UserPlus, Filter, ChevronsLeft, ChevronsRight, Eye, Pencil, Clock, CalendarDays, Wallet, FileText, History, UserCheck, UserX, Trash2 } from 'lucide-react';
 import { Button } from '../../shared/components/Button';
 import { useDepartmentAccess } from '../../hooks/useDepartmentAccess';
 import { StatusBadge } from '../common/StatusBadge';
+import { ActionMenu, ActionMenuItem } from '../common/ActionMenu';
+import { Permission } from '../../security/permissions/permissions';
 
 interface EmployeeTableProps {
   locationFilter?: string;
@@ -23,6 +26,7 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   statusFilter = 'ALL'
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { employees, isLoading } = useSelector((state: RootState) => state.hr);
   const [search, setSearch] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('ALL');
@@ -32,6 +36,73 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   useEffect(() => {
     dispatch(fetchEmployeesThunk());
   }, [dispatch]);
+
+  const getEmployeeActions = (emp: Employee): ActionMenuItem<Employee>[] => [
+    {
+      id: 'view',
+      label: 'View Profile',
+      icon: Eye,
+      permission: Permission.EMPLOYEE_VIEW,
+      onClick: () => navigate(`/employee-details/${emp.id}`),
+    },
+    {
+      id: 'edit',
+      label: 'Edit Employee',
+      icon: Pencil,
+      permission: Permission.EMPLOYEE_UPDATE,
+      onClick: () => navigate(`/employee-details/${emp.id}?edit=true`),
+    },
+    {
+      id: 'attendance',
+      label: 'Attendance',
+      icon: Clock,
+      permission: Permission.ATTENDANCE_VIEW,
+      onClick: () => navigate(`/attendance?employeeId=${emp.id}`),
+    },
+    {
+      id: 'leave',
+      label: 'Leave',
+      icon: CalendarDays,
+      permission: Permission.LEAVE_REQUEST,
+      onClick: () => navigate(`/leave?employeeId=${emp.id}`),
+    },
+    {
+      id: 'payroll',
+      label: 'Payroll',
+      icon: Wallet,
+      permission: Permission.EMPLOYEE_VIEW,
+      onClick: () => navigate(`/payroll?employeeId=${emp.id}`),
+    },
+    {
+      id: 'documents',
+      label: 'Documents',
+      icon: FileText,
+      permission: Permission.DOCUMENT_UPLOAD,
+      onClick: () => navigate(`/documents?employeeId=${emp.id}`),
+    },
+    {
+      id: 'audit',
+      label: 'Audit History',
+      icon: History,
+      permission: Permission.AUDIT_LOG_VIEW,
+      onClick: () => navigate(`/audit-logs?employeeId=${emp.id}`),
+    },
+    {
+      id: 'toggle-status',
+      label: emp.status === 'Active' ? 'Deactivate' : 'Activate',
+      icon: emp.status === 'Active' ? UserX : UserCheck,
+      permission: Permission.EMPLOYEE_UPDATE,
+      danger: emp.status === 'Active',
+      dividerBefore: true,
+      requiresConfirmation: emp.status === 'Active',
+      confirmationTitle: 'Deactivate Employee',
+      confirmationMessage: `Are you sure you want to deactivate ${emp.name}? They will lose access to system features until reactivated.`,
+      onClick: async () => {
+        const nextStatus = emp.status === 'Active' ? 'TERMINATED' : 'Active';
+        await dispatch(updateEmployeeStatusThunk({ id: emp.id, status: nextStatus }));
+      },
+    },
+  ];
 
   const handleStatusChange = (id: string, status: Employee['status']) => {
     dispatch(updateEmployeeStatusThunk({ id, status }));
@@ -303,7 +374,12 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
                       {(emp as any).syncStatus || 'Synced'}
                     </td>
                     <td className="py-3 px-4">
-                      <button className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-extrabold text-[11px]">View</button>
+                      <ActionMenu
+                        actions={getEmployeeActions(emp)}
+                        row={emp}
+                        buttonLabel="Action ▾"
+                        ariaLabel={`Actions for ${emp.name}`}
+                      />
                     </td>
                   </tr>
                 );

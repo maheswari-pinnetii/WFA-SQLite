@@ -160,11 +160,11 @@ router.get('/employees', authenticateToken, enforceScope, authenticatedUserLimit
 router.post('/employees/bulk-update', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, employeeController.bulkUpdateEmployees);
 router.get('/employees/:id/export-data', authenticateToken, validateIdParam, employeeController.exportEmployeeData);
 router.post('/employees/:id/anonymize-data', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, employeeController.anonymizeEmployeeData);
-router.put('/employees/:id/status', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_UPDATE', 'EMPLOYEE_MANAGE']), validateIdParam, validateUpdateEmployeeStatus, employeeController.updateEmployeeStatus);
+router.put('/employees/:id/status', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, validateUpdateEmployeeStatus, employeeController.updateEmployeeStatus);
 router.get('/employees/:id', authenticateToken, enforceScope, validateIdParam, employeeController.getEmployeeById);
-router.post('/employees', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_CREATE', 'EMPLOYEE_MANAGE']), validateCreateEmployee, employeeController.createEmployee);
+router.post('/employees', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateCreateEmployee, employeeController.createEmployee);
 router.put('/employees/:id', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_UPDATE', 'EMPLOYEE_MANAGE']), validateIdParam, validateUpdateEmployee, employeeController.updateEmployee);
-router.delete('/employees/:id', authenticateToken, enforceScope, authorizePermissions(['EMPLOYEE_DELETE', 'EMPLOYEE_MANAGE']), validateIdParam, employeeController.deleteEmployee);
+router.delete('/employees/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, employeeController.deleteEmployee);
 
 // Employee Master — full profile (aggregated)
 router.get('/employees/:id/profile', authenticateToken, enforceScope, validateIdParam, employeeController.getFullProfile);
@@ -286,6 +286,14 @@ router.get('/shifts', authenticateToken, authenticatedUserLimiter, attendanceP2.
 router.post('/shifts', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, attendanceP2.createShift);
 router.put('/shifts/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, attendanceP2.updateShift);
 router.delete('/shifts/:id', authenticateToken, authorizeRoles(['ADMIN']), validateIdParam, authenticatedUserLimiter, attendanceP2.deleteShift);
+
+// Holidays & Work Configs
+router.get('/holidays', authenticateToken, authenticatedUserLimiter, performanceController.getHolidays);
+router.post('/holidays', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.addHoliday);
+router.delete('/holidays/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, performanceController.deleteHoliday);
+
+router.get('/work-configs', authenticateToken, authenticatedUserLimiter, performanceController.getWorkConfigs);
+router.post('/work-configs', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, performanceController.createWorkConfig);
 
 // Phase 2: Employee Shift Assignments
 router.post('/employees/:id/shift-assignment', authenticateToken, authorizeRoles(['ADMIN', 'HR']), validateIdParam, authenticatedUserLimiter, attendanceP2.assignShift);

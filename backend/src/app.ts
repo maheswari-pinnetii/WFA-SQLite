@@ -187,6 +187,11 @@ if (fs.existsSync(frontendDist)) {
   });
 }
 
+// 404 handler for unmatched routes
+app.use((req: Request, res: Response, next: NextFunction) => {
+  sendError(res, AppError.notFound(`Route ${req.method} ${req.originalUrl}`), req);
+});
+
 // Global Error Handler — standard AppError format, never leaks internals
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   sendError(res, err, req);

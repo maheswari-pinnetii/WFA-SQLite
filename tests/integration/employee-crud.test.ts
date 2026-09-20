@@ -348,15 +348,16 @@ describe('5. Delete Employee (DELETE /employees/:id)', () => {
 
   it('ADMIN can successfully delete an employee', async () => {
     if (!createdEmployeeId) return;
+    const targetId = createdEmployeeId;
     const res = await request(app)
-      .delete(`/v1/employees/${createdEmployeeId}`)
+      .delete(`/v1/employees/${targetId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect([200, 204]).toContain(res.status);
     createdEmployeeId = ''; // already cleaned up
 
     // Verify deleted employee is gone
     const getRes = await request(app)
-      .get(`/v1/employees/${createdEmployeeId}`)
+      .get(`/v1/employees/${targetId}`)
       .set('Authorization', `Bearer ${adminToken}`);
     expect([404, 400]).toContain(getRes.status);
   });

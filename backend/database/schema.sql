@@ -38,14 +38,31 @@ CREATE TABLE IF NOT EXISTS teams (
 CREATE TABLE IF NOT EXISTS shifts (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
+  shiftType TEXT DEFAULT 'fixed',
   startTime TEXT NOT NULL,
   endTime TEXT NOT NULL,
+  breakDurationMinutes INTEGER DEFAULT 60,
   gracePeriodMinutes INTEGER NOT NULL DEFAULT 0,
+  workHoursPerDay INTEGER DEFAULT 8,
+  weekOffDays TEXT DEFAULT '["Saturday","Sunday"]',
+  isFlexible INTEGER DEFAULT 0,
+  isActive INTEGER DEFAULT 1,
   organizationId TEXT NOT NULL DEFAULT 'org-stackly',
   companyId TEXT NOT NULL DEFAULT 'org-stackly',
   createdAt TEXT NOT NULL,
   updatedAt TEXT NOT NULL,
   FOREIGN KEY (companyId) REFERENCES companies(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS work_configurations (
+  id TEXT PRIMARY KEY,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  name TEXT NOT NULL,
+  workMode TEXT DEFAULT 'HYBRID',
+  weeklyHours INTEGER DEFAULT 40,
+  flexibleHours INTEGER DEFAULT 0,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS locations (

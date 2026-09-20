@@ -133,21 +133,16 @@ export class EmployeeDashboardService {
       { step: 'Performance Appraisal Cycle', date: '2026-10-15', status: 'UPCOMING' }
     ];
 
-    // Comprehensive KPIs
+    // Comprehensive 8 KPIs
     const kpis = {
+      attendanceRate: 98.4,
       hoursLogged: Math.round(hoursLogged),
-      overtime: 4.5,
       leaveBalance,
-      pendingLeaves,
-      tasksAssigned,
       tasksCompleted,
-      lateArrivals,
-      earlyDepartures,
-      upcomingHolidays: 2,
-      nextReview: 'Oct 15, 2026',
-      payrollStatus: 'PROCESSED (Sep 2026)',
-      nextSalaryDate: 'Sep 30, 2026',
-      taxDeclarationStatus: 'APPROVED (New Tax Regime FY26-27)'
+      sprintProgress: 85,
+      performanceScore: 92,
+      overtime: 6.5,
+      attendanceStreak: 18
     };
 
     // Fetch employee's skills

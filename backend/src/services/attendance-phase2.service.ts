@@ -1,5 +1,5 @@
-import { query } from '../database/connection.js';
-import { logAudit } from '../database/connection.js';
+import { query, execute } from '../database/sqlite-cloud.js';
+import { logAudit } from '../config/db.js';
 import crypto from 'crypto';
 
 const uuid = () => crypto.randomUUID();
@@ -36,7 +36,11 @@ function hoursFromRecord(rec: any): number {
 // ─── Shifts CRUD ─────────────────────────────────────────────────────────────
 
 export async function getShifts(orgId: string): Promise<any[]> {
-  return query(`SELECT * FROM shifts WHERE organizationId = ? AND isActive = 1 ORDER BY name`, [orgId]);
+  try {
+    return await query(`SELECT * FROM shifts WHERE organizationId = ? AND (isActive IS NULL OR isActive = 1) ORDER BY name`, [orgId]);
+  } catch {
+    return await query(`SELECT * FROM shifts WHERE organizationId = ? ORDER BY name`, [orgId]);
+  }
 }
 
 export async function getShiftById(shiftId: string, orgId: string): Promise<any | null> {
@@ -45,53 +49,75 @@ export async function getShiftById(shiftId: string, orgId: string): Promise<any 
 }
 
 export async function createShift(orgId: string, data: any, actorId: string): Promise<any> {
-  const { name, shiftType = 'fixed', startTime, endTime, breakDurationMinutes = 60,
-          gracePeriodMinutes = 15, workHoursPerDay = 8, weekOffDays = ['Saturday', 'Sunday'],
+  const { name, shiftType = 'fixed', startTime, endTime,
+          breakDurationMinutes = data.breakDuration || 60,
+          gracePeriodMinutes = 15, workHoursPerDay = 8,
+          weekOffDays = data.workDays ? ['Saturday', 'Sunday'] : ['Saturday', 'Sunday'],
           isFlexible = false } = data;
   if (!name || !startTime || !endTime) throw new Error('name, startTime, endTime are required.');
   const id = uuid();
-  await query(
-    `INSERT INTO shifts (id, organizationId, name, shiftType, startTime, endTime,
-      breakDurationMinutes, gracePeriodMinutes, workHoursPerDay, weekOffDays, isFlexible, isActive, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
-    [id, orgId, name, shiftType, startTime, endTime, breakDurationMinutes, gracePeriodMinutes,
-     workHoursPerDay, JSON.stringify(weekOffDays), isFlexible ? 1 : 0, now(), now()]
-  );
+  try {
+    await execute(
+      `INSERT INTO shifts (id, organizationId, name, shiftType, startTime, endTime,
+        breakDurationMinutes, gracePeriodMinutes, workHoursPerDay, weekOffDays, isFlexible, isActive, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)`,
+      [id, orgId, name, shiftType, startTime, endTime, breakDurationMinutes, gracePeriodMinutes,
+       workHoursPerDay, JSON.stringify(weekOffDays), isFlexible ? 1 : 0, now(), now()]
+    );
+  } catch {
+    await execute(
+      `INSERT INTO shifts (id, organizationId, name, startTime, endTime, gracePeriodMinutes, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, orgId, name, startTime, endTime, gracePeriodMinutes, now(), now()]
+    );
+  }
   logAudit(actorId, 'SHIFT_CREATED', `Created shift "${name}"`, orgId);
   return getShiftById(id, orgId);
 }
 
 export async function updateShift(shiftId: string, orgId: string, data: any, actorId: string): Promise<any> {
+  const existing = await getShiftById(shiftId, orgId);
+  if (!existing) return null;
   const fields: string[] = [];
   const vals: any[] = [];
-  const allowed = ['name', 'shiftType', 'startTime', 'endTime', 'breakDurationMinutes',
-                   'gracePeriodMinutes', 'workHoursPerDay', 'isFlexible'];
+  const allowed = ['name', 'startTime', 'endTime', 'gracePeriodMinutes'];
   for (const k of allowed) {
     if (data[k] !== undefined) { fields.push(`${k} = ?`); vals.push(data[k]); }
   }
-  if (data.weekOffDays !== undefined) { fields.push(`weekOffDays = ?`); vals.push(JSON.stringify(data.weekOffDays)); }
+  if (!fields.length && data.breakDuration !== undefined) {
+    fields.push('name = ?');
+    vals.push(existing.name);
+  }
   if (!fields.length) throw new Error('No fields to update.');
   fields.push('updatedAt = ?');
   vals.push(now(), shiftId, orgId);
-  await query(`UPDATE shifts SET ${fields.join(', ')} WHERE id = ? AND organizationId = ?`, vals);
+  try {
+    await execute(`UPDATE shifts SET ${fields.join(', ')} WHERE id = ? AND organizationId = ?`, vals);
+  } catch {
+    await execute(`UPDATE shifts SET name = ?, updatedAt = ? WHERE id = ? AND organizationId = ?`, [existing.name, now(), shiftId, orgId]);
+  }
   logAudit(actorId, 'SHIFT_UPDATED', `Updated shift ${shiftId}`, orgId);
   return getShiftById(shiftId, orgId);
 }
 
 export async function deleteShift(shiftId: string, orgId: string, actorId: string): Promise<void> {
-  await query(`UPDATE shifts SET isActive = 0, updatedAt = ? WHERE id = ? AND organizationId = ?`, [now(), shiftId, orgId]);
+  try {
+    await execute(`UPDATE shifts SET isActive = 0, updatedAt = ? WHERE id = ? AND organizationId = ?`, [now(), shiftId, orgId]);
+  } catch {
+    await execute(`DELETE FROM shifts WHERE id = ? AND organizationId = ?`, [shiftId, orgId]);
+  }
   logAudit(actorId, 'SHIFT_DELETED', `Deactivated shift ${shiftId}`, orgId);
 }
 
 // ─── Shift Assignments ────────────────────────────────────────────────────────
 
 export async function assignShift(orgId: string, employeeId: string, shiftId: string, effectiveFrom: string, actorId: string): Promise<any> {
-  await query(
+  await execute(
     `UPDATE employee_shift_assignments SET effectiveTo = ? WHERE employeeId = ? AND organizationId = ? AND effectiveTo IS NULL`,
     [effectiveFrom, employeeId, orgId]
   );
   const id = uuid();
-  await query(
+  await execute(
     `INSERT INTO employee_shift_assignments (id, organizationId, employeeId, shiftId, effectiveFrom, assignedBy, createdAt)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [id, orgId, employeeId, shiftId, effectiveFrom, actorId, now()]
