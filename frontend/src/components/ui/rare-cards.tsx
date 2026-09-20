@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Phone, Mail, Globe, Loader2, ArrowUp, ArrowDown, ChevronsUpDown, ChevronDown } from 'lucide-react';
+import { Phone, Mail, Globe, Loader2, ArrowUp, ArrowDown, ChevronsUpDown, ChevronDown, ChevronRight, Package, Truck, RotateCcw, CreditCard, User, ShoppingBag } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface MeteorCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -827,6 +827,154 @@ export const Faq3: React.FC<Faq3Props> = ({
     </section>
   );
 };
+
+export interface HelpCategory {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  articles: number;
+}
+
+export interface PopularTopic {
+  title: string;
+  href: string;
+}
+
+export interface Help1Props {
+  title?: string;
+  description?: string;
+  categories?: HelpCategory[];
+  popularTopics?: PopularTopic[];
+  className?: string;
+  onContactSupport?: () => void;
+}
+
+const DEFAULT_CATEGORIES: HelpCategory[] = [
+  {
+    icon: <Package className="w-5 h-5 text-emerald-400" />,
+    title: 'Workforce Orders',
+    description: 'Track, modify, or manage equipment assignments',
+    articles: 12,
+  },
+  {
+    icon: <Truck className="w-5 h-5 text-blue-400" />,
+    title: 'Dispatch & Logistics',
+    description: 'Field delivery tracking and hardware dispatch',
+    articles: 8,
+  },
+  {
+    icon: <RotateCcw className="w-5 h-5 text-amber-400" />,
+    title: 'Returns & Swaps',
+    description: 'Device return policy and exchange process',
+    articles: 15,
+  },
+  {
+    icon: <CreditCard className="w-5 h-5 text-purple-400" />,
+    title: 'Payroll & Expenses',
+    description: 'Direct deposits, reimbursements, and tax forms',
+    articles: 10,
+  },
+  {
+    icon: <User className="w-5 h-5 text-teal-400" />,
+    title: 'Employee Profile',
+    description: 'Profile updates, credentials, and security',
+    articles: 7,
+  },
+  {
+    icon: <ShoppingBag className="w-5 h-5 text-rose-400" />,
+    title: 'Asset Inventory',
+    description: 'Laptops, badges, and peripheral availability',
+    articles: 9,
+  },
+];
+
+const DEFAULT_TOPICS: PopularTopic[] = [
+  { title: 'How to check my attendance status', href: '#' },
+  { title: 'Requesting emergency leave or swap', href: '#' },
+  { title: 'Resetting 2FA / WebAuthn credentials', href: '#' },
+  { title: 'Payroll deposit not reflected', href: '#' },
+  { title: 'Shift timing & grace period rules', href: '#' },
+  { title: 'Downloading monthly payslips PDF', href: '#' },
+];
+
+export const Help1: React.FC<Help1Props> = ({
+  title = 'Help Center',
+  description = 'How can we help your workforce operations today?',
+  categories = DEFAULT_CATEGORIES,
+  popularTopics = DEFAULT_TOPICS,
+  className,
+  onContactSupport,
+}) => {
+  return (
+    <section className={cn('py-12 text-slate-100', className)}>
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="mb-8 text-center space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+            {title}
+          </h1>
+          <p className="text-slate-400 text-xs md:text-sm max-w-xl mx-auto">{description}</p>
+        </div>
+
+        <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {categories.map((category, index) => (
+            <div
+              key={index}
+              className="group cursor-pointer rounded-xl border border-slate-800 bg-slate-900/90 p-4 backdrop-blur-xl transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/60 shadow-lg"
+            >
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 p-2 rounded-lg bg-slate-800/80 border border-slate-700/60">
+                  {category.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-xs text-white truncate">{category.title}</h3>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-emerald-400" />
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                    {category.description}
+                  </p>
+                  <p className="mt-2 text-[10px] font-semibold text-slate-500">
+                    {category.articles} articles
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-5 backdrop-blur-xl shadow-lg">
+          <h2 className="mb-3 text-sm font-bold text-white">Popular Topics</h2>
+          <div className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
+            {popularTopics.map((topic, index) => (
+              <a
+                key={index}
+                href={topic.href}
+                className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-slate-300 font-medium hover:text-emerald-400 hover:bg-slate-800/60 transition-colors"
+              >
+                <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                <span className="truncate">{topic.title}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-8 text-center space-y-3">
+          <p className="text-xs text-slate-400">
+            Can&apos;t find what you&apos;re looking for?
+          </p>
+          <button
+            type="button"
+            onClick={onContactSupport}
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white transition-colors cursor-pointer"
+          >
+            Contact Support
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 
 
 
