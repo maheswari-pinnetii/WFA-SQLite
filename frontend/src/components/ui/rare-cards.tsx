@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Phone, Mail, Globe, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface MeteorCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -323,6 +324,260 @@ export const ChartGroup1: React.FC<ChartGroup1Props> = ({
     </section>
   );
 };
+
+export interface ContactFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+export interface Contact2Props {
+  title?: string;
+  description?: string;
+  phone?: string;
+  email?: string;
+  web?: { label: string; url: string };
+  formSubheading?: string;
+  formHeading?: string;
+  successMessage?: string;
+  submitLabel?: string;
+  submittingLabel?: string;
+  className?: string;
+  onSubmit?: (data: ContactFormData) => Promise<void>;
+}
+
+export const Contact2: React.FC<Contact2Props> = ({
+  title = 'Contact Us',
+  description = 'Building workforce operations with Stackly WFA-SQLite? Drop us a line if you need assistance configuring enterprise modules.',
+  phone = '+1 (555) 010-2400',
+  email = 'support@stackly-wfa.com',
+  web = { label: 'stackly-wfa.com', url: 'https://stackly-wfa.com' },
+  formHeading = 'Send us a message',
+  formSubheading = 'We usually reply within one business day.',
+  successMessage = 'Thanks — your message is in our inbox.',
+  submitLabel = 'Send message',
+  submittingLabel = 'Sending…',
+  className,
+  onSubmit,
+}) => {
+  const [formData, setFormData] = React.useState<ContactFormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: '',
+    message: '',
+  });
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+  const [showSuccess, setShowSuccess] = React.useState(false);
+
+  const validate = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (!formData.firstName.trim()) errs.firstName = 'First name is required';
+    if (!formData.lastName.trim()) errs.lastName = 'Last name is required';
+    if (!formData.email.trim()) {
+      errs.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errs.email = 'Please enter a valid email';
+    }
+    if (!formData.subject.trim()) errs.subject = 'Subject is required';
+    if (!formData.message.trim()) errs.message = 'Message is required';
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    try {
+      setIsSubmitting(true);
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      setIsSubmitted(true);
+      setShowSuccess(true);
+      setFormData({ firstName: '', lastName: '', email: '', subject: '', message: '' });
+      setTimeout(() => setShowSuccess(false), 4500);
+      setTimeout(() => setIsSubmitted(false), 5000);
+    } catch {
+      setErrors({ root: 'Something went wrong. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  return (
+    <section className={cn('py-12 text-slate-100', className)}>
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-col gap-12 lg:flex-row lg:gap-16">
+          {/* Info Side */}
+          <div className="flex flex-1 flex-col gap-8">
+            <div className="flex flex-col gap-3">
+              <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
+                {title}
+              </h1>
+              <p className="text-slate-400 text-sm md:text-base leading-relaxed">
+                {description}
+              </p>
+            </div>
+            <div className="flex flex-col gap-4 text-sm font-medium">
+              <a href={`tel:${phone}`} className="group flex items-center gap-3 text-slate-300 hover:text-emerald-400 transition-colors">
+                <Phone className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
+                <span>{phone}</span>
+              </a>
+              <a href={`mailto:${email}`} className="group flex items-center gap-3 text-slate-300 hover:text-emerald-400 transition-colors">
+                <Mail className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
+                <span>{email}</span>
+              </a>
+              <a
+                href={web.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-center gap-3 text-slate-300 hover:text-emerald-400 transition-colors"
+              >
+                <Globe className="w-5 h-5 text-slate-400 group-hover:text-emerald-400" />
+                <span>{web.label}</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Form Side */}
+          <div className="flex-1">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-5 rounded-2xl border border-slate-800 bg-slate-900/90 p-6 md:p-8 backdrop-blur-xl shadow-xl"
+            >
+              <div className="flex flex-col gap-1">
+                <h2 className="text-xl font-bold text-white">{formHeading}</h2>
+                <p className="text-xs text-slate-400">{formSubheading}</p>
+              </div>
+
+              {isSubmitted && (
+                <div
+                  className={cn(
+                    'rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-center transition-opacity duration-500',
+                    showSuccess ? 'opacity-100' : 'opacity-0'
+                  )}
+                >
+                  <p className="text-xs font-semibold text-emerald-400">{successMessage}</p>
+                </div>
+              )}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="firstName" className="text-xs font-semibold text-slate-300">
+                    First Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="Jordan"
+                    className="w-full px-3 py-2 text-xs rounded-md bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                  />
+                  {errors.firstName && <span className="text-[11px] text-rose-400">{errors.firstName}</span>}
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="lastName" className="text-xs font-semibold text-slate-300">
+                    Last Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Kim"
+                    className="w-full px-3 py-2 text-xs rounded-md bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                  />
+                  {errors.lastName && <span className="text-[11px] text-rose-400">{errors.lastName}</span>}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="email" className="text-xs font-semibold text-slate-300">
+                  Email <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@company.com"
+                  className="w-full px-3 py-2 text-xs rounded-md bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                />
+                {errors.email && <span className="text-[11px] text-rose-400">{errors.email}</span>}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="subject" className="text-xs font-semibold text-slate-300">
+                  Subject <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  id="subject"
+                  name="subject"
+                  type="text"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  placeholder="Question about enterprise modules"
+                  className="w-full px-3 py-2 text-xs rounded-md bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                />
+                {errors.subject && <span className="text-[11px] text-rose-400">{errors.subject}</span>}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="message" className="text-xs font-semibold text-slate-300">
+                  Message <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows={4}
+                  value={formData.message}
+                  onChange={handleChange}
+                  placeholder="Tell us what you are configuring…"
+                  className="w-full px-3 py-2 text-xs rounded-md bg-slate-950 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                />
+                {errors.message && <span className="text-[11px] text-rose-400">{errors.message}</span>}
+              </div>
+
+              {errors.root && <p className="text-xs text-rose-400">{errors.root}</p>}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full mt-2 py-2.5 px-4 text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                <span>{isSubmitting ? submittingLabel : submitLabel}</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 
 
 
