@@ -233,7 +233,7 @@ export class AnalyticsRepository {
     return rows;
   }
 
-  async getTasksSummary(queryData: any) {
+  async getTasksList(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
     const rows = await query(`
       SELECT id, status, priority, points, createdAt, updatedAt

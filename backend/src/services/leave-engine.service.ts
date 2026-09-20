@@ -105,7 +105,32 @@ export const leaveEngineService = {
       `INSERT INTO holidays (id, organizationId, name, date, type) VALUES (?, ?, ?, ?, ?)`,
       [id, organizationId, data.name, data.date, data.type || 'PUBLIC']
     );
-    return { id };
+    return { id, organizationId, ...data };
+  },
+
+  async deleteHoliday(id: string, organizationId: string) {
+    await execute(
+      `DELETE FROM holidays WHERE id = ? AND organizationId = ?`,
+      [id, organizationId]
+    );
+  },
+
+  async getWorkConfigs(organizationId: string) {
+    return query(
+      `SELECT * FROM work_configurations WHERE organizationId = ? ORDER BY createdAt DESC`,
+      [organizationId]
+    );
+  },
+
+  async createWorkConfig(organizationId: string, data: any) {
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    await execute(
+      `INSERT INTO work_configurations (id, organizationId, name, workMode, weeklyHours, flexibleHours, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, organizationId, data.name, data.workMode || 'HYBRID', data.weeklyHours || 40, data.flexibleHours ? 1 : 0, now, now]
+    );
+    return { id, organizationId, ...data };
   },
 
   /** ─── BUSINESS DAYS CALCULATION ─────────────────── */

@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { query, execute } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
 import { jobScheduler } from './jobScheduler.service.js';
-import { PayrollEngineService } from './payroll-engine.service.ts';
+import { PayrollEngineService } from './payroll-engine.service.js';
 import { TaxCalculationService, CtcCalculationInput } from './tax-calculation.service.js';
 
 export interface SetSalaryStructureParams {

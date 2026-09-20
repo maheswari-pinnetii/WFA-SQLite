@@ -140,7 +140,8 @@ export class EmployeeRepository {
       data.organizationId, data.companyId, data.createdAt, data.updatedAt
     ]);
 
-    return this.findById(employeeData.id, data.organizationId);
+    const created = await this.findById(data.id, data.organizationId);
+    return created || data;
   }
 
   async update(id: string, orgId: string, updateData: any) {
@@ -163,7 +164,10 @@ export class EmployeeRepository {
   }
 
   async softDelete(id: string, orgId: string) {
-    return this.update(id, orgId, { status: 'TERMINATED' });
+    const existing = await this.findById(id, orgId);
+    if (!existing) return null;
+    await execute(`DELETE FROM employees WHERE id = ? AND organizationId = ?`, [id, orgId]);
+    return existing;
   }
 
   async count(queryData: any) {
