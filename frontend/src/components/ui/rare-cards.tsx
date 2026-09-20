@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { cn } from '../../lib/utils';
 
 export interface MeteorCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -235,5 +235,94 @@ export const ChartCard1: React.FC<ChartCard1Props> = ({
     </div>
   );
 };
+
+export interface ChartGroup1Props {
+  className?: string;
+  revenueData?: { month: string; value: number }[];
+  ordersData?: { month: string; value: number }[];
+}
+
+const defaultRevenueData = [
+  { month: 'Jan', value: 18600 },
+  { month: 'Feb', value: 30500 },
+  { month: 'Mar', value: 23700 },
+  { month: 'Apr', value: 27300 },
+  { month: 'May', value: 20900 },
+  { month: 'Jun', value: 31400 },
+];
+
+const defaultOrdersData = [
+  { month: 'Jan', value: 186 },
+  { month: 'Feb', value: 305 },
+  { month: 'Mar', value: 237 },
+  { month: 'Apr', value: 273 },
+  { month: 'May', value: 209 },
+  { month: 'Jun', value: 314 },
+];
+
+export const ChartGroup1: React.FC<ChartGroup1Props> = ({
+  className,
+  revenueData = defaultRevenueData,
+  ordersData = defaultOrdersData,
+}) => {
+  return (
+    <section className={cn('w-full py-6', className)}>
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Revenue Card */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-6 text-slate-100 backdrop-blur-xl shadow-xl">
+          <div className="mb-4">
+            <h3 className="text-base font-semibold text-slate-100">Revenue</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Monthly revenue trends</p>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revenueGradientGroup" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={8} fontSize={12} stroke="#94a3b8" />
+                <YAxis axisLine={false} tickLine={false} tickMargin={8} fontSize={12} stroke="#94a3b8" tickFormatter={(v) => `$${v / 1000}k`} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.5rem', color: '#f8fafc' }}
+                  itemStyle={{ color: '#10b981' }}
+                  formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
+                />
+                <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fill="url(#revenueGradientGroup)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Orders Card */}
+        <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-6 text-slate-100 backdrop-blur-xl shadow-xl">
+          <div className="mb-4">
+            <h3 className="text-base font-semibold text-slate-100">Orders</h3>
+            <p className="text-xs text-slate-400 mt-0.5">Monthly order volume</p>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={ordersData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={8} fontSize={12} stroke="#94a3b8" />
+                <YAxis axisLine={false} tickLine={false} tickMargin={8} fontSize={12} stroke="#94a3b8" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '0.5rem', color: '#f8fafc' }}
+                  itemStyle={{ color: '#3b82f6' }}
+                  formatter={(value: any) => [Number(value).toLocaleString(), 'Orders']}
+                />
+                <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 
 
