@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Phone, Mail, Globe, Loader2 } from 'lucide-react';
+import { Phone, Mail, Globe, Loader2, ArrowUp, ArrowDown, ChevronsUpDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface MeteorCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -577,6 +577,150 @@ export const Contact2: React.FC<Contact2Props> = ({
     </section>
   );
 };
+
+export interface DataTable4Item {
+  id: string;
+  item: string;
+  type: string;
+  stock: boolean;
+  sku: string;
+  price: number;
+  availability: ('In store' | 'Online')[];
+}
+
+const defaultTableData: DataTable4Item[] = [
+  { id: 'prod-001', item: 'Tablet Case', type: 'Electronics', stock: true, sku: 'TC-001', price: 83.24, availability: ['In store', 'Online'] },
+  { id: 'prod-002', item: 'Smart Watch', type: 'Electronics', stock: true, sku: 'SW-002', price: 246.27, availability: ['In store', 'Online'] },
+  { id: 'prod-003', item: 'Wool Sweater', type: 'Accessories', stock: true, sku: 'WS-003', price: 168.27, availability: ['In store'] },
+  { id: 'prod-004', item: 'Wireless Earbuds', type: 'Electronics', stock: true, sku: 'WE-004', price: 107.75, availability: ['In store', 'Online'] },
+  { id: 'prod-005', item: 'Laptop Sleeve', type: 'Electronics', stock: true, sku: 'LS-005', price: 248.02, availability: ['In store', 'Online'] },
+  { id: 'prod-006', item: 'Running Shoes', type: 'Footwear', stock: true, sku: 'RS-006', price: 208.26, availability: ['In store'] },
+  { id: 'prod-007', item: 'Winter Jacket', type: 'Clothing', stock: true, sku: 'WJ-007', price: 148.06, availability: ['In store'] },
+  { id: 'prod-008', item: 'Phone Case', type: 'Accessories', stock: true, sku: 'PC-008', price: 298.08, availability: ['In store', 'Online'] },
+  { id: 'prod-009', item: 'Fitness Tracker', type: 'Clothing', stock: true, sku: 'FT-009', price: 222.09, availability: ['In store'] },
+  { id: 'prod-010', item: 'Sunglasses', type: 'Accessories', stock: true, sku: 'SG-010', price: 60.17, availability: ['In store'] },
+];
+
+export interface DataTable4Props {
+  title?: string;
+  description?: string;
+  items?: DataTable4Item[];
+  className?: string;
+}
+
+export const DataTable4: React.FC<DataTable4Props> = ({
+  title = 'Minimal Responsive Table',
+  description = 'Fully responsive table with horizontal scrolling, custom cell styling, and adaptive typography. Optimized for mobile devices with touch gestures and swipe hints.',
+  items = defaultTableData,
+  className,
+}) => {
+  const [sortKey, setSortKey] = React.useState<keyof DataTable4Item | null>(null);
+  const [sortDir, setSortDir] = React.useState<'asc' | 'desc'>('asc');
+
+  const handleSort = (key: keyof DataTable4Item) => {
+    if (sortKey === key) {
+      if (sortDir === 'asc') setSortDir('desc');
+      else {
+        setSortKey(null);
+        setSortDir('asc');
+      }
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sortedData = React.useMemo(() => {
+    if (!sortKey) return items;
+    return [...items].sort((a, b) => {
+      const valA = a[sortKey];
+      const valB = b[sortKey];
+      if (typeof valA === 'number' && typeof valB === 'number') {
+        return sortDir === 'asc' ? valA - valB : valB - valA;
+      }
+      return sortDir === 'asc'
+        ? String(valA).localeCompare(String(valB))
+        : String(valB).localeCompare(String(valA));
+    });
+  }, [items, sortKey, sortDir]);
+
+  const renderSortIcon = (key: keyof DataTable4Item) => {
+    if (sortKey !== key) return <ChevronsUpDown className="w-3.5 h-3.5 opacity-50 ml-1" />;
+    return sortDir === 'asc' ? <ArrowUp className="w-3.5 h-3.5 ml-1" /> : <ArrowDown className="w-3.5 h-3.5 ml-1" />;
+  };
+
+  return (
+    <section className={cn('py-8 text-slate-100', className)}>
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="mb-6">
+          <h2 className="text-xl font-bold tracking-tight text-white">{title}</h2>
+          <p className="mt-1 text-xs text-slate-400 max-w-2xl">{description}</p>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/90 backdrop-blur-xl shadow-xl">
+          <table className="w-full text-left text-xs border-collapse min-w-[700px]">
+            <thead>
+              <tr className="border-b border-slate-800 bg-slate-950/80 text-slate-400 font-semibold uppercase text-[11px] tracking-wider">
+                <th className="py-3 px-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('sku')}>
+                  <div className="flex items-center">
+                    <span>SKU</span>
+                    {renderSortIcon('sku')}
+                  </div>
+                </th>
+                <th className="py-3 px-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('item')}>
+                  <div className="flex items-center">
+                    <span>Item</span>
+                    {renderSortIcon('item')}
+                  </div>
+                </th>
+                <th className="py-3 px-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('type')}>
+                  <div className="flex items-center">
+                    <span>Type</span>
+                    {renderSortIcon('type')}
+                  </div>
+                </th>
+                <th className="py-3 px-4">In Stock</th>
+                <th className="py-3 px-4 cursor-pointer hover:text-white transition-colors" onClick={() => handleSort('price')}>
+                  <div className="flex items-center">
+                    <span>Price</span>
+                    {renderSortIcon('price')}
+                  </div>
+                </th>
+                <th className="py-3 px-4">Available In</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60 font-medium">
+              {sortedData.map((row) => (
+                <tr key={row.id} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="py-3 px-4 font-mono text-slate-400 uppercase tracking-wide">{row.sku}</td>
+                  <td className="py-3 px-4 font-bold text-white">{row.item}</td>
+                  <td className="py-3 px-4 text-slate-400">{row.type}</td>
+                  <td className="py-3 px-4">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-400 border border-emerald-800">
+                      {row.stock ? 'YES' : 'NO'}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 font-mono font-bold text-emerald-400">${row.price.toFixed(2)}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex gap-1.5 flex-wrap">
+                      {row.availability.map((loc) => (
+                        <span key={loc} className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+                          {loc}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-2 text-center text-[11px] text-slate-500 sm:hidden">← Swipe to see more →</p>
+      </div>
+    </section>
+  );
+};
+
 
 
 
