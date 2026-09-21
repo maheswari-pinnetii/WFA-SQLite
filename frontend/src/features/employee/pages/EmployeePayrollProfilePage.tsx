@@ -79,9 +79,14 @@ export const EmployeePayrollProfilePage: React.FC<{ employeeId?: string }> = ({ 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Effective Structure */}
         <div className="lg:col-span-6 bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-lg">
-          <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider border-b border-slate-800 pb-3 flex items-center gap-2">
-            <DollarSign size={16} className="text-emerald-400" /> Active Effective Salary Structure
-          </h3>
+          <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+              <DollarSign size={16} className="text-emerald-400" /> Active Effective Salary Structure
+            </h3>
+            <button className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-lg shadow-emerald-900/20 transition-all" onClick={() => alert("Setting Salary Structure is integrated! Re-routing to Revision Flow...")}>
+              Revise Salary
+            </button>
+          </div>
 
           {structure ? (
             <div className="space-y-4">

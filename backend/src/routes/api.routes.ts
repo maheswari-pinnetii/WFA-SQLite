@@ -456,7 +456,15 @@ router.get('/payroll/tax/:employeeId', authenticateToken, enforceScope, authenti
 router.post('/payroll/tax/:employeeId', authenticateToken, enforceScope, authenticatedUserLimiter, payrollController.upsertEmployeeTaxProfile);
 router.get('/payroll/tax/:employeeId/form16', authenticateToken, enforceScope, authenticatedUserLimiter, payrollController.getForm16Pdf);
 
-// ─── Compliance (Phase 5) ────────────────────────────────────────────────────
+  // ─── Payroll: Full & Final (F&F) Settlement ─────────────────────────────────
+  router.get('/payroll/fnf', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getFnFSettlements);
+  router.post('/payroll/fnf', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.calculateFnF);
+  router.post('/payroll/fnf/:id/approve', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.approveFnF);
+
+  // ─── Payroll: Audit Logs ──────────────────────────────────────────────────────
+  router.get('/payroll/audit', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getAuditLogs);
+
+  // ─── Compliance (Phase 5) ────────────────────────────────────────────────────
 router.get('/compliance/config', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, complianceController.getComplianceConfigs);
 router.post('/compliance/config', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, complianceController.setComplianceConfig);
 

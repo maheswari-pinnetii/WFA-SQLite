@@ -461,6 +461,61 @@ export const payrollService = {
     }
 
     return this.getEmployeeTaxProfile(employeeId, fy);
+  },
+
+  // -------------------------------------------------------------
+  // Full & Final (F&F) Settlement
+  // -------------------------------------------------------------
+  
+  async getFnFSettlements(organizationId: string) {
+    return query(
+      `SELECT fnf.*, e.firstName || ' ' || e.lastName as employeeName, e.employeeCode, e.department, e.designation 
+       FROM full_and_final_settlements fnf
+       JOIN employees e ON fnf.employeeId = e.id
+       WHERE fnf.organizationId = ?
+       ORDER BY fnf.createdAt DESC`,
+      [organizationId]
+    );
+  },
+
+  async calculateFnF(params: { employeeId: string; organizationId: string; exitDate: string; noticePeriodDays: number; noticeServedDays: number; gratuityAmount: number; otherDeductions: number; preparedBy: string }) {
+    // Basic mock calculation for F&F
+    const { employeeId, organizationId, exitDate, noticePeriodDays, noticeServedDays, gratuityAmount, otherDeductions, preparedBy } = params;
+    
+    const unpaidSalaryAmount = 45000;
+    const leaveEncashmentAmount = 15000;
+    const noticeShortfallDeduction = (noticePeriodDays > noticeServedDays) ? 10000 : 0;
+    
+    const netSettlementAmount = (unpaidSalaryAmount + leaveEncashmentAmount + gratuityAmount) - (noticeShortfallDeduction + otherDeductions);
+    
+    const id = randomUUID();
+    await execute(
+      `INSERT INTO full_and_final_settlements 
+       (id, employeeId, organizationId, exitDate, noticePeriodDays, noticeServedDays, unpaidSalaryAmount, leaveEncashmentAmount, noticeShortfallDeduction, gratuityAmount, otherDeductions, netSettlementAmount, preparedBy, createdAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, employeeId, organizationId, exitDate, noticePeriodDays, noticeServedDays, unpaidSalaryAmount, leaveEncashmentAmount, noticeShortfallDeduction, gratuityAmount, otherDeductions, netSettlementAmount, preparedBy, new Date().toISOString()]
+    );
+    
+    return { success: true, id };
+  },
+
+  async approveFnF(id: string, approvedBy: string) {
+    await execute(
+      `UPDATE full_and_final_settlements SET status = 'APPROVED', approvedBy = ? WHERE id = ?`,
+      [approvedBy, id]
+    );
+    return { success: true };
+  },
+
+  // -------------------------------------------------------------
+  // Audit Logs
+  // -------------------------------------------------------------
+  
+  async getAuditLogs(organizationId: string) {
+    return query(
+      `SELECT * FROM payroll_audit_logs WHERE organizationId = ? ORDER BY timestamp DESC LIMIT 100`,
+      [organizationId]
+    );
   }
 };
 

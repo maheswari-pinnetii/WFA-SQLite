@@ -13,14 +13,14 @@ export const AuditLogsPage: React.FC = () => {
     analyticsApi.getAuditLogs()
       .then((items) => {
         if (!items || items.length === 0) throw new Error('No items');
-        setLogs(items.map((item) => ({
+        setLogs(items.map((item: any) => ({
           id: item.id,
           timestamp: item.timestamp,
-          actor: item.employeeId,
-          role: 'AUDIT',
+          actor: item.actorId || item.employeeId || 'Unknown',
+          role: item.actorRole || 'AUDIT',
           action: item.action,
-          target: item.details,
-          ip: 'server',
+          target: item.entityType ? `${item.entityType} (${item.entityId})` : (item.details || 'System'),
+          ip: item.ipAddress || 'server',
           status: 'SUCCESS'
         })));
       })

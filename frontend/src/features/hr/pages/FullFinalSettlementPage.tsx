@@ -13,6 +13,7 @@ import {
   Plus
 } from 'lucide-react';
 import { useAuth } from '../../../auth/hooks/useAuth';
+import { payrollApi } from '../../../api/endpoints/payroll.api';
 
 interface FnFSettlement {
   id: string;
@@ -50,18 +51,11 @@ export const FullFinalSettlementPage: React.FC = () => {
   const [gratuityAmount, setGratuityAmount] = useState(0);
   const [otherDeductions, setOtherDeductions] = useState(0);
 
-  const token = localStorage.getItem('token');
-
   const fetchSettlements = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/payroll/fnf', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        setSettlements(data.data || []);
-      }
+      const data = await payrollApi.getFnFSettlements();
+      setSettlements(data || []);
     } catch (err) {
       console.error('Failed to fetch F&F settlements:', err);
     } finally {
@@ -77,27 +71,17 @@ export const FullFinalSettlementPage: React.FC = () => {
     e.preventDefault();
     if (!employeeId || !exitDate) return;
     try {
-      const res = await fetch('/api/payroll/fnf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          employeeId,
-          exitDate,
-          noticePeriodDays: Number(noticePeriodDays),
-          noticeServedDays: Number(noticeServedDays),
-          gratuityAmount: Number(gratuityAmount),
-          otherDeductions: Number(otherDeductions)
-        })
+      await payrollApi.calculateFnF({
+        employeeId,
+        exitDate,
+        noticePeriodDays: Number(noticePeriodDays),
+        noticeServedDays: Number(noticeServedDays),
+        gratuityAmount: Number(gratuityAmount),
+        otherDeductions: Number(otherDeductions)
       });
-      const data = await res.json();
-      if (data.success) {
-        setShowModal(false);
-        setEmployeeId('');
-        fetchSettlements();
-      }
+      setShowModal(false);
+      setEmployeeId('');
+      fetchSettlements();
     } catch (err) {
       console.error('Failed to calculate F&F:', err);
     }
@@ -105,14 +89,8 @@ export const FullFinalSettlementPage: React.FC = () => {
 
   const handleApproveFnF = async (id: string) => {
     try {
-      const res = await fetch(`/api/payroll/fnf/${id}/approve`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) {
-        fetchSettlements();
-      }
+      await payrollApi.approveFnF(id);
+      fetchSettlements();
     } catch (err) {
       console.error('Failed to approve F&F:', err);
     }

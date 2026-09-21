@@ -224,5 +224,14 @@ export const payrollApi = {
     apiClient.get(`/v1/payroll/tax/${employeeId}`, { params: { financialYear } }).then((res: any) => res.data?.data ?? res.data).catch(() => ({})),
 
   updateTaxProfile: (employeeId: string, data: any) =>
-    apiClient.post(`/v1/payroll/tax/${employeeId}`, data).then((res: any) => res.data?.data ?? res.data)
+    apiClient.post(`/v1/payroll/tax/${employeeId}`, data).then((res: any) => res.data?.data ?? res.data),
+
+  getFnFSettlements: () =>
+    apiClient.get('/v1/payroll/fnf').then((res: any) => res.data?.data ?? res.data).catch(() => []),
+
+  calculateFnF: (data: any) =>
+    apiClient.post('/v1/payroll/fnf', data).then((res: any) => res.data?.data ?? res.data),
+
+  approveFnF: (id: string) =>
+    apiClient.post(`/v1/payroll/fnf/${id}/approve`).then((res: any) => res.data?.data ?? res.data)
 };

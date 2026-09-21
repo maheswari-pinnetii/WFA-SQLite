@@ -40,7 +40,7 @@ const MyPayslips: React.FC = () => {
   };
 
   const handleDownload = (payslip: Payslip) => {
-    alert(`Downloading PDF for payslip ${payslip.id}`);
+    window.open(`http://localhost:5000/api/payroll/payslips/${payslip.id}/pdf`, '_blank');
   };
 
   return (

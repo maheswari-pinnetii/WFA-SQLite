@@ -151,9 +151,11 @@ export const analyticsApi = {
       ];
     }
   },
-  async getAuditLogs(): Promise<Array<{ id: string; timestamp: string; employeeId: string; action: string; details: string }>> {
+  async getAuditLogs(): Promise<Array<{ id: string; timestamp: string; employeeId: string; action: string; details: string; status?: string; ipAddress?: string; userRole?: string }>> {
     try {
-      return unwrap(await apiClient.get('/v1/attendance/audit-logs'));
+      const data = await apiClient.get('/v1/payroll/audit');
+      if (data.data?.success && data.data.data !== undefined) return data.data.data;
+      throw new Error();
     } catch {
       return [];
     }

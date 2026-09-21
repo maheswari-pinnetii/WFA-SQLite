@@ -87,10 +87,17 @@ export const StatutoryCompliancePage: React.FC = () => {
           </p>
         </div>
 
-        <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-emerald-900/20 self-start md:self-auto">
-          <Download size={18} />
-          <span>Export Compliance Return</span>
-        </button>
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          <button 
+            onClick={() => alert("Statutory Settings configuration is open! (Mock UI)")}
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-medium text-sm transition-all shadow-sm border border-slate-700">
+            <span>Configure Settings</span>
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium text-sm transition-all shadow-lg shadow-emerald-900/20">
+            <Download size={18} />
+            <span>Export Compliance Return</span>
+          </button>
+        </div>
       </div>
 
       {/* Compliance Overview Summary */}
