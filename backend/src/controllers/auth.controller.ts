@@ -1010,6 +1010,9 @@ export const changePassword = async (req: any, res: Response): Promise<any> => {
     const result = await authService.changePassword(user.id, currentPassword, newPassword);
 
     if (!result.success) {
+      if (result.message === 'Current password is incorrect.') {
+        return res.status(401).json({ success: false, message: result.message });
+      }
       return res.status(400).json({ success: false, message: result.message });
     }
 
