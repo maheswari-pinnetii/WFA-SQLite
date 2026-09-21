@@ -38,6 +38,12 @@ jobs:
     - name: Run Security Tests
       run: npm run test:security
 
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: Run Playwright Tests
+      run: npm run test:e2e
+
     - name: Production Build
       run: npm run build
 

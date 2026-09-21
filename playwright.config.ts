@@ -1,11 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: '.',
-  testMatch: [
-    './playwright/tests/**/*.spec.ts',
-    './tests/e2e/**/*.spec.ts',
-  ],
+  testDir: './tests/e2e',
+  testMatch: '**/*.spec.ts',
   timeout: 30000,
   expect: {
     timeout: 5000,
@@ -50,4 +47,10 @@ export default defineConfig({
       use: { ...devices['iPhone 12'] },
     },
   ],
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120 * 1000,
+  },
 });
