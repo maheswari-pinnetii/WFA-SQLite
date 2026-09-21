@@ -69,6 +69,9 @@ export default defineConfig({
     include: ['tests/**/*.test.{ts,tsx}'],
     exclude: ['node_modules', 'playwright/**'],
     globals: true,
+    fileParallelism: false,
+    setupFiles: ['./tests/setup/test-env.ts', './tests/setup/cleanup.ts'],
+    globalSetup: ['./tests/setup/global.setup.ts'],
     server: {
       deps: {
         external: ['better-sqlite3', '@sqlitecloud/drivers']

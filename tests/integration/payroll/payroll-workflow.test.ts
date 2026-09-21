@@ -11,8 +11,9 @@
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../../backend/src/app.js';
-import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
+import { app } from '../../../backend/src/app.js';
+import { connectDatabase } from '../../../backend/src/database/sqlite-cloud.js';
+import { initDb } from '../../../backend/src/config/db.js';
 
 const PASSWORD = 'StacklyWFA2026!';
 
@@ -20,6 +21,10 @@ async function loginAs(email: string): Promise<string> {
   const loginRes = await request(app)
     .post('/v1/auth/login')
     .send({ email, password: PASSWORD });
+  if (!loginRes.body.success) {
+    console.error(`Login failed for ${email}:`, loginRes.body);
+    throw new Error(`Login failed for ${email}`);
+  }
   let token = loginRes.body.data?.token || loginRes.body.token;
   if (loginRes.body.data?.requiresMfa || loginRes.body.requiresMfa) {
     const { challengeId, otpDevHint } = loginRes.body.data || loginRes.body;
@@ -41,6 +46,7 @@ let testEmployeeId = '';
 
 beforeAll(async () => {
   await connectDatabase();
+  await initDb();
   [adminToken, hrToken, managerToken, employeeToken] = await Promise.all([
     loginAs('admin@thestackly.com'),
     loginAs('hr@thestackly.com'),
@@ -190,6 +196,9 @@ describe('3. Generate Payslips', () => {
       .post(`/v1/payroll/runs/${createdRunId}/generate`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({});
+    if (res.status === 500) {
+      console.log('Generate payslips 500 error:', res.body);
+    }
     expect([200, 201, 400]).toContain(res.status);
     if (res.status === 200 || res.status === 201) {
       expect(res.body.success).toBe(true);

@@ -503,7 +503,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 }
 
 .app-shell {
-  background: var(--bg-primary) !important;
+  background: linear-gradient(-45deg, var(--bg-primary), var(--bg-secondary), var(--bg-tertiary), var(--bg-primary)) !important;
+  background-size: 400% 400% !important;
+  animation: appShellGlow 15s ease infinite !important;
+  position: relative;
+}
+
+@keyframes appShellGlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* ==========================================================================
@@ -579,8 +588,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-header {
   height: var(--header-height) !important;
   padding-inline: clamp(1rem, 2.5vw, 2rem) !important;
-  background: var(--bg-secondary) !important;
-  border-bottom: 1px solid var(--border-color) !important;
+  background: color-mix(in srgb, var(--bg-secondary) 60%, transparent) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1) !important;
 }
 
 .status-bar {
@@ -675,10 +687,14 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 
 .admin-dashboard .glass-panel,
 .admin-dashboard .bg-slate-900,
-.admin-dashboard [class*="bg-slate-900/"] {
-  background: var(--surface) !important;
-  border-color: var(--line) !important;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06) !important;
+.admin-dashboard [class*="bg-slate-900/"],
+.admin-dashboard .bg-white {
+  background: color-mix(in srgb, var(--surface) 40%, transparent) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid color-mix(in srgb, var(--line) 30%, transparent) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  border-radius: 16px !important;
 }
 
 .admin-dashboard [class*="bg-slate-950"] {
@@ -765,10 +781,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .app-sidebar {
   width: 220px !important;
   min-width: 220px !important;
-  background:
-    radial-gradient(circle at 15% 0%, rgba(16, 185, 129, 0.18), transparent 16rem),
-    linear-gradient(180deg, #022C22 0%, #011a15 100%) !important;
-  border-right-color: rgba(52, 211, 153, 0.16) !important;
+  background: color-mix(in srgb, var(--bg-secondary) 50%, transparent) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-right: 1px solid color-mix(in srgb, var(--border-color) 40%, transparent) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05) !important;
 }
 .app-sidebar[class*="w-[64px]"] {
   width: 64px !important;

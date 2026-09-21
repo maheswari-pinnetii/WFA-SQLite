@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import * as employeeController from '../../backend/src/controllers/employee.controller.js';
-import { employeeService } from '../../backend/src/services/employee.service.js';
+import * as employeeController from '../../../backend/src/controllers/employee.controller.js';
+import { employeeService } from '../../../backend/src/services/employee.service.js';
 
-vi.mock('../../backend/src/services/employee.service.js');
-vi.mock('../../backend/src/config/db.js', () => ({ logAudit: vi.fn() }));
-vi.mock('../../backend/src/sockets/index.js', () => ({ emitToOrg: vi.fn(), SOCKET_EVENTS: {} }));
+vi.mock('../../../backend/src/services/employee.service.js');
+vi.mock('../../../backend/src/config/db.js', () => ({ logAudit: vi.fn() }));
+vi.mock('../../../backend/src/sockets/index.js', () => ({ emitToOrg: vi.fn(), SOCKET_EVENTS: {} }));
 
 describe('Employee Controller - IDOR & BOLA Prevention', () => {
   it('blocks EMPLOYEE from updating another user profile', async () => {
@@ -36,6 +36,7 @@ describe('Employee Controller - IDOR & BOLA Prevention', () => {
       json: vi.fn()
     };
 
+    vi.mocked(employeeService.getEmployeeById).mockResolvedValue({ id: 'emp-101', avatar: 'old.png', location: 'Office' });
     vi.mocked(employeeService.updateEmployee).mockResolvedValue({ id: 'emp-101', avatar: 'new-pic.png', location: 'Remote' });
 
     await employeeController.updateEmployee(req, res);
@@ -56,6 +57,7 @@ describe('Employee Controller - IDOR & BOLA Prevention', () => {
       json: vi.fn()
     };
 
+    vi.mocked(employeeService.getEmployeeById).mockResolvedValue({ id: 'emp-999', department: 'HR' });
     vi.mocked(employeeService.updateEmployee).mockResolvedValue({ id: 'emp-999', department: 'Sales', performanceScore: 98 });
 
     await employeeController.updateEmployee(req, res);

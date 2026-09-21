@@ -13,8 +13,9 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../../backend/src/app.js';
-import { connectDatabase, query } from '../../backend/src/database/sqlite-cloud.js';
+import { app } from '../../../backend/src/app.js';
+import { initDb } from '../../../backend/src/config/db.js';
+import { connectDatabase, query } from '../../../backend/src/database/sqlite-cloud.js';
 
 const TEST_EMAIL = 'employee@thestackly.com';
 const TEST_PASSWORD = 'StacklyWFA2026!';
@@ -48,6 +49,7 @@ async function loginAs(email: string, password: string): Promise<string> {
 
 beforeAll(async () => {
   await connectDatabase();
+  await initDb();
   employeeToken = await loginAs(TEST_EMAIL, TEST_PASSWORD);
   adminToken = await loginAs(ADMIN_EMAIL, TEST_PASSWORD);
 }, 30000);

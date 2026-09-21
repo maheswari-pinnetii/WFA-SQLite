@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import path from 'path';
 import fs from 'fs';
-import { app } from '../../backend/src/app.js';
-import { env } from '../../backend/src/config/env.js';
-import { validateMagicNumbers, setFileDownloadSecurityHeaders, UPLOAD_STORAGE_DIR } from '../../backend/src/middleware/fileUpload.js';
-import { getSafeErrorMessage } from '../../backend/src/utils/errorHandler.js';
+import { app } from '../../../backend/src/app.js';
+import { env } from '../../../backend/src/config/env.js';
+import { validateMagicNumbers, setFileDownloadSecurityHeaders, UPLOAD_STORAGE_DIR } from '../../../backend/src/middleware/fileUpload.js';
+import { getSafeErrorMessage } from '../../../backend/src/utils/errorHandler.js';
 
 describe('Security Hardening & Protection Verification Suite', () => {
 
@@ -276,7 +276,7 @@ describe('Security Hardening & Protection Verification Suite', () => {
   // ============================================================================
   describe('5. Secrets Management & Exposure Verification', () => {
     it('verifies that .gitignore includes .env and local databases', () => {
-      const gitignorePath = path.resolve(__dirname, '../../.gitignore');
+      const gitignorePath = path.resolve(__dirname, '../../../.gitignore');
       const content = fs.readFileSync(gitignorePath, 'utf-8');
       expect(content).toContain('.env');
       expect(content).toContain('*.sqlite');
@@ -284,14 +284,14 @@ describe('Security Hardening & Protection Verification Suite', () => {
     });
 
     it('verifies that .env.example contains only template placeholders and no live secrets', () => {
-      const envExamplePath = path.resolve(__dirname, '../../.env.example');
+      const envExamplePath = path.resolve(__dirname, '../../../.env.example');
       const content = fs.readFileSync(envExamplePath, 'utf-8');
       expect(content).not.toContain('xenaeusZqMZhUIfNKX9p9qx8TNRR7Y1XisX4APazqdE');
       expect(content).toContain('<STRONG_RANDOM_SECRET_MIN_32_CHARS>');
     });
 
     it('verifies backend uses env.JWT_SECRET dynamically without hardcoded fallback strings', () => {
-      const socketAuthPath = path.resolve(__dirname, '../../backend/src/sockets/socketAuth.ts');
+      const socketAuthPath = path.resolve(__dirname, '../../../backend/src/sockets/socketAuth.ts');
       const socketContent = fs.readFileSync(socketAuthPath, 'utf-8');
       expect(socketContent).not.toContain("const JWT_SECRET = env.JWT_SECRET || 'stackly_wfa_super_secret_jwt_key_2026'");
       expect(socketContent).toContain('const JWT_SECRET = env.JWT_SECRET;');

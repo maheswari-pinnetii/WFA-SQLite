@@ -1,8 +1,8 @@
 // @vitest-environment node
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../../backend/src/app.js';
-import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
+import { app } from '../../../backend/src/app.js';
+import { connectDatabase } from '../../../backend/src/database/sqlite-cloud.js';
 
 describe('1,000 Concurrent Live Login Benchmark', () => {
   beforeAll(async () => {

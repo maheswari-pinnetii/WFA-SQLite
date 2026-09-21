@@ -274,6 +274,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       return handleControllerError(sessionErr, req, res, 'auth.login.session', 500, 'Failed to establish session.');
     }
   } catch (err: any) {
+    console.error('Login error detail:', err);
     return handleControllerError(err, req, res, 'auth.login', 500, 'Authentication error occurred.');
   }
 };

@@ -9,7 +9,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DB_DIR = path.resolve(__dirname, '../../../database/sqlite');
-const DB_PATH = path.join(DB_DIR, process.env.NODE_ENV === 'test' ? 'wfa-test.sqlite' : 'wfa.sqlite');
+const DB_PATH = process.env.NODE_ENV === 'test' && process.env.TEST_DB_PATH 
+  ? process.env.TEST_DB_PATH 
+  : path.join(DB_DIR, process.env.NODE_ENV === 'test' ? 'wfa-test.sqlite' : 'wfa.sqlite');
 
 let cloudDb: SQLiteCloudDatabase | null = null;
 let localDb: BetterSqlite3.Database | null = null;

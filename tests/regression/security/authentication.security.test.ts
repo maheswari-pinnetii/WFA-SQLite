@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
-import { app } from '../../backend/src/app.js';
-import { env } from '../../backend/src/config/env.js';
+import { app } from '../../../backend/src/app.js';
+import { env } from '../../../backend/src/config/env.js';
 
 describe('Critical Security Verification Suite', () => {
   describe('1. JWT Authentication & Fallback Vulnerability Remediation', () => {

@@ -65,24 +65,21 @@ class SQLiteStore implements Store {
         this.cleanup().catch(() => undefined);
       }
 
-      const rows = await query('SELECT hits, expiresAt FROM rate_limits WHERE key = ?', [key]);
-      
+      const sql = `
+        INSERT INTO rate_limits (key, hits, expiresAt)
+        VALUES (?, 1, ?)
+        ON CONFLICT(key) DO UPDATE SET
+          hits = CASE WHEN rate_limits.expiresAt < ? THEN 1 ELSE rate_limits.hits + 1 END,
+          expiresAt = CASE WHEN rate_limits.expiresAt < ? THEN ? ELSE rate_limits.expiresAt END
+        RETURNING hits, expiresAt;
+      `;
+      const rows = await query(sql, [key, expiresAt, now, now, expiresAt]);
+
       if (rows && rows.length > 0) {
-        const record = rows[0];
-        if (now > record.expiresAt) {
-          // Expired window, reset
-          await execute('UPDATE rate_limits SET hits = 1, expiresAt = ? WHERE key = ?', [expiresAt, key]);
-          return { totalHits: 1, resetTime: new Date(expiresAt) };
-        } else {
-          // Increment
-          await execute('UPDATE rate_limits SET hits = hits + 1 WHERE key = ?', [key]);
-          return { totalHits: record.hits + 1, resetTime: new Date(record.expiresAt) };
-        }
-      } else {
-        // Insert new
-        await execute('INSERT INTO rate_limits (key, hits, expiresAt) VALUES (?, 1, ?)', [key, expiresAt]);
-        return { totalHits: 1, resetTime: new Date(expiresAt) };
+        return { totalHits: rows[0].hits, resetTime: new Date(rows[0].expiresAt) };
       }
+
+      return { totalHits: 1, resetTime: new Date(expiresAt) };
     } catch (err: any) {
       const errMsg = err?.message || (typeof err === 'object' ? JSON.stringify(err) : String(err));
       logger.error('security.rate_limit.db_error', 'Rate limit database error, falling back to permissive', { error: errMsg });
@@ -130,14 +127,7 @@ const createExponentialBackoffHandler = (
     const rawEmail = req.body?.email || req.body?.username || (req as any).user?.id || 'anonymous';
     const key = keyGen(req);
 
-    let hits = maxAllowed + 1;
-    try {
-      await ensureRateLimitsTable();
-      const rows = await query('SELECT hits FROM rate_limits WHERE key = ?', [key]);
-      if (rows && rows.length > 0) {
-        hits = rows[0].hits;
-      }
-    } catch (_) {}
+    let hits = (req as any).rateLimit?.current || maxAllowed + 1;
 
     // Exponential backoff calculation:
     // excess 1 -> 15s, excess 2 -> 30s, excess 3 -> 60s, excess 4 -> 120s ... up to 1800s (30m)

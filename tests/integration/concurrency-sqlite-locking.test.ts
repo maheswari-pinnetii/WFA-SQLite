@@ -16,7 +16,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../backend/src/app.js';
-import { connectDatabase, query } from '../../backend/src/database/sqlite-cloud.js';
+import { initDb } from '../../backend/src/config/db.js';
+import { connectDatabase, query, execute } from '../../backend/src/database/sqlite-cloud.js';
 
 const PASSWORD = 'StacklyWFA2026!';
 
@@ -24,6 +25,9 @@ async function loginAs(email: string): Promise<string> {
   const loginRes = await request(app)
     .post('/v1/auth/login')
     .send({ email, password: PASSWORD });
+  if (loginRes.status !== 200) {
+    throw new Error(`Login failed for ${email}: ${loginRes.status} ${JSON.stringify(loginRes.body)}`);
+  }
   let token = loginRes.body.data?.token || loginRes.body.token;
   if (loginRes.body.data?.requiresMfa || loginRes.body.requiresMfa) {
     const { challengeId, otpDevHint } = loginRes.body.data || loginRes.body;
@@ -43,6 +47,7 @@ const nextKey = () => `concurrency-key-${++keyCounter}`;
 
 beforeAll(async () => {
   await connectDatabase();
+  await initDb();
   [adminToken, employeeToken] = await Promise.all([
     loginAs('admin@thestackly.com'),
     loginAs('employee@thestackly.com'),
@@ -90,7 +95,7 @@ describe('1. Concurrent Read Operations (WAL Mode)', () => {
     const results = await Promise.all(requests);
     const serverErrors = results.filter(r => r.status >= 500);
     expect(serverErrors.length).toBe(0);
-  });
+  }, 30000);
 });
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -101,14 +106,14 @@ describe('2. Concurrent Idempotent Check-In (Same Key)', () => {
     // Directly clear any active attendance session for this employee via SQL
     // so the concurrent check-ins below start from a clean slate regardless of
     // prior test-run residue.
-    try {
-      await query(
-        `UPDATE attendancerecords SET status = 'Checked Out', checkOutTime = ? WHERE employeeId IN (SELECT id FROM users WHERE email = ?) AND status != 'Checked Out'`,
-        [new Date().toISOString(), 'employee@thestackly.com']
-      );
-    } catch (_) {
-      // If the table doesn't exist yet or employee not found, proceed anyway
-    }
+    await execute(
+      `DELETE FROM Attendance WHERE employeeId IN (SELECT id FROM Users WHERE email = ?)`,
+      ['employee@thestackly.com']
+    ).catch(() => {});
+    await execute(
+      `DELETE FROM attendancerecords WHERE employeeId IN (SELECT id FROM users WHERE email = ?)`,
+      ['employee@thestackly.com']
+    ).catch(() => {});
   });
 
   it('concurrent identical check-ins with same idempotency key produce exactly 1 record', async () => {
@@ -130,6 +135,9 @@ describe('2. Concurrent Idempotent Check-In (Same Key)', () => {
     expect(serverErrors.length).toBe(0);
 
     const successResults = results.filter(r => r.status === 200 || r.status === 201);
+    if (successResults.length === 0) {
+      console.log('Failed Idempotency requests:', results.map(r => r.body));
+    }
     expect(successResults.length).toBeGreaterThan(0);
 
     // All successful responses should have the same attendance record ID

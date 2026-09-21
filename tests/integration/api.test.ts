@@ -13,7 +13,7 @@ const client = axios.create({
 });
 
 beforeAll(async () => {
-  await seedSqlite();
+  // await seedSqlite();
   await initDb();
   await Attendance.deleteMany({});
   await Correction.deleteMany({});

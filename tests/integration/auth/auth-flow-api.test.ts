@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import axios from 'axios';
-import { app } from '../../backend/src/app.js';
-import { initDb, query, execute, getDb } from '../../backend/src/database/connection.js';
-import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
+import { app } from '../../../backend/src/app.js';
+import { initDb, query, execute, getDb } from '../../../backend/src/database/connection.js';
+import { seedSqlite } from '../../../backend/scripts/seed-sqlite.ts';
 
 let server: any;
 let client: any;
@@ -17,7 +17,7 @@ const testUser = {
 };
 
 beforeAll(async () => {
-  await seedSqlite();
+  // await seedSqlite();
   await initDb();
   return new Promise<void>((resolve) => {
     server = app.listen(0, () => {

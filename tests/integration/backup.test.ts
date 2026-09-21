@@ -1,43 +1,32 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import axios from 'axios';
+import request from 'supertest';
 import fs from 'fs';
 import path from 'path';
-import { app } from '../../server.js';
+import { app } from '../../backend/src/app.js';
 import { initDb, getDb } from '../../backend/src/config/db.js';
-import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
+import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
 import { backupService } from '../../backend/src/services/backup.service.js';
-
-let server: any;
-const PORT = 5096;
-const client = axios.create({
-  baseURL: `http://localhost:${PORT}`,
-  validateStatus: () => true
-});
 
 let adminToken = '';
 
 beforeAll(async () => {
-  await seedSqlite();
+  await connectDatabase();
   await initDb();
-  return new Promise<void>((resolve) => {
-    server = app.listen(PORT, async () => {
-      // Login as admin
-      const loginRes = await client.post('/v1/auth/login', {
-        email: 'admin@thestackly.com',
-        password: 'StacklyWFA2026!'
-      });
-      if (loginRes.data?.data?.token) {
-        adminToken = loginRes.data.data.token;
-      } else if (loginRes.data?.data?.challengeId) {
-        const verifyRes = await client.post('/v1/auth/mfa/verify', {
-          challengeId: loginRes.data.data.challengeId,
-          otp: loginRes.data.data.otpDevHint || '123456'
-        });
-        adminToken = verifyRes.data.data.token;
-      }
-      resolve();
-    });
+  
+  // Login as admin
+  const loginRes = await request(app).post('/v1/auth/login').send({
+    email: 'admin@thestackly.com',
+    password: 'StacklyWFA2026!'
   });
+  if (loginRes.body?.data?.token) {
+    adminToken = loginRes.body.data.token;
+  } else if (loginRes.body?.data?.challengeId) {
+    const verifyRes = await request(app).post('/v1/auth/mfa/verify').send({
+      challengeId: loginRes.body.data.challengeId,
+      code: loginRes.body.data.otpDevHint || '123456'
+    });
+    adminToken = verifyRes.body.data.token;
+  }
 }, 30000);
 
 afterAll(async () => {
@@ -45,15 +34,6 @@ afterAll(async () => {
   if (db) {
     db.close();
   }
-  return new Promise<void>((resolve) => {
-    if (server) {
-      server.close(() => {
-        resolve();
-      });
-    } else {
-      resolve();
-    }
-  });
 }, 30000);
 
 describe('SQLite Database Backup & Disaster Recovery Test Suite', () => {
@@ -101,40 +81,34 @@ describe('SQLite Database Backup & Disaster Recovery Test Suite', () => {
   });
 
   it('should support Admin REST endpoint POST /v1/admin/backups', async () => {
-    const res = await client.post('/v1/admin/backups', {
+    const res = await request(app).post('/v1/admin/backups').send({
       tag: 'api-test-snapshot',
       compress: true
-    }, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
+    }).set('Authorization', `Bearer ${adminToken}`);
 
     expect(res.status).toBe(201);
-    expect(res.data.success).toBe(true);
-    expect(res.data.data.filename).toBeDefined();
-    expect(res.data.data.checksumSha256).toBeDefined();
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.filename).toBeDefined();
+    expect(res.body.data.checksumSha256).toBeDefined();
   }, 30000);
 
   it('should support Admin REST endpoint GET /v1/admin/backups', async () => {
-    const res = await client.get('/v1/admin/backups', {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
+    const res = await request(app).get('/v1/admin/backups').set('Authorization', `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
-    expect(res.data.success).toBe(true);
-    expect(Array.isArray(res.data.data)).toBe(true);
-    expect(res.data.count).toBeGreaterThan(0);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.count).toBeGreaterThan(0);
   });
 
   it('should support Admin REST endpoint POST /v1/admin/backups/restore', async () => {
-    const res = await client.post('/v1/admin/backups/restore', {
+    const res = await request(app).post('/v1/admin/backups/restore').send({
       filename: createdBackupFilename
-    }, {
-      headers: { Authorization: `Bearer ${adminToken}` }
-    });
+    }).set('Authorization', `Bearer ${adminToken}`);
 
     expect(res.status).toBe(200);
-    expect(res.data.success).toBe(true);
-    expect(res.data.message).toContain('successfully restored');
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toContain('successfully restored');
   });
 
   it('should delete a backup snapshot and cleanup metadata sidecar', async () => {
@@ -151,7 +125,7 @@ describe('SQLite Database Backup & Disaster Recovery Test Suite', () => {
   });
 
   it('should reject unauthorized non-admin access to backup endpoints', async () => {
-    const res = await client.get('/v1/admin/backups');
+    const res = await request(app).get('/v1/admin/backups');
     expect(res.status).toBe(401);
   });
 });

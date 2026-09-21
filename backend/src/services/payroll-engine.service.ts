@@ -132,15 +132,9 @@ export class PayrollEngineService {
       `UPDATE payroll_runs SET 
         status = 'CALCULATED',
         totalEmployees = ?,
-        totalGross = ?,
+        totalGrossPay = ?,
         totalDeductions = ?,
         totalNetPay = ?,
-        totalPf = ?,
-        totalEsi = ?,
-        totalPt = ?,
-        totalTds = ?,
-        totalReimbursements = ?,
-        totalLopDeductions = ?,
         updatedAt = ?
        WHERE id = ?`,
       [
@@ -148,12 +142,6 @@ export class PayrollEngineService {
         Number(totalGross.toFixed(2)),
         Number(totalDeductions.toFixed(2)),
         Number(totalNetPay.toFixed(2)),
-        Number(totalPf.toFixed(2)),
-        Number(totalEsi.toFixed(2)),
-        Number(totalPt.toFixed(2)),
-        Number(totalTds.toFixed(2)),
-        Number(totalReimbursements.toFixed(2)),
-        Number(totalLopDeductions.toFixed(2)),
         new Date().toISOString(),
         runId
       ]

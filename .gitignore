@@ -51,3 +51,8 @@ yarn-error.log*
 scratch/
 
 Desktop.ini
+
+# Test Database
+tests/.data/
+*.test.sqlite
+*.integration.sqlite

@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../../backend/src/app.js';
-import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
-import { seedSqlite } from '../../backend/scripts/seed-sqlite.js';
+import { app } from '../../../backend/src/app.js';
+import { connectDatabase } from '../../../backend/src/database/sqlite-cloud.js';
+import { seedSqlite } from '../../../backend/scripts/seed-sqlite.js';
 
 describe('5 Enterprise Roles Authentication & Authorization Test Suite', () => {
   beforeAll(async () => {
     process.env.NODE_ENV = 'test';
     await connectDatabase();
-    await seedSqlite();
+  // await seedSqlite();
   }, 30000);
 
   const rolesConfig = [

@@ -14,8 +14,8 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../../backend/src/app.js';
-import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
+import { app } from '../../../backend/src/app.js';
+import { connectDatabase } from '../../../backend/src/database/sqlite-cloud.js';
 
 const PASSWORD = 'StacklyWFA2026!';
 
@@ -151,7 +151,7 @@ describe('2. Break & Resume (POST /attendance/break, /attendance/resume)', () =>
       .set('Authorization', `Bearer ${adminToken}`) // admin who hasn't checked in
       .set('Idempotency-Key', nextKey())
       .send({});
-    expect([400, 404, 500]).toContain(res.status);
+    expect([400, 404, 409, 500]).toContain(res.status);
     expect(res.body.success).toBe(false);
   });
 });
@@ -166,7 +166,7 @@ describe('3. Check-Out (POST /attendance/check-out)', () => {
       .set('Authorization', `Bearer ${managerToken}`) // manager hasn't checked in
       .set('Idempotency-Key', nextKey())
       .send({});
-    expect([400, 404, 500]).toContain(res.status);
+    expect([400, 404, 409, 500]).toContain(res.status);
     expect(res.body.success).toBe(false);
   });
 

@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { app } from '../../server.js';
-import { initDb, getDb } from '../../backend/src/config/db.js';
-import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
-import { execute } from '../../backend/src/database/sqlite-cloud.js';
+import { app } from '../../../server.js';
+import { initDb, getDb } from '../../../backend/src/config/db.js';
+import { seedSqlite } from '../../../backend/scripts/seed-sqlite.ts';
+import { execute } from '../../../backend/src/database/sqlite-cloud.js';
 
 let server: any;
 const PORT = 5097;
 const BASE_URL = `http://localhost:${PORT}`;
 
 beforeAll(async () => {
-  await seedSqlite();
+  // await seedSqlite();
   await initDb();
   // Clear rate limits so previous test suites don't bleed into concurrency tests
   await execute('DELETE FROM rate_limits').catch(() => {});

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { Role, ROLE_LABELS, ROLE_HOME_PATHS, ROLE_LEVELS } from '../../frontend/src/security/roles/roles';
-import { Permission } from '../../frontend/src/security/permissions/permissions';
+import { Role, ROLE_LABELS, ROLE_HOME_PATHS, ROLE_LEVELS } from '../../../frontend/src/security/roles/roles';
+import { Permission } from '../../../frontend/src/security/permissions/permissions';
 
 describe('RBAC & Roles Specifications Unit Tests', () => {
   describe('Role mappings validation', () => {
