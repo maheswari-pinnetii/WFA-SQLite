@@ -15,7 +15,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../../backend/src/app.js';
 import { initDb } from '../../../backend/src/config/db.js';
-import { connectDatabase, query } from '../../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase, query, execute } from '../../../backend/src/database/sqlite-cloud.js';
 
 const TEST_EMAIL = 'employee@thestackly.com';
 const TEST_PASSWORD = 'StacklyWFA2026!';
@@ -302,6 +302,11 @@ describe('5. Session Management', () => {
 // 6. Password Reset Flow
 // ────────────────────────────────────────────────────────────────────────────
 describe('6. Password Reset Flow', () => {
+  beforeAll(async () => {
+    // Clear rate limits before testing password reset flow to avoid 429
+    await execute('DELETE FROM rate_limits');
+  });
+
   it('returns 200 for valid email in forgot-password (even if not sent)', async () => {
     const res = await request(app)
       .post('/v1/auth/forgot-password')
