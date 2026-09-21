@@ -8,7 +8,7 @@ import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
-import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
+import { useDashboardData } from '../../../hooks/useDashboardData';
 import { ChartGrid } from '../../../components/dashboard/charts';
 
 import { useRealtimeDashboard } from '../../../hooks/useRealtimeDashboard';
@@ -182,7 +182,7 @@ export const HrSprintOverview: React.FC<{ hrTasks: Task[] }> = ({ hrTasks }) => 
 
 export const HrDashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const { data: analytics, isLoading, error, reload } = useAnalyticsData();
+  const dashboard = useDashboardData(Role.HR);
   const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
   const [hrTasks, setHrTasks] = useState<Task[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
@@ -221,13 +221,9 @@ export const HrDashboardPage: React.FC = () => {
 
   const firstName = user?.name ? user.name.split(' ')[0] : 'HR';
 
-  const rawCount = analytics?.metrics?.totalWorkforce ?? 1000;
-  const headCount = typeof rawCount === 'number' ? rawCount : Number(rawCount) || 1000;
-  const attendanceRate = analytics?.metrics?.attendanceRate ?? '96.5%';
-
   // Real-time synchronization for HR Dashboard
-  useRealtimeDashboard(() => reload());
-  useRealtimeAttendance(() => reload());
+  useRealtimeDashboard(() => dashboard.reload());
+  useRealtimeAttendance(() => dashboard.reload());
 
   return (
     <>
@@ -294,30 +290,17 @@ export const HrDashboardPage: React.FC = () => {
         {/* Enterprise KPI Grid */}
         <KpiGrid
           role={Role.HR}
-          loading={isLoading}
-          data={{
-            headcount: headCount,
-            headcountTrend: 8.4,
-            attendanceRate: typeof attendanceRate === 'number' ? attendanceRate : 96.5,
-            attendanceRateTrend: 1.5,
-            pendingLeaveRequests: 8,
-            pendingCorrections: 3,
-            newJoinersMonth: 24,
-            attritionRate: 4.2,
-            attritionTrend: -0.8,
-            lateArrivalsToday: 4,
-            complianceScore: 100,
-          }}
+          loading={dashboard.isLoading}
+          data={dashboard.data?.kpis || {}}
         />
 
-
-        {/* Reusable Enterprise Chart Grid (8 Charts) */}
+        {/* Dynamic Reusable Chart Grid */}
         <ChartGrid
           role="HR"
-          dashboardData={analytics}
-          loading={isLoading}
-          error={error ? String(error) : null}
-          onRetry={reload}
+          dashboardData={dashboard.data}
+          loading={dashboard.isLoading}
+          error={dashboard.error ? String(dashboard.error) : null}
+          onRetry={dashboard.reload}
         />
 
         <EmployeeTable

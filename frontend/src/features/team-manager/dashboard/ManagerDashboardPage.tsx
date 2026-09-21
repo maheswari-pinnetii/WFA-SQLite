@@ -6,10 +6,10 @@ import { KPICard } from '../../../components/cards/KPICard';
 import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
-import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
+import { useDashboardData } from '../../../hooks/useDashboardData';
 import { ChartGrid } from '../../../components/dashboard/charts';
-import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { employeeApi } from '../../../api/endpoints/employee.api';
+import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
 import { Briefcase, Users, CheckCircle2, XCircle, Clock, Zap, Star, FileText, AlertTriangle, ArrowRight, Filter, Layers } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -171,7 +171,7 @@ export const ManagerSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) =>
 );
 
 export const ManagerDashboardPage: React.FC = () => {
-  const analytics = useAnalyticsData();
+  const dashboard = useDashboardData(Role.MANAGER);
   const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
   const [approvals, setApprovals] = useState<Array<{ id: string; employee: string; type: string; duration: string; reason: string; status: 'PENDING' | 'APPROVED' | 'REJECTED' }>>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -262,29 +262,18 @@ export const ManagerDashboardPage: React.FC = () => {
         {/* Enterprise KPI Grid */}
         <KpiGrid
           role={Role.MANAGER}
-          loading={loading}
-          data={{
-            teamSize: employees.length || 1000,
-            teamAttendanceRate: 98.2,
-            teamAttendanceTrend: 1.2,
-            presentCount: 950,
-            onLeaveCount: 35,
-            lateCount: 15,
-            avgTeamWorkHours: '8h 30m',
-            productivityScore: 92.4,
-            productivityTrend: 2.1,
-            pendingTeamApprovals: pendingApprovalsCount,
-          }}
+          loading={loading || dashboard.isLoading}
+          data={dashboard.data?.kpis || {}}
         />
 
 
         {/* Reusable Enterprise Chart Grid (8 Charts) */}
         <ChartGrid
           role="MANAGER"
-          dashboardData={analytics.data}
-          loading={analytics.isLoading}
-          error={analytics.error ? String(analytics.error) : null}
-          onRetry={analytics.reload}
+          dashboardData={dashboard.data}
+          loading={dashboard.isLoading}
+          error={dashboard.error ? String(dashboard.error) : null}
+          onRetry={dashboard.reload}
         />
 
         <EmployeeTable

@@ -27,9 +27,7 @@ export const initDb = async (): Promise<void> => {
         if (!(await columnExists('users', 'authProvider'))) {
           try { await execute("ALTER TABLE users ADD COLUMN authProvider TEXT DEFAULT 'local';"); } catch (e) {}
         }
-        if (!(await columnExists('users', 'supabase_auth_id'))) {
-          try { await execute("ALTER TABLE users ADD COLUMN supabase_auth_id TEXT;"); } catch (e) {}
-        }
+
         if (!(await columnExists('users', 'providerSubject'))) {
           try { await execute("ALTER TABLE users ADD COLUMN providerSubject TEXT;"); } catch (e) {}
         }

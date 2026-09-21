@@ -6,7 +6,7 @@ import { KPICard } from '../../../components/cards/KPICard';
 import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 
 import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillDownModal';
-import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
+import { useDashboardData } from '../../../hooks/useDashboardData';
 import { ChartGrid } from '../../../components/dashboard/charts';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
@@ -148,7 +148,7 @@ export const TeamLeadSprintBoard: React.FC<{ sprintTasks: Task[] }> = ({ sprintT
 );
 
 export const TeamLeadDashboardPage: React.FC = () => {
-  const analytics = useAnalyticsData();
+  const dashboard = useDashboardData(Role.TEAM_LEAD);
   const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
   const [directReports, setDirectReports] = useState<Employee[]>([]);
   const [sprintTasks, setSprintTasks] = useState<Task[]>([]);
@@ -207,27 +207,18 @@ export const TeamLeadDashboardPage: React.FC = () => {
         {/* Enterprise KPI Grid */}
         <KpiGrid
           role={Role.TEAM_LEAD}
-          loading={loading}
-          data={{
-            teamMembersCount: directReports.length || 8,
-            presentTodayCount: directReports.filter(e => e.status === 'Active').length || 7,
-            attendanceRate: 97.5,
-            lateArrivalsCount: 1,
-            activeTasksCount: sprintTasks.filter(t => t.status !== 'COMPLETED').length || 4,
-            completedTasksCount: sprintTasks.filter(t => t.status === 'COMPLETED').length || 12,
-            workHoursLogged: '45h 30m',
-            pendingItemsCount: 2,
-          }}
+          loading={loading || dashboard.isLoading}
+          data={dashboard.data?.kpis || {}}
         />
 
 
         {/* Reusable Enterprise Chart Grid (8 Charts) */}
         <ChartGrid
           role="TEAM_LEAD"
-          dashboardData={analytics.data}
-          loading={analytics.isLoading}
-          error={analytics.error ? String(analytics.error) : null}
-          onRetry={analytics.reload}
+          dashboardData={dashboard.data}
+          loading={dashboard.isLoading}
+          error={dashboard.error ? String(dashboard.error) : null}
+          onRetry={dashboard.reload}
         />
 
         <EmployeeTable

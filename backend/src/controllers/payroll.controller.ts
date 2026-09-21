@@ -325,7 +325,7 @@ export const getForm16Pdf = async (req: Request, res: Response) => {
 
 export const getFnFSettlements = async (req: Request, res: Response) => {
   try {
-    const data = await payrollService.getFnFSettlements((req.user as any)?.organizationId || 'org-stackly');
+    const data = await payrollService.getFnFSettlements((req as any).user?.organizationId || 'org-stackly');
     return res.json({ success: true, data });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err.message });
@@ -336,8 +336,8 @@ export const calculateFnF = async (req: Request, res: Response) => {
   try {
     const params = {
       ...req.body,
-      organizationId: (req.user as any)?.organizationId || 'org-stackly',
-      preparedBy: (req.user as any)?.id || 'admin'
+      organizationId: (req as any).user?.organizationId || 'org-stackly',
+      preparedBy: (req as any).user?.id || 'admin'
     };
     const data = await payrollService.calculateFnF(params);
     return res.json(data);
@@ -349,7 +349,7 @@ export const calculateFnF = async (req: Request, res: Response) => {
 export const approveFnF = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const data = await payrollService.approveFnF(id, (req.user as any)?.id || 'admin');
+    const data = await payrollService.approveFnF(id as string, (req as any).user?.id || 'admin');
     return res.json(data);
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err.message });
@@ -362,7 +362,7 @@ export const approveFnF = async (req: Request, res: Response) => {
 
 export const getAuditLogs = async (req: Request, res: Response) => {
   try {
-    const logs = await payrollService.getAuditLogs((req.user as any)?.organizationId || 'org-stackly');
+    const logs = await payrollService.getAuditLogs((req as any).user?.organizationId || 'org-stackly');
     return res.json({ success: true, data: logs });
   } catch (err: any) {
     return res.status(500).json({ success: false, error: err.message });

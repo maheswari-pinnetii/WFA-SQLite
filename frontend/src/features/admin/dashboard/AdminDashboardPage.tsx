@@ -7,7 +7,7 @@ import { DrillDownModal, DrillDownData } from '../../../shared/components/DrillD
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 
-import { useAnalyticsData } from '../../../hooks/useAnalyticsData';
+import { useDashboardData } from '../../../hooks/useDashboardData';
 import { ChartGrid } from '../../../components/dashboard/charts';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
@@ -241,7 +241,7 @@ export const AdminSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
 
 export const AdminDashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const analytics = useAnalyticsData();
+  const dashboard = useDashboardData(Role.ADMIN);
   const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -355,31 +355,18 @@ export const AdminDashboardPage: React.FC = () => {
         {/* Enterprise KPI Grid */}
         <KpiGrid
           role={Role.ADMIN}
-          loading={loading}
-          data={{
-            totalEmployees: employees.length || 1000,
-            totalEmployeesTrend: 12.4,
-            presentToday: analytics.data?.metrics?.activePresent || 950,
-            presentTodayTrend: 4.8,
-            attendanceRate: analytics.data?.metrics?.attendanceRate || 96.5,
-            attendanceRateTrend: 1.5,
-            totalDepartments: 10,
-            onLeaveToday: 35,
-            onLeaveTrend: -0.5,
-            pendingApprovals: 12,
-            lateArrivalsToday: 8,
-            avgWorkHours: '8h 45m',
-          }}
+          loading={loading || dashboard.isLoading}
+          data={dashboard.data?.kpis || {}}
         />
 
 
         {/* Reusable Enterprise Chart Grid (8 Charts) */}
         <ChartGrid
           role="ADMIN"
-          dashboardData={analytics.data}
-          loading={analytics.isLoading}
-          error={analytics.error ? String(analytics.error) : null}
-          onRetry={analytics.reload}
+          dashboardData={dashboard.data}
+          loading={dashboard.isLoading}
+          error={dashboard.error ? String(dashboard.error) : null}
+          onRetry={dashboard.reload}
         />
 
         <EmployeeTable

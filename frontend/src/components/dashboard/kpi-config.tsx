@@ -38,14 +38,14 @@ export interface KpiItemConfig {
 
 export const ROLE_KPI_CONFIGS: Record<Role, KpiItemConfig[]> = {
   [Role.ADMIN]: [
-    { key: 'totalEmployees', title: 'Total Employees', icon: <PeopleAltIcon />, dataKey: 'totalEmployees', trendKey: 'totalEmployeesTrend', subtitle: 'Current workforce' },
-    { key: 'activeEmployees', title: 'Active Employees', icon: <PersonIcon />, dataKey: 'activeEmployees', subtitle: 'Currently active' },
-    { key: 'departments', title: 'Departments', icon: <BusinessIcon />, dataKey: 'totalDepartments', subtitle: 'Active departments' },
-    { key: 'attendanceRate', title: 'Attendance Rate', icon: <EventAvailableIcon />, dataKey: 'attendanceRate', trendKey: 'attendanceRateTrend', subtitle: 'Current period' },
-    { key: 'payrollCost', title: 'Payroll Cost', icon: <PaymentsIcon />, dataKey: 'payrollCost', subtitle: 'Current period' },
+    { key: 'totalUsers', title: 'Total Users', icon: <PeopleAltIcon />, dataKey: 'totalUsers', subtitle: 'Registered users' },
+    { key: 'activeSessions', title: 'Active Sessions', icon: <PersonIcon />, dataKey: 'activeSessions', subtitle: 'Live sessions' },
+    { key: 'totalStorage', title: 'Total Storage', icon: <BusinessIcon />, dataKey: 'totalStorage', subtitle: 'Database size' },
+    { key: 'errorRate', title: 'Error Rate', icon: <TrendingDownIcon />, dataKey: 'errorRate', subtitle: 'System errors' },
     { key: 'pendingApprovals', title: 'Pending Approvals', icon: <PendingActionsIcon />, dataKey: 'pendingApprovals', subtitle: 'Requires action' },
-    { key: 'openPositions', title: 'Open Positions', icon: <WorkIcon />, dataKey: 'openPositions', subtitle: 'Current openings' },
-    { key: 'attritionRate', title: 'Attrition Rate', icon: <TrendingDownIcon />, dataKey: 'attritionRate', trendKey: 'attritionTrend', subtitle: 'Current period' }
+    { key: 'departments', title: 'Departments', icon: <BusinessIcon />, dataKey: 'totalDepartments', subtitle: 'Active departments' },
+    { key: 'integrationsHealth', title: 'Integrations Health', icon: <TaskAltIcon />, dataKey: 'integrationsHealth', subtitle: 'System integrations' },
+    { key: 'dailyLogins', title: 'Daily Logins', icon: <SpeedIcon />, dataKey: 'dailyLogins', subtitle: 'Today' }
   ],
 
   [Role.HR]: [
@@ -60,35 +60,35 @@ export const ROLE_KPI_CONFIGS: Record<Role, KpiItemConfig[]> = {
   ],
 
   [Role.MANAGER]: [
-    { key: 'teamSize', title: 'Team Size', icon: <GroupsIcon />, dataKey: 'teamSize', subtitle: 'Direct & indirect reports' },
-    { key: 'presentToday', title: 'Present Today', icon: <HowToRegIcon />, dataKey: 'presentCount', subtitle: 'Punched in' },
-    { key: 'teamAttendance', title: 'Team Attendance', icon: <EventAvailableIcon />, dataKey: 'teamAttendanceRate', trendKey: 'teamAttendanceTrend', subtitle: 'Current sprint' },
-    { key: 'pendingLeaves', title: 'Pending Leaves', icon: <EventBusyIcon />, dataKey: 'onLeaveCount', subtitle: 'Awaiting review' },
-    { key: 'activeProjects', title: 'Active Projects', icon: <WorkIcon />, dataKey: 'activeProjects', subtitle: 'In progress' },
-    { key: 'sprintProgress', title: 'Sprint Progress', icon: <SpeedIcon />, dataKey: 'sprintProgress', subtitle: 'Current sprint completion' },
-    { key: 'productivity', title: 'Productivity', icon: <TrendingUpIcon />, dataKey: 'productivityScore', trendKey: 'productivityTrend', subtitle: 'Target: 90%' },
-    { key: 'performance', title: 'Performance', icon: <AssessmentIcon />, dataKey: 'performanceScore', subtitle: 'Team evaluation' }
+    { key: 'totalTeam', title: 'Total Team', icon: <GroupsIcon />, dataKey: 'totalTeam', subtitle: 'Direct & indirect reports' },
+    { key: 'teamPresent', title: 'Team Present', icon: <HowToRegIcon />, dataKey: 'teamPresent', subtitle: 'Punched in' },
+    { key: 'taskCompletion', title: 'Task Completion', icon: <TaskAltIcon />, dataKey: 'taskCompletion', subtitle: 'Current sprint' },
+    { key: 'openRoles', title: 'Open Roles', icon: <WorkIcon />, dataKey: 'openRoles', subtitle: 'Active hiring' },
+    { key: 'pendingReviews', title: 'Pending Reviews', icon: <PendingActionsIcon />, dataKey: 'pendingReviews', subtitle: 'Leaves & appraisals' },
+    { key: 'onLeave', title: 'On Leave', icon: <EventBusyIcon />, dataKey: 'onLeave', subtitle: 'Current' },
+    { key: 'productivity', title: 'Productivity', icon: <TrendingUpIcon />, dataKey: 'productivity', subtitle: 'Sprint metrics' },
+    { key: 'budget', title: 'Budget', icon: <PaymentsIcon />, dataKey: 'budget', subtitle: 'Utilization' }
   ],
 
   [Role.TEAM_LEAD]: [
-    { key: 'teamMembers', title: 'Team Members', icon: <GroupsIcon />, dataKey: 'teamMembersCount', subtitle: 'Active sprint members' },
-    { key: 'presentToday', title: 'Present Today', icon: <HowToRegIcon />, dataKey: 'presentTodayCount', subtitle: 'Active in shift' },
-    { key: 'attendanceRate', title: 'Attendance Rate', icon: <EventAvailableIcon />, dataKey: 'attendanceRate', subtitle: 'Team average' },
+    { key: 'teamMembers', title: 'Team Members', icon: <GroupsIcon />, dataKey: 'teamMembers', subtitle: 'Active sprint members' },
+    { key: 'presentToday', title: 'Present Today', icon: <HowToRegIcon />, dataKey: 'presentToday', subtitle: 'Active in shift' },
+    { key: 'taskCompletion', title: 'Task Completion', icon: <TaskAltIcon />, dataKey: 'taskCompletion', subtitle: 'Current sprint' },
+    { key: 'blockedTasks', title: 'Blocked Tasks', icon: <BlockIcon />, dataKey: 'blockedTasks', subtitle: 'Action required' },
     { key: 'sprintProgress', title: 'Sprint Progress', icon: <SpeedIcon />, dataKey: 'sprintProgress', subtitle: 'Current sprint' },
-    { key: 'tasksCompleted', title: 'Tasks Completed', icon: <TaskAltIcon />, dataKey: 'completedTasksCount', subtitle: 'Current sprint' },
-    { key: 'blockedTasks', title: 'Blocked Tasks', icon: <BlockIcon />, dataKey: 'blockedTasksCount', subtitle: 'Action required' },
-    { key: 'productivity', title: 'Productivity', icon: <TrendingUpIcon />, dataKey: 'productivityScore', subtitle: 'Output rating' },
-    { key: 'pendingActions', title: 'Pending Actions', icon: <PendingActionsIcon />, dataKey: 'pendingItemsCount', subtitle: 'Peer feedback & logs' }
+    { key: 'pendingActions', title: 'Pending Actions', icon: <PendingActionsIcon />, dataKey: 'pendingActions', subtitle: 'Peer feedback & logs' },
+    { key: 'productivity', title: 'Productivity', icon: <TrendingUpIcon />, dataKey: 'productivity', subtitle: 'Output rating' },
+    { key: 'performance', title: 'Performance', icon: <AssessmentIcon />, dataKey: 'performance', subtitle: 'Team evaluation' }
   ],
 
   [Role.EMPLOYEE]: [
-    { key: 'attendance', title: 'Attendance', icon: <EventAvailableIcon />, dataKey: 'myAttendanceRate', subtitle: 'This month' },
-    { key: 'workingHours', title: 'Working Hours', icon: <AccessTimeIcon />, dataKey: 'hoursToday', subtitle: 'Logged today' },
-    { key: 'leaveBalance', title: 'Leave Balance', icon: <BeachAccessIcon />, dataKey: 'leaveBalance', subtitle: 'Available paid days' },
-    { key: 'tasksCompleted', title: 'Tasks Completed', icon: <TaskAltIcon />, dataKey: 'completedTasks', subtitle: 'Current sprint' },
-    { key: 'sprintProgress', title: 'Sprint Progress', icon: <SpeedIcon />, dataKey: 'sprintProgress', subtitle: 'Target completion' },
-    { key: 'performance', title: 'Performance', icon: <AssessmentIcon />, dataKey: 'performanceScore', subtitle: 'Evaluation rating' },
-    { key: 'overtime', title: 'Overtime', icon: <MoreTimeIcon />, dataKey: 'overtimeHours', subtitle: 'Extra hours logged' },
-    { key: 'attendanceStreak', title: 'Attendance Streak', icon: <LocalFireDepartmentIcon />, dataKey: 'attendanceStreak', subtitle: 'Consecutive days' }
+    { key: 'attendance', title: 'Attendance', icon: <EventAvailableIcon />, dataKey: 'attendance', subtitle: 'This month' },
+    { key: 'productivity', title: 'Productivity', icon: <TrendingUpIcon />, dataKey: 'productivity', subtitle: 'Personal rating' },
+    { key: 'taskProgress', title: 'Task Progress', icon: <TaskAltIcon />, dataKey: 'taskProgress', subtitle: 'Current sprint' },
+    { key: 'timeLogs', title: 'Time Logs', icon: <AccessTimeIcon />, dataKey: 'timeLogs', subtitle: 'Logged today' },
+    { key: 'upcomingLeave', title: 'Upcoming Leave', icon: <BeachAccessIcon />, dataKey: 'upcomingLeave', subtitle: 'Approved days off' },
+    { key: 'coreHours', title: 'Core Hours', icon: <MoreTimeIcon />, dataKey: 'coreHours', subtitle: 'Compliance' },
+    { key: 'openTickets', title: 'Open Tickets', icon: <PendingActionsIcon />, dataKey: 'openTickets', subtitle: 'IT / HR requests' },
+    { key: 'training', title: 'Training', icon: <AssessmentIcon />, dataKey: 'training', subtitle: 'Modules completed' }
   ]
 };

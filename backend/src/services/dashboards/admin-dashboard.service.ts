@@ -25,44 +25,29 @@ export class AdminDashboardService {
     // Total payroll cost estimation (can adjust to real column if available)
     const payrollCost = totalHeadcount * 5000; 
 
-    // Query pending approvals (leave requests)
-    const pendingLeaveReqs = await query(`SELECT COUNT(*) as count FROM leaverequests WHERE status = 'PENDING' AND organizationId = ?`, [orgId]);
-    const pendingApprovals = pendingLeaveReqs[0]?.count || 0;
-
-    // Real task completion stats for admin
-    const taskStats = await analyticsRepository.getTasksSummary({ organizationId: orgId });
-    const taskMap: Record<string, number> = {};
-    for (const t of taskStats) taskMap[t.status] = t.count;
-    
-    // Real Headcount Trend by join date (grouping by month)
-    const headcountTrendRows = await query(`
-      SELECT strftime('%Y-%m', joinDate) as month, COUNT(*) as count
-      FROM employees
-      WHERE organizationId = ? AND joinDate IS NOT NULL
-      GROUP BY month
-      ORDER BY month ASC
-      LIMIT 6
-    `, [orgId]);
-
-    let runningHeadcount = 0;
-    const headcountTrend = headcountTrendRows.map((r: any) => {
-      runningHeadcount += r.count;
-      // Convert '2026-01' to 'Jan'
-      const date = new Date(`${r.month}-01`);
-      const monthName = date.toLocaleDateString('en-US', { month: 'short' });
-      return { month: monthName, headcount: runningHeadcount };
-    });
-
     // 8 KPIs
+    const totalUsersRow = await query(`SELECT COUNT(*) as count FROM users`);
+    const activeSessionsRow = await query(`SELECT COUNT(*) as count FROM sessions WHERE expiresAt > datetime('now') AND revokedAt IS NULL`);
+    const pageCountRow = await query(`PRAGMA page_count`);
+    const pageSizeRow = await query(`PRAGMA page_size`);
+    const errorRateRow = await query(`SELECT (SUM(CASE WHEN level = 'ERROR' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) as rate FROM audit_logs`);
+    const pendingLeaveReqs = await query(`SELECT COUNT(*) as count FROM leaverequests WHERE status = 'PENDING' AND organizationId = ?`, [orgId]);
+    const deptsRow = await query(`SELECT COUNT(*) as count FROM departments`);
+    const loginsRow = await query(`SELECT COUNT(*) as count FROM audit_logs WHERE action = 'LOGIN' AND timestamp >= date('now')`);
+    
+    const pageCount = pageCountRow[0]?.page_count || 0;
+    const pageSize = pageSizeRow[0]?.page_size || 0;
+    const storageMB = ((pageCount * pageSize) / (1024 * 1024)).toFixed(2);
+
     const kpis = {
-      totalHeadcount,
-      activeHeadcount,
-      onLeaveHeadcount,
-      payrollCost,
-      pendingApprovals,
-      openRoles: Math.floor(totalHeadcount * 0.05), // Estimated if no reqs table
-      complianceScore: 98,
-      systemHealth: 100
+      totalUsers: totalUsersRow[0]?.count || 0,
+      activeSessions: activeSessionsRow[0]?.count || 0,
+      totalStorage: `${storageMB} MB`,
+      errorRate: parseFloat((errorRateRow[0]?.rate || 0).toFixed(2)),
+      pendingApprovals: pendingLeaveReqs[0]?.count || 0,
+      totalDepartments: deptsRow[0]?.count || 0,
+      integrationsHealth: 100, // Hardcoded for now
+      dailyLogins: loginsRow[0]?.count || 0
     };
 
     // 6 Charts

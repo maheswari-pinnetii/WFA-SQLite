@@ -27,17 +27,12 @@ export const socketAuthMiddleware = (socket: Socket, next: (err?: Error) => void
         return next(new Error('Authentication error: Invalid or expired token'));
       }
 
-      const supabaseId = decoded.sub;
       const email = decoded.email;
 
-      let appUser = await User.findOne({ supabase_auth_id: supabaseId });
+      let appUser = null;
       
-      if (!appUser && email) {
+      if (email) {
         appUser = await User.findOne({ email });
-        if (appUser) {
-          appUser.supabase_auth_id = supabaseId;
-          await appUser.save();
-        }
       }
 
       if (!appUser) {

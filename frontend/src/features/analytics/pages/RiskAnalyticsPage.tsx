@@ -16,9 +16,9 @@ export const RiskAnalyticsPage: React.FC = () => {
   }
 
   const riskDistribution = analytics?.riskDistribution || [];
-  const highRiskCount = riskDistribution.find(r => r.name === 'High Risk')?.value || 0;
-  const mediumRiskCount = riskDistribution.find(r => r.name === 'Medium Risk')?.value || 0;
-  const lowRiskCount = riskDistribution.find(r => r.name === 'Low Risk')?.value || 0;
+  const highRiskCount = riskDistribution.find((r: any) => r.name === 'High Risk')?.value || 0;
+  const mediumRiskCount = riskDistribution.find((r: any) => r.name === 'Medium Risk')?.value || 0;
+  const lowRiskCount = riskDistribution.find((r: any) => r.name === 'Low Risk')?.value || 0;
 
   const riskRoster = (employees || [])
     .map(emp => {

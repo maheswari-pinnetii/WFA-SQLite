@@ -14,8 +14,7 @@ export const authenticateToken = async (req, res, next) => {
   if (!token) return res.status(401).json({ success: false, message: 'Unauthorized access token missing' });
 
   try {
-    // 1. Verify Supabase JWT (signed with JWT_SECRET / SUPABASE_JWT_SECRET)
-    // Note: Ensure env.JWT_SECRET matches your Supabase Project JWT Secret
+    // 1. Verify JWT
     const decoded = jwt.verify(token, JWT_SECRET, {
       algorithms: ['HS256']
     }) as any;

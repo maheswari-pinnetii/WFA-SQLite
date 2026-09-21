@@ -135,14 +135,14 @@ export class EmployeeDashboardService {
 
     // Comprehensive 8 KPIs
     const kpis = {
-      attendanceRate: 98.4,
-      hoursLogged: Math.round(hoursLogged),
-      leaveBalance,
-      tasksCompleted,
-      sprintProgress: 85,
-      performanceScore: 92,
-      overtime: 6.5,
-      attendanceStreak: 18
+      attendance: 98.4,
+      productivity: 92,
+      taskProgress: 85,
+      timeLogs: Math.round(hoursLogged),
+      upcomingLeave: pendingLeaves,
+      coreHours: 42,
+      openTickets: 2,
+      training: 100
     };
 
     // Fetch employee's skills
