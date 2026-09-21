@@ -1,12 +1,12 @@
-# Master Documentation Index
+# Entity Relationship Diagram
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | DAT-002 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
-| Owner | Engineering |
+| Owner | Data |
 | Created | 21 September 2026 |
 | Last Updated | 21 September 2026 |
 | Target Release | Not specified |
@@ -14,5 +14,9 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. ERD
+```mermaid
+erDiagram
+    EMPLOYEES ||--o{ ATTENDANCE : logs
+    EMPLOYEES ||--o{ LEAVE : requests
+```

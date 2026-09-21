@@ -1,8 +1,8 @@
-# Master Documentation Index
+# Engineering Plan
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | ENG-001 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
@@ -14,5 +14,5 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Coding Standards
+TypeScript strict mode, ESLint, Prettier.

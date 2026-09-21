@@ -17,7 +17,7 @@ setupAuthInterceptors();
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <GlobalErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider>

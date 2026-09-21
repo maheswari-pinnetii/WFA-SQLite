@@ -1,12 +1,12 @@
-# Master Documentation Index
+# RBAC Documentation
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | SEC-002 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
-| Owner | Engineering |
+| Owner | Security |
 | Created | 21 September 2026 |
 | Last Updated | 21 September 2026 |
 | Target Release | Not specified |
@@ -14,5 +14,5 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Roles
+ADMIN, HR, MANAGER, TEAM_LEAD, EMPLOYEE.

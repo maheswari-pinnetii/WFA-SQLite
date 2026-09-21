@@ -1,12 +1,12 @@
-# Master Documentation Index
+# Security
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | SEC-001 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
-| Owner | Engineering |
+| Owner | Security |
 | Created | 21 September 2026 |
 | Last Updated | 21 September 2026 |
 | Target Release | Not specified |
@@ -14,5 +14,5 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Security
+Zero-trust security, rate limiting, JWT + HttpOnly Cookies.

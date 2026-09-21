@@ -1,8 +1,8 @@
-# Master Documentation Index
+# Requirements Traceability
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | SRS-004 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
@@ -14,5 +14,7 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Matrix
+| Requirement | Feature | Status |
+|---|---|---|
+| FR-001 | RBAC | IMPLEMENTED |

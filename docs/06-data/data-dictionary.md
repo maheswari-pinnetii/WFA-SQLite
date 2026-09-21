@@ -1,12 +1,12 @@
-# Master Documentation Index
+# Data Dictionary
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | DAT-004 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
-| Owner | Engineering |
+| Owner | Data |
 | Created | 21 September 2026 |
 | Last Updated | 21 September 2026 |
 | Target Release | Not specified |
@@ -14,5 +14,6 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Fields
+- `id`: UUID
+- `email`: String

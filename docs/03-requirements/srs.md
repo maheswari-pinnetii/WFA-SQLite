@@ -1,8 +1,8 @@
-# Master Documentation Index
+# Software Requirements Specification
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | SRS-001 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
@@ -14,5 +14,8 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Functional Requirements
+- FR-001: The system shall support 5 RBAC roles.
+- FR-002: The system shall provide WebAuthn login.
+## 2. Non-Functional Requirements
+- NFR-001: The database must use SQLite WAL mode.

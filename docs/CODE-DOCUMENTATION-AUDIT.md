@@ -1,8 +1,8 @@
-# Master Documentation Index
+# Code Documentation Audit
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | RPT-002 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
@@ -14,5 +14,5 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Audit
+Verification of code vs docs.

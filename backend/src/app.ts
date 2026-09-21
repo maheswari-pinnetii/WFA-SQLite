@@ -13,6 +13,7 @@ import { logger } from './config/logger.js';
 import { AppError, ErrorCode, sendError } from './utils/apiError.js';
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Security: Hide backend server identity and technology disclosure
 app.disable('x-powered-by');

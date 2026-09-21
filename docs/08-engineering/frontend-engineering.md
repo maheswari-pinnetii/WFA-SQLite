@@ -1,8 +1,8 @@
-# Master Documentation Index
+# Frontend Engineering
 
 | Field | Value |
 |-------|-------|
-| Document ID | DOC-001 |
+| Document ID | ENG-003 |
 | Version | 1.0 |
 | Status | Active |
 | Author | Maheswari Pinneti |
@@ -14,5 +14,5 @@
 
 ---
 
-## 1. Master Index
-Welcome to the WFA-SQLite documentation portal.
+## 1. Frontend
+React 18, Vite, Redux Toolkit, React Query, Zustand.
