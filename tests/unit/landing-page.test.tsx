@@ -20,7 +20,7 @@ vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
 describe('Enterprise Landing Page UI & Features Test Suite', () => {
   const renderLandingPage = () => {
     return render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <LandingPage />
       </BrowserRouter>
     );

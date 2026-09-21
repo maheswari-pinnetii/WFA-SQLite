@@ -274,7 +274,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
 
     it('2.1 should render PasswordlessLoginCard heading and FIDO2 markers', () => {
       render(
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <PasswordlessLoginCard onPasskeyLogin={vi.fn()} />
         </BrowserRouter>
       );
@@ -285,7 +285,7 @@ describe('Trusted Devices & Biometric / Homescreen Lock Test Suite', () => {
 
     it('2.2 should render PasswordlessLoginCard biometric scanner HUD and action buttons', () => {
       render(
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <PasswordlessLoginCard onPasskeyLogin={vi.fn()} />
         </BrowserRouter>
       );

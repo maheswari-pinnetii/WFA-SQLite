@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 import { EnterpriseHeader } from './components/EnterpriseHeader';
 import { Sidebar } from './components/Sidebar';
 import { SupportModal } from '../components/SupportModal';
@@ -117,7 +119,9 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
           className="app-main flex-1 flex flex-col min-w-0 focus:outline-none"
         >
           <div className="flex-1 p-4 md:p-8 space-y-6">
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </div>
 
           {/* Small footprint dashboard footer */}

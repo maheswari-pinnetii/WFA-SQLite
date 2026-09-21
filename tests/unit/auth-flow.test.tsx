@@ -31,7 +31,7 @@ vi.mock('../../frontend/src/auth/services/auth.service', () => ({
   },
 }));
 
-const renderPage = (page: React.ReactNode) => render(<BrowserRouter>{page}</BrowserRouter>);
+const renderPage = (page: React.ReactNode) => render(<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{page}</BrowserRouter>);
 
 describe('Authentication pages', () => {
   beforeEach(() => {

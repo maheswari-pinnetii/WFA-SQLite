@@ -152,15 +152,40 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
     roles: ALL_ROLES,
     children: [
       { id: 'payroll.dashboard', label: 'Dashboard', path: '/payroll/dashboard', roles: LEADERSHIP_ROLES },
-      { id: 'payroll.register', label: 'Payroll Register', path: '/payroll/register', roles: HR_ADMIN_ROLES },
-      { id: 'payroll.ctc', label: 'CTC Calculator', path: '/payroll/ctc-calculator', roles: ALL_ROLES },
-      { id: 'payroll.departments', label: 'Department Payroll', path: '/payroll/departments', roles: LEADERSHIP_ROLES },
+      {
+        id: 'payroll.salary',
+        label: 'Salary Management',
+        roles: HR_ADMIN_ROLES,
+        children: [
+          { id: 'payroll.salary.structures', label: 'Salary Structures', path: '/payroll/salary-structures' },
+          { id: 'payroll.salary.components', label: 'Salary Components', path: '/payroll/salary-components' },
+          { id: 'payroll.salary.revisions', label: 'Salary Revisions', path: '/payroll/revisions' },
+          { id: 'payroll.salary.ctc', label: 'CTC Calculator', path: '/payroll/ctc-calculator' },
+        ]
+      },
+      {
+        id: 'payroll.runs',
+        label: 'Payroll Runs',
+        roles: HR_ADMIN_ROLES,
+        children: [
+          { id: 'payroll.runs.active', label: 'Active Run', path: '/payroll/runs/active' },
+          { id: 'payroll.runs.history', label: 'Run History', path: '/payroll/runs/history' },
+          { id: 'payroll.runs.register', label: 'Payroll Register', path: '/payroll/register' },
+        ]
+      },
+      {
+        id: 'payroll.compliance',
+        label: 'Compliance & Tax',
+        roles: ALL_ROLES,
+        children: [
+          { id: 'payroll.compliance.statutory', label: 'Statutory Settings', path: '/payroll/compliance/statutory', roles: HR_ADMIN_ROLES },
+          { id: 'payroll.compliance.tax', label: 'Tax Declarations', path: '/payroll/tax-declarations', roles: ALL_ROLES },
+          { id: 'payroll.compliance.ytd', label: 'YTD Summary', path: '/payroll/ytd', roles: ALL_ROLES },
+        ]
+      },
       { id: 'payroll.fnf', label: 'Full & Final (F&F)', path: '/payroll/fnf', roles: HR_ADMIN_ROLES },
-      { id: 'payroll.revisions', label: 'Salary Revisions', path: '/payroll/revisions', roles: ALL_ROLES },
-      { id: 'payroll.payslips', label: 'Payslips', path: '/payroll/payslips', roles: ALL_ROLES },
-      { id: 'payroll.tax.declarations', label: 'Tax & Declarations', path: '/payroll/tax-declarations', roles: ALL_ROLES },
+      { id: 'payroll.payslips', label: 'My Payslips', path: '/payroll/payslips', roles: ALL_ROLES },
       { id: 'payroll.reports', label: 'Payroll Reports', path: '/payroll/reports', roles: HR_ADMIN_ROLES },
-
     ]
   },
   {

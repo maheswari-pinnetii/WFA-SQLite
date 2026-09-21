@@ -13,7 +13,7 @@ describe('Step 2: PasswordlessLoginCard Component Unit Tests', () => {
 
   const renderCard = (props: React.ComponentProps<typeof PasswordlessLoginCard>) => {
     return render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <PasswordlessLoginCard {...props} />
       </BrowserRouter>
     );

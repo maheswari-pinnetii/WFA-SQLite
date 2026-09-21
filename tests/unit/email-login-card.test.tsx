@@ -9,7 +9,7 @@ import { EmailLoginCard } from '../../frontend/src/auth/components/EmailLoginCar
 describe('Step 1: EmailLoginCard Component Unit Tests', () => {
   const renderCard = (props: React.ComponentProps<typeof EmailLoginCard>) => {
     return render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <EmailLoginCard {...props} />
       </BrowserRouter>
     );

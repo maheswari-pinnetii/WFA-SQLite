@@ -25,7 +25,7 @@ describe('Step 3: SignUpPage Component Unit Tests', () => {
 
   const renderSignUp = () => {
     return render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SignUpPage />
       </BrowserRouter>
     );

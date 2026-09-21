@@ -38,12 +38,17 @@ async function loginWithMfa(page: Page, email: string, password = 'StacklyWFA202
   await emailInput.waitFor({ state: 'visible', timeout: 10000 });
   await emailInput.fill(email);
 
+  // Click Next
+  const nextBtn = page.locator('button[type="submit"], button:has-text("Next")').first();
+  await nextBtn.click();
+
   // Fill password
   const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
+  await passwordInput.waitFor({ state: 'visible', timeout: 10000 });
   await passwordInput.fill(password);
 
   // Submit
-  const submitBtn = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")').first();
+  const submitBtn = page.locator('button[type="submit"], button:has-text("Sign in")').first();
   await submitBtn.click();
 
   // Handle MFA
