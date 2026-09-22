@@ -50,9 +50,10 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   const [unreadCount, setUnreadCount] = useState(3);
   const [hasNewNotification, setHasNewNotification] = useState(false);
   const [notifications, setNotifications] = useState([
-    { id: '1', title: 'Attendance Alert: 3 Late Check-Ins', subtitle: 'HR Operations', time: '5m ago', type: 'warning', path: '/hr/attendance', read: false },
-    { id: '2', title: 'Leave Request Pending Review', subtitle: 'Sarah Connor (Engineering)', time: '45m ago', type: 'info', path: '/manager/approvals', read: false },
-    { id: '3', title: 'System Security Audit Completed', subtitle: 'Compliance Stream', time: '2h ago', type: 'success', path: '/admin/audit-logs', read: false },
+    { id: '1', title: 'Attendance Alert: 3 Late Check-Ins', subtitle: 'HR Operations', time: '5m ago', type: 'warning', path: '/hr/attendance', read: false, roles: [Role.HR, Role.ADMIN] },
+    { id: '2', title: 'Leave Request Pending Review', subtitle: 'Sarah Connor (Engineering)', time: '45m ago', type: 'info', path: '/manager/approvals', read: false, roles: [Role.MANAGER, Role.ADMIN] },
+    { id: '3', title: 'System Security Audit Completed', subtitle: 'Compliance Stream', time: '2h ago', type: 'success', path: '/admin/audit-logs', read: false, roles: [Role.ADMIN] },
+    { id: '4', title: 'Your Leave Request Approved', subtitle: 'HR Operations', time: '1h ago', type: 'success', path: '/employee/leave/history', read: false, roles: [Role.EMPLOYEE] },
   ]);
 
   // Dropdowns State
@@ -88,12 +89,14 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   });
 
   const searchResultsMap = [
-    { title: 'Global Headcount & Department Analytics', category: 'reports', path: '/admin/analytics' },
-    { title: 'User Management & Security Scopes', category: 'security', path: '/admin/users' },
-    { title: 'System Security Audit Stream', category: 'security', path: '/admin/audit-logs' },
-    { title: 'Workforce Attendance Roster', category: 'employees', path: '/hr/attendance' },
-    { title: 'Performance Review Matrix', category: 'employees', path: '/hr/performance' },
-    { title: 'Engineering & Product Teams', category: 'departments', path: '/admin/departments' },
+    { title: 'Global Headcount & Department Analytics', category: 'reports', path: '/admin/analytics', roles: [Role.ADMIN, Role.HR] },
+    { title: 'User Management & Security Scopes', category: 'security', path: '/admin/users', roles: [Role.ADMIN] },
+    { title: 'System Security Audit Stream', category: 'security', path: '/admin/audit-logs', roles: [Role.ADMIN] },
+    { title: 'Workforce Attendance Roster', category: 'employees', path: '/hr/attendance', roles: [Role.HR, Role.ADMIN] },
+    { title: 'Performance Review Matrix', category: 'employees', path: '/hr/performance', roles: [Role.HR, Role.ADMIN] },
+    { title: 'Engineering & Product Teams', category: 'departments', path: '/admin/departments', roles: [Role.ADMIN, Role.HR] },
+    { title: 'My Performance Overview', category: 'reports', path: '/employee/performance/overview', roles: [Role.EMPLOYEE] },
+    { title: 'My Attendance Logs', category: 'employees', path: '/employee/attendance/today', roles: [Role.EMPLOYEE] },
   ];
 
 
@@ -141,8 +144,12 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
   const filteredSearchResults = searchResultsMap.filter((item) => {
     const matchesCategory = searchCategory === 'all' || item.category === searchCategory;
     const matchesQuery = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesQuery;
+    const matchesRole = item.roles.includes(role as Role);
+    return matchesCategory && matchesQuery && matchesRole;
   });
+
+  const displayNotifications = notifications.filter(n => n.roles.includes(role as Role));
+
 
   const isDark = theme === 'dark';
 
@@ -313,7 +320,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
               </div>
 
               <div className="space-y-1.5 max-h-72 overflow-y-auto">
-                {notifications.map((n) => (
+                {displayNotifications.map((n) => (
                   <div
                     key={n.id}
                     onClick={() => {

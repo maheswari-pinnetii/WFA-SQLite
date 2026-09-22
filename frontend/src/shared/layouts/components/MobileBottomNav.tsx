@@ -7,13 +7,43 @@ import { ROLE_HOME_PATHS } from '../../../security/roles/roles';
 export const MobileBottomNav: React.FC<{ onOpenMobileMenu: () => void }> = ({ onOpenMobileMenu }) => {
   const { role } = useAuth();
   const location = useLocation();
-  const homePath = ROLE_HOME_PATHS[role] || '/employee/dashboard';
+  const homePath = ROLE_HOME_PATHS[role as Role] || '/employee/dashboard';
+
+  const getAttendancePath = () => {
+    switch (role as Role) {
+      case Role.ADMIN: return '/admin/attendance-overview';
+      case Role.HR: return '/hr/attendance';
+      case Role.MANAGER: return '/manager/attendance';
+      case Role.TEAM_LEAD: return '/team-lead/attendance';
+      default: return '/employee/attendance';
+    }
+  };
+
+  const getLeavesPath = () => {
+    switch (role as Role) {
+      case Role.ADMIN: return '/admin/leaves';
+      case Role.HR: return '/hr/leaves';
+      case Role.MANAGER: return '/manager/leaves';
+      case Role.TEAM_LEAD: return '/leave/team';
+      default: return '/employee/leave/overview';
+    }
+  };
+
+  const getAnalyticsPath = () => {
+    switch (role as Role) {
+      case Role.ADMIN: return '/admin/productivity';
+      case Role.HR: return '/hr/productivity';
+      case Role.MANAGER: return '/manager/productivity';
+      case Role.TEAM_LEAD: return '/team-lead/productivity';
+      default: return '/employee/performance';
+    }
+  };
 
   const navItems = [
     { label: 'Dashboard', path: homePath, icon: <LayoutDashboard size={20} /> },
-    { label: 'Attendance', path: '/attendance', icon: <Clock size={20} /> },
-    { label: 'Leaves', path: '/hr/leaves', icon: <Calendar size={20} /> },
-    { label: 'Analytics', path: '/analytics/productivity', icon: <BarChart3 size={20} /> },
+    { label: 'Attendance', path: getAttendancePath(), icon: <Clock size={20} /> },
+    { label: 'Leaves', path: getLeavesPath(), icon: <Calendar size={20} /> },
+    { label: 'Analytics', path: getAnalyticsPath(), icon: <BarChart3 size={20} /> },
   ];
 
   return (
