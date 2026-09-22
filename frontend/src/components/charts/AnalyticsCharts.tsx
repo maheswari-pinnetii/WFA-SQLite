@@ -88,7 +88,7 @@ export const AnalyticsLineChart: React.FC<BaseChartProps & { xKey?: string; seri
   const chartData = data && data.length > 0 ? data : DEFAULT_LINE_DATA;
 
   return (
-    <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={false} onRetry={onRetry} minHeight={height + 100}>
+    <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={!data || data.length === 0} onRetry={onRetry} minHeight={height + 100}>
       <div className="w-full min-w-0 min-h-[260px] h-full">
         <ResponsiveContainer width="99%" height={height} minWidth={1}>
           <LineChart data={chartData} margin={{ top: 12, right: 12, left: -18, bottom: 0 }}>
@@ -122,7 +122,7 @@ export const AnalyticsBarChart: React.FC<BaseChartProps & { xKey?: string; serie
   const chartData = data && data.length > 0 ? data : DEFAULT_BAR_DATA;
 
   return (
-    <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={false} onRetry={onRetry} minHeight={height + 100}>
+    <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={!data || data.length === 0} onRetry={onRetry} minHeight={height + 100}>
       <div className="w-full min-w-0 min-h-[260px] h-full">
         <ResponsiveContainer width="99%" height={height} minWidth={1}>
           <BarChart data={chartData} layout={layout === 'vertical' ? 'vertical' : 'horizontal'} margin={{ top: 12, right: 12, left: layout === 'vertical' ? 36 : -18, bottom: 0 }}>
@@ -165,7 +165,7 @@ export const AnalyticsDonutChart: React.FC<BaseChartProps & { nameKey?: string; 
   const chartData = data && data.length > 0 ? data : DEFAULT_DONUT_DATA;
 
   return (
-    <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={false} onRetry={onRetry} minHeight={height + 100}>
+    <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={!data || data.length === 0} onRetry={onRetry} minHeight={height + 100}>
       <div className="w-full min-w-0 min-h-[260px] h-full">
         <ResponsiveContainer width="99%" height={height} minWidth={1}>
           <PieChart>

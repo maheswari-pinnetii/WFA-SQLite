@@ -112,6 +112,8 @@ import { SalaryStructuresPage } from '../../features/hr/pages/SalaryStructuresPa
 import { StatutoryCompliancePage } from '../../features/hr/pages/StatutoryCompliancePage';
 import { SalaryComponentsPage } from '../../features/hr/pages/SalaryComponentsPage';
 import { HeadcountAnalyticsPage } from '../../features/analytics/pages/HeadcountAnalyticsPage';
+import { ComingSoonPage } from '../../pages/ComingSoonPage';
+import { NotificationPreferences } from '../../features/employee/pages/NotificationPreferences';
 import { AttritionAnalyticsPage } from '../../features/analytics/pages/AttritionAnalyticsPage';
 
 
@@ -377,8 +379,8 @@ export const AppRoutes: React.FC = () => {
                 {/* Profile & Security & Settings & Analytics & Notifications */}
                 <Route path="/employee/profile" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
                 <Route path="/employee/profile/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
-                <Route path="/employee/analytics" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeDashboard /></RoleGuard>} />
-                <Route path="/employee/notifications" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeDashboard /></RoleGuard>} />
+                <Route path="/employee/analytics" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><ProductivityAnalyticsPage /></RoleGuard>} />
+                <Route path="/employee/notifications" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><NotificationPreferences /></RoleGuard>} />
                 <Route path="/employee/security" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
                 <Route path="/employee/settings" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
 
@@ -527,13 +529,13 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/employee/profile" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
                 
                 {/* Role-based Wildcard Fallbacks to prevent 404 on broken dashboard links */}
-                <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="/hr/*" element={<Navigate to="/hr/dashboard" replace />} />
-                <Route path="/manager/*" element={<Navigate to="/manager/dashboard" replace />} />
-                <Route path="/team-lead/*" element={<Navigate to="/team-lead/dashboard" replace />} />
-                <Route path="/team/*" element={<Navigate to="/team/dashboard" replace />} />
-                <Route path="/employee/*" element={<Navigate to="/employee/dashboard" replace />} />
-                <Route path="/me/*" element={<Navigate to="/me/dashboard" replace />} />
+                <Route path="/admin/*" element={<ComingSoonPage />} />
+                <Route path="/hr/*" element={<ComingSoonPage />} />
+                <Route path="/manager/*" element={<ComingSoonPage />} />
+                <Route path="/team-lead/*" element={<ComingSoonPage />} />
+                <Route path="/team/*" element={<ComingSoonPage />} />
+                <Route path="/employee/*" element={<ComingSoonPage />} />
+                <Route path="/me/*" element={<ComingSoonPage />} />
 
                 {/* Legacy Root Paths Redirects */}
                 <Route path="/dashboard" element={<DefaultHomeRedirect />} />
