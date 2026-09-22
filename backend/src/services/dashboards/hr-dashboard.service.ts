@@ -75,6 +75,20 @@ export class HrDashboardService {
     const presentToday = presentTodayRow[0]?.count || 0;
     const attendanceRate = totalHeadcount > 0 ? Number(((presentToday / totalHeadcount) * 100).toFixed(1)) : 0;
 
+    // Check payroll runs
+    const payrollRunsRows = await query(`
+      SELECT status FROM payroll_runs 
+      WHERE organizationId = ? 
+      ORDER BY createdAt DESC LIMIT 1
+    `, [orgId]);
+    const latestPayrollStatus = payrollRunsRows.length > 0 ? payrollRunsRows[0].status : null;
+    let payrollStatusStr = "Pending Processing";
+    if (latestPayrollStatus === 'PROCESSED' || latestPayrollStatus === 'COMPLETED') {
+      payrollStatusStr = "100% Processed";
+    } else if (latestPayrollStatus === 'DRAFT' || latestPayrollStatus === 'IN_PROGRESS') {
+      payrollStatusStr = "Processing Active";
+    }
+
     const kpis = {
       headcount: totalHeadcount,
       presentToday: presentToday,
@@ -83,7 +97,7 @@ export class HrDashboardService {
       pendingApprovals: leaveRequests + hrIssues,
       newJoinersMonth: newHires,
       attritionRate: turnoverRate,
-      payrollStatus: "100% Processed"
+      payrollStatus: payrollStatusStr
     };
 
     // 6 Charts

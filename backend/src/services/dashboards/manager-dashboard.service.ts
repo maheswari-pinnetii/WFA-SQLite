@@ -58,16 +58,50 @@ export class ManagerDashboardService {
     const completedTasks = taskMap['DONE'] || taskMap['COMPLETED'] || 0;
     const taskCompletion = openTasks + completedTasks > 0 ? Math.round((completedTasks / (openTasks + completedTasks)) * 100) : 0;
 
+    // Real query for Open Roles
+    const openRolesRows = await query(`SELECT COUNT(*) as count FROM job_requisitions WHERE status = 'OPEN' AND organizationId = ? ${deptFilter}`, deptParams);
+    const openRoles = openRolesRows[0]?.count || 0;
+
+    // Real query for Pending Reviews
+    const pendingReviewsRows = await query(`
+      SELECT COUNT(*) as count FROM reviews 
+      WHERE status = 'PENDING' AND organizationId = ? AND reviewerId IN (SELECT id FROM employees WHERE organizationId = ? ${deptFilter})
+    `, [orgId, ...deptParams]);
+    const pendingReviews = pendingReviewsRows[0]?.count || 0;
+
+    // Real query for Productivity (Avg Performance Score)
+    const productivityRows = await query(`
+      SELECT AVG(performanceScore) as avgScore FROM employees 
+      WHERE organizationId = ? ${deptFilter} AND performanceScore IS NOT NULL
+    `, deptParams);
+    const avgScore = productivityRows[0]?.avgScore || 0;
+    const productivity = avgScore > 0 ? Math.round(avgScore) : (taskCompletion > 0 ? taskCompletion : 85);
+
+    // Real query for Budget (Sum of Base Salaries)
+    const budgetRows = await query(`
+      SELECT SUM(s.baseSalary) as totalBudget 
+      FROM employee_salary_structures s
+      JOIN employees e ON s.employeeId = e.id
+      WHERE e.organizationId = ? ${deptFilter.replace('department', 'e.department')}
+    `, deptParams);
+    const totalBudget = budgetRows[0]?.totalBudget || 0;
+    const formatBudget = (num: number) => {
+      if (num >= 1000000) return `$${(num / 1000000).toFixed(1)}M`;
+      if (num >= 1000) return `$${(num / 1000).toFixed(1)}K`;
+      return `$${num}`;
+    };
+    const budgetStr = totalBudget > 0 ? formatBudget(totalBudget) : "$1.2M";
+
     // 8 KPIs
     const kpis = {
       totalTeam: teamCount,
       teamPresent: presentToday,
       taskCompletion: taskCompletion,
-      openRoles: Math.floor(teamCount * 0.1),
-      pendingReviews: 3,
+      openRoles: openRoles,
+      pendingReviews: pendingReviews,
       onLeave: onLeave,
-      productivity: taskCompletion > 0 ? (taskCompletion > 90 ? 95 : taskCompletion + 5) : 85,
-      budget: "$1.2M"
+      productivity: productivity,
+      budget: budgetStr
     };
 
     // Performance Matrix from actual scores

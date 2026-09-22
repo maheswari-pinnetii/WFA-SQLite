@@ -60,7 +60,7 @@ export const workflowService = {
     if (workflow.entityType === 'EXPENSE') {
       await execute(`UPDATE expense_claims SET status = ? WHERE id = ?`, [finalStatus, entityId]);
     } else if (workflow.entityType === 'LEAVE') {
-      await execute(`UPDATE leave_requests SET status = ? WHERE id = ?`, [finalStatus, entityId]);
+      await execute(`UPDATE leaverequests SET status = ? WHERE id = ?`, [finalStatus, entityId]);
     } else if (workflow.entityType === 'ATTENDANCE_CORRECTION') {
       await execute(`UPDATE attendance_corrections SET status = ? WHERE id = ?`, [finalStatus, entityId]);
     }
@@ -200,8 +200,8 @@ export const workflowService = {
               req.managerId,
               CASE
                 WHEN w.entityType = 'EXPENSE' THEN 'Expense Claim: ₹' || ex.amount || ' - ' || ex.category
-                WHEN w.entityType = 'LEAVE' THEN 'Leave: ' || l.type || ' (' || l.startDate || ' to ' || l.endDate || ')'
-                WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN 'Correction: ' || ac.date
+                WHEN w.entityType = 'LEAVE' THEN 'Leave: ' || l.leaveType || ' (' || l.startDate || ' to ' || l.endDate || ')'
+                WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN 'Correction: ' || ac.appliedAt
               END as details,
               CASE
                 WHEN w.entityType = 'EXPENSE' THEN ex.description
@@ -213,7 +213,7 @@ export const workflowService = {
        JOIN approval_workflows w ON r.workflowId = w.id
        JOIN approval_steps s ON r.workflowId = s.workflowId AND r.currentStepOrder = s.stepOrder
        LEFT JOIN expense_claims ex ON w.entityType = 'EXPENSE' AND r.entityId = ex.id
-       LEFT JOIN leave_requests l ON w.entityType = 'LEAVE' AND r.entityId = l.id
+       LEFT JOIN leaverequests l ON w.entityType = 'LEAVE' AND r.entityId = l.id
        LEFT JOIN attendance_corrections ac ON w.entityType = 'ATTENDANCE_CORRECTION' AND r.entityId = ac.id
        LEFT JOIN employees e1 ON ex.employeeId = e1.id
        LEFT JOIN employees e2 ON l.employeeId = e2.id

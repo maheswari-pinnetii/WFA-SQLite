@@ -32,9 +32,9 @@ export const expenseService = {
     const now = new Date().toISOString();
     
     await execute(
-      `INSERT INTO expense_claims (id, employeeId, category, amount, currency, claimDate, description, receiptUrl, status, createdAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)`,
-      [id, data.employeeId, data.category, data.amount, data.currency || 'INR', data.claimDate, data.description, data.receiptUrl || null, now]
+      `INSERT INTO expense_claims (id, employeeId, category, amount, currency, claimDate, description, receiptUrl, status, createdAt, submittedAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?)`,
+      [id, data.employeeId, data.category, data.amount, data.currency || 'INR', data.claimDate, data.description, data.receiptUrl || null, now, now, now]
     );
 
     // Fetch the workflow ID for EXPENSE

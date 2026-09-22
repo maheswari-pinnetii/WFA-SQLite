@@ -66,15 +66,29 @@ export class TeamLeadDashboardService {
     const sprintVelocity = taskMap['DONE'] || taskMap['COMPLETED'] || 0;
     const activeTasks = (taskMap['TODO'] || 0) + (taskMap['IN_PROGRESS'] || 0);
     const sprintProgress = activeTasks + sprintVelocity > 0 ? Math.round((sprintVelocity / (activeTasks + sprintVelocity)) * 100) : 0;
+    // Real Pending Actions
+    const pendingActionsRows = teamLead
+      ? await query(`SELECT COUNT(*) as count FROM approval_requests WHERE status = 'PENDING' AND organizationId = ? AND employeeId IN (SELECT id FROM employees WHERE team = ? AND organizationId = ?)`, [orgId, teamLead, orgId])
+      : await query(`SELECT COUNT(*) as count FROM approval_requests WHERE status = 'PENDING' AND organizationId = ?`, [orgId]);
+    const pendingActions = pendingActionsRows[0]?.count || 0;
+
+    // Real Productivity and Performance (from average performance scores)
+    const perfRows = teamLead
+      ? await query(`SELECT AVG(performanceScore) as avgScore FROM employees WHERE organizationId = ? AND team = ? AND performanceScore IS NOT NULL`, [orgId, teamLead])
+      : await query(`SELECT AVG(performanceScore) as avgScore FROM employees WHERE organizationId = ? AND performanceScore IS NOT NULL`, [orgId]);
+    const avgScore = perfRows[0]?.avgScore || 0;
+    const productivity = avgScore > 0 ? Math.round(avgScore) : (sprintProgress > 0 ? sprintProgress + 5 : 85);
+    const performance = avgScore > 0 ? Math.round(avgScore) : 92;
+
     const kpis = {
       teamMembers: squadSize,
       presentToday: checkedIn,
       taskCompletion: sprintVelocity,
       blockedTasks: taskMap['BLOCKED'] || 0,
       sprintProgress: sprintProgress,
-      pendingActions: 3,
-      productivity: sprintProgress > 0 ? sprintProgress + 5 : 85,
-      performance: 92
+      pendingActions: pendingActions,
+      productivity: productivity,
+      performance: performance
     };
 
     const leaveCalendarRows = teamLead

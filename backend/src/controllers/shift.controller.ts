@@ -20,14 +20,14 @@ export const createShift = async (req: Request, res: Response) => {
 
 export const updateShift = async (req: Request, res: Response) => {
   try {
-    const data = await shiftService.updateShift(req.params.id, getOrgId(req), req.body);
+    const data = await shiftService.updateShift(req.params.id as string, getOrgId(req), req.body);
     res.json({ success: true, data });
   } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
 };
 
 export const deleteShift = async (req: Request, res: Response) => {
   try {
-    await shiftService.deleteShift(req.params.id, getOrgId(req));
+    await shiftService.deleteShift(req.params.id as string, getOrgId(req));
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
 };
@@ -49,14 +49,14 @@ export const createHoliday = async (req: Request, res: Response) => {
 
 export const updateHoliday = async (req: Request, res: Response) => {
   try {
-    const data = await shiftService.updateHoliday(req.params.id, getOrgId(req), req.body);
+    const data = await shiftService.updateHoliday(req.params.id as string, getOrgId(req), req.body);
     res.json({ success: true, data });
   } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
 };
 
 export const deleteHoliday = async (req: Request, res: Response) => {
   try {
-    await shiftService.deleteHoliday(req.params.id, getOrgId(req));
+    await shiftService.deleteHoliday(req.params.id as string, getOrgId(req));
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
 };
@@ -78,14 +78,14 @@ export const createWorkConfig = async (req: Request, res: Response) => {
 
 export const updateWorkConfig = async (req: Request, res: Response) => {
   try {
-    const data = await shiftService.updateWorkConfig(req.params.id, getOrgId(req), req.body);
+    const data = await shiftService.updateWorkConfig(req.params.id as string, getOrgId(req), req.body);
     res.json({ success: true, data });
   } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
 };
 
 export const deleteWorkConfig = async (req: Request, res: Response) => {
   try {
-    await shiftService.deleteWorkConfig(req.params.id, getOrgId(req));
+    await shiftService.deleteWorkConfig(req.params.id as string, getOrgId(req));
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
 };

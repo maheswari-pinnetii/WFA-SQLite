@@ -641,6 +641,78 @@ export const initDb = async (): Promise<void> => {
         `);
 
         await execute(`
+          CREATE TABLE IF NOT EXISTS expense_claims (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            category TEXT NOT NULL,
+            amount REAL NOT NULL,
+            currency TEXT DEFAULT 'INR',
+            claimDate TEXT NOT NULL,
+            description TEXT,
+            receiptUrl TEXT,
+            status TEXT DEFAULT 'PENDING',
+            submittedAt TEXT NOT NULL,
+            createdAt TEXT NOT NULL,
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS leaverequests (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            employeeName TEXT,
+            department TEXT,
+            team TEXT,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            companyId TEXT,
+            leaveType TEXT NOT NULL,
+            type TEXT,
+            startDate TEXT NOT NULL,
+            endDate TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            status TEXT DEFAULT 'PENDING',
+            duration TEXT DEFAULT 'FULL_DAY',
+            managerId TEXT,
+            reviewedBy TEXT,
+            reviewComment TEXT,
+            appliedAt TEXT NOT NULL,
+            createdAt TEXT,
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS approval_delegations (
+            id TEXT PRIMARY KEY,
+            delegatorId TEXT NOT NULL,
+            delegateId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            startDate TEXT NOT NULL,
+            endDate TEXT NOT NULL,
+            status TEXT DEFAULT 'ACTIVE',
+            createdAt TEXT NOT NULL,
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS attendance_corrections (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            attendanceRecordId TEXT NOT NULL,
+            proposedCheckIn TEXT,
+            proposedCheckOut TEXT,
+            reason TEXT NOT NULL,
+            status TEXT DEFAULT 'PENDING',
+            appliedAt TEXT NOT NULL,
+            updatedAt TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
           CREATE TABLE IF NOT EXISTS assets (
             id TEXT PRIMARY KEY,
             organizationId TEXT NOT NULL DEFAULT 'org-stackly',

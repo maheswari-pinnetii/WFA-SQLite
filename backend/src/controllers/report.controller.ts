@@ -387,6 +387,7 @@ export const exportLeaveReport = async (req: any, res: any) => {
     res.setHeader('Content-Disposition', 'attachment; filename="leave_report_' + filenameDate + '.csv"');
     return res.status(200).send(csvContent);
   } catch (err: any) {
+    console.error('EXPORT LEAVE ERROR:', err);
     return handleControllerError(err, req, res, 'report.exportLeaveReport', 500, 'Failed to export leave report.');
   }
 };

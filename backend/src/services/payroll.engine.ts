@@ -1,5 +1,5 @@
-import { query } from '../database/sqlite-cloud';
-import { v4 as uuidv4 } from 'uuid';
+import { query } from '../database/sqlite-cloud.js';
+import { randomUUID } from 'crypto';
 
 export interface PayrollResult {
   employeeId: string;

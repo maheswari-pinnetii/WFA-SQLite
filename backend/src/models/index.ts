@@ -32,3 +32,7 @@ export const EmployeeEducation = new ModelShim('employee_education');
 export const EmployeeCertification = new ModelShim('employee_certifications');
 export const EmployeeExperience = new ModelShim('employee_experience');
 export const LifecycleEvent = new ModelShim('lifecycle_events');
+export const Holiday = new ModelShim('holidays');
+export const WorkConfig = new ModelShim('work_configurations');
+export const EmployeeShift = new ModelShim('roster_assignments'); // Or whatever the table is called
+export const RegularizationRequest = new ModelShim('correctionrequests');

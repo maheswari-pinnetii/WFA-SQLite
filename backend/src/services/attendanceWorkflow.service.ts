@@ -25,7 +25,7 @@ export class AttendanceWorkflowService {
     const request = await RegularizationRequest.findById(id);
     if (!request) throw new Error('Request not found');
 
-    RegularizationRequest.update(id, {
+    RegularizationRequest.updateOne({ id }, {
       status,
       managerId,
       managerComments,
@@ -36,7 +36,7 @@ export class AttendanceWorkflowService {
       // Find the attendance record and update it to Regularized
       const record = await Attendance.findById(request.attendanceRecordId);
       if (record) {
-        Attendance.update(record.id, {
+        Attendance.updateOne({ id: record.id }, {
           status: 'Regularized',
           updatedAt: new Date().toISOString()
         });
@@ -47,17 +47,17 @@ export class AttendanceWorkflowService {
 
   // Get regularization requests
   async getRegularizationRequests(companyId: string, query: any) {
-    return RegularizationRequest.findAll({ companyId, ...query });
+    return RegularizationRequest.find({ companyId, ...query });
   }
 
   // Daily Cron Job Logic for calculating late, overtime, absent, etc.
   async calculateDailyAttendance(companyId: string, date: string) {
     // 1. Get all employees in the company
-    const employees = await Employee.findAll({ companyId });
+    const employees = await Employee.find({ companyId });
     
     for (const emp of employees) {
       // Check if it's a holiday
-      const holidays = await Holiday.findAll({ companyId });
+      const holidays = await Holiday.find({ companyId });
       const isHoliday = holidays.some(h => h.date === date);
       if (isHoliday) continue;
 
@@ -119,7 +119,7 @@ export class AttendanceWorkflowService {
         if (late_by > 0) status = 'Late';
         else if (status === 'Checked Out' || status === 'Present') status = 'Present';
 
-        Attendance.update(record.id, {
+        Attendance.updateOne({ id: record.id }, {
           late_by,
           early_by,
           overtime,
@@ -129,7 +129,7 @@ export class AttendanceWorkflowService {
         });
       } else if (record.checkInTime && !record.checkOutTime) {
         // Anomaly: Missed punch out (if it's the next day)
-        Attendance.update(record.id, {
+        Attendance.updateOne({ id: record.id }, {
           status: 'Anomaly',
           updatedAt: new Date().toISOString()
         });

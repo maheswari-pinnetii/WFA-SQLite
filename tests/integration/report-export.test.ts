@@ -59,7 +59,7 @@ describe('Real Compliance & Intelligence Reports Streaming Suite', () => {
       INSERT INTO attendancerecords (
         id, employeeId, employeeName, department, team, date, checkInTime, checkOutTime, status, workMode, shiftType, organizationId, companyId, createdAt, updatedAt
       ) VALUES (
-        'att-rep-001', ?, 'Employee Reporter', 'Engineering', 'Backend', '2026-09-08', '2026-09-08T09:00:00.000Z', '2026-09-08T17:30:00.000Z', 'PRESENT', 'OFFICE', 'REGULAR', ?, ?, ?, ?
+        'att-rep-001', ?, 'Employee Reporter', 'Engineering', 'Backend', '2030-10-10', '2030-10-10T09:00:00.000Z', '2030-10-10T17:30:00.000Z', 'PRESENT', 'OFFICE', 'REGULAR', ?, ?, ?, ?
       )
     `, [employeeId, orgId, orgId, now, now]);
 
@@ -68,7 +68,7 @@ describe('Real Compliance & Intelligence Reports Streaming Suite', () => {
       INSERT INTO leaverequests (
         id, employeeId, employeeName, department, team, type, startDate, endDate, status, reason, organizationId, companyId, createdAt
       ) VALUES (
-        'leave-rep-001', ?, 'Employee Reporter', 'Engineering', 'Backend', 'ANNUAL', '2026-09-15', '2026-09-18', 'APPROVED', 'Annual Family Vacation', ?, ?, ?
+        'leave-rep-001', ?, 'Employee Reporter', 'Engineering', 'Backend', 'ANNUAL', '2030-11-01', '2030-11-05', 'APPROVED', 'Annual Family Vacation', ?, ?, ?
       )
     `, [employeeId, orgId, orgId, now]);
 

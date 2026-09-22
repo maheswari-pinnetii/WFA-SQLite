@@ -331,8 +331,51 @@ export const AdminDashboard: React.FC = () => {
         )}
       </div>
 
+      {/* Database Tables Overview (Added for User Verification) */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-2xs mt-6">
+        <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">System Database Integration (All Tables)</h3>
+        </div>
+        {loading ? (
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => <div key={i} className="h-8 rounded bg-slate-100 dark:bg-slate-800/60 animate-pulse" />)}
+          </div>
+        ) : (data?.databaseStats || []).length === 0 ? (
+          <div className="py-8 text-center text-xs text-slate-400">No database statistics available.</div>
+        ) : (
+          <div className="overflow-x-auto rounded-md border border-slate-200 dark:border-slate-800 max-h-96 overflow-y-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 font-medium sticky top-0">
+                <tr>
+                  <th className="py-2.5 px-3">Table Name</th>
+                  <th className="py-2.5 px-3">Total Rows</th>
+                  <th className="py-2.5 px-3">Status</th>
+                  <th className="py-2.5 px-3">Data Preview (ID)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-800 dark:text-slate-200">
+                {(data?.databaseStats || []).map((stat: any, i: number) => (
+                  <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-slate-100">{stat.name}</td>
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">{stat.rowCount}</td>
+                    <td className="py-2.5 px-3">
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-medium border ${stat.rowCount > 0 ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border-emerald-200/60 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 border-rose-200'}`}>
+                        {stat.rowCount > 0 ? 'POPULATED' : 'EMPTY'}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3 text-slate-500 truncate max-w-xs">
+                      {stat.preview && stat.preview.length > 0 ? stat.preview.map((p: any) => p.id || p.name || JSON.stringify(p).substring(0, 20)).join(', ') : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* Quick Navigation Links */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
         {[
           { label: 'User Directory', path: '/admin/users', icon: <Users size={16} /> },
           { label: 'Organization Units', path: '/admin/departments', icon: <Layers size={16} /> },

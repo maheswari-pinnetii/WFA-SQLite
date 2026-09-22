@@ -10,7 +10,7 @@ export const shiftService = {
   
   async createShift(orgId: string, data: any) {
     if (!data.name || !data.start_time || !data.end_time) {
-      throw new AppError(ErrorCode.BAD_REQUEST, 'name, start_time, and end_time are required', 400);
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'name, start_time, and end_time are required', 400);
     }
     const id = randomUUID();
     const newShift = {
@@ -36,12 +36,12 @@ export const shiftService = {
     if (!shift) throw new AppError(ErrorCode.NOT_FOUND, 'Shift not found', 404);
     
     const updates = { ...data, updated_at: new Date().toISOString() };
-    await Shift.update({ id, companyId: orgId }, updates);
+    await Shift.updateOne({ id, companyId: orgId }, updates);
     return { ...shift, ...updates };
   },
 
   async deleteShift(id: string, orgId: string) {
-    await Shift.delete({ id, companyId: orgId });
+    await Shift.deleteOne({ id, companyId: orgId });
   },
 
   // ─── HOLIDAYS ─────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ export const shiftService = {
 
   async createHoliday(orgId: string, data: any) {
     if (!data.name || !data.date) {
-      throw new AppError(ErrorCode.BAD_REQUEST, 'name and date are required', 400);
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'name and date are required', 400);
     }
     const id = randomUUID();
     const newHoliday = {
@@ -75,12 +75,12 @@ export const shiftService = {
     if (!holiday) throw new AppError(ErrorCode.NOT_FOUND, 'Holiday not found', 404);
     
     const updates = { ...data, updated_at: new Date().toISOString() };
-    await Holiday.update({ id, companyId: orgId }, updates);
+    await Holiday.updateOne({ id, companyId: orgId }, updates);
     return { ...holiday, ...updates };
   },
 
   async deleteHoliday(id: string, orgId: string) {
-    await Holiday.delete({ id, companyId: orgId });
+    await Holiday.deleteOne({ id, companyId: orgId });
   },
 
   // ─── WORK CONFIGS ─────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ export const shiftService = {
 
   async createWorkConfig(orgId: string, data: any) {
     if (!data.name) {
-      throw new AppError(ErrorCode.BAD_REQUEST, 'name is required', 400);
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'name is required', 400);
     }
     const id = randomUUID();
     const newConfig = {
@@ -108,7 +108,7 @@ export const shiftService = {
     
     if (newConfig.is_default) {
       // If this is set as default, unset other defaults
-      await WorkConfig.update({ companyId: orgId }, { is_default: 0 });
+      await WorkConfig.updateMany({ companyId: orgId }, { is_default: 0 });
     }
     
     await WorkConfig.create([newConfig]);
@@ -121,15 +121,15 @@ export const shiftService = {
     
     const updates = { ...data, updated_at: new Date().toISOString() };
     if (updates.is_default) {
-      await WorkConfig.update({ companyId: orgId }, { is_default: 0 });
+      await WorkConfig.updateMany({ companyId: orgId }, { is_default: 0 });
     }
     
-    await WorkConfig.update({ id, companyId: orgId }, updates);
+    await WorkConfig.updateOne({ id, companyId: orgId }, updates);
     return { ...config, ...updates };
   },
 
   async deleteWorkConfig(id: string, orgId: string) {
-    await WorkConfig.delete({ id, companyId: orgId });
+    await WorkConfig.deleteOne({ id, companyId: orgId });
   }
 };
 

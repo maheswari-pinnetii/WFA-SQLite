@@ -376,6 +376,52 @@ export const AdminDashboardPage: React.FC = () => {
           statusFilter={statusFilter}
         />
         <AdminSprintOverview tasks={tasks} />
+        
+        {/* Database Tables Overview (Added for User Verification) */}
+        <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg p-6 shadow-sm mt-6">
+          <div className="flex items-center justify-between mb-4 border-b border-[var(--border-color)] pb-3">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] flex items-center gap-2">
+              <Layers size={16} className="text-emerald-500" /> System Database Integration (All Tables)
+            </h3>
+          </div>
+          {dashboard.isLoading ? (
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => <div key={i} className="h-10 rounded bg-[var(--bg-tertiary)] animate-pulse" />)}
+            </div>
+          ) : (dashboard.data?.databaseStats || []).length === 0 ? (
+            <div className="py-10 text-center text-sm text-[var(--text-muted)]">No database statistics available. Ensure backend migration is complete.</div>
+          ) : (
+            <div className="overflow-x-auto rounded-md border border-[var(--border-color)] max-h-96 overflow-y-auto bg-[var(--bg-tertiary)]/30">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-b border-[var(--border-color)] font-semibold sticky top-0 shadow-sm z-10">
+                  <tr>
+                    <th className="py-3 px-4">Table Name</th>
+                    <th className="py-3 px-4">Total Rows</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Data Preview (ID)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-color)]/80 text-[var(--text-primary)]">
+                  {(dashboard.data?.databaseStats || []).map((stat: any, i: number) => (
+                    <tr key={i} className="hover:bg-[var(--bg-hover)] transition-colors">
+                      <td className="py-3 px-4 font-semibold">{stat.name}</td>
+                      <td className="py-3 px-4 font-mono text-[11px] text-[var(--text-muted)]">{stat.rowCount}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold border ${stat.rowCount > 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-600 border-rose-500/20'}`}>
+                          {stat.rowCount > 0 ? 'POPULATED' : 'EMPTY'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-[var(--text-muted)] truncate max-w-xs font-mono text-[10px]">
+                        {stat.preview && stat.preview.length > 0 ? stat.preview.map((p: any) => p.id || p.name || JSON.stringify(p).substring(0, 20)).join(', ') : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
         <DrillDownModal isOpen={!!drillDownData} data={drillDownData} onClose={() => setDrillDownData(null)} />
       </div>
     </>
