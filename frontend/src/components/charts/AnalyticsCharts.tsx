@@ -90,7 +90,7 @@ export const AnalyticsLineChart: React.FC<BaseChartProps & { xKey?: string; seri
   return (
     <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={false} onRetry={onRetry} minHeight={height + 100}>
       <div className="w-full min-w-0 min-h-[260px] h-full">
-        <ResponsiveContainer width="100%" height={height} minWidth={1}>
+        <ResponsiveContainer width="99%" height={height} minWidth={1}>
           <LineChart data={chartData} margin={{ top: 12, right: 12, left: -18, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color, rgba(255,255,255,0.1))" />
             <XAxis dataKey={xKey} stroke="var(--text-muted, #94A3B8)" tick={tickStyle} />
@@ -124,7 +124,7 @@ export const AnalyticsBarChart: React.FC<BaseChartProps & { xKey?: string; serie
   return (
     <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={false} onRetry={onRetry} minHeight={height + 100}>
       <div className="w-full min-w-0 min-h-[260px] h-full">
-        <ResponsiveContainer width="100%" height={height} minWidth={1}>
+        <ResponsiveContainer width="99%" height={height} minWidth={1}>
           <BarChart data={chartData} layout={layout === 'vertical' ? 'vertical' : 'horizontal'} margin={{ top: 12, right: 12, left: layout === 'vertical' ? 36 : -18, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color, rgba(255,255,255,0.1))" />
             {layout === 'vertical' ? (
@@ -167,7 +167,7 @@ export const AnalyticsDonutChart: React.FC<BaseChartProps & { nameKey?: string; 
   return (
     <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={false} onRetry={onRetry} minHeight={height + 100}>
       <div className="w-full min-w-0 min-h-[260px] h-full">
-        <ResponsiveContainer width="100%" height={height} minWidth={1}>
+        <ResponsiveContainer width="99%" height={height} minWidth={1}>
           <PieChart>
             <Pie data={chartData} dataKey={valueKey} nameKey={nameKey} innerRadius={55} outerRadius={85} paddingAngle={4} cx="50%" cy="45%">
               {chartData.map((_, index) => (

@@ -15,6 +15,9 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    watch: {
+      ignored: ['**/database/**', '**/logs/**']
+    },
     proxy: {
       '/v1': {
         target: 'http://localhost:5001',

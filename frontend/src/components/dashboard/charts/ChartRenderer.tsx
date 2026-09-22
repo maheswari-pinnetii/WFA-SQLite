@@ -72,7 +72,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
 
     return (
       <div className="w-full min-w-0 flex-1" style={{ width: '100%', height }}>
-        <ResponsiveContainer width="100%" height={height} minWidth={1}>
+        <ResponsiveContainer width="99%" height={height} minWidth={1}>
           <PieChart>
             <Tooltip content={<CustomTooltip />} />
             <Legend
@@ -104,7 +104,7 @@ export const ChartRenderer: React.FC<ChartRendererProps> = ({
 
   return (
     <div className="w-full min-w-0 flex-1" style={{ width: '100%', height }}>
-      <ResponsiveContainer width="100%" height={height} minWidth={1}>
+      <ResponsiveContainer width="99%" height={height} minWidth={1}>
         {config.type === 'line' ? (
           <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.6} />
