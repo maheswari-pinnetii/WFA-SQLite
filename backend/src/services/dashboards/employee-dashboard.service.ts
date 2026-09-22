@@ -8,10 +8,9 @@ export class EmployeeDashboardService {
     
     // Employee details & Employment Metadata - search employees first, then users
     let employeeRows = await query(`
-      SELECT e.*, d.name as departmentName, des.name as designationName, loc.name as locationName
+      SELECT e.*, d.name as departmentName, e.designation as designationName, loc.name as locationName
       FROM employees e
       LEFT JOIN departments d ON e.department = d.id OR e.department = d.name
-      LEFT JOIN designations des ON e.designation = des.id OR e.designation = des.name
       LEFT JOIN locations loc ON e.location = loc.id OR e.location = loc.name
       WHERE e.id = ? AND (e.organizationId = ? OR e.organizationId IS NULL)
     `, [employeeId, orgId]);

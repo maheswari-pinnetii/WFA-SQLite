@@ -27,6 +27,9 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
   const [lat, setLat] = useState(OFFICE_COORDS.lat);
   const [lng, setLng] = useState(OFFICE_COORDS.lng);
   
+  // Prevent double clicks triggering invalid transitions
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   // Local state to simulate offline mode
   const [isOfflineMode, setIsOfflineMode] = useState(false);
   const [availableShifts, setAvailableShifts] = useState<Array<{ name: 'Regular' | 'Flexible' | 'Overnight'; startTime: string; endTime: string }>>([
@@ -72,49 +75,51 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
 
   // Handle Action dispatchers (with geofencing & offline checks)
   const handleCheckIn = async () => {
-    let finalLat = OFFICE_COORDS.lat;
-    let finalLng = OFFICE_COORDS.lng;
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      let finalLat = OFFICE_COORDS.lat;
+      let finalLng = OFFICE_COORDS.lng;
 
-    if (workMode === 'Office' && !useCustomLocation) {
-      try {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
+      if (workMode === 'Office' && !useCustomLocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
+          });
+          finalLat = position.coords.latitude;
+          finalLng = position.coords.longitude;
+        } catch (err: any) {
+          dispatch(addNotification({ message: 'Failed to get real location. Ensure location permissions are granted for Office Check-In.', type: 'warning' }));
+          return;
+        }
+      } else if (useCustomLocation) {
+        finalLat = lat;
+        finalLng = lng;
+      }
+
+      const idempotencyKey = Math.random().toString(36).substr(2, 9);
+      const payload = {
+        employeeId,
+        employeeName,
+        department,
+        shiftType,
+        workMode,
+        latitude: finalLat,
+        longitude: finalLng,
+        accuracy: 5,
+        idempotencyKey,
+      };
+
+      if (isOfflineMode) {
+        await attendanceService.enqueueOfflineAction({
+          type: 'CHECK_IN',
+          payload,
         });
-        finalLat = position.coords.latitude;
-        finalLng = position.coords.longitude;
-      } catch (err: any) {
-        dispatch(addNotification({ message: 'Failed to get real location. Ensure location permissions are granted for Office Check-In.', type: 'warning' }));
+        dispatch(addNotification({ message: 'Offline: Check-in queued locally.', type: 'warning' }));
+        dispatch(syncLocalDataThunk(employeeId));
         return;
       }
-    } else if (useCustomLocation) {
-      finalLat = lat;
-      finalLng = lng;
-    }
 
-    const idempotencyKey = Math.random().toString(36).substr(2, 9);
-    const payload = {
-      employeeId,
-      employeeName,
-      department,
-      shiftType,
-      workMode,
-      latitude: finalLat,
-      longitude: finalLng,
-      accuracy: 5,
-      idempotencyKey,
-    };
-
-    if (isOfflineMode) {
-      await attendanceService.enqueueOfflineAction({
-        type: 'CHECK_IN',
-        payload,
-      });
-      dispatch(addNotification({ message: 'Offline: Check-in queued locally.', type: 'warning' }));
-      dispatch(syncLocalDataThunk(employeeId));
-      return;
-    }
-
-    try {
       const record = await attendanceService.checkInRemote(payload);
       dispatch(addNotification({ message: 'Checked in successfully!', type: 'success' }));
       
@@ -127,66 +132,80 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
       dispatch(fetchAttendanceDataThunk(employeeId));
     } catch (err: any) {
       dispatch(addNotification({ message: err.message, type: 'warning' }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleTakeBreak = async () => {
-    if (isOfflineMode) {
-      await attendanceService.enqueueOfflineAction({
-        type: 'BREAK_START',
-        payload: { employeeId },
-      });
-      dispatch(addNotification({ message: 'Offline: Break start queued locally.', type: 'warning' }));
-      dispatch(syncLocalDataThunk(employeeId));
-      return;
-    }
-
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
+      if (isOfflineMode) {
+        await attendanceService.enqueueOfflineAction({
+          type: 'BREAK_START',
+          payload: { employeeId },
+        });
+        dispatch(addNotification({ message: 'Offline: Break start queued locally.', type: 'warning' }));
+        dispatch(syncLocalDataThunk(employeeId));
+        return;
+      }
+
       await attendanceService.transitionRemote('break', employeeId);
       dispatch(addNotification({ message: 'Break started.', type: 'info' }));
       dispatch(fetchAttendanceDataThunk(employeeId));
     } catch (err: any) {
       dispatch(addNotification({ message: err.message, type: 'warning' }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleResume = async () => {
-    if (isOfflineMode) {
-      await attendanceService.enqueueOfflineAction({
-        type: 'BREAK_END',
-        payload: { employeeId },
-      });
-      dispatch(addNotification({ message: 'Offline: Resume queued locally.', type: 'warning' }));
-      dispatch(syncLocalDataThunk(employeeId));
-      return;
-    }
-
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
+      if (isOfflineMode) {
+        await attendanceService.enqueueOfflineAction({
+          type: 'BREAK_END',
+          payload: { employeeId },
+        });
+        dispatch(addNotification({ message: 'Offline: Resume queued locally.', type: 'warning' }));
+        dispatch(syncLocalDataThunk(employeeId));
+        return;
+      }
+
       await attendanceService.transitionRemote('resume', employeeId);
       dispatch(addNotification({ message: 'Resumed work.', type: 'success' }));
       dispatch(fetchAttendanceDataThunk(employeeId));
     } catch (err: any) {
       dispatch(addNotification({ message: err.message, type: 'warning' }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleCheckOut = async () => {
-    if (isOfflineMode) {
-      await attendanceService.enqueueOfflineAction({
-        type: 'CHECK_OUT',
-        payload: { employeeId },
-      });
-      dispatch(addNotification({ message: 'Offline: Check-out queued locally.', type: 'warning' }));
-      dispatch(syncLocalDataThunk(employeeId));
-      return;
-    }
-
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
+      if (isOfflineMode) {
+        await attendanceService.enqueueOfflineAction({
+          type: 'CHECK_OUT',
+          payload: { employeeId },
+        });
+        dispatch(addNotification({ message: 'Offline: Check-out queued locally.', type: 'warning' }));
+        dispatch(syncLocalDataThunk(employeeId));
+        return;
+      }
+
       await attendanceService.transitionRemote('check-out', employeeId);
       dispatch(addNotification({ message: 'Checked out successfully!', type: 'success' }));
       dispatch(fetchAttendanceDataThunk(employeeId));
     } catch (err: any) {
       dispatch(addNotification({ message: err.message, type: 'warning' }));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -289,7 +308,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
           ) : (
             <button
               onClick={handleCheckIn}
-              disabled={isLoading}
+              disabled={isLoading || isSubmitting}
               className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed h-10"
               title="Punch Check-In attendance for today"
               aria-label="Check-In Now"
@@ -301,7 +320,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
             <button
               onClick={handleCheckOut}
-              disabled={isLoading}
+              disabled={isLoading || isSubmitting}
               className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-rose-600 hover:bg-rose-700 disabled:opacity-50 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed h-10"
               title="Complete shift and Check-Out"
               aria-label="Check-Out"
@@ -312,7 +331,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
             {activeRecord.status !== 'On Break' ? (
               <button
                 onClick={handleTakeBreak}
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
                 className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-medium text-sm text-slate-700 dark:text-slate-200 transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed h-10"
                 title="Pause active shift for a break"
                 aria-label="Take Break"
@@ -322,7 +341,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
             ) : (
               <button
                 onClick={handleResume}
-                disabled={isLoading}
+                disabled={isLoading || isSubmitting}
                 className="w-full sm:flex-1 px-5 py-2.5 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 font-medium text-sm text-white shadow-sm transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed h-10"
                 title="End break and resume active work"
                 aria-label="Resume Work"

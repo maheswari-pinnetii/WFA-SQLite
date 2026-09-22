@@ -189,16 +189,9 @@ export const deleteExperience = async (id: string, orgId: string) =>
 export const getFullEmployeeProfile = async (employeeId: string, orgId: string) => {
   const empRows = await query(
     `SELECT e.*,
-       d.title as designationTitle, jl.name as jobLevelName,
-       cc.name as costCenterName, l.name as locationName,
-       mgr.name as managerName, tl.name as teamLeadName
+       e.designation as designationTitle
+
      FROM employees e
-     LEFT JOIN designations d ON e.designationId = d.id
-     LEFT JOIN job_levels jl ON e.jobLevelId = jl.id
-     LEFT JOIN cost_centers cc ON e.costCenterId = cc.id
-     LEFT JOIN org_locations l ON e.locationId = l.id
-     LEFT JOIN employees mgr ON e.manager = mgr.id
-     LEFT JOIN employees tl ON e.teamLead = tl.id
      WHERE e.id=? AND e.organizationId=?`,
     [employeeId, orgId]
   );

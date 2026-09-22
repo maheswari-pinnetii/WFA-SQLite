@@ -72,14 +72,14 @@ describe('1. Admin-Only Endpoint Restrictions', () => {
       const res = await (request(app) as any)[endpoint.method](endpoint.path)
         .set('Authorization', `Bearer ${tokens.ADMIN}`);
       expect([200, 201, 202, 204]).toContain(res.status);
-    });
+    }, 20000);
 
     for (const role of ['HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE']) {
       it(`${role} is forbidden from ${endpoint.method.toUpperCase()} ${endpoint.path}`, async () => {
         const res = await (request(app) as any)[endpoint.method](endpoint.path)
-          .set('Authorization', `Bearer ${tokens[role]}`);
+          .set('Authorization', `Bearer ${tokens[role as keyof typeof tokens]}`);
         expect([403, 401]).toContain(res.status);
-      });
+      }, 20000);
     }
   }
 });

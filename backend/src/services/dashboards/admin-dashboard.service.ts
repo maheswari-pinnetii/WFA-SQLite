@@ -50,6 +50,9 @@ export class AdminDashboardService {
       dailyLogins: loginsRow[0]?.count || 0
     };
 
+    const headcountTrend: any[] = [];
+    const taskMap: Record<string, number> = {};
+
     // 6 Charts
     const charts = {
       headcountTrend: headcountTrend.length > 0 ? headcountTrend : [
