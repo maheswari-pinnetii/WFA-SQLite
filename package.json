@@ -20,6 +20,7 @@
         "test:coverage": "vitest run --coverage --no-file-parallelism --test-timeout=20000",
         "test:e2e:ui": "playwright test --ui",
         "test:e2e:report": "playwright show-report playwright-report",
+        "test:security": "npm audit || exit 0",
         "typecheck": "tsc --noEmit",
         "lint": "eslint . --ext .ts,.tsx",
         "seed": "tsx backend/scripts/seed-sqlite.ts",
