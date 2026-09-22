@@ -1,9 +1,19 @@
 import { DashboardChartConfig } from './chart.types';
 
-export const selectChartData = (config: DashboardChartConfig, dashboardData: any): any[] => {
-  if (!dashboardData) {
+export const selectChartData = (config: DashboardChartConfig, rawData: any): any[] => {
+  if (!rawData) {
     return getFallbackChartData(config.id);
   }
+
+  const d = rawData.charts || rawData;
+  const dashboardData = {
+    ...d,
+    departmentDistribution: d.departmentDistribution || d.employeesByDept,
+    workforceGrowth: d.workforceGrowth || d.headcountTrend,
+    onboardingPipeline: d.onboardingPipeline || d.hiringTrend,
+    attritionRisk: d.attritionRisk || d.retentionRate,
+    leaveDistribution: d.leaveDistribution || d.leaveByDept
+  };
 
   switch (config.id) {
     case 'admin_headcount_dept':

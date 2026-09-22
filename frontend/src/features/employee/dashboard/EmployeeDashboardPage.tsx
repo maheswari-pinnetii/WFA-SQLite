@@ -9,6 +9,7 @@ import { attendanceApi, AttendanceRecord, CorrectionRequest } from '../../../api
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { KpiGrid } from '../../../components/dashboard/KpiGrid';
 import { ChartGrid } from '../../../components/dashboard/charts';
+import { useDashboardData } from '../../../hooks/useDashboardData';
 import {
   Clock,
   Calendar,
@@ -128,27 +129,13 @@ export const EmployeeDashboardOverview: React.FC<{ user: any }> = ({ user }) => 
 
 // 3. Employee KPI Cards
 export const EmployeeKpiGrid: React.FC<{
-  hoursToday: string;
-  hoursThisWeek: string;
-  attendanceRate: string;
-  overtimeHours: string;
-  leaveBalance: string;
-  leavesUsed: string;
-  pendingTasksCount: number;
-  timesheetStatus: string;
-}> = (props) => (
+  data: any;
+  loading: boolean;
+}> = ({ data, loading }) => (
   <KpiGrid
     role={Role.EMPLOYEE}
-    data={{
-      hoursToday: props.hoursToday,
-      hoursThisWeek: props.hoursThisWeek,
-      attendanceRate: props.attendanceRate,
-      overtimeHours: props.overtimeHours,
-      leaveBalance: props.leaveBalance,
-      leavesUsed: props.leavesUsed,
-      pendingTasksCount: props.pendingTasksCount,
-      timesheetStatus: props.timesheetStatus,
-    }}
+    loading={loading}
+    data={data || {}}
   />
 );
 
@@ -983,6 +970,7 @@ export const EmployeeAttendanceTable: React.FC<{
 // Main Employee Dashboard Component
 export const EmployeeDashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const dashboard = useDashboardData(Role.EMPLOYEE);
   const [workspaceMode, setWorkspaceMode] = useState<'all-in-one' | 'absence' | 'attendance' | 'sprint'>('all-in-one');
 
   const [tasks, setTasks] = useState<Task[]>([
@@ -1347,16 +1335,7 @@ export const EmployeeDashboardPage: React.FC = () => {
         {/* MODE: SPRINT TASKS & DELIVERABLES */}
         {workspaceMode === 'sprint' && (
           <div className="space-y-6 animate-fadeIn">
-            <EmployeeKpiGrid
-              hoursToday={hoursToday}
-              hoursThisWeek={hoursThisWeek}
-              attendanceRate={attendanceRate}
-              overtimeHours={overtimeHours}
-              leaveBalance="14 Days"
-              leavesUsed="4 Days"
-              pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
-              timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
-            />
+            <EmployeeKpiGrid data={dashboard.data?.kpis} loading={dashboard.isLoading} />
             <EmployeeSprintWork
               tasks={tasks}
               loading={loading}
@@ -1390,16 +1369,7 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="emerald"
                 badge="Target: 40h/wk"
               />
-              <EmployeeKpiGrid
-                hoursToday={hoursToday}
-                hoursThisWeek={hoursThisWeek}
-                attendanceRate={attendanceRate}
-                overtimeHours={overtimeHours}
-                leaveBalance="14 Days"
-                leavesUsed="4 Days"
-                pendingTasksCount={tasks.filter(t => t.status !== 'COMPLETED').length}
-                timesheetStatus={todayRecord?.out && todayRecord.out !== 'Active' ? 'Submitted' : 'Pending Verification'}
-              />
+              <EmployeeKpiGrid data={dashboard.data?.kpis} loading={dashboard.isLoading} />
             </section>
 
             {/* STEP 3: Shift Schedule & Monthly Attendance Calendar */}
@@ -1448,7 +1418,13 @@ export const EmployeeDashboardPage: React.FC = () => {
                 tagColor="indigo"
                 badge="Current Month"
               />
-              <ChartGrid role="EMPLOYEE" />
+              <ChartGrid 
+                role="EMPLOYEE" 
+                dashboardData={dashboard.data}
+                loading={dashboard.isLoading}
+                error={dashboard.error ? String(dashboard.error) : null}
+                onRetry={dashboard.reload}
+              />
             </section>
 
             {/* STEP 6: Monthly Timesheet & Activity */}
