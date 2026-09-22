@@ -1,0 +1,13 @@
+node_modules
+dist
+.git
+.github
+playwright-report
+test-results
+scratch
+database/sqlite/*.sqlite
+database/sqlite/*.sqlite-journal
+database/sqlite/*.sqlite-wal
+database/sqlite/*.sqlite-shm
+logs
+.env
