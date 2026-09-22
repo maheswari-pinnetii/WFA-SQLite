@@ -30,7 +30,7 @@ export class AdminDashboardService {
     const activeSessionsRow = await query(`SELECT COUNT(*) as count FROM sessions WHERE expiresAt > datetime('now') AND revokedAt IS NULL`);
     const pageCountRow = await query(`PRAGMA page_count`);
     const pageSizeRow = await query(`PRAGMA page_size`);
-    const errorRateRow = await query(`SELECT (SUM(CASE WHEN level = 'ERROR' THEN 1 ELSE 0 END) * 100.0 / COUNT(*)) as rate FROM audit_logs`);
+    const errorRateRow = await query(`SELECT (SUM(CASE WHEN action LIKE '%ERROR%' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)) as rate FROM audit_logs`);
     const pendingLeaveReqs = await query(`SELECT COUNT(*) as count FROM leaverequests WHERE status = 'PENDING' AND organizationId = ?`, [orgId]);
     const deptsRow = await query(`SELECT COUNT(*) as count FROM departments`);
     const loginsRow = await query(`SELECT COUNT(*) as count FROM audit_logs WHERE action = 'LOGIN' AND timestamp >= date('now')`);
