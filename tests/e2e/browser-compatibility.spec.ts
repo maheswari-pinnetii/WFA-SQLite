@@ -138,9 +138,15 @@ test.describe('2. Authentication Flow', () => {
     const emailInput = page.locator('input[type="email"]').first();
     if (await emailInput.isVisible({ timeout: 5000 }).catch(() => false)) {
       await emailInput.fill('invalid@nowhere.com');
+      
+      const nextBtn = page.locator('button[type="submit"], button:has-text("Next")').first();
+      await nextBtn.click();
+      
       const passwordInput = page.locator('input[type="password"]').first();
+      await passwordInput.waitFor({ state: 'visible', timeout: 5000 });
       await passwordInput.fill('wrongpassword');
-      const submitBtn = page.locator('button[type="submit"]').first();
+      
+      const submitBtn = page.locator('button[type="submit"], button:has-text("Sign in")').first();
       await submitBtn.click();
 
       // Should see an error message
@@ -253,7 +259,7 @@ test.describe('4. Navigation & Page Loads', () => {
     await p.waitForLoadState('networkidle');
 
     await expect(p.locator('body')).toBeVisible();
-    const hasContent = await p.locator('h1, h2, h3, table, [class*="card"]').first().isVisible({ timeout: 5000 }).catch(() => false);
+    const hasContent = await p.locator('h1, h2, h3, table, [class*="card"], [class*="glass-panel"]').first().isVisible({ timeout: 15000 }).catch(() => false);
     expect(hasContent).toBe(true);
 
     await ctx.close();

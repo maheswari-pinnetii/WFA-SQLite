@@ -80,7 +80,8 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
         time: 'Just now',
         type: newNotif.type === 'WARNING' ? 'warning' : 'info',
         path: '/hr/attendance',
-        read: false
+        read: false,
+        roles: []
       },
       ...prev
     ]);
