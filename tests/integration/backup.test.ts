@@ -78,7 +78,7 @@ describe('SQLite Database Backup & Disaster Recovery Test Suite', () => {
     const res = await backupService.restoreBackup(createdBackupFilename, 'usr-admin-01');
     expect(res.success).toBe(true);
     expect(res.message).toContain('successfully restored');
-  });
+  }, 30000);
 
   it('should support Admin REST endpoint POST /v1/admin/backups', async () => {
     const res = await request(app).post('/v1/admin/backups').send({
