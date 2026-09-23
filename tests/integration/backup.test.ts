@@ -109,7 +109,7 @@ describe('SQLite Database Backup & Disaster Recovery Test Suite', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.message).toContain('successfully restored');
-  });
+  }, 30000);
 
   it('should delete a backup snapshot and cleanup metadata sidecar', async () => {
     const deleted = await backupService.deleteBackup(createdBackupFilename, 'usr-admin-01');

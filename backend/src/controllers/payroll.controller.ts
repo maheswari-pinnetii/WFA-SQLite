@@ -371,7 +371,7 @@ export const getAuditLogs = async (req: Request, res: Response) => {
 
 export const exportTallyVouchers = async (req: Request, res: Response) => {
   try {
-    const runId = req.params.runId;
+    const runId = req.params.runId as string;
     const xml = await payrollService.generateTallyXML(runId);
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename="payroll_vouchers_${runId}.xml"`);

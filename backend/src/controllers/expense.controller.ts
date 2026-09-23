@@ -50,7 +50,7 @@ export const getMyExpenses = async (req: Request, res: Response) => {
 export const approveExpense = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await expenseService.updateExpenseStatus(id, 'APPROVED');
+    await expenseService.updateExpenseStatus(id as string, 'APPROVED');
     return res.json({ success: true, message: 'Expense approved successfully' });
   } catch (err: any) {
     logger.error(`[Expense Controller] Error approving expense: ${err.message}`);
@@ -61,7 +61,7 @@ export const approveExpense = async (req: Request, res: Response) => {
 export const rejectExpense = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await expenseService.updateExpenseStatus(id, 'REJECTED');
+    await expenseService.updateExpenseStatus(id as string, 'REJECTED');
     return res.json({ success: true, message: 'Expense rejected successfully' });
   } catch (err: any) {
     logger.error(`[Expense Controller] Error rejecting expense: ${err.message}`);

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { query } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
 
-export const globalSearch = async (req: Request, res: Response) => {
+export const globalSearch = async (req: any, res: Response) => {
   try {
     const searchQuery = (req.query.q as string) || '';
     const userId = req.user?.id;
