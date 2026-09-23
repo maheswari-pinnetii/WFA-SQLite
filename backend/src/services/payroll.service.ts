@@ -516,6 +516,95 @@ export const payrollService = {
       `SELECT * FROM payroll_audit_logs WHERE organizationId = ? ORDER BY timestamp DESC LIMIT 100`,
       [organizationId]
     );
+  },
+
+  // -------------------------------------------------------------
+  // Integrations / Exports
+  // -------------------------------------------------------------
+  
+  async generateTallyXML(runId: string): Promise<string> {
+    const runRows = await query('SELECT * FROM payroll_runs WHERE id = ?', [runId]);
+    if (!runRows || runRows.length === 0) {
+      throw new Error('Payroll run not found');
+    }
+    const run = runRows[0];
+    if (run.status !== 'FINALIZED' && run.status !== 'APPROVED') {
+      throw new Error('Payroll run must be finalized or approved to export accounting vouchers');
+    }
+
+    const employees = await query('SELECT * FROM payroll_run_employees WHERE payrollRunId = ?', [runId]);
+    if (!employees || employees.length === 0) {
+      throw new Error('No employee records found for this payroll run');
+    }
+
+    // Aggregate totals
+    let totalGross = 0;
+    let totalNet = 0;
+    let totalPF = 0;
+    let totalPT = 0;
+    let totalTDS = 0;
+
+    for (const emp of employees) {
+      totalGross += (emp.grossEarnings || 0);
+      totalNet += (emp.netPay || 0);
+      totalPF += (emp.employeePf || 0); // Employee PF deduction
+      totalPT += (emp.professionalTax || 0);
+      totalTDS += (emp.tdsDeduction || 0);
+    }
+
+    // Generate Tally ERP 9 / Prime XML format for a Journal Voucher
+    const xml = `<?xml version="1.0" ?>
+<ENVELOPE>
+  <HEADER>
+    <TALLYREQUEST>Import Data</TALLYREQUEST>
+  </HEADER>
+  <BODY>
+    <IMPORTDATA>
+      <REQUESTDESC>
+        <REPORTNAME>Vouchers</REPORTNAME>
+        <STATICVARIABLES>
+          <SVCURRENTCOMPANY>${run.organizationId}</SVCURRENTCOMPANY>
+        </STATICVARIABLES>
+      </REQUESTDESC>
+      <REQUESTDATA>
+        <TALLYMESSAGE xmlns:UDF="TallyUDF">
+          <VOUCHER VCHTYPE="Journal" ACTION="Create">
+            <DATE>${run.runDate.replace(/-/g, '')}</DATE>
+            <VOUCHERTYPENAME>Journal</VOUCHERTYPENAME>
+            <NARRATION>Payroll for period ${run.periodStart} to ${run.periodEnd}</NARRATION>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Salary Expense</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>Yes</ISDEEMEDPOSITIVE>
+              <AMOUNT>-${totalGross.toFixed(2)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>Salary Payable</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>${totalNet.toFixed(2)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>PF Payable</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>${totalPF.toFixed(2)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>PT Payable</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>${totalPT.toFixed(2)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+            <ALLLEDGERENTRIES.LIST>
+              <LEDGERNAME>TDS Payable</LEDGERNAME>
+              <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
+              <AMOUNT>${totalTDS.toFixed(2)}</AMOUNT>
+            </ALLLEDGERENTRIES.LIST>
+          </VOUCHER>
+        </TALLYMESSAGE>
+      </REQUESTDATA>
+    </IMPORTDATA>
+  </BODY>
+</ENVELOPE>`;
+
+    return xml;
   }
 };
 

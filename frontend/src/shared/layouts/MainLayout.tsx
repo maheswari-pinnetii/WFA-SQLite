@@ -13,10 +13,12 @@ import { BetaFeedbackModal } from '../components/BetaFeedbackModal';
 import { PrivacySettingsModal } from '../components/PrivacySettingsModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useTheme } from '../../design-system/theme/theme';
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { role, user } = useAuth();
+  usePushNotifications();
   const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [supportModalOpen, setSupportModalOpen] = useState(false);

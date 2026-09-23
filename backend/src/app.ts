@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import apiRouter from './routes/api.routes.js';
+import biometricRouter from './routes/biometric.routes.js';
 import { initDb, healthCheck } from './config/db.js';
 import { configureResilience } from './middleware/resilience.js';
 
@@ -159,6 +160,9 @@ app.get('/health/metrics', authenticateToken as any, authorizeRoles(['ADMIN']) a
 
 
 // API Routes (Canonical /api/v1 only)
+
+// Biometric Push Listener (must bypass standard json parsing, uses express.text)
+app.use('/iclock', express.text({ type: '*/*' }), biometricRouter);
 
 app.use('/api/v1', apiRouter);
 app.use('/v1', apiRouter);

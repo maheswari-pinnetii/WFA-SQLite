@@ -266,7 +266,7 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
               )}
             </span>
 
-            {isOfflineMode ? (
+            {(isOfflineMode || !navigator.onLine) ? (
               <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800">
                 <WifiOff size={11} /> Offline Mode
               </span>

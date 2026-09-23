@@ -167,3 +167,23 @@ export const updatePreferences = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Failed to update notification preferences' });
   }
 };
+
+export const registerPushToken = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    const { token, deviceType } = req.body;
+    if (!token) {
+      return res.status(400).json({ success: false, message: 'Token is required' });
+    }
+
+    const { PushService } = await import('../services/push.service.js');
+    await PushService.registerToken(userId, token, deviceType || 'web');
+
+    res.json({ success: true, message: 'Push token registered successfully' });
+  } catch (error: any) {
+    console.error('Error registering push token:', error);
+    res.status(500).json({ success: false, message: 'Failed to register push token' });
+  }
+};

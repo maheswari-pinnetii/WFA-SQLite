@@ -871,6 +871,15 @@ export const initDb = async (): Promise<void> => {
         `);
         await execute(`CREATE INDEX IF NOT EXISTS idx_security_audit_user ON security_audit_logs(userId)`);
 
+        await execute(`
+          CREATE TABLE IF NOT EXISTS device_tokens (
+            token TEXT PRIMARY KEY,
+            userId TEXT NOT NULL,
+            deviceType TEXT DEFAULT 'web',
+            createdAt TEXT DEFAULT CURRENT_TIMESTAMP
+          )
+        `);
+
         // Ensure teamlead@thestackly.com alias exists alongside lead@thestackly.com
         try {
           const leadRows = await query('SELECT * FROM users WHERE email = ?', ['lead@thestackly.com']);

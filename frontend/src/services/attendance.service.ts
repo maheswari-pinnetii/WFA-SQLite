@@ -490,3 +490,11 @@ class AttendanceService {
 }
 
 export const attendanceService = new AttendanceService();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('Network online, syncing attendance offline actions...');
+    attendanceService.syncOfflineActionsRemote().catch(console.error);
+  });
+}
+

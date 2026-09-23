@@ -313,6 +313,7 @@ router.put('/notifications/read-all', authenticateToken, authenticatedUserLimite
 router.put('/notifications/:id/read', authenticateToken, validateIdParam, authenticatedUserLimiter, notificationController.markAsRead);
 router.get('/notifications/preferences', authenticateToken, authenticatedUserLimiter, notificationController.getPreferences);
 router.put('/notifications/preferences', authenticateToken, authenticatedUserLimiter, notificationController.updatePreferences);
+router.post('/notifications/push-token', authenticateToken, authenticatedUserLimiter, notificationController.registerPushToken);
 router.get('/employees/:id/shift-assignment', authenticateToken, enforceScope, validateIdParam, authenticatedUserLimiter, attendanceP2.getCurrentShift);
 
 // Analytics
@@ -452,6 +453,7 @@ router.post('/payroll/runs/:runId/reverse', authenticateToken, authorizeRoles(['
 
 router.get('/payroll/runs/:runId/payslips', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.getRunPayslips);
 router.get('/payroll/runs/:runId/register', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.getPayrollRegister);
+router.get('/payroll/runs/:runId/export/tally', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, payrollController.exportTallyVouchers);
 router.get('/payroll/departments/summary', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, payrollController.getDepartmentSummary);
 
 router.get('/payroll/payslips/me', authenticateToken, authenticatedUserLimiter, payrollController.getMyPayslips);
