@@ -42,12 +42,12 @@ export const MyExpensesPage: React.FC = () => {
     try {
       if (file) {
         const fileData = new FormData();
-        fileData.append('file', file);
-        const uploadRes = await api.post('/upload', fileData, {
+        fileData.append('receipt', file);
+        const uploadRes = await api.post('/expenses/receipt', fileData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         if (uploadRes.data?.success) {
-          uploadedUrl = uploadRes.data.url;
+          uploadedUrl = uploadRes.data.receiptUrl;
         }
       }
 

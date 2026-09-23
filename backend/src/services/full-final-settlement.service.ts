@@ -54,8 +54,8 @@ export class FullFinalSettlementService {
 
     // 4. Calculate Pending Expense Reimbursements
     const pendingExpenses = await query(
-      `SELECT SUM(amount) as total FROM expenses WHERE (employeeId = ? OR userId = ?) AND status = 'APPROVED' AND (paidStatus IS NULL OR paidStatus != 'PAID')`,
-      [employeeId, emp.userId || employeeId]
+      `SELECT SUM(amount) as total FROM expense_claims WHERE employeeId = ? AND status = 'APPROVED'`,
+      [employeeId]
     ).then(res => res[0]?.total || 0);
 
     // 5. Notice Period Shortfall Recovery

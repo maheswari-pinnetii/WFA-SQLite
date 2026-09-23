@@ -491,6 +491,7 @@ router.post('/documents', authenticateToken, authenticatedUserLimiter, documentC
 
 // ─── Expenses (Phase 9) ──────────────────────────────────────────────────
 router.post('/expenses', authenticateToken, authenticatedUserLimiter, expenseController.submitExpense);
+router.post('/expenses/receipt', authenticateToken, authenticatedUserLimiter, uploadMiddleware.single('receipt'), expenseController.uploadReceipt);
 router.get('/expenses/me', authenticateToken, authenticatedUserLimiter, expenseController.getMyExpenses);
 router.put('/expenses/:id/approve', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, expenseController.approveExpense);
 router.put('/expenses/:id/reject', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, expenseController.rejectExpense);

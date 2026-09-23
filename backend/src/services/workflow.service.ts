@@ -213,7 +213,8 @@ export const workflowService = {
                 WHEN w.entityType = 'LEAVE' THEN l.reason
                 WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN ac.reason
                 WHEN w.entityType = 'TIMESHEET' THEN 'Timesheet submission'
-              END as description
+              END as description,
+              ex.receiptUrl as receiptUrl
        FROM approval_requests r
        JOIN employees req ON r.requesterId = req.id
        JOIN approval_workflows w ON r.workflowId = w.id

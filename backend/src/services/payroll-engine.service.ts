@@ -232,11 +232,10 @@ export class PayrollEngineService {
 
     // 4. Reimbursement Integration (Approved Expenses)
     const approvedExpenses = await query(
-      `SELECT * FROM expenses 
-       WHERE (employeeId = ? OR userId = ?) 
-       AND status = 'APPROVED' 
-       AND (payrollProcessed IS NULL OR payrollProcessed = 0)`,
-      [employeeId, emp.userId || employeeId]
+      `SELECT * FROM expense_claims 
+       WHERE employeeId = ? 
+       AND status = 'APPROVED'`,
+      [employeeId]
     );
 
     let eligibleReimbursements = 0;
@@ -617,7 +616,7 @@ export class PayrollEngineService {
 
     for (const r of reimbursements as any[]) {
       try {
-        await execute(`UPDATE expenses SET payrollProcessed = 1, paidStatus = 'PAID' WHERE id = ?`, [r.expenseClaimId]);
+        await execute(`UPDATE expense_claims SET status = 'PAID' WHERE id = ?`, [r.expenseClaimId]);
       } catch (e) {}
     }
 
