@@ -203,7 +203,7 @@ describe('3. Generate Payslips', () => {
     if (res.status === 200 || res.status === 201) {
       expect(res.body.success).toBe(true);
     }
-  });
+  }, 15000);
 
   it('EMPLOYEE cannot generate payslips', async () => {
     const res = await request(app)

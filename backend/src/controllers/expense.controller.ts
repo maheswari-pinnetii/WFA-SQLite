@@ -46,3 +46,25 @@ export const getMyExpenses = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
+
+export const approveExpense = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await expenseService.updateExpenseStatus(id, 'APPROVED');
+    return res.json({ success: true, message: 'Expense approved successfully' });
+  } catch (err: any) {
+    logger.error(`[Expense Controller] Error approving expense: ${err.message}`);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+export const rejectExpense = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await expenseService.updateExpenseStatus(id, 'REJECTED');
+    return res.json({ success: true, message: 'Expense rejected successfully' });
+  } catch (err: any) {
+    logger.error(`[Expense Controller] Error rejecting expense: ${err.message}`);
+    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};

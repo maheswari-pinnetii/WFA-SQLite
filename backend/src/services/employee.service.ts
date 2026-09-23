@@ -42,6 +42,9 @@ export class EmployeeService {
     if (queryParams.joiningYear && queryParams.joiningYear !== 'ALL' && queryParams.joiningYear !== 'All') {
       query.joinDate = new RegExp('^' + queryParams.joiningYear);
     }
+    if (queryParams.lifecycleStage && queryParams.lifecycleStage !== 'ALL') {
+      query.lifecycleStage = queryParams.lifecycleStage;
+    }
 
     let sortOption: any = {};
     if (queryParams.sortBy) {

@@ -12,6 +12,7 @@ export interface GetEmployeesParams {
   joiningYear?: string;
   sortBy?: string;
   sortOrder?: string;
+  lifecycleStage?: string;
 }
 
 const FALLBACK_EMPLOYEES: Employee[] = [

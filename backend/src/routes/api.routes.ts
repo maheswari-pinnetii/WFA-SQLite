@@ -29,6 +29,8 @@ import * as leaveController from '../controllers/leave.controller.js';
 import * as jobRoleController from '../controllers/job-role.controller.js';
 import * as notificationController from '../controllers/notification.controller.js';
 import * as timesheetController from '../controllers/timesheet.controller.js';
+import * as searchController from '../controllers/search.controller.js';
+import * as documentController from '../controllers/document.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { tenantScope } from '../middleware/tenantScope.js';
 import { uploadMiddleware } from '../middleware/fileUpload.js';
@@ -480,9 +482,18 @@ router.post('/compliance/config', authenticateToken, authorizeRoles(['ADMIN', 'H
 router.get('/workflows/pending', authenticateToken, authenticatedUserLimiter, workflowController.getPendingApprovals);
 router.post('/workflows/requests/:requestId/action', authenticateToken, authenticatedUserLimiter, workflowController.takeApprovalAction);
 
-// ─── Expenses (Phase 8) ──────────────────────────────────────────────────
+// ─── Global Search (Phase 10) ────────────────────────────────────────────────
+router.get('/search', authenticateToken, authenticatedUserLimiter, searchController.globalSearch);
+
+// ─── Documents (Self-Service) ────────────────────────────────────────────────
+router.get('/documents/me', authenticateToken, authenticatedUserLimiter, documentController.getMyDocuments);
+router.post('/documents', authenticateToken, authenticatedUserLimiter, documentController.uploadDocument);
+
+// ─── Expenses (Phase 9) ──────────────────────────────────────────────────
 router.post('/expenses', authenticateToken, authenticatedUserLimiter, expenseController.submitExpense);
 router.get('/expenses/me', authenticateToken, authenticatedUserLimiter, expenseController.getMyExpenses);
+router.put('/expenses/:id/approve', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, expenseController.approveExpense);
+router.put('/expenses/:id/reject', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, expenseController.rejectExpense);
 
 // ─── Shifts & Roster Templates ───────────────────────────────────────────────
 router.get('/shifts', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, shiftController.getShifts);

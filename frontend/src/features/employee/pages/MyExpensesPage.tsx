@@ -7,6 +7,8 @@ export const MyExpensesPage: React.FC = () => {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   
   const [formData, setFormData] = useState({
     category: 'TRAVEL',
@@ -34,19 +36,36 @@ export const MyExpensesPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
+    let uploadedUrl = formData.receiptUrl;
+
     try {
+      if (file) {
+        const fileData = new FormData();
+        fileData.append('file', file);
+        const uploadRes = await api.post('/upload', fileData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (uploadRes.data?.success) {
+          uploadedUrl = uploadRes.data.url;
+        }
+      }
+
       await api.post('/expenses', {
         category: formData.category,
         amount: Number(formData.amount),
         claimDate: formData.claimDate,
         description: formData.description,
-        receiptUrl: formData.receiptUrl
+        receiptUrl: uploadedUrl
       });
       setShowModal(false);
       setFormData({ category: 'TRAVEL', amount: '', claimDate: new Date().toISOString().split('T')[0], description: '', receiptUrl: '' });
+      setFile(null);
       fetchExpenses();
     } catch (err) {
       console.error('Failed to submit expense', err);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -101,8 +120,13 @@ export const MyExpensesPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       ₹{expense.amount.toLocaleString('en-IN')}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate flex items-center gap-2">
                       {expense.description}
+                      {expense.receiptUrl && (
+                        <a href={`http://localhost:5000${expense.receiptUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" title="View Receipt">
+                          <FileText className="w-4 h-4" />
+                        </a>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(expense.status)}
@@ -174,12 +198,22 @@ export const MyExpensesPage: React.FC = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Receipt (Optional)</label>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,application/pdf"
+                  onChange={e => setFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                />
+              </div>
+
               <div className="pt-4 flex justify-end gap-3">
-                <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+                <Button type="button" variant="outline" onClick={() => { setShowModal(false); setFile(null); }} disabled={uploading}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-orange-600 hover:bg-orange-700">
-                  Submit Claim
+                <Button type="submit" className="bg-orange-600 hover:bg-orange-700" disabled={uploading}>
+                  {uploading ? 'Submitting...' : 'Submit Claim'}
                 </Button>
               </div>
             </form>

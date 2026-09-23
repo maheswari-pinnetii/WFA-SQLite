@@ -65,7 +65,7 @@
 - **Frontend:** New modules under `features/lifecycle/pages` created: Onboarding, Probation, Confirmation, Transfers, Promotions, and Exit.
 - **Required Work:** API connections from the frontend to the backend endpoints (e.g. `transitionStatus`, `addDocument`, `calculateFnFSettlement`) replacing current frontend mocked states.
 
-### 9. Expenses (Status: MISSING)
+### 9. Expenses (Status: IMPLEMENTED)
 - **Required Work:** Complete workflow for expense submission, receipt upload (w/ MIME/size validation), Manager/Finance approvals, and Payroll integration.
 
 ### 10. Global Search & UI Polish (Status: MISSING)

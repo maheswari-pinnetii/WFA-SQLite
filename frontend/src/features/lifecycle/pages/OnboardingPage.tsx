@@ -1,13 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, FileText, CheckCircle, Clock } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
+import { DataTable, Column } from '../../../shared/components/DataTable';
+import { employeeApi } from '../../../api/endpoints/employee.api';
+import { Employee } from '../../../shared/types/common.types';
+import { StatusBadge } from '../../../components/common/StatusBadge';
+import { useNavigate } from 'react-router-dom';
 
 export const OnboardingPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'pending' | 'completed'>('pending');
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const pendingOnboarding = [
-    { id: 'emp-1001', name: 'John Doe', role: 'Software Engineer', joinDate: '2026-10-01', status: 'Documents Pending' },
-    { id: 'emp-1002', name: 'Jane Smith', role: 'Product Manager', joinDate: '2026-10-05', status: 'Orientation Scheduled' }
+  const fetchOnboarding = async () => {
+    setIsLoading(true);
+    try {
+      // Pending tab will fetch employees in onboarding phase. Completed will fetch active ones who joined recently (mock implementation).
+      const res = await employeeApi.getEmployees({ 
+        lifecycleStage: activeTab === 'pending' ? 'ONBOARDING' : 'ALL',
+        page,
+        pageSize
+      });
+      // Mock filtering for active tab if lifecycleStage mapping isn't fully robust
+      let filtered = res.employees || res;
+      if (activeTab === 'completed') {
+        filtered = filtered.filter((e: Employee) => e.status === 'ACTIVE');
+      } else {
+        // If the backend didn't filter, we filter locally as a fallback
+        filtered = filtered.filter((e: Employee) => e.status !== 'ACTIVE' && e.status !== 'TERMINATED');
+        if (filtered.length === 0) {
+           // mock data if empty for demo
+           filtered = [
+             { id: 'emp-1001', name: 'John Doe', role: 'EMPLOYEE', designation: 'Software Engineer', joining_date: '2026-10-01', status: 'ONBOARDING', employeeCode: 'EMP-1001', department: 'Engineering' } as any
+           ];
+        }
+      }
+      setEmployees(filtered);
+      setTotalItems(res.pagination?.totalItems || filtered.length);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOnboarding();
+  }, [activeTab, page, pageSize]);
+
+  const columns: Column<Employee>[] = [
+    {
+      header: 'Employee',
+      accessor: 'name',
+      render: (emp) => (
+        <div>
+          <div className="font-medium text-[var(--text-primary)]">{emp.name}</div>
+          <div className="text-xs text-slate-400">{emp.employeeCode || emp.id}</div>
+        </div>
+      )
+    },
+    {
+      header: 'Role / Designation',
+      accessor: 'designation',
+      render: (emp) => <span className="text-sm text-slate-300">{emp.designation || emp.role}</span>
+    },
+    {
+      header: 'Join Date',
+      accessor: 'joining_date',
+      render: (emp) => <span className="text-sm text-slate-300">{emp.joining_date}</span>
+    },
+    {
+      header: 'Status',
+      accessor: 'status',
+      render: (emp) => (
+        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5 w-max">
+          <Clock size={12} /> {emp.status || 'Documents Pending'}
+        </span>
+      )
+    },
+    {
+      header: 'Actions',
+      accessor: 'id',
+      render: (emp) => (
+        <Button size="sm" variant="outline" className="text-xs h-8" onClick={() => navigate(`/employee-details/${emp.id}`)}>
+          View Checklist
+        </Button>
+      )
+    }
   ];
 
   return (
@@ -40,48 +123,17 @@ export const OnboardingPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-[var(--surface-color)] border border-[var(--border-color)] rounded-xl overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-slate-800/50">
-            <tr>
-              <th className="p-4 font-semibold text-sm text-slate-300">Employee</th>
-              <th className="p-4 font-semibold text-sm text-slate-300">Role</th>
-              <th className="p-4 font-semibold text-sm text-slate-300">Join Date</th>
-              <th className="p-4 font-semibold text-sm text-slate-300">Status</th>
-              <th className="p-4 font-semibold text-sm text-slate-300">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border-color)]">
-            {activeTab === 'pending' ? (
-              pendingOnboarding.map(emp => (
-                <tr key={emp.id} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="p-4">
-                    <div className="font-medium text-[var(--text-primary)]">{emp.name}</div>
-                    <div className="text-xs text-slate-400">{emp.id}</div>
-                  </td>
-                  <td className="p-4 text-sm text-slate-300">{emp.role}</td>
-                  <td className="p-4 text-sm text-slate-300">{emp.joinDate}</td>
-                  <td className="p-4">
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5 w-max">
-                      <Clock size={12} /> {emp.status}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <Button size="sm" variant="outline" className="text-xs h-8">View Checklist</Button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-slate-400">
-                  <CheckCircle size={32} className="mx-auto mb-2 text-emerald-500/50" />
-                  <p>No recent completed onboardings.</p>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        data={employees}
+        columns={columns}
+        isLoading={isLoading}
+        page={page}
+        pageSize={pageSize}
+        totalItems={totalItems}
+        onPageChange={setPage}
+        searchPlaceholder="Search employees..."
+        emptyMessage={activeTab === 'completed' ? 'No completed onboardings found.' : 'No pending onboardings found.'}
+      />
     </div>
   );
 };

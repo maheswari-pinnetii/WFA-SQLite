@@ -4,6 +4,7 @@ import { ProtectedRoute } from '../../security/guards/ProtectedRoute';
 import { RoleGuard } from '../../security/guards/RoleGuard';
 import { GuestGuard } from '../../security/guards/GuestGuard';
 import { MainLayout } from '../../shared/layouts/MainLayout';
+import { CommandPalette } from '../../shared/components/CommandPalette';
 import { LoginPage } from '../../auth/pages/LoginPage';
 
 import { SignUpPage } from '../../auth/pages/SignUpPage';
@@ -61,6 +62,7 @@ import { TeamLeadSprintsPage } from '../../features/team-lead/pages/TeamLeadSpri
 
 // Employee Dashboards & Pages
 import { EmployeeDashboard } from '../../features/employee/dashboard/EmployeeDashboard';
+import { DocumentsPage } from '../../features/employee/pages/DocumentsPage';
 import { ProfileRouter as Profile } from '../../features/profile/ProfileRouter';
 import { MyAttendance } from '../../features/employee/pages/MyAttendance';
 import { MyPerformance } from '../../features/employee/pages/MyPerformance';
@@ -174,6 +176,7 @@ export const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute>
             <MainLayout>
+              <CommandPalette />
               <Routes>
                 {/* ========== Account Security Routes (all authenticated roles) ========== */}
                 <Route path="/change-password" element={<ChangePasswordPage />} />
@@ -387,6 +390,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/employee/goals" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyGoalsPage /></RoleGuard>} />
 
                 {/* Documents & Requests & Assets & Expenses */}
+                <Route path="/employee/documents/my" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><DocumentsPage /></RoleGuard>} />
                 <Route path="/employee/documents/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
                 <Route path="/employee/requests/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><EmployeeRequestsPage /></RoleGuard>} />
                 <Route path="/employee/assets/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />

@@ -11,6 +11,7 @@ import { useDepartmentAccess } from '../../hooks/useDepartmentAccess';
 import { StatusBadge } from '../common/StatusBadge';
 import { ActionMenu, ActionMenuItem } from '../common/ActionMenu';
 import { Permission } from '../../security/permissions/permissions';
+import { DataTable, Column } from '../../shared/components/DataTable';
 
 interface EmployeeTableProps {
   locationFilter?: string;
@@ -162,6 +163,203 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
     'Finance & Operations'
   ];
 
+  const handleExport = () => {
+    // Generate CSV for currently filtered employees
+    const csvRows = [];
+    const headers = ['Employee ID', 'Name', 'Email', 'Department', 'Location', 'Status', 'Join Date'];
+    csvRows.push(headers.join(','));
+    
+    filteredEmployees.forEach((emp: any) => {
+      const values = [
+        emp.employeeCode || emp.code || emp.id,
+        `"${emp.name}"`,
+        `"${emp.email}"`,
+        `"${emp.department}"`,
+        `"${emp.location || ''}"`,
+        emp.status,
+        emp.joinDate || ''
+      ];
+      csvRows.push(values.join(','));
+    });
+
+    const csvData = csvRows.join('\n');
+    const blob = new Blob([csvData], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'employees_export.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const columns: Column<any>[] = [
+    {
+      key: 'code',
+      header: 'Employee ID',
+      accessorKey: 'employeeCode',
+      render: (emp) => (
+        <span className="font-mono font-bold text-[var(--text-secondary)]">
+          {emp.employeeCode || emp.code || 'EMP-1000'}
+        </span>
+      )
+    },
+    {
+      key: 'name',
+      header: 'Employee Name',
+      accessorKey: 'name',
+      render: (emp) => (
+        <div>
+          <div className="font-bold text-[var(--text-primary)]">{emp.name}</div>
+          <div className="text-[10px] text-[var(--text-muted)] font-semibold">{emp.designation || 'Specialist'}</div>
+        </div>
+      )
+    },
+    {
+      key: 'joinDate',
+      header: 'Joining Date',
+      accessorKey: 'joinDate',
+      render: (emp) => {
+        if (!emp.joinDate) return <span className="text-[var(--text-secondary)] font-medium">N/A</span>;
+        const dateObj = new Date(emp.joinDate);
+        if (isNaN(dateObj.getTime())) return <span className="text-[var(--text-secondary)] font-medium">{emp.joinDate}</span>;
+        const day = String(dateObj.getDate()).padStart(2, '0');
+        const month = dateObj.toLocaleString('en-US', { month: 'short' });
+        const year = dateObj.getFullYear();
+        return <span className="text-[var(--text-secondary)] font-medium">{`${day} ${month} ${year}`}</span>;
+      }
+    },
+    {
+      key: 'status',
+      header: 'Employment Status',
+      accessorKey: 'status',
+      render: (emp) => (
+        <select
+          value={emp.status}
+          onChange={(e) => handleStatusChange(emp.id, e.target.value as Employee['status'])}
+          className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] cursor-pointer"
+        >
+          <option value="Active">Active</option>
+          <option value="ON_LEAVE">ON_LEAVE</option>
+          <option value="TERMINATED">Terminated</option>
+        </select>
+      )
+    },
+    {
+      key: 'tenure',
+      header: 'Tenure',
+      render: (emp) => {
+        if (!emp.joinDate) return <span className="text-emerald-600 dark:text-emerald-400 font-semibold">N/A</span>;
+        const joinDate = new Date(emp.joinDate);
+        const now = new Date();
+        if (isNaN(joinDate.getTime()) || joinDate > now) return <span className="text-emerald-600 dark:text-emerald-400 font-semibold">0 days</span>;
+        let years = now.getFullYear() - joinDate.getFullYear();
+        let months = now.getMonth() - joinDate.getMonth();
+        let days = now.getDate() - joinDate.getDate();
+        if (days < 0) {
+          months -= 1;
+          const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+          days += prevMonth.getDate();
+        }
+        if (months < 0) {
+          years -= 1;
+          months += 12;
+        }
+        const parts = [];
+        if (years > 0) parts.push(`${years} year${years > 1 ? 's' : ''}`);
+        if (months > 0) parts.push(`${months} month${months > 1 ? 's' : ''}`);
+        if (days > 0 || parts.length === 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+        return <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{parts.slice(0, 2).join(' ')}</span>;
+      }
+    },
+    {
+      key: 'department',
+      header: 'Department',
+      accessorKey: 'department',
+      render: (emp) => <span className="font-bold text-[var(--text-primary)]">{emp.department}</span>
+    },
+    {
+      key: 'team',
+      header: 'Team',
+      accessorKey: 'team',
+      render: (emp) => <span className="text-[var(--text-muted)]">{emp.team || 'N/A'}</span>
+    },
+    {
+      key: 'manager',
+      header: 'Manager',
+      render: (emp) => <span className="text-[var(--text-muted)]">{emp.manager || 'Priya Sharma'}</span>
+    },
+    {
+      key: 'teamLead',
+      header: 'Team Lead',
+      render: (emp) => <span className="text-[var(--text-muted)]">{emp.teamLead || 'Arjun Reddy'}</span>
+    },
+    {
+      key: 'location',
+      header: 'Location',
+      accessorKey: 'location',
+      render: (emp) => <span className="text-[var(--text-secondary)] font-semibold">{emp.location || 'HQ'}</span>
+    },
+    {
+      key: 'attendanceStatus',
+      header: 'Attendance Status',
+      render: (emp) => <StatusBadge status={emp.attendance_status || 'PRESENT'} />
+    },
+    {
+      key: 'shiftTimings',
+      header: 'Shift Timings',
+      render: (emp) => <span className="font-mono text-[var(--text-secondary)] font-semibold">{emp.shiftTiming || emp.shift || '09:00 - 18:00 (GS)'}</span>
+    },
+    {
+      key: 'checkIn',
+      header: 'Check-In',
+      render: (emp) => <span className="font-mono text-[var(--text-secondary)]">{emp.checkIn || '09:32 AM'}</span>
+    },
+    {
+      key: 'checkOut',
+      header: 'Check-Out',
+      render: (emp) => <span className="font-mono text-[var(--text-secondary)]">{emp.checkOut || '06:35 PM'}</span>
+    },
+    {
+      key: 'workingHours',
+      header: 'Working Hours',
+      render: (emp) => <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">{emp.workingHours || '08h 12m'}</span>
+    },
+    {
+      key: 'breakDuration',
+      header: 'Break Duration',
+      render: (emp) => <span className="font-mono text-[var(--text-secondary)]">{emp.breakDuration || '01h 03m'}</span>
+    },
+    {
+      key: 'leaveBalance',
+      header: 'Leave Balance',
+      render: (emp) => <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">{emp.leaveBalance || '12 days'}</span>
+    },
+    {
+      key: 'lastActivity',
+      header: 'Last Activity',
+      render: (emp) => <span className="text-[var(--text-muted)]">{emp.lastActivity || 'Check-In'}</span>
+    },
+    {
+      key: 'syncStatus',
+      header: 'Sync Status',
+      render: (emp) => <span className="text-teal-600 dark:text-teal-400 font-bold">{emp.syncStatus || 'Synced'}</span>
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (emp) => (
+        <ActionMenu
+          actions={getEmployeeActions(emp as Employee)}
+          row={emp}
+          buttonLabel="Action ▾"
+          ariaLabel={`Actions for ${emp.name}`}
+        />
+      )
+    }
+  ];
+
   return (
     <div className="bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg p-5 shadow-sm space-y-4 w-full max-w-full min-w-0 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -229,218 +427,27 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
         </div>
       </div>
 
-      {/* Roster Table */}
-      <div className="overflow-x-auto overflow-y-auto max-h-[500px] rounded-md border border-[var(--border-color)] bg-[var(--bg-card)] w-full max-w-full min-w-0">
-        <table className="w-full text-left text-sm min-w-[1600px]">
-          <thead className="sticky top-0 z-10 bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-b border-[var(--border-color)] uppercase font-semibold text-[11px] tracking-wider">
-            <tr>
-              <th className="py-3 px-4 w-[110px]">Employee ID</th>
-              <th className="py-3 px-4 w-[180px]">Employee Name</th>
-              <th className="py-3 px-4 w-[120px]">Joining Date</th>
-              <th className="py-3 px-4 w-[150px]">Employment Status</th>
-              <th className="py-3 px-4 w-[120px]">Tenure</th>
-              <th className="py-3 px-4 w-[140px]">Department</th>
-              <th className="py-3 px-4 w-[120px]">Team</th>
-              <th className="py-3 px-4 w-[130px]">Manager</th>
-              <th className="py-3 px-4 w-[130px]">Team Lead</th>
-              <th className="py-3 px-4 w-[100px]">Location</th>
-              <th className="py-3 px-4 w-[140px]">Attendance Status</th>
-              <th className="py-3 px-4 w-[130px]">Shift Timings</th>
-              <th className="py-3 px-4 w-[100px]">Check-In</th>
-              <th className="py-3 px-4 w-[100px]">Check-Out</th>
-              <th className="py-3 px-4 w-[110px]">Working Hours</th>
-              <th className="py-3 px-4 w-[110px]">Break Duration</th>
-              <th className="py-3 px-4 w-[110px]">Leave Balance</th>
-              <th className="py-3 px-4 w-[120px]">Last Activity</th>
-              <th className="py-3 px-4 w-[100px]">Sync Status</th>
-              <th className="py-3 px-4 w-[80px]">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border-color)] text-xs">
-            {isLoading ? (
-              <tr>
-                <td colSpan={20} className="px-5 py-8 text-center text-[var(--text-muted)] font-semibold">Loading employee workforce directory...</td>
-              </tr>
-            ) : paginatedEmployees.length === 0 ? (
-              <tr>
-                <td colSpan={20} className="px-5 py-8 text-center text-[var(--text-muted)]">
-                  No matching employee records found.
-                </td>
-              </tr>
-            ) : (
-              paginatedEmployees.map((emp) => {
-                const tenure = (() => {
-                  if (!emp.joinDate) return 'N/A';
-                  const joinDate = new Date(emp.joinDate);
-                  const now = new Date();
-                  if (isNaN(joinDate.getTime()) || joinDate > now) return '0 days';
-                  let years = now.getFullYear() - joinDate.getFullYear();
-                  let months = now.getMonth() - joinDate.getMonth();
-                  let days = now.getDate() - joinDate.getDate();
-                  if (days < 0) {
-                    months -= 1;
-                    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-                    days += prevMonth.getDate();
-                  }
-                  if (months < 0) {
-                    years -= 1;
-                    months += 12;
-                  }
-                  const parts = [];
-                  if (years > 0) parts.push(`${years} year${years > 1 ? 's' : ''}`);
-                  if (months > 0) parts.push(`${months} month${months > 1 ? 's' : ''}`);
-                  if (days > 0 || parts.length === 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
-                  return parts.slice(0, 2).join(' ');
-                })();
-
-                const formattedJoinDate = (() => {
-                  if (!emp.joinDate) return 'N/A';
-                  const dateObj = new Date(emp.joinDate);
-                  if (isNaN(dateObj.getTime())) return emp.joinDate;
-                  const day = String(dateObj.getDate()).padStart(2, '0');
-                  const month = dateObj.toLocaleString('en-US', { month: 'short' });
-                  const year = dateObj.getFullYear();
-                  return `${day} ${month} ${year}`;
-                })();
-
-                return (
-                  <tr key={emp.id} className="hover:bg-[var(--bg-hover)] transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-[var(--text-secondary)]">
-                      {emp.employeeCode || emp.code || 'EMP-1000'}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-[var(--text-primary)]">
-                      <div>
-                        <div>{emp.name}</div>
-                        <div className="text-[10px] text-[var(--text-muted)] font-semibold">{emp.designation || 'Specialist'}</div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-[var(--text-secondary)] font-medium">
-                      {formattedJoinDate}
-                    </td>
-                    <td className="py-3 px-4">
-                      <select
-                        value={emp.status}
-                        onChange={(e) => handleStatusChange(emp.id, e.target.value as Employee['status'])}
-                        className="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-primary)] cursor-pointer"
-                      >
-                        <option value="Active">Active</option>
-                        <option value="ON_LEAVE">ON_LEAVE</option>
-                        <option value="TERMINATED">Terminated</option>
-                      </select>
-                    </td>
-                    <td className="py-3 px-4 text-emerald-600 dark:text-emerald-400 font-semibold">
-                      {tenure}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-[var(--text-primary)]">
-                      {emp.department}
-                    </td>
-                    <td className="py-3 px-4 text-[var(--text-muted)]">
-                      {emp.team || 'N/A'}
-                    </td>
-                    <td className="py-3 px-4 text-[var(--text-muted)]">
-                      {(emp as any).manager || 'Priya Sharma'}
-                    </td>
-                    <td className="py-3 px-4 text-[var(--text-muted)]">
-                      {(emp as any).teamLead || 'Arjun Reddy'}
-                    </td>
-                    <td className="py-3 px-4 text-[var(--text-secondary)] font-semibold">
-                      {emp.location || 'HQ'}
-                    </td>
-                    <td className="py-3 px-4">
-                      <StatusBadge status={(emp as any).attendance_status || 'PRESENT'} />
-                    </td>
-                    <td className="py-3 px-4 font-mono text-[var(--text-secondary)] font-semibold">
-                      {(emp as any).shiftTiming || (emp as any).shift || '09:00 - 18:00 (GS)'}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
-                      {(emp as any).checkIn || '09:32 AM'}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
-                      {(emp as any).checkOut || '06:35 PM'}
-                    </td>
-                    <td className="py-3 px-4 font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                      {(emp as any).workingHours || '08h 12m'}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
-                      {(emp as any).breakDuration || '01h 03m'}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-emerald-600 dark:text-emerald-400 font-bold">
-                      {(emp as any).leaveBalance || '12 days'}
-                    </td>
-                    <td className="py-3 px-4 text-[var(--text-muted)]">
-                      {(emp as any).lastActivity || 'Check-In'}
-                    </td>
-                    <td className="py-3 px-4 text-teal-600 dark:text-teal-400 font-bold">
-                      {(emp as any).syncStatus || 'Synced'}
-                    </td>
-                    <td className="py-3 px-4">
-                      <ActionMenu
-                        actions={getEmployeeActions(emp)}
-                        row={emp}
-                        buttonLabel="Action ▾"
-                        ariaLabel={`Actions for ${emp.name}`}
-                      />
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Advanced Pagination Controls for 10,000 Records */}
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-2 text-xs text-slate-400 pt-2">
-          <span>
-            Showing <strong className="text-[var(--text-primary)]">{((page - 1) * pageSize) + 1}</strong> to{' '}
-            <strong className="text-[var(--text-primary)]">{Math.min(page * pageSize, filteredEmployees.length).toLocaleString()}</strong> of{' '}
-            <strong className="text-[var(--text-primary)]">{filteredEmployees.length.toLocaleString()}</strong> records
-          </span>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage(1)}
-              disabled={page === 1}
-              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
-              title="First Page"
-            >
-              <ChevronsLeft size={16} />
-            </button>
-
-            <button
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              disabled={page === 1}
-              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
-              title="Previous Page"
-            >
-              <ChevronLeft size={16} />
-            </button>
-
-            <span className="font-medium text-xs text-slate-700 dark:text-slate-300 px-3">
-              Page {page.toLocaleString()} of {totalPages.toLocaleString()}
-            </span>
-
-            <button
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-              disabled={page === totalPages}
-              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
-              title="Next Page"
-            >
-              <ChevronRight size={16} />
-            </button>
-
-            <button
-              onClick={() => setPage(totalPages)}
-              disabled={page === totalPages}
-              className="p-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-30 transition-colors"
-              title="Last Page"
-            >
-              <ChevronsRight size={16} />
-            </button>
+      {/* Roster Table via DataTable */}
+      <div className="w-full max-w-full overflow-hidden">
+        {isLoading ? (
+          <div className="p-8 text-center text-[var(--text-muted)] font-semibold border border-[var(--border-color)] bg-[var(--bg-card)] rounded-md">
+            Loading employee workforce directory...
           </div>
-        </div>
-      )}
+        ) : (
+          <DataTable 
+            columns={columns} 
+            data={paginatedEmployees} 
+            page={page}
+            pageSize={pageSize}
+            totalCount={filteredEmployees.length}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            onExport={handleExport}
+            emptyMessage="No matching employee records found."
+          />
+        )}
+      </div>
     </div>
   );
 };
