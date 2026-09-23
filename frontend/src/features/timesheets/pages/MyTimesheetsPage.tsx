@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Paper, Table, TableBody, TableCell, TableHead, TableRow, Chip, Button, Box } from '@mui/material';
-import { api } from '../../../shared/api';
+import { apiClient as api } from '../../../api/client';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
@@ -22,7 +22,7 @@ export const MyTimesheetsPage: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">My Timesheets</Typography>
         <Button variant="contained" color="primary" onClick={() => navigate('/timesheets/entry')}>
           New Timesheet

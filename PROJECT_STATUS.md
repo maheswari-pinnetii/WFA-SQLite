@@ -55,13 +55,15 @@
 ### 6. Timesheet Management (Status: MISSING)
 - **Required Work:** End-to-end implementation for My Timesheet, Weekly/Monthly views, Project/Task tracking, and Manager approvals.
 
-### 7. Roster / Shift Management (Status: MISSING)
-- **Backend:** `shift.controller.ts` exists in basic form.
-- **Required Work:** Visual roster planner UI, drag/drop capabilities, shift assignments, conflict detection.
+### 7. Roster / Shift Management (Status: IMPLEMENTED)
+- **Backend:** `shift.controller.ts` & `scheduling.controller.ts` fully implemented. Shift assignments logic is present in `scheduling.service.ts` using `shift_assignments` table.
+- **Frontend:** `ShiftsPage.tsx` handles Shift CRUD and team assignments. `RosterPlannerPage.tsx` handles visual roster planner UI with drag/drop capabilities.
+- **Database:** `shifts` and `shift_assignments` tables exist and migrations are present.
 
-### 8. Employee Lifecycle (Status: PARTIALLY_IMPLEMENTED)
-- **Backend:** `employee-lifecycle.controller.ts` exists.
-- **Required Work:** Formalize onboarding, probation, confirmation, promotion, and fully tie resignation/clearance into the F&F workflow.
+### 8. Employee Lifecycle (Status: IMPLEMENTED)
+- **Backend:** `employee-lifecycle.controller.ts` is in place.
+- **Frontend:** New modules under `features/lifecycle/pages` created: Onboarding, Probation, Confirmation, Transfers, Promotions, and Exit.
+- **Required Work:** API connections from the frontend to the backend endpoints (e.g. `transitionStatus`, `addDocument`, `calculateFnFSettlement`) replacing current frontend mocked states.
 
 ### 9. Expenses (Status: MISSING)
 - **Required Work:** Complete workflow for expense submission, receipt upload (w/ MIME/size validation), Manager/Finance approvals, and Payroll integration.

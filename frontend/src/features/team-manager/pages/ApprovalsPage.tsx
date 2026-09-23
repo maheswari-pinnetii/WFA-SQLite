@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, Calendar, FileText, UserCheck, ShieldCheck, AlertTriangle, Eye } from 'lucide-react';
+import { CheckCircle2, Clock, Calendar, FileText, UserCheck, ShieldCheck, AlertTriangle, Eye, ArrowLeftRight } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { apiClient as api } from '../../../api/client';
+import { SwipeableApprovalCard } from '../components/SwipeableApprovalCard';
 
 interface WorkflowRequest {
   id: string;
@@ -121,8 +122,15 @@ export const ApprovalsPage: React.FC = () => {
         </div>
       )}
 
+      {/* Swipe Hint (Mobile Only) */}
+      {filteredRequests.length > 0 && (
+        <div className="md:hidden flex items-center justify-center gap-2 py-2 text-xs font-medium text-slate-400 animate-pulse">
+          <ArrowLeftRight size={14} /> Swipe cards left/right to action
+        </div>
+      )}
+
       {/* Tabs */}
-      <div className="flex flex-wrap items-center gap-3 border-b border-slate-800 pb-2">
+      <div className="flex items-center gap-3 border-b border-slate-800 pb-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
         <button
           onClick={() => setActiveTab('all')}
           className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs transition-all cursor-pointer ${
@@ -178,8 +186,8 @@ export const ApprovalsPage: React.FC = () => {
         </button>
       </div>
 
-      <div className="glass-panel p-6 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-color)]">
+      <div className="glass-panel md:p-6 rounded-3xl md:border md:border-[var(--border-color)] md:bg-[var(--bg-card)] space-y-4">
+        <div className="hidden md:flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--border-color)]">
           <h3 className="text-base font-extrabold text-[var(--text-primary)] flex items-center gap-2">
             Pending Action Items
           </h3>
@@ -198,76 +206,80 @@ export const ApprovalsPage: React.FC = () => {
               const hasBlackoutWarning = req.entityType === 'LEAVE' && isOverlappingBlackout(req.leaveStartDate, req.leaveEndDate);
 
               return (
-                <div
+                <SwipeableApprovalCard
                   key={req.id}
-                  className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-700 transition-colors"
+                  id={req.id}
+                  onApprove={(id) => handleAction(id, 'APPROVED')}
+                  onReject={(id) => handleAction(id, 'REJECTED')}
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-slate-400">{req.id.substring(0,8)}...</span>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300">
-                        {req.workflowName}
-                      </span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                        <Clock size={10} /> Pending Approval
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-bold text-white flex items-center gap-2 mt-1">
-                      <UserCheck size={14} className="text-slate-400" />
-                      {req.employeeName || 'Unknown Employee'}
-                    </h4>
-                    <div className="flex flex-col gap-2 mt-2">
-                      <p className="text-xs text-slate-300 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 inline-block shadow-inner w-fit">
-                        {req.details}
-                      </p>
-                      
-                      {req.entityType === 'LEAVE' && (
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            className="h-6 text-[10px] border-blue-500/30 text-blue-400 bg-blue-500/10 px-2"
-                            onClick={() => fetchBalance(req.requesterId, req.details.split(' ')[1])} // basic parsing for demo
-                          >
-                            <Eye size={12} className="mr-1" /> View Balance
-                          </Button>
-                          {balanceMap[req.requesterId] && (
-                            <span className="text-[10px] text-blue-300 font-mono bg-slate-800 px-2 py-0.5 rounded">
-                              {balanceMap[req.requesterId]}
-                            </span>
-                          )}
-                        </div>
+                  <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-700 transition-colors w-full h-full">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs text-slate-400">{req.id.substring(0,8)}...</span>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300">
+                          {req.workflowName}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                          <Clock size={10} /> Pending Approval
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2 mt-1">
+                        <UserCheck size={14} className="text-slate-400" />
+                        {req.employeeName || 'Unknown Employee'}
+                      </h4>
+                      <div className="flex flex-col gap-2 mt-2">
+                        <p className="text-xs text-slate-300 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 inline-block shadow-inner w-fit">
+                          {req.details}
+                        </p>
+                        
+                        {req.entityType === 'LEAVE' && (
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="outline" 
+                              className="h-6 text-[10px] border-blue-500/30 text-blue-400 bg-blue-500/10 px-2"
+                              onClick={() => fetchBalance(req.requesterId, req.details.split(' ')[1])} // basic parsing for demo
+                            >
+                              <Eye size={12} className="mr-1" /> View Balance
+                            </Button>
+                            {balanceMap[req.requesterId] && (
+                              <span className="text-[10px] text-blue-300 font-mono bg-slate-800 px-2 py-0.5 rounded">
+                                {balanceMap[req.requesterId]}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        {hasBlackoutWarning && (
+                          <div className="flex items-center gap-1.5 text-orange-400 text-[10px] font-bold bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded w-fit">
+                            <AlertTriangle size={12} />
+                            WARNING: Leave request overlaps with a company Blackout Period.
+                          </div>
+                        )}
+                      </div>
+                      {req.description && (
+                        <p className="text-xs text-slate-400 mt-1 italic pl-1 border-l-2 border-slate-700">
+                          "{req.description}"
+                        </p>
                       )}
-                      
-                      {hasBlackoutWarning && (
-                        <div className="flex items-center gap-1.5 text-orange-400 text-[10px] font-bold bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded w-fit">
-                          <AlertTriangle size={12} />
-                          WARNING: Leave request overlaps with a company Blackout Period.
-                        </div>
-                      )}
                     </div>
-                    {req.description && (
-                      <p className="text-xs text-slate-400 mt-1 italic pl-1 border-l-2 border-slate-700">
-                        "{req.description}"
-                      </p>
-                    )}
-                  </div>
 
-                  <div className="flex gap-2 w-full md:w-auto">
-                    <Button
-                      variant="outline"
-                      className="flex-1 md:flex-none border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500"
-                      onClick={() => handleAction(req.id, 'REJECTED')}
-                    >
-                      Reject
-                    </Button>
-                    <Button
-                      className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/50"
-                      onClick={() => handleAction(req.id, 'APPROVED')}
-                    >
-                      <ShieldCheck size={16} className="mr-2" /> Approve
-                    </Button>
+                    <div className="flex gap-2 w-full md:w-auto">
+                      <Button
+                        variant="outline"
+                        className="flex-1 md:flex-none border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500"
+                        onClick={() => handleAction(req.id, 'REJECTED')}
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/50"
+                        onClick={() => handleAction(req.id, 'APPROVED')}
+                      >
+                        <ShieldCheck size={16} className="mr-2" /> Approve
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </SwipeableApprovalCard>
               );
             })
           )}

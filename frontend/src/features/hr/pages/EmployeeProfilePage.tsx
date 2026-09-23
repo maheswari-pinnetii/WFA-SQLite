@@ -163,7 +163,7 @@ export const EmployeeProfilePage: React.FC = () => {
     if (!id || !newDocument.documentType || !newDocument.documentUrl) return;
     try {
       setSaving(true);
-      await lifecycleApi.addDocument(id, newDocument);
+      await lifecycleApi.uploadDocument(id, newDocument);
       showToast('Document uploaded.');
       setNewDocument({ documentType: '', documentUrl: '' });
       fetchProfile();
@@ -175,7 +175,7 @@ export const EmployeeProfilePage: React.FC = () => {
     if (!id || !transitionStatus.status) return;
     try {
       setSaving(true);
-      await lifecycleApi.transitionStatus(id, transitionStatus.status, transitionStatus.reason);
+      await lifecycleApi.transitionStatus(id, { status: transitionStatus.status, reason: transitionStatus.reason });
       showToast('Status transitioned successfully.');
       setTransitionStatus({ status: 'ACTIVE', reason: '' });
       fetchProfile();

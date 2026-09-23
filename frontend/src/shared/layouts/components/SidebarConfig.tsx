@@ -126,7 +126,7 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
       { id: 'attendance.corrections', label: 'Corrections', path: '/attendance/corrections', roles: ALL_ROLES },
       { id: 'attendance.regularization', label: 'Regularization', path: '/attendance/regularization', roles: ALL_ROLES },
       { id: 'attendance.shifts', label: 'Shifts', path: '/attendance/shifts', roles: ALL_ROLES, badge: { text: '9h', variant: 'emerald' } },
-      { id: 'attendance.roster-planner', label: 'Roster Planner', path: '/manager/roster-planner', roles: LEADERSHIP_ROLES, badge: { text: 'New', variant: 'blue' } },
+      { id: 'attendance.roster-planner', label: 'Roster Planner', path: '/manager/roster-planner', roles: LEADERSHIP_ROLES, badge: { text: 'New', variant: 'cyan' } },
       { id: 'attendance.overtime', label: 'Overtime', path: '/attendance/overtime', roles: LEADERSHIP_ROLES },
     ]
   },
@@ -339,6 +339,16 @@ export const EMPLOYEE_NAVIGATION: NavigationItem[] = [
       { id: 'emp.attendance.history', label: 'Attendance History', path: '/employee/attendance/history', roles: [Role.EMPLOYEE] },
       { id: 'emp.attendance.hours', label: 'Work Hours', path: '/employee/attendance/hours', roles: [Role.EMPLOYEE] },
       { id: 'emp.attendance.corrections', label: 'Attendance Corrections', path: '/employee/attendance/corrections', roles: [Role.EMPLOYEE] }
+    ]
+  },
+  {
+    id: 'emp.timesheets',
+    label: 'Timesheets',
+    icon: <Clock size={18} strokeWidth={2} />,
+    roles: [Role.EMPLOYEE],
+    children: [
+      { id: 'emp.timesheets.my', label: 'My Timesheets', path: '/timesheets/my', roles: [Role.EMPLOYEE] },
+      { id: 'emp.timesheets.entry', label: 'Timesheet Entry', path: '/timesheets/entry', roles: [Role.EMPLOYEE] },
     ]
   },
   {

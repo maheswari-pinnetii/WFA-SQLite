@@ -5,7 +5,7 @@ import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Clock, ShieldCheck, Activity, Users, Plus, Edit2, CheckCircle2, UserCheck, AlertCircle, Save } from 'lucide-react';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { Button } from '../../../components/ui/button';
-import api from '../../../shared/api/axios';
+import { apiClient as api } from '../../../api/client';
 
 import { ShiftDefinition, DEFAULT_SHIFTS } from '../../../shared/types/shifts.types';
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Paper, Table, TableBody, TableCell, TableHead, TableRow, Button, Box, TextField, MenuItem } from '@mui/material';
-import { api } from '../../../shared/api';
+import { apiClient as api } from '../../../api/client';
 import { useNavigate, useParams } from 'react-router-dom';
 import { startOfWeek, endOfWeek, format, addDays } from 'date-fns';
 
@@ -85,7 +85,7 @@ export const TimesheetEntryPage: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Timesheet Entry</Typography>
         <Typography variant="h6">{format(weekStart, 'MMM dd')} - {format(weekEnd, 'MMM dd, yyyy')}</Typography>
       </Box>
@@ -134,7 +134,7 @@ export const TimesheetEntryPage: React.FC = () => {
                     onChange={e => updateEntry(idx, 'hours', e.target.value)}
                     disabled={isReadOnly}
                     size="small"
-                    inputProps={{ min: 0, max: 24, step: 0.5 }}
+                    slotProps={{ htmlInput: { min: 0, max: 24, step: 0.5 } }}
                     sx={{ width: 80 }}
                   />
                 </TableCell>
@@ -155,13 +155,13 @@ export const TimesheetEntryPage: React.FC = () => {
           </TableBody>
         </Table>
         {!isReadOnly && (
-          <Box mt={2}>
+          <Box sx={{ mt: 2 }}>
             <Button variant="outlined" onClick={addEntry}>+ Add Line Item</Button>
           </Box>
         )}
       </Paper>
 
-      <Box display="flex" justifyContent="flex-end" gap={2}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
         <Button variant="outlined" onClick={() => navigate('/timesheets/my')}>Cancel</Button>
         {!isReadOnly && (
           <>

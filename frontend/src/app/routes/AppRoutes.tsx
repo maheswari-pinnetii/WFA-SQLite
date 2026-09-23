@@ -116,6 +116,16 @@ import { HeadcountAnalyticsPage } from '../../features/analytics/pages/Headcount
 import { ComingSoonPage } from '../../pages/ComingSoonPage';
 import { NotificationPreferences } from '../../features/employee/pages/NotificationPreferences';
 import { AttritionAnalyticsPage } from '../../features/analytics/pages/AttritionAnalyticsPage';
+import { MyTimesheetsPage } from '../../features/timesheets/pages/MyTimesheetsPage';
+import { TimesheetEntryPage } from '../../features/timesheets/pages/TimesheetEntryPage';
+
+// Lifecycle Pages
+import { OnboardingPage } from '../../features/lifecycle/pages/OnboardingPage';
+import { ProbationPage } from '../../features/lifecycle/pages/ProbationPage';
+import { ConfirmationPage } from '../../features/lifecycle/pages/ConfirmationPage';
+import { TransfersPage } from '../../features/lifecycle/pages/TransfersPage';
+import { PromotionsPage } from '../../features/lifecycle/pages/PromotionsPage';
+import { ExitPage } from '../../features/lifecycle/pages/ExitPage';
 
 
 const DefaultHomeRedirect: React.FC = () => {
@@ -359,6 +369,11 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/employee/payroll/reimbursements" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyExpensesPage /></RoleGuard>} />
                 <Route path="/employee/payslips" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><PayslipsPage /></RoleGuard>} />
 
+                {/* Timesheets */}
+                <Route path="/timesheets/my" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><MyTimesheetsPage /></RoleGuard>} />
+                <Route path="/timesheets/entry" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><TimesheetEntryPage /></RoleGuard>} />
+                <Route path="/timesheets/entry/:id" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><TimesheetEntryPage /></RoleGuard>} />
+
                 {/* Benefits & Learning & Skills */}
                 <Route path="/employee/benefits/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><Profile /></RoleGuard>} />
                 <Route path="/employee/learning/*" element={<RoleGuard allowedRoles={[Role.EMPLOYEE, Role.TEAM_LEAD, Role.MANAGER, Role.HR, Role.ADMIN]}><SkillOverviewPage /></RoleGuard>} />
@@ -401,7 +416,13 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/organization/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><OrganizationPage /></RoleGuard>} />
 
                 {/* Employee Lifecycle */}
-                <Route path="/lifecycle/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><EmployeeManagement /></RoleGuard>} />
+                <Route path="/lifecycle/onboarding" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><OnboardingPage /></RoleGuard>} />
+                <Route path="/lifecycle/probation" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><ProbationPage /></RoleGuard>} />
+                <Route path="/lifecycle/confirmation" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><ConfirmationPage /></RoleGuard>} />
+                <Route path="/lifecycle/transfers" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><TransfersPage /></RoleGuard>} />
+                <Route path="/lifecycle/promotions" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PromotionsPage /></RoleGuard>} />
+                <Route path="/lifecycle/exit" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><ExitPage /></RoleGuard>} />
+                <Route path="/lifecycle/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><OnboardingPage /></RoleGuard>} />
 
                 {/* Attendance */}
                 <Route path="/attendance/overview" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><AttendanceOverviewPage /></RoleGuard>} />
