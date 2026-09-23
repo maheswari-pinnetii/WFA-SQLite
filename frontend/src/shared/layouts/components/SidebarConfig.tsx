@@ -126,7 +126,18 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
       { id: 'attendance.corrections', label: 'Corrections', path: '/attendance/corrections', roles: ALL_ROLES },
       { id: 'attendance.regularization', label: 'Regularization', path: '/attendance/regularization', roles: ALL_ROLES },
       { id: 'attendance.shifts', label: 'Shifts', path: '/attendance/shifts', roles: ALL_ROLES, badge: { text: '9h', variant: 'emerald' } },
+      { id: 'attendance.roster-planner', label: 'Roster Planner', path: '/manager/roster-planner', roles: LEADERSHIP_ROLES, badge: { text: 'New', variant: 'blue' } },
       { id: 'attendance.overtime', label: 'Overtime', path: '/attendance/overtime', roles: LEADERSHIP_ROLES },
+    ]
+  },
+  {
+    id: 'timesheets',
+    label: 'Timesheets',
+    icon: <Clock size={18} strokeWidth={2} />,
+    roles: ALL_ROLES,
+    children: [
+      { id: 'timesheets.my', label: 'My Timesheets', path: '/timesheets/my', roles: ALL_ROLES },
+      { id: 'timesheets.entry', label: 'Timesheet Entry', path: '/timesheets/entry', roles: ALL_ROLES },
     ]
   },
   {

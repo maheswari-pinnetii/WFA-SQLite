@@ -23,9 +23,12 @@ import * as adminDashboardController from '../controllers/admin-dashboard.contro
 import * as hrDashboardController from '../controllers/hr-dashboard.controller.js';
 import * as managerDashboardController from '../controllers/manager-dashboard.controller.js';
 import * as teamLeadDashboardController from '../controllers/team-lead-dashboard.controller.js';
+import * as shiftController from '../controllers/shift.controller.js';
 import * as employeeDashboardController from '../controllers/employee-dashboard.controller.js';
+import * as leaveController from '../controllers/leave.controller.js';
 import * as jobRoleController from '../controllers/job-role.controller.js';
 import * as notificationController from '../controllers/notification.controller.js';
+import * as timesheetController from '../controllers/timesheet.controller.js';
 import { authenticateToken, authorizeRoles, authorizePermissions, enforceScope } from '../middleware/auth.js';
 import { tenantScope } from '../middleware/tenantScope.js';
 import { uploadMiddleware } from '../middleware/fileUpload.js';
@@ -266,8 +269,11 @@ router.post('/leave-requests/bulk-review', authenticateToken, authorizeRoles(['A
 router.put('/leave-requests/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewLeaveRequest, workforceController.reviewLeaveRequest);
 router.put('/leave-requests/:id/review', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), validateIdParam, idempotencyMiddleware, validateReviewLeaveRequest, workforceController.reviewLeaveRequest);
 
-router.get('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), workforceController.getLeavePolicies);
-router.post('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), workforceController.createLeavePolicy);
+router.get('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), leaveController.getLeavePolicies);
+router.post('/leave-policies', authenticateToken, authorizeRoles(['ADMIN', 'HR']), leaveController.createLeavePolicy);
+
+router.get('/leave-blackout-periods', authenticateToken, authenticatedUserLimiter, leaveController.getBlackoutPeriods);
+router.post('/leave-blackout-periods', authenticateToken, authorizeRoles(['ADMIN', 'HR']), leaveController.createBlackoutPeriod);
 
 router.get('/tasks', authenticateToken, enforceScope, authenticatedUserLimiter, workforceController.getTasks);
 router.put('/tasks/:id', authenticateToken, validateIdParam, validateUpdateTask, workforceController.updateTask);
@@ -476,7 +482,14 @@ router.post('/workflows/requests/:requestId/action', authenticateToken, authenti
 router.post('/expenses', authenticateToken, authenticatedUserLimiter, expenseController.submitExpense);
 router.get('/expenses/me', authenticateToken, authenticatedUserLimiter, expenseController.getMyExpenses);
 
+// ─── Shifts & Roster Templates ───────────────────────────────────────────────
+router.get('/shifts', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, shiftController.getShifts);
+router.post('/shifts', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, shiftController.createShift);
+router.put('/shifts/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, shiftController.updateShift);
+router.delete('/shifts/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, shiftController.deleteShift);
+
 // ─── Scheduling & Overtime (Step 7) ──────────────────────────────────────────
+router.get('/scheduling/departments/:departmentId/roster', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.getDepartmentRoster);
 router.get('/scheduling/employees/:employeeId/schedule', authenticateToken, enforceScope, authenticatedUserLimiter, schedulingController.getSchedule);
 router.put('/scheduling/employees/:employeeId/schedule', authenticateToken, authorizeRoles(['ADMIN', 'HR', 'MANAGER']), authenticatedUserLimiter, schedulingController.setSchedule);
 router.get('/scheduling/employees/:employeeId/shifts', authenticateToken, enforceScope, authenticatedUserLimiter, schedulingController.getShiftAssignments);
@@ -502,5 +515,13 @@ router.post('/training/courses/:courseId/enroll', authenticateToken, authorizeRo
 router.patch('/training/enrollments/:enrollmentId/complete', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.markCourseComplete);
 router.get('/training/my-training', authenticateToken, authenticatedUserLimiter, schedulingController.getMyTraining);
 router.get('/training/mandatory-compliance', authenticateToken, authorizeRoles(['ADMIN', 'HR']), authenticatedUserLimiter, schedulingController.getMandatoryCompliance);
+
+// ==========================================
+// Phase 6: Timesheet Management
+// ==========================================
+router.get('/projects', authenticateToken, timesheetController.getProjects);
+router.get('/timesheets', authenticateToken, timesheetController.getMyTimesheets);
+router.get('/timesheets/:id', authenticateToken, timesheetController.getTimesheetById);
+router.post('/timesheets', authenticateToken, timesheetController.saveTimesheet);
 
 export default router;

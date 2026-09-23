@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   FileCheck,
   User,
@@ -39,12 +40,15 @@ interface FnFSettlement {
 
 export const FullFinalSettlementPage: React.FC = () => {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialEmpId = searchParams.get('employeeId') || '';
+  
   const [settlements, setSettlements] = useState<FnFSettlement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(!!initialEmpId);
 
   // New F&F State
-  const [employeeId, setEmployeeId] = useState('');
+  const [employeeId, setEmployeeId] = useState(initialEmpId);
   const [exitDate, setExitDate] = useState(new Date().toISOString().split('T')[0]);
   const [noticePeriodDays, setNoticePeriodDays] = useState(30);
   const [noticeServedDays, setNoticeServedDays] = useState(30);
@@ -76,11 +80,13 @@ export const FullFinalSettlementPage: React.FC = () => {
         exitDate,
         noticePeriodDays: Number(noticePeriodDays),
         noticeServedDays: Number(noticeServedDays),
-        gratuityAmount: Number(gratuityAmount),
         otherDeductions: Number(otherDeductions)
       });
       setShowModal(false);
       setEmployeeId('');
+      if (searchParams.has('employeeId')) {
+        setSearchParams({});
+      }
       fetchSettlements();
     } catch (err) {
       console.error('Failed to calculate F&F:', err);

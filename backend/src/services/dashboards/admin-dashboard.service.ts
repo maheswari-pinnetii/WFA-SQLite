@@ -39,7 +39,7 @@ export class AdminDashboardService {
     const pageSize = pageSizeRow[0]?.page_size || 0;
     const storageMB = ((pageCount * pageSize) / (1024 * 1024)).toFixed(2);
 
-    const featureFlags = await query(`SELECT COUNT(*) as count FROM feature_flags WHERE isEnabled = 1`);
+    const featureFlags = await query(`SELECT COUNT(*) as count FROM feature_flags WHERE enabled = 1`);
     const activeIntegrations = featureFlags[0]?.count || 0;
     
     // Calculate a dynamic health score based on active features and error rates
@@ -59,8 +59,29 @@ export class AdminDashboardService {
       dailyLogins: loginsRow[0]?.count || 0
     };
 
-    const headcountTrend: any[] = [];
+    const taskSummary = await analyticsRepository.getTasksSummary({ organizationId: orgId });
     const taskMap: Record<string, number> = {};
+    taskSummary.forEach((t: any) => {
+      taskMap[t.status] = t.count;
+    });
+
+    const headcountRows = await query(`
+      SELECT strftime('%Y-%m', joinDate) as month, COUNT(*) as count 
+      FROM employees 
+      WHERE organizationId = ? AND joinDate IS NOT NULL 
+      GROUP BY month 
+      ORDER BY month ASC 
+      LIMIT 6
+    `, [orgId]);
+    
+    let cumulative = 0;
+    const headcountTrend = headcountRows.map((r: any) => {
+      cumulative += r.count;
+      return {
+        month: new Date(`${r.month}-01`).toLocaleDateString('en-US', { month: 'short' }),
+        headcount: cumulative
+      };
+    });
 
     // 6 Charts
     const charts = {

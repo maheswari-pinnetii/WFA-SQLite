@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { query, execute } from '../database/sqlite-cloud.js';
+import { query, execute, getDatabase } from '../database/sqlite-cloud.js';
 import { logger } from '../config/logger.js';
 
 export const schedulingService = {
@@ -36,14 +36,47 @@ export const schedulingService = {
   // ─── SHIFT ASSIGNMENTS ─────────────────────────────────────────────────────
 
   async getShiftAssignments(employeeId: string, organizationId: string) {
-    return query(
-      `SELECT sa.*, s.name as shiftName, s.startTime, s.endTime
+    const db = getDatabase();
+    return db.prepare(`
+      SELECT sa.*, s.name as shiftName, s.startTime, s.endTime
        FROM shift_assignments sa
        JOIN shifts s ON sa.shiftId = s.id
        WHERE sa.employeeId = ? AND sa.organizationId = ?
-       ORDER BY sa.startDate DESC`,
-      [employeeId, organizationId]
-    );
+       ORDER BY sa.startDate DESC
+    `).all(employeeId, organizationId);
+  },
+
+  async getDepartmentRoster(departmentId: string, startDate: string, endDate: string, organizationId: string) {
+    const db = getDatabase();
+    
+    // Get all employees in the department
+    const employees = db.prepare(`
+      SELECT id, name, email, role, department 
+      FROM employees 
+      WHERE department = ? AND organizationId = ?
+    `).all(departmentId, organizationId);
+    
+    if (!employees.length) return [];
+    
+    const employeeIds = employees.map((e: any) => e.id);
+    const placeholders = employeeIds.map(() => '?').join(',');
+    
+    // Get all shifts for these employees in the date range
+    const shifts = db.prepare(`
+      SELECT sa.employeeId, sa.id as assignmentId, sa.startDate, 
+             s.id as shiftId, s.name as shiftName, s.startTime, s.endTime
+      FROM shift_assignments sa
+      JOIN shifts s ON sa.shiftId = s.id
+      WHERE sa.employeeId IN (${placeholders}) 
+      AND sa.organizationId = ? 
+      AND sa.startDate >= ? AND sa.startDate <= ?
+    `).all(...employeeIds, organizationId, startDate, endDate);
+    
+    // Map shifts to employees
+    return employees.map((emp: any) => ({
+      ...emp,
+      shifts: shifts.filter((s: any) => s.employeeId === emp.id)
+    }));
   },
 
   async assignShift(data: {
@@ -53,12 +86,32 @@ export const schedulingService = {
     endDate?: string;
     organizationId: string;
   }) {
-    const id = randomUUID();
-    await execute(
-      `INSERT INTO shift_assignments (id, employeeId, shiftId, startDate, endDate, organizationId)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [id, data.employeeId, data.shiftId, data.startDate, data.endDate || null, data.organizationId]
-    );
+    const db = getDatabase();
+    
+    // Conflict Detection 1: Verify employee exists
+    const emp = db.prepare('SELECT id FROM employees WHERE id = ? AND organizationId = ?').get(data.employeeId, data.organizationId);
+    if (!emp) throw new Error('Employee not found');
+    
+    // Conflict Detection 2: Verify shift exists
+    const shift = db.prepare('SELECT id FROM shifts WHERE id = ? AND organizationId = ?').get(data.shiftId, data.organizationId);
+    if (!shift) throw new Error('Shift not found');
+    
+    // Conflict Detection 3: Prevent duplicate shift on the same day
+    const existing = db.prepare(`
+      SELECT id FROM shift_assignments 
+      WHERE employeeId = ? AND startDate = ? AND organizationId = ?
+    `).get(data.employeeId, data.startDate, data.organizationId);
+    
+    if (existing) {
+      throw new Error('Employee already has a shift assigned on this date');
+    }
+    
+    const id = `sa-${randomUUID()}`;
+    db.prepare(`
+      INSERT INTO shift_assignments (id, employeeId, shiftId, startDate, endDate, organizationId)
+       VALUES (?, ?, ?, ?, ?, ?)
+    `).run(id, data.employeeId, data.shiftId, data.startDate, data.endDate || null, data.organizationId);
+    
     logger.info(`[Scheduling] Assigned shift ${data.shiftId} to employee ${data.employeeId}`);
     return { id };
   },

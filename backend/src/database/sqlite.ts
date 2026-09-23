@@ -190,7 +190,7 @@ export class ModelShim {
     
     let setClause = fields.map(k => `${k} = ?`).join(', ');
     const values = fields.map(k => {
-      let v = updates[k];
+      const v = updates[k];
       if (this.tableName === 'users' && k === 'permissions' && Array.isArray(v)) return JSON.stringify(v);
       if (this.tableName === 'attendancerecords' && k === 'breaks' && Array.isArray(v)) return JSON.stringify(v);
       if (this.tableName === 'idempotencyrecords' && k === 'response' && typeof v === 'object') return JSON.stringify(v);
@@ -239,7 +239,7 @@ export class ModelShim {
     if (fields.length > 0) {
       let setClause = fields.map(k => `${k} = ?`).join(', ');
       const values = fields.map(k => {
-        let v = updates[k];
+        const v = updates[k];
         if (this.tableName === 'users' && k === 'permissions' && Array.isArray(v)) return JSON.stringify(v);
         if (this.tableName === 'attendancerecords' && k === 'breaks' && Array.isArray(v)) return JSON.stringify(v);
         if (this.tableName === 'idempotencyrecords' && k === 'response' && typeof v === 'object') return JSON.stringify(v);

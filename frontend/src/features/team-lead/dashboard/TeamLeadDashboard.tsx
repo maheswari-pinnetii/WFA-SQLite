@@ -19,59 +19,6 @@ import { analyticsApi } from '../../../api/endpoints/analytics.api';
 import { Users, AlertCircle, FileCode, Layers, RefreshCw, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const FALLBACK: any = {
-  kpis: { 
-    squadSize: 12, 
-    checkedIn: 11, 
-    absent: 0, 
-    late: 1, 
-    onLeave: 1, 
-    pendingLeaveRequests: 2, 
-    activeTasks: 18,
-    sprintVelocity: 45, 
-    blockedTasks: 2, 
-    avgResponseTime: '1.2h',
-    codeReviews: 8 
-  },
-  charts: { 
-    dailyCheckins: [
-      { day: 'Mon', checkedIn: 11 }, { day: 'Tue', checkedIn: 12 }, { day: 'Wed', checkedIn: 10 },
-      { day: 'Thu', checkedIn: 11 }, { day: 'Fri', checkedIn: 12 }
-    ],
-    taskStatus: [
-      { name: 'To Do', value: 5, color: '#94a3b8' },
-      { name: 'In Progress', value: 8, color: '#059669' },
-      { name: 'In Review', value: 3, color: '#f59e0b' },
-      { name: 'Done', value: 12, color: '#10b981' }
-    ],
-    velocityTrend: [
-      { sprint: 'S1', points: 35 }, { sprint: 'S2', points: 42 }, { sprint: 'S3', points: 38 },
-      { sprint: 'S4', points: 45 }
-    ],
-    blockersByType: [
-      { name: 'Dependencies', value: 50, color: '#ef4444' },
-      { name: 'Requirements', value: 30, color: '#f59e0b' },
-      { name: 'Environment', value: 20, color: '#8b5cf6' }
-    ],
-    leaveCalendar: [
-      { week: 'W1', leaves: 2 }, { week: 'W2', leaves: 0 }, { week: 'W3', leaves: 1 },
-      { week: 'W4', leaves: 3 }
-    ],
-    workloadDistribution: [
-      { name: 'Alex', tasks: 4 },
-      { name: 'Sam', tasks: 6 },
-      { name: 'Taylor', tasks: 3 },
-      { name: 'Jordan', tasks: 5 }
-    ]
-  },
-  tables: { 
-    roster: [
-      { name: 'Alex Mercer', role: 'Frontend Dev', status: 'Active', joinDate: '2024-03-12' },
-      { name: 'Sam Fisher', role: 'Backend Dev', status: 'Active', joinDate: '2023-08-20' },
-      { name: 'Taylor Swift', role: 'UI Designer', status: 'Active', joinDate: '2025-01-05' }
-    ]
-  },
-};
 
 export const TeamLeadDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -87,10 +34,10 @@ export const TeamLeadDashboard: React.FC = () => {
       if (res && (res.kpis || res.charts)) {
         setData(res);
       } else {
-        setError('Failed to fetch Team Lead dashboard metrics from server.');
+        setData(null);
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to load Team Lead metrics.');
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -179,56 +126,56 @@ export const TeamLeadDashboard: React.FC = () => {
         {[
           {
             title: 'Team Members',
-            value: kpis.squadSize ?? 12,
+            value: kpis.teamMembers ?? 0,
             meta: 'Assigned squad size',
-            trend: { value: 'Full squad active', direction: 'up' as const },
+            trend: { value: 'Full squad active', direction: 'neutral' as const },
             icon: <GroupsIcon />,
           },
           {
             title: 'Present Today',
-            value: kpis.checkedIn ?? 11,
+            value: kpis.presentToday ?? 0,
             meta: 'Checked-in squad members',
-            trend: { value: '91.6% presence today', direction: 'up' as const },
+            trend: { value: 'Today\'s presence', direction: 'neutral' as const },
             icon: <HowToRegIcon />,
           },
           {
             title: 'Attendance Rate',
-            value: `${Math.round(((kpis.checkedIn ?? 11) / (kpis.squadSize ?? 12)) * 100)}%`,
-            meta: 'Sprint 24 average',
-            trend: { value: '↑ 1.5% target', direction: 'up' as const },
+            value: (kpis.teamMembers && kpis.presentToday) ? `${Math.round((kpis.presentToday / kpis.teamMembers) * 100)}%` : '0%',
+            meta: 'Daily average',
+            trend: { value: 'Squad attendance rate', direction: 'neutral' as const },
             icon: <EventAvailableIcon />,
           },
           {
             title: 'Sprint Progress',
-            value: `${kpis.sprintVelocity ?? 45} pts`,
-            meta: 'Current sprint velocity',
-            trend: { value: '↑ 3 pts vs last sprint', direction: 'up' as const },
+            value: kpis.sprintProgress != null ? `${kpis.sprintProgress}%` : '0%',
+            meta: 'Current sprint milestone',
+            trend: { value: 'Sprint completion rate', direction: 'neutral' as const },
             icon: <SpeedIcon />,
           },
           {
             title: 'Tasks Completed',
-            value: kpis.activeTasks ? kpis.activeTasks : 18,
+            value: kpis.taskCompletion ?? 0,
             meta: 'Done in current sprint',
-            trend: { value: 'On track', direction: 'up' as const },
+            trend: { value: 'Sprint velocity', direction: 'neutral' as const },
             icon: <TaskAltIcon />,
           },
           {
             title: 'Blocked Tasks',
-            value: kpis.blockedTasks ?? 2,
+            value: kpis.blockedTasks ?? 0,
             meta: 'Awaiting unblock',
             trend: { value: 'Requires unblock', direction: 'down' as const },
             icon: <BlockIcon />,
           },
           {
             title: 'Productivity',
-            value: '92%',
-            meta: 'Code review speed',
-            trend: { value: '1.2h response SLA', direction: 'up' as const },
+            value: kpis.productivity != null ? `${kpis.productivity}%` : '0%',
+            meta: 'Output velocity',
+            trend: { value: 'Efficiency score', direction: 'neutral' as const },
             icon: <TrendingUpIcon />,
           },
           {
             title: 'Pending Actions',
-            value: kpis.pendingLeaveRequests ?? 2,
+            value: kpis.pendingActions ?? 0,
             meta: 'Code reviews & leaves',
             trend: { value: 'Action required', direction: 'down' as const },
             icon: <PendingActionsIcon />,

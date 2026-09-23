@@ -247,7 +247,7 @@ export const bulkReviewLeaveRequests = async (req, res) => {
           if (status === 'APPROVED') {
             const startDate = new Date(request.startDate);
             const endDate = new Date(request.endDate);
-            let days = request.isHalfDay ? 0.5 : Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            const days = request.isHalfDay ? 0.5 : Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
             await leaveEngineService.deductLeaveBalance(request.employeeId, request.leaveTypeId, days, orgId);
           }
           await leaveEngineService.updateLeaveRequestStatus(reqId, orgId, status, req.user.name);

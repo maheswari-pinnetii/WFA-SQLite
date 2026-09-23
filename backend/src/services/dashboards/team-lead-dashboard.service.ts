@@ -67,10 +67,13 @@ export class TeamLeadDashboardService {
     const activeTasks = (taskMap['TODO'] || 0) + (taskMap['IN_PROGRESS'] || 0);
     const sprintProgress = activeTasks + sprintVelocity > 0 ? Math.round((sprintVelocity / (activeTasks + sprintVelocity)) * 100) : 0;
     // Real Pending Actions
-    const pendingActionsRows = teamLead
-      ? await query(`SELECT COUNT(*) as count FROM approval_requests WHERE status = 'PENDING' AND organizationId = ? AND employeeId IN (SELECT id FROM employees WHERE team = ? AND organizationId = ?)`, [orgId, teamLead, orgId])
-      : await query(`SELECT COUNT(*) as count FROM approval_requests WHERE status = 'PENDING' AND organizationId = ?`, [orgId]);
-    const pendingActions = pendingActionsRows[0]?.count || 0;
+    let pendingActions = 0;
+    try {
+      const pendingActionsRows = teamLead
+        ? await query(`SELECT COUNT(*) as count FROM approval_requests WHERE status = 'PENDING' AND organizationId = ? AND employeeId IN (SELECT id FROM employees WHERE team = ? AND organizationId = ?)`, [orgId, teamLead, orgId])
+        : await query(`SELECT COUNT(*) as count FROM approval_requests WHERE status = 'PENDING' AND organizationId = ?`, [orgId]);
+      pendingActions = pendingActionsRows[0]?.count || 0;
+    } catch {}
 
     // Real Productivity and Performance (from average performance scores)
     const perfRows = teamLead
@@ -95,44 +98,45 @@ export class TeamLeadDashboardService {
       ? await query(`SELECT strftime('%W', startDate) as week, COUNT(*) as leaves FROM leaverequests WHERE organizationId = ? AND team = ? AND startDate IS NOT NULL GROUP BY week ORDER BY week DESC LIMIT 4`, [orgId, teamLead])
       : await query(`SELECT strftime('%W', startDate) as week, COUNT(*) as leaves FROM leaverequests WHERE organizationId = ? AND startDate IS NOT NULL GROUP BY week ORDER BY week DESC LIMIT 4`, [orgId]);
 
-    const leaveCalendar = leaveCalendarRows.length > 0 ? leaveCalendarRows.map((r: any, i: number) => ({
+    const leaveCalendar = leaveCalendarRows.map((r: any, i: number) => ({
       week: `W${i+1}`,
       leaves: r.leaves
-    })) : [
-      { week: 'W1', leaves: 2 }
-    ];
+    }));
+
+    const attendanceTrendRows = teamLead
+      ? await query(`SELECT date, COUNT(*) as count FROM attendancerecords ar JOIN employees e ON ar.employeeId = e.id WHERE ar.organizationId = ? AND e.team = ? AND ar.status = 'PRESENT' GROUP BY date ORDER BY date DESC LIMIT 5`, [orgId, teamLead])
+      : await query(`SELECT date, COUNT(*) as count FROM attendancerecords WHERE organizationId = ? AND status = 'PRESENT' GROUP BY date ORDER BY date DESC LIMIT 5`, [orgId]);
+      
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dailyCheckins = attendanceTrendRows.map((r: any) => ({
+      day: days[new Date(r.date).getDay()],
+      checkedIn: r.count
+    })).reverse();
+    
+    const taskAssigneeRows = teamLead
+      ? await query(`SELECT assigneeId, COUNT(*) as count FROM tasks t JOIN employees e ON t.assigneeId = e.id WHERE t.organizationId = ? AND e.team = ? GROUP BY assigneeId`, [orgId, teamLead])
+      : await query(`SELECT assigneeId, COUNT(*) as count FROM tasks WHERE organizationId = ? GROUP BY assigneeId`, [orgId]);
+    
+    const workloadMap: Record<string, number> = {};
+    for (const r of taskAssigneeRows) workloadMap[r.assigneeId] = r.count;
 
     // 6 Charts
     const charts = {
-      dailyCheckins: [
-        { day: 'Mon', checkedIn: 95 },
-        { day: 'Tue', checkedIn: 92 },
-        { day: 'Wed', checkedIn: 98 },
-        { day: 'Thu', checkedIn: 90 },
-        { day: 'Fri', checkedIn: 85 }
-      ],
+      dailyCheckins,
       taskStatus: [
         { name: 'To Do', value: taskMap['TODO'] || 0, color: '#64748b' },
         { name: 'In Progress', value: taskMap['IN_PROGRESS'] || 0, color: '#3b82f6' },
         { name: 'Review', value: taskMap['REVIEW'] || 0, color: '#f59e0b' },
         { name: 'Done', value: taskMap['DONE'] || taskMap['COMPLETED'] || 0, color: '#10b981' }
       ],
-      velocityTrend: [
-        { sprint: 'Sprint 1', points: 38 },
-        { sprint: 'Sprint 2', points: 40 },
-        { sprint: 'Sprint 3', points: 35 },
-        { sprint: 'Sprint 4', points: 42 }
-      ],
+      velocityTrend: [],
       blockersByType: [
-        { name: 'Dependencies', value: taskMap['BLOCKED'] || 0, color: '#ef4444' },
-        { name: 'Clarification', value: 30, color: '#f59e0b' },
-        { name: 'Environment', value: 20, color: '#8b5cf6' },
-        { name: 'Other', value: 10, color: '#64748b' }
+        { name: 'Dependencies', value: taskMap['BLOCKED'] || 0, color: '#ef4444' }
       ],
       leaveCalendar,
       workloadDistribution: teamRows.slice(0, 5).map(emp => ({
         name: emp.name ? emp.name.split(' ')[0] : `User ${emp.id}`,
-        tasks: Math.floor(Math.random() * 8) + 2
+        tasks: workloadMap[emp.id] || 0
       }))
     };
 

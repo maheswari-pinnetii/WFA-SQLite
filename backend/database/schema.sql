@@ -845,6 +845,29 @@ CREATE TABLE IF NOT EXISTS leave_balances (
   FOREIGN KEY (leaveTypeId) REFERENCES leave_types(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS leave_policies (
+  id TEXT PRIMARY KEY,
+  organizationId TEXT DEFAULT 'org-stackly',
+  leaveTypeId TEXT NOT NULL,
+  accrualRate REAL NOT NULL,
+  maxCarryOver INTEGER DEFAULT 0,
+  encashable INTEGER DEFAULT 0,
+  probationEligibility INTEGER DEFAULT 0,
+  createdAt TEXT NOT NULL,
+  FOREIGN KEY (leaveTypeId) REFERENCES leave_types(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS leave_blackout_periods (
+  id TEXT PRIMARY KEY,
+  organizationId TEXT DEFAULT 'org-stackly',
+  name TEXT NOT NULL,
+  startDate TEXT NOT NULL,
+  endDate TEXT NOT NULL,
+  affectedDepartments TEXT,
+  reason TEXT,
+  createdAt TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS holidays (
   id TEXT PRIMARY KEY,
   organizationId TEXT DEFAULT 'org-stackly',
@@ -1303,3 +1326,41 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   ipAddress TEXT,
   createdAt TEXT NOT NULL
 );
+-- Phase 6: Timesheet Management
+
+CREATE TABLE IF NOT EXISTS projects (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  client TEXT,
+  status TEXT DEFAULT 'ACTIVE',
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS timesheets (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  startDate TEXT NOT NULL,
+  endDate TEXT NOT NULL,
+  status TEXT DEFAULT 'DRAFT', -- DRAFT, PENDING, APPROVED, REJECTED
+  totalHours REAL DEFAULT 0,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS timesheet_entries (
+  id TEXT PRIMARY KEY,
+  timesheetId TEXT NOT NULL,
+  projectId TEXT NOT NULL,
+  taskId TEXT,
+  date TEXT NOT NULL,
+  hours REAL NOT NULL,
+  description TEXT,
+  FOREIGN KEY (timesheetId) REFERENCES timesheets(id) ON DELETE CASCADE,
+  FOREIGN KEY (projectId) REFERENCES projects(id) ON DELETE CASCADE
+);
+

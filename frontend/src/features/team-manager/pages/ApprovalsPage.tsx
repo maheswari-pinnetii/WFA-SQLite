@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, Calendar, FileText, UserCheck, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Clock, Calendar, FileText, UserCheck, ShieldCheck, AlertTriangle, Eye } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { apiClient as api } from '../../../api/client';
 
 interface WorkflowRequest {
   id: string;
   entityId: string;
+  requesterId: string;
   entityType: 'EXPENSE' | 'LEAVE' | 'ATTENDANCE_CORRECTION';
   workflowName: string;
   currentStepOrder: number;
@@ -13,19 +14,28 @@ interface WorkflowRequest {
   employeeName: string;
   details: string;
   description: string;
+  leaveStartDate?: string;
+  leaveEndDate?: string;
 }
 
 export const ApprovalsPage: React.FC = () => {
   const [requests, setRequests] = useState<WorkflowRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'EXPENSE' | 'LEAVE' | 'ATTENDANCE_CORRECTION'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'EXPENSE' | 'LEAVE' | 'ATTENDANCE_CORRECTION' | 'TIMESHEET'>('all');
+  const [blackoutPeriods, setBlackoutPeriods] = useState<any[]>([]);
+  const [balanceMap, setBalanceMap] = useState<Record<string, string>>({});
 
   const loadApprovals = async () => {
     setLoading(true);
     try {
       const response = await api.get('/workflows/pending');
       setRequests(response.data.data);
+      
+      const bpResponse = await api.get('/leave-blackout-periods');
+      if (bpResponse.data && bpResponse.data.data) {
+        setBlackoutPeriods(bpResponse.data.data);
+      }
     } catch (err) {
       console.error('Failed to load workflow approvals:', err);
     } finally {
@@ -48,7 +58,39 @@ export const ApprovalsPage: React.FC = () => {
     }
   };
 
+  const fetchBalance = async (employeeId: string, leaveTypeId: string) => {
+    try {
+      // Assuming a generic endpoint exists or just getting all balances
+      const response = await api.get(`/leave/balances/${employeeId}`);
+      if (response.data && response.data.data) {
+        const bal = response.data.data.find((b: any) => b.leaveTypeId === leaveTypeId || b.leaveTypeName === leaveTypeId);
+        if (bal) {
+          setBalanceMap(prev => ({ ...prev, [employeeId]: `${bal.allocated - bal.used} days remaining` }));
+        } else {
+          setBalanceMap(prev => ({ ...prev, [employeeId]: `No balance found` }));
+        }
+      }
+    } catch (e) {
+      setBalanceMap(prev => ({ ...prev, [employeeId]: `Error fetching balance` }));
+    }
+  };
+
   const filteredRequests = activeTab === 'all' ? requests : requests.filter(r => r.entityType === activeTab);
+
+  const isOverlappingBlackout = (start?: string, end?: string) => {
+    if (!start || !end || blackoutPeriods.length === 0) return false;
+    const reqStart = new Date(start).getTime();
+    const reqEnd = new Date(end).getTime();
+    
+    for (const bp of blackoutPeriods) {
+      const bpStart = new Date(bp.startDate).getTime();
+      const bpEnd = new Date(bp.endDate).getTime();
+      if ((reqStart <= bpEnd && reqEnd >= bpStart)) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   return (
     <div className="space-y-6 animate-fadeIn font-sans pb-10">
@@ -123,6 +165,17 @@ export const ApprovalsPage: React.FC = () => {
         >
           <FileText size={15} /> Expenses
         </button>
+
+        <button
+          onClick={() => setActiveTab('TIMESHEET')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs transition-all cursor-pointer ${
+            activeTab === 'TIMESHEET'
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+              : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+          }`}
+        >
+          <Clock size={15} /> Timesheets
+        </button>
       </div>
 
       <div className="glass-panel p-6 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)] space-y-4">
@@ -141,52 +194,82 @@ export const ApprovalsPage: React.FC = () => {
           ) : filteredRequests.length === 0 ? (
             <p className="text-sm text-slate-400 text-center py-4">No pending requests found.</p>
           ) : (
-            filteredRequests.map((req) => (
-              <div
-                key={req.id}
-                className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-700 transition-colors"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-slate-400">{req.id.substring(0,8)}...</span>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300">
-                      {req.workflowName}
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                      <Clock size={10} /> Pending Approval
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-bold text-white flex items-center gap-2 mt-1">
-                    <UserCheck size={14} className="text-slate-400" />
-                    {req.employeeName || 'Unknown Employee'}
-                  </h4>
-                  <p className="text-xs text-slate-300 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 inline-block mt-1 shadow-inner">
-                    {req.details}
-                  </p>
-                  {req.description && (
-                    <p className="text-xs text-slate-400 mt-1 italic pl-1 border-l-2 border-slate-700">
-                      "{req.description}"
-                    </p>
-                  )}
-                </div>
+            filteredRequests.map((req) => {
+              const hasBlackoutWarning = req.entityType === 'LEAVE' && isOverlappingBlackout(req.leaveStartDate, req.leaveEndDate);
 
-                <div className="flex gap-2 w-full md:w-auto">
-                  <Button
-                    variant="outline"
-                    className="flex-1 md:flex-none border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500"
-                    onClick={() => handleAction(req.id, 'REJECTED')}
-                  >
-                    Reject
-                  </Button>
-                  <Button
-                    className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/50"
-                    onClick={() => handleAction(req.id, 'APPROVED')}
-                  >
-                    <ShieldCheck size={16} className="mr-2" /> Approve
-                  </Button>
+              return (
+                <div
+                  key={req.id}
+                  className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-slate-700 transition-colors"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs text-slate-400">{req.id.substring(0,8)}...</span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300">
+                        {req.workflowName}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                        <Clock size={10} /> Pending Approval
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2 mt-1">
+                      <UserCheck size={14} className="text-slate-400" />
+                      {req.employeeName || 'Unknown Employee'}
+                    </h4>
+                    <div className="flex flex-col gap-2 mt-2">
+                      <p className="text-xs text-slate-300 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 inline-block shadow-inner w-fit">
+                        {req.details}
+                      </p>
+                      
+                      {req.entityType === 'LEAVE' && (
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            className="h-6 text-[10px] border-blue-500/30 text-blue-400 bg-blue-500/10 px-2"
+                            onClick={() => fetchBalance(req.requesterId, req.details.split(' ')[1])} // basic parsing for demo
+                          >
+                            <Eye size={12} className="mr-1" /> View Balance
+                          </Button>
+                          {balanceMap[req.requesterId] && (
+                            <span className="text-[10px] text-blue-300 font-mono bg-slate-800 px-2 py-0.5 rounded">
+                              {balanceMap[req.requesterId]}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      
+                      {hasBlackoutWarning && (
+                        <div className="flex items-center gap-1.5 text-orange-400 text-[10px] font-bold bg-orange-500/10 border border-orange-500/20 px-2 py-1 rounded w-fit">
+                          <AlertTriangle size={12} />
+                          WARNING: Leave request overlaps with a company Blackout Period.
+                        </div>
+                      )}
+                    </div>
+                    {req.description && (
+                      <p className="text-xs text-slate-400 mt-1 italic pl-1 border-l-2 border-slate-700">
+                        "{req.description}"
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <Button
+                      variant="outline"
+                      className="flex-1 md:flex-none border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500"
+                      onClick={() => handleAction(req.id, 'REJECTED')}
+                    >
+                      Reject
+                    </Button>
+                    <Button
+                      className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/50"
+                      onClick={() => handleAction(req.id, 'APPROVED')}
+                    >
+                      <ShieldCheck size={16} className="mr-2" /> Approve
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

@@ -19,53 +19,6 @@ import { analyticsApi } from '../../../api/endpoints/analytics.api';
 import { Users, Clock, Briefcase, Layers, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const FALLBACK: any = {
-  kpis: { 
-    teamSize: 45, 
-    presentToday: 42, 
-    onLeave: 3, 
-    openTasks: 12,
-    taskCompletion: 88,
-    overtimeHours: 24.5,
-    skillGaps: 4,
-    upcomingReviews: 5
-  },
-  charts: { 
-    teamAttendanceTrend: [
-      { day: 'Mon', attendance: 98 }, { day: 'Tue', attendance: 95 }, { day: 'Wed', attendance: 100 },
-      { day: 'Thu', attendance: 92 }, { day: 'Fri', attendance: 95 }
-    ],
-    taskBurnout: [
-      { name: 'Low Risk', value: 30, color: '#10b981' },
-      { name: 'Medium Risk', value: 10, color: '#f59e0b' },
-      { name: 'High Risk', value: 5, color: '#ef4444' }
-    ],
-    skillCoverage: [
-      { skill: 'React', level: 85 },
-      { skill: 'Node.js', level: 75 },
-      { skill: 'UI/UX', level: 60 }
-    ],
-    overtimeByWeek: [
-      { week: 'W1', hours: 10 }, { week: 'W2', hours: 15 }, { week: 'W3', hours: 8 }, { week: 'W4', hours: 12 }
-    ],
-    leavePipeline: [
-      { month: 'Sep', approved: 5, pending: 2 },
-      { month: 'Oct', approved: 8, pending: 5 }
-    ],
-    performanceMatrix: [
-      { name: 'Exceeds', value: 15, color: '#059669' },
-      { name: 'Meets', value: 25, color: '#10b981' },
-      { name: 'Needs Imp.', value: 5, color: '#f59e0b' }
-    ]
-  },
-  tables: { 
-    roster: [
-      { name: 'Alice Smith', role: 'SDE II', status: 'Active', joinDate: '2025-01-15' },
-      { name: 'Bob Johnson', role: 'Frontend Dev', status: 'Active', joinDate: '2025-06-20' },
-      { name: 'Charlie Davis', role: 'Backend Dev', status: 'On Leave', joinDate: '2024-11-10' }
-    ]
-  },
-};
 
 export const ManagerDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -81,10 +34,10 @@ export const ManagerDashboard: React.FC = () => {
       if (res && (res.kpis || res.charts)) {
         setData(res);
       } else {
-        setData(FALLBACK);
+        setData(null);
       }
     } catch (err: any) {
-      setData(FALLBACK);
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -173,58 +126,58 @@ export const ManagerDashboard: React.FC = () => {
         {[
           {
             title: 'Team Size',
-            value: kpis.teamSize ?? 45,
+            value: kpis.totalTeam ?? 0,
             meta: 'Department members',
-            trend: { value: 'Full headcount active', direction: 'up' as const },
+            trend: { value: 'Full headcount active', direction: 'neutral' as const },
             icon: <GroupsIcon />,
           },
           {
             title: 'Present Today',
-            value: kpis.presentToday ?? 42,
+            value: kpis.teamPresent ?? 0,
             meta: 'Checked-in headcount',
-            trend: { value: '93.3% team presence', direction: 'up' as const },
+            trend: { value: 'Today\'s presence', direction: 'neutral' as const },
             icon: <HowToRegIcon />,
           },
           {
             title: 'Team Attendance',
-            value: `${Math.round(((kpis.presentToday ?? 42) / (kpis.teamSize ?? 45)) * 100)}%`,
-            meta: 'Weekly average',
-            trend: { value: '↑ 2.1% vs target', direction: 'up' as const },
+            value: (kpis.totalTeam && kpis.teamPresent) ? `${Math.round((kpis.teamPresent / kpis.totalTeam) * 100)}%` : '0%',
+            meta: 'Daily average',
+            trend: { value: 'Team presence rate', direction: 'neutral' as const },
             icon: <EventAvailableIcon />,
           },
           {
             title: 'Pending Leaves',
-            value: kpis.onLeave ?? 3,
+            value: kpis.onLeave ?? 0,
             meta: 'Awaiting manager approval',
             trend: { value: 'Action required', direction: 'down' as const },
             icon: <EventBusyIcon />,
           },
           {
             title: 'Active Projects',
-            value: kpis.openTasks ?? 12,
+            value: kpis.openTasks ?? 0,
             meta: 'In-progress deliverables',
-            trend: { value: 'On track for Q3', direction: 'up' as const },
+            trend: { value: 'Ongoing tasks', direction: 'neutral' as const },
             icon: <WorkOutlineOutlinedIcon />,
           },
           {
             title: 'Sprint Progress',
-            value: `${kpis.taskCompletion ?? 88}%`,
+            value: kpis.taskCompletion != null ? `${kpis.taskCompletion}%` : '0%',
             meta: 'Sprint milestone',
-            trend: { value: '↑ 5% vs last sprint', direction: 'up' as const },
+            trend: { value: 'Task completion rate', direction: 'neutral' as const },
             icon: <SpeedIcon />,
           },
           {
             title: 'Productivity',
-            value: '94%',
+            value: kpis.productivity != null ? `${kpis.productivity}%` : '0%',
             meta: 'Output velocity',
-            trend: { value: 'High efficiency', direction: 'up' as const },
+            trend: { value: 'Efficiency score', direction: 'neutral' as const },
             icon: <TrendingUpIcon />,
           },
           {
-            title: 'Performance',
-            value: '4.8 / 5',
-            meta: 'Review score',
-            trend: { value: 'Top performing unit', direction: 'up' as const },
+            title: 'Department Budget',
+            value: kpis.budget || '$0',
+            meta: 'Allocated base salaries',
+            trend: { value: 'Budget utilization', direction: 'neutral' as const },
             icon: <AssessmentIcon />,
           },
         ].map((kpi) => (

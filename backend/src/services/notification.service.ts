@@ -55,7 +55,7 @@ export const createNotification = async (
 ) => {
   try {
     // 1. Fetch user preferences
-    let prefs = await query(`SELECT * FROM user_notification_preferences WHERE userId = ?`, [userId]);
+    const prefs = await query(`SELECT * FROM user_notification_preferences WHERE userId = ?`, [userId]);
     let userPrefs = prefs[0];
 
     // If no preferences, assume defaults (all enabled)

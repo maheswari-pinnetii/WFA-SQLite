@@ -79,7 +79,7 @@ export class HrDashboardService {
     const payrollRunsRows = await query(`
       SELECT status FROM payroll_runs 
       WHERE organizationId = ? 
-      ORDER BY createdAt DESC LIMIT 1
+      ORDER BY rowid DESC LIMIT 1
     `, [orgId]);
     const latestPayrollStatus = payrollRunsRows.length > 0 ? payrollRunsRows[0].status : null;
     let payrollStatusStr = "Pending Processing";
@@ -101,27 +101,23 @@ export class HrDashboardService {
     };
 
     // 6 Charts
+    // 6 Charts
     const charts = {
-      hiringTrend: hiringTrend.length > 0 ? hiringTrend : [
-        { month: 'Jan', hires: 4 },
-        { month: 'Feb', hires: 6 }
-      ],
+      hiringTrend: hiringTrend,
       retentionRate: [
         { month: 'Jan', rate: 98 },
         { month: 'Feb', rate: 97.5 },
         { month: 'Mar', rate: 98.2 },
         { month: 'Apr', rate: 97.8 },
         { month: 'May', rate: 96.5 },
-        { month: 'Jun', rate: 95.8 }
+        { month: 'Jun', rate: turnoverRate > 0 ? (100 - turnoverRate) : 95.8 }
       ],
-      leaveByDept: leaveByDeptRows.length > 0 ? leaveByDeptRows : departmentComparison,
-      trainingProgress: skillsMetrics.length > 0 ? skillsMetrics.slice(0, 5).map((s: any, i: number) => ({
+      leaveByDept: leaveByDeptRows,
+      trainingProgress: skillsMetrics.slice(0, 5).map((s: any, i: number) => ({
         name: s.name,
         value: Math.round((s.covered / (s.people || 1)) * 100),
         color: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'][i % 5]
-      })) : [
-        { name: 'Compliance', value: 95, color: '#10b981' }
-      ],
+      })),
       performanceBellCurve,
       hrTicketTypes: hrTicketTypes.map((t: any, i: number) => ({
         name: t.name.replace('_', ' '),

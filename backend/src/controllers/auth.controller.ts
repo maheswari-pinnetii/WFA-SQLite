@@ -186,7 +186,7 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
     try {
       // SECURITY FIX: Direct bcrypt.compare (no cache — avoids timing side-channel)
-      let isMatch = await secureBcryptCompare(password, user.password_hash);
+      const isMatch = await secureBcryptCompare(password, user.password_hash);
       if (!isMatch) {
         const attempts = failedRecord ? failedRecord.attempts + 1 : 1;
         let lockedUntil: string | null = null;
@@ -840,7 +840,7 @@ export const ssoCallback = async (req: Request, res: Response): Promise<any> => 
       }
     }
 
-    let users = await query('SELECT * FROM users WHERE authProvider = ? AND providerSubject = ?', [provider, providerSubject]);
+    const users = await query('SELECT * FROM users WHERE authProvider = ? AND providerSubject = ?', [provider, providerSubject]);
     let targetUser: any = null;
 
     if (!users || users.length === 0) {

@@ -19,61 +19,6 @@ import { analyticsApi } from '../../../api/endpoints/analytics.api';
 import { Users, FileSpreadsheet, Briefcase, Layers, RefreshCw, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const FALLBACK: any = {
-  kpis: { 
-    totalHeadcount: 1000, 
-    activeHeadcount: 950, 
-    onLeaveHeadcount: 35, 
-    terminatedHeadcount: 15, 
-    payrollCost: 25000000,
-    pendingApprovals: 24,
-    openRoles: 18,
-    complianceScore: 98,
-    systemHealth: 100
-  },
-  charts: {
-    headcountTrend: [
-      { month: 'Jan', headcount: 850 }, { month: 'Feb', headcount: 900 }, { month: 'Mar', headcount: 940 },
-      { month: 'Apr', headcount: 980 }, { month: 'May', headcount: 1000 }
-    ],
-    employeesByDept: [
-      { name: 'Engineering', headcount: 420 },
-      { name: 'Sales', headcount: 230 },
-      { name: 'Product', headcount: 150 },
-      { name: 'HR', headcount: 100 },
-      { name: 'Support', headcount: 100 }
-    ],
-    roleDistribution: [
-      { name: 'Employee', value: 750, color: '#3b82f6' },
-      { name: 'Team Lead', value: 150, color: '#10b981' },
-      { name: 'Manager', value: 70, color: '#f59e0b' },
-      { name: 'HR', value: 20, color: '#8b5cf6' },
-      { name: 'Admin', value: 10, color: '#ef4444' }
-    ],
-    leaveTrends: [
-      { month: 'Jan', leaves: 240 }, { month: 'Feb', leaves: 190 }, { month: 'Mar', leaves: 300 },
-      { month: 'Apr', leaves: 220 }, { month: 'May', leaves: 280 }
-    ],
-    payrollBreakdown: [
-      { name: 'Engineering', cost: 13000000 },
-      { name: 'Sales', cost: 5000000 },
-      { name: 'Product', cost: 3600000 },
-      { name: 'Support', cost: 1000000 },
-      { name: 'HR', cost: 700000 }
-    ],
-    taskCompletion: [
-      { name: 'Completed', value: 85, color: '#10b981' },
-      { name: 'Pending', value: 15, color: '#f59e0b' }
-    ]
-  },
-  tables: { 
-    recentJoiners: [
-      { department: 'Engineering', team: 'Frontend', role: 'SDE II', status: 'ACTIVE', joinDate: '2026-09-01' },
-      { department: 'Sales', team: 'Enterprise', role: 'AE', status: 'ACTIVE', joinDate: '2026-09-05' },
-      { department: 'Product', team: 'Core', role: 'PM', status: 'ACTIVE', joinDate: '2026-09-10' }
-    ]
-  },
-};
 
 export const AdminDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -89,10 +34,10 @@ export const AdminDashboard: React.FC = () => {
       if (res && (res.kpis || res.charts)) {
         setData(res);
       } else {
-        setData(FALLBACK);
+        setData(null);
       }
     } catch (err: any) {
-      setData(FALLBACK);
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -180,39 +125,39 @@ export const AdminDashboard: React.FC = () => {
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
         {[
           {
-            title: 'Total Employees',
-            value: kpis.totalHeadcount ?? 0,
-            meta: 'Current workforce',
-            trend: { value: '↑ 3.2% vs last month', direction: 'up' as const },
+            title: 'Total Users',
+            value: kpis.totalUsers ?? 0,
+            meta: 'System user accounts',
+            trend: { value: 'User base', direction: 'neutral' as const },
             icon: <PeopleAltIcon />,
           },
           {
-            title: 'Active Employees',
-            value: kpis.activeHeadcount ?? 0,
-            meta: 'Currently active',
-            trend: { value: '94.0% active rate', direction: 'up' as const },
+            title: 'Active Sessions',
+            value: kpis.activeSessions ?? 0,
+            meta: 'Currently online',
+            trend: { value: 'Live sessions', direction: 'neutral' as const },
             icon: <PersonIcon />,
           },
           {
-            title: 'Departments',
-            value: charts.employeesByDept ? charts.employeesByDept.length : 5,
-            meta: 'Active org units',
-            trend: { value: 'Org capacity', direction: 'neutral' as const },
+            title: 'Database Storage',
+            value: kpis.totalStorage || '0 MB',
+            meta: 'SQLite WAL size',
+            trend: { value: 'Storage usage', direction: 'neutral' as const },
             icon: <BusinessIcon />,
           },
           {
-            title: 'Attendance Rate',
-            value: kpis.activeHeadcount && kpis.totalHeadcount ? `${Math.round((kpis.activeHeadcount / kpis.totalHeadcount) * 100)}%` : '94.2%',
-            meta: 'Monthly average',
-            trend: { value: '↑ 1.4% vs target', direction: 'up' as const },
-            icon: <EventAvailableIcon />,
+            title: 'System Error Rate',
+            value: kpis.errorRate != null ? `${kpis.errorRate}%` : '0%',
+            meta: 'Failed audit actions',
+            trend: { value: 'Platform stability', direction: 'down' as const },
+            icon: <TrendingDownIcon />,
           },
           {
-            title: 'Payroll Cost',
-            value: kpis.payrollCost != null ? `₹${(Number(kpis.payrollCost) / 100000).toFixed(2)}L` : '₹12.50L',
-            meta: 'Monthly expenditure',
-            trend: { value: 'Within budget', direction: 'up' as const },
-            icon: <PaymentsIcon />,
+            title: 'Daily Logins',
+            value: kpis.dailyLogins ?? 0,
+            meta: 'Today\'s activity',
+            trend: { value: 'Authentication volume', direction: 'up' as const },
+            icon: <EventAvailableIcon />,
           },
           {
             title: 'Pending Approvals',
@@ -222,18 +167,18 @@ export const AdminDashboard: React.FC = () => {
             icon: <PendingActionsIcon />,
           },
           {
-            title: 'Open Positions',
-            value: kpis.openRoles ?? 8,
-            meta: 'Active requisitions',
-            trend: { value: 'Hiring active', direction: 'up' as const },
+            title: 'Total Departments',
+            value: kpis.totalDepartments ?? 0,
+            meta: 'Organization units',
+            trend: { value: 'Org hierarchy', direction: 'neutral' as const },
             icon: <WorkOutlineOutlinedIcon />,
           },
           {
-            title: 'Attrition Rate',
-            value: '3.8%',
-            meta: 'Annual estimate',
-            trend: { value: '↓ 0.5% vs Q2', direction: 'up' as const },
-            icon: <TrendingDownIcon />,
+            title: 'System Health',
+            value: kpis.integrationsHealth != null ? `${kpis.integrationsHealth}/100` : '100/100',
+            meta: 'Overall platform score',
+            trend: { value: 'Operational status', direction: 'up' as const },
+            icon: <PaymentsIcon />,
           },
         ].map((kpi) => (
           <Grid key={kpi.title} size={{ xs: 12, sm: 6, lg: 3 }}>

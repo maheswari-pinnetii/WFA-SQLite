@@ -105,7 +105,7 @@ export class TaxCalculationService {
     const employerPfAnnual = employerPfMonthly * 12;
 
     // ESI Calculations (Only if monthly gross <= 21000)
-    let approxMonthlyGross = basicMonthly + hraMonthly + conveyanceMonthly + medicalMonthly + foodMonthly;
+    const approxMonthlyGross = basicMonthly + hraMonthly + conveyanceMonthly + medicalMonthly + foodMonthly;
     let employeeEsiMonthly = 0;
     let employerEsiMonthly = 0;
     if (approxMonthlyGross <= 21000) {

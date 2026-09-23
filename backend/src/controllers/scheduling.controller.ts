@@ -32,6 +32,23 @@ export const getShiftAssignments = async (req: Request, res: Response) => {
   } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
 };
 
+export const getDepartmentRoster = async (req: Request, res: Response) => {
+  try {
+    const { departmentId } = req.params;
+    const { startDate, endDate } = req.query;
+    if (!departmentId || !startDate || !endDate) {
+      return res.status(400).json({ success: false, message: 'departmentId, startDate, and endDate are required' });
+    }
+    const data = await schedulingService.getDepartmentRoster(
+      String(departmentId), 
+      String(startDate), 
+      String(endDate), 
+      u(req).organizationId
+    );
+    res.json({ success: true, data });
+  } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
+};
+
 export const assignShift = async (req: Request, res: Response) => {
   try {
     const { shiftId, startDate, endDate } = req.body;
@@ -41,7 +58,12 @@ export const assignShift = async (req: Request, res: Response) => {
       employeeId: p('employeeId', req), shiftId, startDate, endDate, organizationId: u(req).organizationId
     });
     res.status(201).json({ success: true, data });
-  } catch (err: any) { res.status(500).json({ success: false, message: err.message }); }
+  } catch (err: any) { 
+    if (err.message.includes('not found') || err.message.includes('already has a shift')) {
+      return res.status(409).json({ success: false, message: err.message });
+    }
+    res.status(500).json({ success: false, message: err.message }); 
+  }
 };
 
 export const getOvertimeRules = async (req: Request, res: Response) => {

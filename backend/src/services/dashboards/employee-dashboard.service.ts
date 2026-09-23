@@ -95,11 +95,11 @@ export class EmployeeDashboardService {
 
     // Shift & Work Mode
     const shiftInfo = {
-      shiftName: 'General Morning Shift (APAC)',
-      shiftTiming: '09:00 AM - 06:00 PM IST',
-      expectedHours: '8.0h',
-      workMode: employee.workMode || 'Hybrid (3 Days Office / 2 Days Remote)',
-      hybridCompliance: '100% (Completed 3/3 Required WFO Days)'
+      shiftName: employee.shift || 'Standard Shift',
+      shiftTiming: employee.shiftTiming || '09:00 AM - 06:00 PM',
+      expectedHours: employee.expectedHours || '8.0h',
+      workMode: employee.workMode || 'Remote',
+      hybridCompliance: employee.hybridCompliance || '100%'
     };
 
     // Employee Lifecycle & Employment Details
@@ -211,37 +211,30 @@ export class EmployeeDashboardService {
       { name: 'Security & RBAC Enforcement', level: 95 }
     ];
 
+    // 7. Extract real data for attendance trend
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const myAttendanceTrend = attendance.slice(0, 5).map((a: any) => {
+      let hours = 0;
+      if (a.checkInTime && a.checkOutTime) {
+        hours = (new Date(a.checkOutTime).getTime() - new Date(a.checkInTime).getTime()) / (1000 * 60 * 60);
+      }
+      return {
+        day: days[new Date(a.date).getDay()] || 'Day',
+        hours: hours > 0 ? Number(hours.toFixed(1)) : 8
+      };
+    }).reverse();
+
     // Charts
     const charts = {
-      myAttendanceTrend: [
-        { day: 'Mon', hours: 8.5 },
-        { day: 'Tue', hours: 8.0 },
-        { day: 'Wed', hours: 8.8 },
-        { day: 'Thu', hours: 8.2 },
-        { day: 'Fri', hours: 8.0 }
-      ],
+      myAttendanceTrend,
       taskProgress: [
-        { name: 'Completed', value: tasksCompleted || 8, color: '#10b981' },
-        { name: 'In Progress', value: tasksInProgress || 3, color: '#3b82f6' },
-        { name: 'To Do', value: tasksToDo || 2, color: '#64748b' }
+        { name: 'Completed', value: tasksCompleted || 0, color: '#10b981' },
+        { name: 'In Progress', value: tasksInProgress || 0, color: '#3b82f6' },
+        { name: 'To Do', value: tasksToDo || 0, color: '#64748b' }
       ],
-      leaveUsage: [
-        { type: 'Annual Leave', used: 4, remaining: 10 },
-        { type: 'Sick Leave', used: 1, remaining: 7 },
-        { type: 'Casual Leave', used: 2, remaining: 4 }
-      ],
-      overtimeHistory: [
-        { month: 'Jun', hours: 4 },
-        { month: 'Jul', hours: 8 },
-        { month: 'Aug', hours: 6 },
-        { month: 'Sep', hours: 4.5 }
-      ],
-      peerFeedbackScore: [
-        { category: 'Teamwork', score: 4.8 },
-        { category: 'Communication', score: 4.6 },
-        { category: 'Technical Excellence', score: 4.9 },
-        { category: 'Ownership', score: 4.7 }
-      ],
+      leaveUsage: [], // Empty for now, would be from leave_balances
+      overtimeHistory: [],
+      peerFeedbackScore: [],
       skillProgression
     };
 

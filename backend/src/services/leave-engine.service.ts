@@ -193,6 +193,42 @@ export const leaveEngineService = {
     halfDayPeriod?: string;
     reason?: string;
   }) {
+    // 1. Check for Blackout Periods
+    const blackoutPeriods = await query(
+      `SELECT * FROM leave_blackout_periods 
+       WHERE organizationId = ? 
+       AND (
+         (startDate <= ? AND endDate >= ?) OR
+         (startDate <= ? AND endDate >= ?) OR
+         (startDate >= ? AND endDate <= ?)
+       )`,
+      [
+        data.organizationId,
+        data.endDate, data.startDate, 
+        data.endDate, data.startDate,
+        data.startDate, data.endDate
+      ]
+    ) as any[];
+
+    if (blackoutPeriods.length > 0) {
+      const emp = await query(`SELECT department FROM employees WHERE id = ?`, [data.employeeId]).then(r => r[0]) as any;
+      for (const bp of blackoutPeriods) {
+        if (!bp.affectedDepartments) {
+          throw new Error(`Cannot request leave during blackout period: ${bp.name}`);
+        } else {
+          try {
+            const depts = JSON.parse(bp.affectedDepartments);
+            if (depts.includes(emp.department)) {
+              throw new Error(`Cannot request leave during blackout period: ${bp.name}`);
+            }
+          } catch (e) {
+            // If parsing fails, assume it applies
+            throw new Error(`Cannot request leave during blackout period: ${bp.name}`);
+          }
+        }
+      }
+    }
+
     const id = randomUUID();
     const now = new Date().toISOString();
     await execute(
@@ -265,26 +301,37 @@ export const leaveEngineService = {
 
   /** ─── AUTOMATION ────────────────────────────────── */
   async runMonthlyAccruals() {
-    logger.info('[LeaveEngine] Running monthly leave accruals (Earned Leave) +1.5 days');
+    logger.info('[LeaveEngine] Running dynamic monthly leave accruals based on policies');
     const year = new Date().getFullYear();
+    
+    // Fetch all active policies
+    const policies = await query(`SELECT * FROM leave_policies`) as any[];
+    if (policies.length === 0) {
+      logger.info('[LeaveEngine] No leave policies found, skipping accruals.');
+      return;
+    }
+
     const activeEmployees = await query(
       `SELECT id, organizationId FROM employees WHERE status = 'ACTIVE'`
-    );
+    ) as any[];
 
     let processed = 0;
-    for (const emp of activeEmployees as any[]) {
-      const leaveTypes = await this.getLeaveTypes(emp.organizationId) as any[];
-      // Assuming 'Earned Leave' or 'Paid Leave' is the type we accrue
-      const earnedLeaveType = leaveTypes.find(lt => lt.name === 'Earned Leave' || lt.name === 'Paid Leave');
-      if (earnedLeaveType) {
-        await execute(
-          `UPDATE leave_balances 
-           SET allocated = allocated + 1.5 
-           WHERE employeeId = ? AND leaveTypeId = ? AND year = ?`,
-          [emp.id, earnedLeaveType.id, year]
-        );
-        processed++;
+    for (const emp of activeEmployees) {
+      const orgPolicies = policies.filter(p => p.organizationId === emp.organizationId);
+      for (const policy of orgPolicies) {
+        if (policy.accrualRate > 0) {
+          // Initialize balance if not present
+          await this.initializeBalances(emp.id, emp.organizationId, year);
+          
+          await execute(
+            `UPDATE leave_balances 
+             SET allocated = allocated + ? 
+             WHERE employeeId = ? AND leaveTypeId = ? AND year = ?`,
+            [policy.accrualRate, emp.id, policy.leaveTypeId, year]
+          );
+        }
       }
+      processed++;
     }
     logger.info(`[LeaveEngine] Completed monthly leave accruals for ${processed} employees.`);
   }

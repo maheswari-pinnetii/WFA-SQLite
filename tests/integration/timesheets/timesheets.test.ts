@@ -48,25 +48,6 @@ afterAll(async () => {
 
 describe('Timesheets & Attendance Integration Tests', () => {
   beforeEach(async () => {
-    // Isolated database cleanup
-    await Attendance.deleteMany({ employeeId: 'usr-emp-timesheet' });
-    await BreakSession.deleteMany({ employeeId: 'usr-emp-timesheet' });
-    await AttendanceEvent.deleteMany({ employeeId: 'usr-emp-timesheet' });
-
-    // Seed test user
-    try {
-      await User.deleteMany({ id: 'usr-emp-timesheet' });
-      await User.create({
-        id: 'usr-emp-timesheet',
-        name: 'Timesheet Tester',
-        email: 'timesheet@thestackly.com',
-        password_hash: 'hash',
-        role: 'EMPLOYEE',
-        organizationId: 'org-stackly',
-        companyId: 'org-stackly'
-      });
-    } catch(e) {}
-    
     // Auth login logic
     const loginRes = await client.post('/v1/auth/login', {
       email: 'employee@thestackly.com',
@@ -76,6 +57,12 @@ describe('Timesheets & Attendance Integration Tests', () => {
        const { challengeId, otpDevHint } = loginRes.data.data;
        const verifyRes = await client.post('/v1/auth/mfa/verify', { challengeId, otp: otpDevHint });
        testToken = verifyRes.data.data.token;
+       const user = verifyRes.data.data.user;
+       
+       // Isolated database cleanup for the logged-in user
+       await Attendance.deleteMany({ employeeId: user.id });
+       await BreakSession.deleteMany({ employeeId: user.id });
+       await AttendanceEvent.deleteMany({ employeeId: user.id });
     }
   });
 

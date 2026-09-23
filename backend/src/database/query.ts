@@ -1,6 +1,6 @@
 import { getDb, execute } from './connection.js';
 
-let tableColumnsCache: Record<string, string[]> = {};
+const tableColumnsCache: Record<string, string[]> = {};
 
 export function getTableColumns(tableName: string): string[] {
   if (!tableColumnsCache[tableName]) {
@@ -135,7 +135,7 @@ export function deserializeRow(tableName: string, row: any): any {
       const columns = getTableColumns(tableName);
       const fields = Object.keys(result).filter(k => typeof result[k] !== 'function' && k !== '_id' && k !== 'id' && columns.includes(k));
       
-      let serializedData = { ...result };
+      const serializedData = { ...result };
       if (tableName === 'users' && Array.isArray(serializedData.permissions)) {
         serializedData.permissions = JSON.stringify(serializedData.permissions);
       }

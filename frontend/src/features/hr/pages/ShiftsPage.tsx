@@ -1,45 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RoleGuard } from '../../../security/guards/RoleGuard';
 import { Role } from '../../../security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Clock, ShieldCheck, Activity, Users, Plus, Edit2, CheckCircle2, UserCheck, AlertCircle, Save } from 'lucide-react';
 import { useAuth } from '../../../auth/hooks/useAuth';
 import { Button } from '../../../components/ui/button';
+import api from '../../../shared/api/axios';
 
 import { ShiftDefinition, DEFAULT_SHIFTS } from '../../../shared/types/shifts.types';
 
 export const ShiftsPage: React.FC = () => {
   const { role, user } = useAuth();
-  const [shifts, setShifts] = useState<ShiftDefinition[]>(() => {
-    const saved = localStorage.getItem('wfa_corporate_shifts');
-    return saved ? JSON.parse(saved) : DEFAULT_SHIFTS;
-  });
+  const [shifts, setShifts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [selectedShift, setSelectedShift] = useState<string>(() => {
-    return localStorage.getItem('wfa_active_shift_id') || 'SH-01';
-  });
+  const [selectedShift, setSelectedShift] = useState<string>('');
 
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignSuccessMsg, setAssignSuccessMsg] = useState('');
 
   const isManagerOrAdmin = role === Role.ADMIN || role === Role.HR || role === Role.MANAGER;
 
+  const fetchShifts = useCallback(async () => {
+    try {
+      const res = await api.get('/shifts');
+      setShifts(res.data.data || []);
+      if (res.data.data?.length > 0 && !selectedShift) {
+        setSelectedShift(res.data.data[0].id);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedShift]);
+
   useEffect(() => {
-    localStorage.setItem('wfa_corporate_shifts', JSON.stringify(shifts));
-  }, [shifts]);
+    fetchShifts();
+  }, [fetchShifts]);
 
   const handleSetActiveShift = (shiftId: string) => {
     setSelectedShift(shiftId);
-    localStorage.setItem('wfa_active_shift_id', shiftId);
     const chosen = shifts.find(s => s.id === shiftId);
-    if (chosen) {
-      localStorage.setItem('wfa_employee_assigned_shift', JSON.stringify(chosen));
-    }
     setAssignSuccessMsg(`Shift successfully updated and assigned! Employee dashboards will now reflect ${chosen?.name}.`);
     setTimeout(() => setAssignSuccessMsg(''), 4000);
   };
 
-  const activeShift = shifts.find(s => s.id === selectedShift) || shifts[0];
+  const activeShift = shifts.find(s => s.id === selectedShift) || shifts[0] || {};
 
   return (
     <>

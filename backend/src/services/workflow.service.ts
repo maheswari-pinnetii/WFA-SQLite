@@ -63,6 +63,8 @@ export const workflowService = {
       await execute(`UPDATE leaverequests SET status = ? WHERE id = ?`, [finalStatus, entityId]);
     } else if (workflow.entityType === 'ATTENDANCE_CORRECTION') {
       await execute(`UPDATE attendance_corrections SET status = ? WHERE id = ?`, [finalStatus, entityId]);
+    } else if (workflow.entityType === 'TIMESHEET') {
+      await execute(`UPDATE timesheets SET status = ? WHERE id = ?`, [finalStatus, entityId]);
     }
   },
 
@@ -196,17 +198,21 @@ export const workflowService = {
   async getPendingRequestsForApprover(approverId: string, role: string) {
     const requests = await query(
       `SELECT r.id, r.entityId, r.requesterId, w.entityType, w.name as workflowName, r.currentStepOrder, r.createdAt,
-              COALESCE(e1.name, e2.name, e3.name) as employeeName,
+              COALESCE(e1.name, e2.name, e3.name, e4.name) as employeeName,
               req.managerId,
               CASE
                 WHEN w.entityType = 'EXPENSE' THEN 'Expense Claim: ₹' || ex.amount || ' - ' || ex.category
-                WHEN w.entityType = 'LEAVE' THEN 'Leave: ' || l.leaveType || ' (' || l.startDate || ' to ' || l.endDate || ')'
+                WHEN w.entityType = 'LEAVE' THEN 'Leave: ' || l.type || ' (' || l.startDate || ' to ' || l.endDate || ')'
                 WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN 'Correction: ' || ac.appliedAt
+                WHEN w.entityType = 'TIMESHEET' THEN 'Timesheet: ' || ts.startDate || ' to ' || ts.endDate || ' (' || ts.totalHours || ' hrs)'
               END as details,
+              l.startDate as leaveStartDate,
+              l.endDate as leaveEndDate,
               CASE
                 WHEN w.entityType = 'EXPENSE' THEN ex.description
                 WHEN w.entityType = 'LEAVE' THEN l.reason
                 WHEN w.entityType = 'ATTENDANCE_CORRECTION' THEN ac.reason
+                WHEN w.entityType = 'TIMESHEET' THEN 'Timesheet submission'
               END as description
        FROM approval_requests r
        JOIN employees req ON r.requesterId = req.id
@@ -215,9 +221,11 @@ export const workflowService = {
        LEFT JOIN expense_claims ex ON w.entityType = 'EXPENSE' AND r.entityId = ex.id
        LEFT JOIN leaverequests l ON w.entityType = 'LEAVE' AND r.entityId = l.id
        LEFT JOIN attendance_corrections ac ON w.entityType = 'ATTENDANCE_CORRECTION' AND r.entityId = ac.id
+       LEFT JOIN timesheets ts ON w.entityType = 'TIMESHEET' AND r.entityId = ts.id
        LEFT JOIN employees e1 ON ex.employeeId = e1.id
        LEFT JOIN employees e2 ON l.employeeId = e2.id
        LEFT JOIN employees e3 ON ac.employeeId = e3.id
+       LEFT JOIN employees e4 ON ts.employeeId = e4.id
        WHERE r.status = 'PENDING_APPROVAL' 
          AND (
            (s.approverType = 'SPECIFIC_USER' AND s.specificApproverId = ?) OR 

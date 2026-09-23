@@ -49,6 +49,28 @@ export const seedSqlite = async () => {
       console.log('Seeded Organization.');
     }
 
+    // Seed Projects for Timesheets
+    const projectCount = db.prepare('SELECT COUNT(*) as count FROM projects').get().count;
+    if (projectCount === 0) {
+      const insertProject = db.prepare(`
+        INSERT INTO projects (id, name, description, client, status, organizationId, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const projectsToSeed = [
+        ['prj-internal', 'Internal Ops', 'General internal meetings and operations', 'Stackly', 'ACTIVE'],
+        ['prj-website', 'Website Redesign', 'Corporate website overhaul', 'Marketing', 'ACTIVE'],
+        ['prj-mobile', 'Mobile App V2', 'React Native cross-platform app', 'Tech', 'ACTIVE'],
+        ['prj-client-a', 'Acme Corp Integration', 'API integration for Acme Corp', 'Acme Corp', 'ACTIVE'],
+        ['prj-holiday', 'Holiday Tracking', 'Company holiday / time-off tracking (internal)', 'HR', 'ACTIVE']
+      ];
+      
+      for (const [id, name, desc, client, status] of projectsToSeed) {
+        insertProject.run(id, name, desc, client, status, ORGANIZATION_ID, nowStr, nowStr);
+      }
+      console.log('Seeded Projects.');
+    }
+
     // 2. Seed departments
     const existingDepts = db.prepare('SELECT name FROM departments').all().map((d: any) => d.name);
     const insertDept = db.prepare(`

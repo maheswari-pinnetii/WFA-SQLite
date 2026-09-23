@@ -19,55 +19,6 @@ import { analyticsApi } from '../../../api/endpoints/analytics.api';
 import { Users, UserPlus, Clock, FileSpreadsheet, Briefcase, Layers, RefreshCw, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const FALLBACK: any = {
-  kpis: { 
-    totalHeadcount: 1000, 
-    presentToday: 950, 
-    onLeaveToday: 35, 
-    newHires: 24, 
-    turnoverRate: 4.5,
-    openReqs: 36,
-    trainingCompletion: 88,
-    employeeSatisfaction: 4.4
-  },
-  charts: { 
-    hiringTrend: [
-      { month: 'May', hires: 8 }, { month: 'Jun', hires: 15 }, { month: 'Jul', hires: 10 },
-      { month: 'Aug', hires: 12 }, { month: 'Sep', hires: 18 }
-    ],
-    retentionRate: [
-      { month: 'May', rate: 94 }, { month: 'Jun', rate: 95 }, { month: 'Jul', rate: 96 },
-      { month: 'Aug', rate: 95.5 }, { month: 'Sep', rate: 97 }
-    ],
-    leaveByDept: [
-      { name: 'Engineering', value: 45, color: '#059669' },
-      { name: 'Sales', value: 25, color: '#10b981' },
-      { name: 'Product', value: 15, color: '#f59e0b' }
-    ],
-    trainingProgress: [
-      { name: 'Security', value: 98 },
-      { name: 'Compliance', value: 85 },
-      { name: 'Diversity', value: 92 }
-    ],
-    performanceBellCurve: [
-      { rating: 'Needs Imp.', count: 25 },
-      { rating: 'Meets', count: 350 },
-      { rating: 'Exceeds', count: 125 }
-    ],
-    hrTicketTypes: [
-      { name: 'Payroll', value: 40, color: '#10b981' },
-      { name: 'Benefits', value: 35, color: '#059669' },
-      { name: 'Policies', value: 25, color: '#f59e0b' }
-    ]
-  },
-  tables: { 
-    roster: [
-      { name: 'Sarah Connor', role: 'HR Business Partner', department: 'HR', status: 'Active', joinDate: '2023-04-10' },
-      { name: 'John Doe', role: 'Talent Acquisition', department: 'HR', status: 'Active', joinDate: '2024-02-15' },
-      { name: 'Jane Smith', role: 'Compensation Specialist', department: 'HR', status: 'Active', joinDate: '2022-11-05' }
-    ]
-  },
-};
 
 export const HrDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -83,10 +34,10 @@ export const HrDashboard: React.FC = () => {
       if (res && (res.kpis || res.charts)) {
         setData(res);
       } else {
-        setData(FALLBACK);
+        setData(null);
       }
     } catch (err: any) {
-      setData(FALLBACK);
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -175,58 +126,58 @@ export const HrDashboard: React.FC = () => {
         {[
           {
             title: 'Total Employees',
-            value: kpis.totalHeadcount ?? 1000,
+            value: kpis.headcount ?? 0,
             meta: 'Current workforce',
-            trend: { value: '↑ 2.4% vs last month', direction: 'up' as const },
+            trend: { value: 'Workforce size', direction: 'neutral' as const },
             icon: <PeopleAltIcon />,
           },
           {
             title: 'Present Today',
-            value: kpis.presentToday ?? 475,
+            value: kpis.presentToday ?? 0,
             meta: 'Checked-in headcount',
-            trend: { value: '95.0% attendance rate', direction: 'up' as const },
+            trend: { value: 'Today\'s attendance', direction: 'neutral' as const },
             icon: <HowToRegIcon />,
           },
           {
             title: 'Attendance Rate',
-            value: kpis.presentToday && kpis.totalHeadcount ? `${Math.round((kpis.presentToday / kpis.totalHeadcount) * 100)}%` : '95%',
-            meta: 'Monthly average',
-            trend: { value: '↑ 1.2% benchmark', direction: 'up' as const },
+            value: kpis.attendanceRate != null ? `${kpis.attendanceRate}%` : '0%',
+            meta: 'Daily average',
+            trend: { value: 'Attendance health', direction: 'neutral' as const },
             icon: <EventAvailableIcon />,
           },
           {
             title: 'Leave Requests',
-            value: kpis.onLeaveToday ?? 20,
-            meta: 'Active leave today',
-            trend: { value: '4.0% leave rate', direction: 'neutral' as const },
+            value: kpis.pendingLeaveRequests ?? 0,
+            meta: 'Pending leave requests',
+            trend: { value: 'Requires attention', direction: 'neutral' as const },
             icon: <BeachAccessIcon />,
           },
           {
             title: 'Pending Approvals',
-            value: 6,
+            value: kpis.pendingApprovals ?? 0,
             meta: 'HR escalation queue',
             trend: { value: 'Action required', direction: 'down' as const },
             icon: <PendingActionsIcon />,
           },
           {
             title: 'New Hires',
-            value: kpis.newHires ?? 12,
+            value: kpis.newJoinersMonth ?? 0,
             meta: 'Joined last 30 days',
             trend: { value: 'Onboarding active', direction: 'up' as const },
             icon: <PersonAddAltIcon />,
           },
           {
             title: 'Attrition Rate',
-            value: `${kpis.turnoverRate ?? 4.5}%`,
+            value: kpis.attritionRate != null ? `${kpis.attritionRate}%` : '0%',
             meta: 'Annual turnover',
-            trend: { value: 'Within 5% benchmark', direction: 'up' as const },
+            trend: { value: 'Employee retention', direction: 'neutral' as const },
             icon: <TrendingDownIcon />,
           },
           {
             title: 'Payroll Status',
-            value: 'COMPLETED',
+            value: kpis.payrollStatus || 'Pending Processing',
             meta: 'Current pay period',
-            trend: { value: 'Disbursed Sep 01', direction: 'up' as const },
+            trend: { value: 'Disbursement track', direction: 'neutral' as const },
             icon: <PaymentsIcon />,
           },
         ].map((kpi) => (

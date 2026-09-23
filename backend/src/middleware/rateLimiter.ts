@@ -127,7 +127,7 @@ const createExponentialBackoffHandler = (
     const rawEmail = req.body?.email || req.body?.username || (req as any).user?.id || 'anonymous';
     const key = keyGen(req);
 
-    let hits = (req as any).rateLimit?.current || maxAllowed + 1;
+    const hits = (req as any).rateLimit?.current || maxAllowed + 1;
 
     // Exponential backoff calculation:
     // excess 1 -> 15s, excess 2 -> 30s, excess 3 -> 60s, excess 4 -> 120s ... up to 1800s (30m)

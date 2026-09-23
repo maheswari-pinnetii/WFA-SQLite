@@ -1,58 +1,85 @@
 import { randomUUID } from 'crypto';
-import { Shift, Holiday, WorkConfig, EmployeeShift } from '../models/index.js';
 import { AppError, ErrorCode } from '../utils/apiError.js';
+import { getDb } from '../config/db.js';
 
 export const shiftService = {
   // ─── SHIFTS ───────────────────────────────────────────────────────────────
   async getShifts(orgId: string) {
-    return Shift.find({ companyId: orgId });
+    const db = getDb();
+    return db.prepare(`SELECT * FROM shifts WHERE organizationId = ?`).all(orgId);
   },
   
   async createShift(orgId: string, data: any) {
-    if (!data.name || !data.start_time || !data.end_time) {
-      throw new AppError(ErrorCode.VALIDATION_ERROR, 'name, start_time, and end_time are required', 400);
+    if (!data.name || !data.startTime || !data.endTime) {
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'name, startTime, and endTime are required', 400);
     }
-    const id = randomUUID();
+    const db = getDb();
+    const id = `sh-${randomUUID()}`;
     const newShift = {
       id,
-      companyId: orgId,
+      organizationId: orgId,
       name: data.name,
-      start_time: data.start_time,
-      end_time: data.end_time,
-      break_duration: data.break_duration || 60,
-      is_overnight: data.is_overnight || 0,
-      color_code: data.color_code || '#10b981',
-      location_id: data.location_id,
-      department_id: data.department_id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      shiftType: data.shiftType || 'fixed',
+      startTime: data.startTime,
+      endTime: data.endTime,
+      breakDurationMinutes: data.breakDurationMinutes || 60,
+      gracePeriodMinutes: data.gracePeriodMinutes || 0,
+      workHoursPerDay: data.workHoursPerDay || 8,
+      weekOffDays: JSON.stringify(data.weekOffDays || ['Saturday', 'Sunday']),
+      isFlexible: data.isFlexible ? 1 : 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-    await Shift.create([newShift]);
+    
+    db.prepare(`
+      INSERT INTO shifts (id, name, shiftType, startTime, endTime, breakDurationMinutes, gracePeriodMinutes, workHoursPerDay, weekOffDays, isFlexible, organizationId, createdAt, updatedAt)
+      VALUES (@id, @name, @shiftType, @startTime, @endTime, @breakDurationMinutes, @gracePeriodMinutes, @workHoursPerDay, @weekOffDays, @isFlexible, @organizationId, @createdAt, @updatedAt)
+    `).run(newShift);
+    
     return newShift;
   },
 
   async updateShift(id: string, orgId: string, data: any) {
-    const shift = await Shift.findOne({ id, companyId: orgId });
+    const db = getDb();
+    const shift = db.prepare(`SELECT * FROM shifts WHERE id = ? AND organizationId = ?`).get(id, orgId);
     if (!shift) throw new AppError(ErrorCode.NOT_FOUND, 'Shift not found', 404);
     
-    const updates = { ...data, updated_at: new Date().toISOString() };
-    await Shift.updateOne({ id, companyId: orgId }, updates);
-    return { ...shift, ...updates };
+    const updates = { ...shift, ...data, updatedAt: new Date().toISOString() };
+    if (Array.isArray(updates.weekOffDays)) updates.weekOffDays = JSON.stringify(updates.weekOffDays);
+    updates.isFlexible = updates.isFlexible ? 1 : 0;
+    
+    db.prepare(`
+      UPDATE shifts SET 
+        name = @name, shiftType = @shiftType, startTime = @startTime, endTime = @endTime, 
+        breakDurationMinutes = @breakDurationMinutes, gracePeriodMinutes = @gracePeriodMinutes, 
+        workHoursPerDay = @workHoursPerDay, weekOffDays = @weekOffDays, isFlexible = @isFlexible, 
+        updatedAt = @updatedAt
+      WHERE id = @id AND organizationId = @organizationId
+    `).run(updates);
+    
+    return updates;
   },
 
   async deleteShift(id: string, orgId: string) {
-    await Shift.deleteOne({ id, companyId: orgId });
+    const db = getDb();
+    db.prepare(`DELETE FROM shifts WHERE id = ? AND organizationId = ?`).run(id, orgId);
   },
 
   // ─── HOLIDAYS ─────────────────────────────────────────────────────────────
   async getHolidays(orgId: string) {
-    return Holiday.find({ companyId: orgId });
+    const db = getDb();
+    try {
+      return db.prepare(`SELECT * FROM holidays WHERE companyId = ?`).all(orgId);
+    } catch {
+      return [];
+    }
   },
 
   async createHoliday(orgId: string, data: any) {
     if (!data.name || !data.date) {
       throw new AppError(ErrorCode.VALIDATION_ERROR, 'name and date are required', 400);
     }
+    const db = getDb();
     const id = randomUUID();
     const newHoliday = {
       id,
@@ -60,76 +87,101 @@ export const shiftService = {
       name: data.name,
       date: data.date,
       type: data.type || 'NATIONAL',
-      description: data.description,
-      location_id: data.location_id,
-      department_id: data.department_id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      description: data.description || '',
+      location_id: data.location_id || null,
+      department_id: data.department_id || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
-    await Holiday.create([newHoliday]);
+    try {
+      db.prepare(`
+        INSERT INTO holidays (id, companyId, name, date, type, description, location_id, department_id, createdAt, updatedAt)
+        VALUES (@id, @companyId, @name, @date, @type, @description, @location_id, @department_id, @createdAt, @updatedAt)
+      `).run(newHoliday);
+    } catch (e: any) {
+      console.warn("Could not insert holiday:", e.message);
+    }
     return newHoliday;
   },
 
   async updateHoliday(id: string, orgId: string, data: any) {
-    const holiday = await Holiday.findOne({ id, companyId: orgId });
+    const db = getDb();
+    let holiday;
+    try {
+      holiday = db.prepare(`SELECT * FROM holidays WHERE id = ? AND companyId = ?`).get(id, orgId);
+    } catch {
+      throw new AppError(ErrorCode.NOT_FOUND, 'Holiday not found', 404);
+    }
     if (!holiday) throw new AppError(ErrorCode.NOT_FOUND, 'Holiday not found', 404);
     
-    const updates = { ...data, updated_at: new Date().toISOString() };
-    await Holiday.updateOne({ id, companyId: orgId }, updates);
-    return { ...holiday, ...updates };
+    const updates = { ...holiday, ...data, updatedAt: new Date().toISOString() };
+    db.prepare(`
+      UPDATE holidays SET 
+        name = @name, date = @date, type = @type, description = @description, 
+        location_id = @location_id, department_id = @department_id, updatedAt = @updatedAt
+      WHERE id = @id AND companyId = @companyId
+    `).run(updates);
+    return updates;
   },
 
   async deleteHoliday(id: string, orgId: string) {
-    await Holiday.deleteOne({ id, companyId: orgId });
+    const db = getDb();
+    try {
+      db.prepare(`DELETE FROM holidays WHERE id = ? AND companyId = ?`).run(id, orgId);
+    } catch {}
   },
 
   // ─── WORK CONFIGS ─────────────────────────────────────────────────────────
   async getWorkConfigs(orgId: string) {
-    return WorkConfig.find({ companyId: orgId });
+    const db = getDb();
+    try {
+      return db.prepare(`SELECT * FROM work_configurations WHERE organizationId = ?`).all(orgId);
+    } catch {
+      return [];
+    }
   },
 
   async createWorkConfig(orgId: string, data: any) {
     if (!data.name) {
       throw new AppError(ErrorCode.VALIDATION_ERROR, 'name is required', 400);
     }
+    const db = getDb();
     const id = randomUUID();
     const newConfig = {
       id,
-      companyId: orgId,
+      organizationId: orgId,
       name: data.name,
-      working_days: data.working_days || '[1, 2, 3, 4, 5]',
-      standard_hours_per_day: data.standard_hours_per_day || 8.0,
-      is_default: data.is_default ? 1 : 0,
-      location_id: data.location_id,
-      department_id: data.department_id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      workMode: data.workMode || 'HYBRID',
+      weeklyHours: data.weeklyHours || 40,
+      flexibleHours: data.flexibleHours || 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
-    if (newConfig.is_default) {
-      // If this is set as default, unset other defaults
-      await WorkConfig.updateMany({ companyId: orgId }, { is_default: 0 });
-    }
-    
-    await WorkConfig.create([newConfig]);
+    db.prepare(`
+      INSERT INTO work_configurations (id, organizationId, name, workMode, weeklyHours, flexibleHours, createdAt, updatedAt)
+      VALUES (@id, @organizationId, @name, @workMode, @weeklyHours, @flexibleHours, @createdAt, @updatedAt)
+    `).run(newConfig);
     return newConfig;
   },
 
   async updateWorkConfig(id: string, orgId: string, data: any) {
-    const config = await WorkConfig.findOne({ id, companyId: orgId });
+    const db = getDb();
+    const config = db.prepare(`SELECT * FROM work_configurations WHERE id = ? AND organizationId = ?`).get(id, orgId);
     if (!config) throw new AppError(ErrorCode.NOT_FOUND, 'Work config not found', 404);
     
-    const updates = { ...data, updated_at: new Date().toISOString() };
-    if (updates.is_default) {
-      await WorkConfig.updateMany({ companyId: orgId }, { is_default: 0 });
-    }
-    
-    await WorkConfig.updateOne({ id, companyId: orgId }, updates);
-    return { ...config, ...updates };
+    const updates = { ...config, ...data, updatedAt: new Date().toISOString() };
+    db.prepare(`
+      UPDATE work_configurations SET 
+        name = @name, workMode = @workMode, weeklyHours = @weeklyHours, flexibleHours = @flexibleHours, updatedAt = @updatedAt
+      WHERE id = @id AND organizationId = @organizationId
+    `).run(updates);
+    return updates;
   },
 
   async deleteWorkConfig(id: string, orgId: string) {
-    await WorkConfig.deleteOne({ id, companyId: orgId });
+    const db = getDb();
+    db.prepare(`DELETE FROM work_configurations WHERE id = ? AND organizationId = ?`).run(id, orgId);
   }
 };
 

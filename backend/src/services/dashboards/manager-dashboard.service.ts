@@ -59,15 +59,21 @@ export class ManagerDashboardService {
     const taskCompletion = openTasks + completedTasks > 0 ? Math.round((completedTasks / (openTasks + completedTasks)) * 100) : 0;
 
     // Real query for Open Roles
-    const openRolesRows = await query(`SELECT COUNT(*) as count FROM job_requisitions WHERE status = 'OPEN' AND organizationId = ? ${deptFilter}`, deptParams);
-    const openRoles = openRolesRows[0]?.count || 0;
+    let openRoles = 0;
+    try {
+      const openRolesRows = await query(`SELECT COUNT(*) as count FROM job_requisitions WHERE status = 'OPEN' AND organizationId = ? ${deptFilter}`, [orgId, ...deptParams]);
+      openRoles = openRolesRows[0]?.count || 0;
+    } catch {}
 
     // Real query for Pending Reviews
-    const pendingReviewsRows = await query(`
-      SELECT COUNT(*) as count FROM reviews 
-      WHERE status = 'PENDING' AND organizationId = ? AND reviewerId IN (SELECT id FROM employees WHERE organizationId = ? ${deptFilter})
-    `, [orgId, ...deptParams]);
-    const pendingReviews = pendingReviewsRows[0]?.count || 0;
+    let pendingReviews = 0;
+    try {
+      const pendingReviewsRows = await query(`
+        SELECT COUNT(*) as count FROM reviews 
+        WHERE status = 'PENDING' AND organizationId = ? AND reviewerId IN (SELECT id FROM employees WHERE organizationId = ? ${deptFilter})
+      `, [orgId, orgId, ...deptParams]);
+      pendingReviews = pendingReviewsRows[0]?.count || 0;
+    } catch {}
 
     // Real query for Productivity (Avg Performance Score)
     const productivityRows = await query(`
@@ -79,7 +85,7 @@ export class ManagerDashboardService {
 
     // Real query for Budget (Sum of Base Salaries)
     const budgetRows = await query(`
-      SELECT SUM(s.baseSalary) as totalBudget 
+      SELECT SUM(s.monthlyGross) as totalBudget 
       FROM employee_salary_structures s
       JOIN employees e ON s.employeeId = e.id
       WHERE e.organizationId = ? ${deptFilter.replace('department', 'e.department')}
@@ -118,16 +124,10 @@ export class ManagerDashboardService {
     ];
 
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const teamAttendanceTrend = attendanceTrendRows.length > 0 ? attendanceTrendRows.map((r: any) => ({
+    const teamAttendanceTrend = attendanceTrendRows.map((r: any) => ({
       day: days[new Date(r.date).getDay()],
       attendance: r.count
-    })) : [
-      { day: 'Mon', attendance: 95 },
-      { day: 'Tue', attendance: 92 },
-      { day: 'Wed', attendance: 98 },
-      { day: 'Thu', attendance: 90 },
-      { day: 'Fri', attendance: 85 }
-    ];
+    }));
 
     const leavePipelineMap: Record<string, any> = {};
     for (const r of leaveReqsRows) {
@@ -141,6 +141,13 @@ export class ManagerDashboardService {
       pending: leavePipelineMap[k].pending
     }));
 
+    // Real skill coverage from repository
+    const skillsMetrics = await analyticsRepository.getSkillsMetrics(dept ? { organizationId: orgId, department: dept } : { organizationId: orgId });
+    const skillCoverage = skillsMetrics.map((s: any) => ({
+      skill: s.name,
+      level: Math.round(s.averageLevel * 20) || 0
+    }));
+
     // 6 Charts
     const charts = {
       teamAttendanceTrend,
@@ -149,22 +156,9 @@ export class ManagerDashboardService {
         { name: 'At Risk', value: openTasks, color: '#f59e0b' },
         { name: 'Burned Out', value: taskMap['BLOCKED'] || 0, color: '#ef4444' }
       ],
-      skillCoverage: [
-        { skill: 'React', level: 85 },
-        { skill: 'Node.js', level: 75 },
-        { skill: 'Python', level: 60 },
-        { skill: 'AWS', level: 50 },
-        { skill: 'Docker', level: 65 }
-      ],
-      overtimeByWeek: [
-        { week: 'W1', hours: 10 },
-        { week: 'W2', hours: 15 },
-        { week: 'W3', hours: 8 },
-        { week: 'W4', hours: 24 }
-      ],
-      leavePipeline: leavePipeline.length > 0 ? leavePipeline : [
-        { month: 'Jan', approved: 2, pending: 1 }
-      ],
+      skillCoverage,
+      overtimeByWeek: [], // Actual overtime would require overtime_records querying
+      leavePipeline: leavePipeline,
       performanceMatrix
     };
 

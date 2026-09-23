@@ -98,7 +98,7 @@ export class AttendanceWorkflowService {
         let late_by = 0;
         let early_by = 0;
         let overtime = 0;
-        let work_hours = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
+        const work_hours = (checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60);
 
         if (checkIn > shiftStart) {
           late_by = Math.floor((checkIn.getTime() - shiftStart.getTime()) / (1000 * 60)); // in minutes

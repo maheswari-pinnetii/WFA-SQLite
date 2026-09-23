@@ -7,33 +7,29 @@ export const LeavePoliciesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
-    name: '',
-    description: '',
     leaveTypeId: '',
     accrualRate: 1,
-    accrualFrequency: 'MONTHLY',
-    maxCarryForward: 0,
-    isProRata: true
+    maxCarryOver: 0,
+    encashable: false,
+    probationEligibility: false
   });
   const [leaveTypes, setLeaveTypes] = useState<any[]>([]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      // For now we'll mock the fetch if endpoints aren't perfectly aligned
-      // But we built the getLeavePolicies endpoint!
-      const res = await fetch('/api/v1/workforce/leave-policies', {
+      const res = await fetch('/api/v1/leave-policies', {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       if (res.ok) {
         const json = await res.json();
-        setPolicies(json.data || []);
+        setPolicies(json || []);
       }
       
       // Load leave types for the dropdown (Mocking for now to avoid breaking UI if endpoint missing)
       setLeaveTypes([
-        { id: '1', name: 'Annual Leave' },
-        { id: '2', name: 'Sick Leave' }
+        { id: 'lt-earned', name: 'Earned Leave' },
+        { id: 'lt-sick', name: 'Sick Leave' }
       ]);
     } catch (err) {
       console.error(err);
@@ -47,17 +43,17 @@ export const LeavePoliciesPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/v1/workforce/leave-policies', {
+      const res = await fetch('/api/v1/leave-policies', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ ...form, leaveTypeId: form.leaveTypeId || '1' })
+        body: JSON.stringify({ ...form, leaveTypeId: form.leaveTypeId || 'lt-earned' })
       });
       if (res.ok) {
         setShowForm(false);
-        setForm({ name: '', description: '', leaveTypeId: '', accrualRate: 1, accrualFrequency: 'MONTHLY', maxCarryForward: 0, isProRata: true });
+        setForm({ leaveTypeId: '', accrualRate: 1, maxCarryOver: 0, encashable: false, probationEligibility: false });
         await loadData();
       }
     } catch (err) {
@@ -75,7 +71,7 @@ export const LeavePoliciesPage: React.FC = () => {
             Leave Policies & Accruals
           </h1>
           <p className="text-xs text-slate-400">
-            Define automated accrual rules, carry-forward limits, and pro-rata calculations.
+            Define automated accrual rules, carry-forward limits, and policy eligibilities.
           </p>
         </div>
         <button onClick={() => setShowForm(!showForm)} className="btn btn-rose btn-sm flex items-center gap-2">
@@ -85,30 +81,27 @@ export const LeavePoliciesPage: React.FC = () => {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="glass-panel p-6 rounded-2xl border-rose-500/30 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="text-xs font-bold text-[var(--text-muted)]">Policy Name
-            <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="input mt-1 w-full" placeholder="e.g. Standard Annual Leave 2026" />
-          </label>
           <label className="text-xs font-bold text-[var(--text-muted)]">Target Leave Type
             <select value={form.leaveTypeId} onChange={e => setForm({...form, leaveTypeId: e.target.value})} className="input mt-1 w-full">
               <option value="">Select Leave Type...</option>
               {leaveTypes.map(lt => <option key={lt.id} value={lt.id}>{lt.name}</option>)}
             </select>
           </label>
-          <label className="text-xs font-bold text-[var(--text-muted)]">Accrual Rate (Days)
+          <label className="text-xs font-bold text-[var(--text-muted)]">Accrual Rate (Days per Month)
             <input required type="number" step="0.5" value={form.accrualRate} onChange={e => setForm({...form, accrualRate: parseFloat(e.target.value)})} className="input mt-1 w-full" />
           </label>
-          <label className="text-xs font-bold text-[var(--text-muted)]">Accrual Frequency
-            <select value={form.accrualFrequency} onChange={e => setForm({...form, accrualFrequency: e.target.value})} className="input mt-1 w-full">
-              <option value="MONTHLY">Monthly (End of Month)</option>
-              <option value="YEARLY">Yearly (Start of Year)</option>
-            </select>
-          </label>
           <label className="text-xs font-bold text-[var(--text-muted)]">Max Carry-Forward (Days)
-            <input required type="number" value={form.maxCarryForward} onChange={e => setForm({...form, maxCarryForward: parseInt(e.target.value)})} className="input mt-1 w-full" />
+            <input required type="number" value={form.maxCarryOver} onChange={e => setForm({...form, maxCarryOver: parseInt(e.target.value)})} className="input mt-1 w-full" />
           </label>
-          <div className="flex items-center gap-2 mt-6">
-            <input type="checkbox" checked={form.isProRata} onChange={e => setForm({...form, isProRata: e.target.checked})} className="accent-rose-500 w-4 h-4" />
-            <span className="text-xs font-bold text-[var(--text-primary)]">Enable Pro-Rata Accrual for mid-month joiners</span>
+          <div className="flex flex-col gap-2 mt-4">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={form.encashable} onChange={e => setForm({...form, encashable: e.target.checked})} className="accent-rose-500 w-4 h-4" />
+              <span className="text-xs font-bold text-[var(--text-primary)]">Allow Encashment</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={form.probationEligibility} onChange={e => setForm({...form, probationEligibility: e.target.checked})} className="accent-rose-500 w-4 h-4" />
+              <span className="text-xs font-bold text-[var(--text-primary)]">Eligible during probation</span>
+            </label>
           </div>
           <button type="submit" className="btn btn-rose md:col-span-2 flex items-center justify-center gap-2 mt-4"><Save size={14} /> Save Policy</button>
         </form>
@@ -127,17 +120,19 @@ export const LeavePoliciesPage: React.FC = () => {
           policies.map(policy => (
             <div key={policy.id} className="glass-panel p-6 rounded-2xl border-[var(--border-color)] flex flex-col md:flex-row gap-6 justify-between">
               <div>
-                <h3 className="text-lg font-black text-[var(--text-primary)]">{policy.name}</h3>
-                <p className="text-xs text-[var(--text-muted)]">{policy.leaveTypeName} • {policy.isProRata ? 'Pro-Rata Enabled' : 'No Pro-Rata'}</p>
+                <h3 className="text-lg font-black text-[var(--text-primary)]">{policy.leaveTypeName}</h3>
+                <p className="text-xs text-[var(--text-muted)]">
+                  {policy.encashable ? 'Encashable' : 'Not Encashable'} • {policy.probationEligibility ? 'Allowed in Probation' : 'Not allowed in Probation'}
+                </p>
               </div>
               <div className="flex gap-6">
                 <div className="text-right">
                   <p className="text-[10px] uppercase font-bold text-slate-400">Accrual Rate</p>
-                  <p className="text-lg font-bold text-rose-500">{policy.accrualRate} <span className="text-xs text-[var(--text-primary)]">days / {policy.accrualFrequency.toLowerCase()}</span></p>
+                  <p className="text-lg font-bold text-rose-500">{policy.accrualRate} <span className="text-xs text-[var(--text-primary)]">days / month</span></p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] uppercase font-bold text-slate-400">Max Carry-Forward</p>
-                  <p className="text-lg font-bold text-[var(--text-primary)]">{policy.maxCarryForward} <span className="text-xs text-[var(--text-muted)]">days</span></p>
+                  <p className="text-lg font-bold text-[var(--text-primary)]">{policy.maxCarryOver} <span className="text-xs text-[var(--text-muted)]">days</span></p>
                 </div>
               </div>
             </div>
@@ -147,3 +142,4 @@ export const LeavePoliciesPage: React.FC = () => {
     </div>
   );
 };
+

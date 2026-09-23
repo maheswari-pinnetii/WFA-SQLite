@@ -49,6 +49,7 @@ import { DeptHeadDashboard } from '../../features/team-manager/pages/DeptHeadDas
 import { ManagerTeamPage } from '../../features/team-manager/pages/ManagerTeamPage';
 import { ManagerSprintsPage } from '../../features/team-manager/pages/ManagerSprintsPage';
 import { ManagerTasksPage } from '../../features/team-manager/pages/ManagerTasksPage';
+import { RosterPlannerPage } from '../../features/team-manager/pages/RosterPlannerPage';
 
 // Team Lead Dashboards & Pages
 import { TeamLeadDashboardPage as TeamLeadDashboard } from '../../features/team-lead/dashboard/TeamLeadDashboardPage';
@@ -271,6 +272,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/manager/team-performance" element={<RoleGuard allowedRoles={[Role.MANAGER, Role.ADMIN]}><TeamReports /></RoleGuard>} />
                 <Route path="/manager/productivity-metrics" element={<RoleGuard allowedRoles={[Role.MANAGER, Role.ADMIN]}><ProductivityAnalyticsPage /></RoleGuard>} />
                 <Route path="/manager/shifts" element={<RoleGuard allowedRoles={[Role.MANAGER, Role.ADMIN]}><ShiftsPage /></RoleGuard>} />
+                <Route path="/manager/roster-planner" element={<RoleGuard allowedRoles={[Role.MANAGER, Role.ADMIN]}><RosterPlannerPage /></RoleGuard>} />
                 <Route path="/manager/settings" element={<RoleGuard allowedRoles={[Role.MANAGER, Role.ADMIN]}><Profile /></RoleGuard>} />
 
                 {/* ==================== 4. TEAM LEAD ROUTES (SPEC SECTION 16) ==================== */}
