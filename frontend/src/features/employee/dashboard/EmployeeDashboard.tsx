@@ -251,7 +251,7 @@ export const EmployeeDashboard: React.FC = () => {
             icon: <LocalFireDepartmentIcon />,
           },
         ].map((kpi) => (
-          <Grid key={kpi.title} size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Grid item key={kpi.title} xs={12} sm={6} lg={3}>
             <KpiCard {...kpi} loading={loading} />
           </Grid>
         ))}
