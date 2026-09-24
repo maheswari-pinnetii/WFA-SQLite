@@ -185,14 +185,14 @@ export class EmployeeDashboardService {
     }
 
     const kpis = {
-      attendance: Number(attendanceRate.toFixed(1)),
-      productivity: productivity,
-      taskProgress: taskProgressRate,
-      timeLogs: Math.round(hoursLogged),
-      upcomingLeave: pendingLeaves,
-      coreHours: Math.round(coreHours),
-      openTickets: openTicketsCount,
-      training: trainingCompleted
+      attendanceToday: Number(attendanceRate.toFixed(1)),
+      performanceScore: productivity,
+      tasksCompleted: taskProgressRate,
+      hoursLogged: Math.round(hoursLogged),
+      leaveBalance: pendingLeaves,
+      upcomingHolidays: Math.round(coreHours),
+      pendingApprovals: openTicketsCount,
+      trainingDue: trainingCompleted
     };
 
     // Fetch employee's skills
@@ -227,7 +227,7 @@ export class EmployeeDashboardService {
     // Charts
     const charts = {
       myAttendanceTrend,
-      taskProgress: [
+      tasksCompleted: [
         { name: 'Completed', value: tasksCompleted || 0, color: '#10b981' },
         { name: 'In Progress', value: tasksInProgress || 0, color: '#3b82f6' },
         { name: 'To Do', value: tasksToDo || 0, color: '#64748b' }

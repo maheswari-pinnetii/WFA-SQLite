@@ -108,9 +108,9 @@ export class TeamLeadDashboardService {
     } catch {}
 
     const kpis = {
-      teamMembers: squadSize,
+      squadSize: squadSize,
       presentToday: checkedIn,
-      taskCompletion: sprintVelocity,
+      activeTasks: sprintVelocity,
       blockedTasks: taskMap['BLOCKED'] || 0,
       sprintProgress,
       pendingActions,
@@ -142,7 +142,7 @@ export class TeamLeadDashboardService {
     }
 
     // Daily checkins trend
-    let dailyCheckins: any[] = [];
+    let sprintBurndown: any[] = [];
     try {
       const attendanceTrendRows = teamLead
         ? await query(`SELECT date, COUNT(*) as count FROM attendancerecords ar JOIN employees e ON ar.employeeId = e.id WHERE (ar.organizationId = ? OR ar.companyId = ?) AND e.team = ? AND ar.status = 'PRESENT' GROUP BY date ORDER BY date DESC LIMIT 5`, [orgId, orgId, teamLead])

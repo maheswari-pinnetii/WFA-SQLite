@@ -120,8 +120,8 @@ export class ManagerDashboardService {
 
     // 8 KPIs
     const kpis = {
-      totalTeam: teamCount,
-      teamPresent: presentToday,
+      teamSize: teamCount,
+      presentToday: presentToday,
       taskCompletion,
       openRoles,
       pendingReviews,
@@ -208,7 +208,7 @@ export class ManagerDashboardService {
     // 6 Charts
     const charts = {
       teamAttendanceTrend,
-      taskBurnout: [
+      taskDistribution: [
         { name: 'On Track', value: completedTasks || Math.round(teamCount * 0.6), color: '#10b981' },
         { name: 'At Risk', value: openTasks || Math.round(teamCount * 0.3), color: '#f59e0b' },
         { name: 'Burned Out', value: taskMap['BLOCKED'] || Math.round(teamCount * 0.1), color: '#ef4444' }
@@ -220,7 +220,7 @@ export class ManagerDashboardService {
         { week: 'Wk 3', hours: Math.round(teamCount * 0.12) },
         { week: 'Wk 4', hours: Math.round(teamCount * 0.20) },
       ],
-      leavePipeline: leavePipelineFinal,
+      leaveSchedule: leavePipelineFinal,
       performanceMatrix
     };
 
