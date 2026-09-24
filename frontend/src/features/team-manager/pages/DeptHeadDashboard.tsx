@@ -52,7 +52,7 @@ export const DeptHeadDashboard: React.FC = () => {
             <Building2 size={18} className="text-emerald-400" />
           </div>
           <p className="text-2xl font-black text-[var(--text-primary)]">6 Teams</p>
-          <p className="text-[11px] text-slate-400">Frontend, Backend, AI, DevOps...</p>
+          <p className="text-[11px] text-slate-400">Frontend, Backend, Human, DevOps...</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-[var(--border-color)] space-y-2">

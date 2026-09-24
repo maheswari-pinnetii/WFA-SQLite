@@ -5,7 +5,7 @@ export const HRSpecialistDashboard: React.FC = () => {
   const candidates = [
     { name: 'Michael Faraday', role: 'Staff Frontend Engineer', stage: 'Technical Interview', status: 'SCHEDULED' },
     { name: 'Ada Lovelace', role: 'Principal Systems Architect', stage: 'Final Leadership Round', status: 'IN_REVIEW' },
-    { name: 'Alan Turing', role: 'Senior AI Specialist', stage: 'Offer Stage', status: 'PENDING' },
+    { name: 'Alan Turing', role: 'Senior Human Specialist', stage: 'Offer Stage', status: 'PENDING' },
   ];
 
   return (
