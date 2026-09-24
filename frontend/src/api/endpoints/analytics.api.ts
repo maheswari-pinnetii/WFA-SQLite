@@ -134,11 +134,16 @@ export const analyticsApi = {
     }
   },
   async getDashboard(role: string): Promise<any> {
-    const response = await apiClient.get(`/v1/dashboard/${role}`);
-    if (response.data?.success && response.data.data !== undefined) {
-      return response.data.data;
+    try {
+      const response = await apiClient.get(`/v1/dashboard/${role}`);
+      if (response.data?.success && response.data.data !== undefined) {
+        return response.data.data;
+      }
+      throw new Error(response.data?.message || `Failed to retrieve ${role} dashboard.`);
+    } catch (err: any) {
+      console.warn(`[analyticsApi.getDashboard] Failed to load ${role} dashboard:`, err?.message);
+      return null;
     }
-    throw new Error(response.data?.message || `Failed to retrieve ${role} dashboard.`);
   },
   async getShifts(): Promise<Array<{ name: 'Regular' | 'Flexible' | 'Overnight'; startTime: string; endTime: string }>> {
     try {

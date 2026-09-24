@@ -64,9 +64,11 @@ export class AnalyticsRepository {
   async getAttendanceRecords(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
     const rows = await query(`
-      SELECT employeeId, status, workMode, checkInTime, checkOutTime, createdAt 
+      SELECT employeeId, date, status, workMode, checkInTime, checkOutTime, createdAt 
       FROM attendancerecords 
       ${clause}
+      ORDER BY date DESC
+      LIMIT 500
     `, params);
     return rows;
   }
@@ -198,10 +200,11 @@ export class AnalyticsRepository {
 
   async getLeaveTrends(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
+    const whereClause = clause ? `${clause} AND startDate IS NOT NULL` : `WHERE startDate IS NOT NULL`;
     const rows = await query(`
       SELECT strftime('%Y-%m', startDate) as month, COUNT(*) as count
       FROM leaverequests
-      ${clause} AND startDate IS NOT NULL
+      ${whereClause}
       GROUP BY month
       ORDER BY month ASC
       LIMIT 6
@@ -211,23 +214,28 @@ export class AnalyticsRepository {
 
   async getLeaveByDept(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
+    // Join with employees to get the department from the employee record
+    const orgId = queryData.organizationId || queryData.companyId || 'org-stackly';
     const rows = await query(`
-      SELECT COALESCE(department, 'Unassigned') as name, COUNT(*) as count
-      FROM leaverequests
-      ${clause}
-      GROUP BY department
-    `, params);
+      SELECT COALESCE(e.department, 'Unassigned') as name, COUNT(*) as count
+      FROM leaverequests lr
+      LEFT JOIN employees e ON lr.employeeId = e.id
+      WHERE (lr.organizationId = ? OR lr.companyId = ?)
+      GROUP BY e.department
+      ORDER BY count DESC
+    `, [orgId, orgId]);
     return rows;
   }
 
   async getAttendanceTrend(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
+    const whereClause = clause ? `${clause} AND status = 'PRESENT'` : `WHERE status = 'PRESENT'`;
     const rows = await query(`
       SELECT date, COUNT(*) as count
       FROM attendancerecords
-      ${clause} AND status = 'PRESENT'
+      ${whereClause}
       GROUP BY date
-      ORDER BY date ASC
+      ORDER BY date DESC
       LIMIT 7
     `, params);
     return rows;

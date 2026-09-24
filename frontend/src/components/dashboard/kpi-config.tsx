@@ -38,14 +38,14 @@ export interface KpiItemConfig {
 
 export const ROLE_KPI_CONFIGS: Record<Role, KpiItemConfig[]> = {
   [Role.ADMIN]: [
-    { key: 'totalUsers', title: 'Total Users', icon: <PeopleAltIcon />, dataKey: 'totalUsers', subtitle: 'Registered users' },
-    { key: 'activeSessions', title: 'Active Sessions', icon: <PersonIcon />, dataKey: 'activeSessions', subtitle: 'Live sessions' },
+    { key: 'totalHeadcount', title: 'Total Headcount', icon: <PeopleAltIcon />, dataKey: 'totalHeadcount', subtitle: 'All employees' },
+    { key: 'activeHeadcount', title: 'Active Employees', icon: <PersonIcon />, dataKey: 'activeHeadcount', subtitle: 'Currently active' },
     { key: 'totalStorage', title: 'Total Storage', icon: <BusinessIcon />, dataKey: 'totalStorage', subtitle: 'Database size' },
     { key: 'errorRate', title: 'Error Rate', icon: <TrendingDownIcon />, dataKey: 'errorRate', subtitle: 'System errors' },
     { key: 'pendingApprovals', title: 'Pending Approvals', icon: <PendingActionsIcon />, dataKey: 'pendingApprovals', subtitle: 'Requires action' },
     { key: 'departments', title: 'Departments', icon: <BusinessIcon />, dataKey: 'totalDepartments', subtitle: 'Active departments' },
     { key: 'integrationsHealth', title: 'Integrations Health', icon: <TaskAltIcon />, dataKey: 'integrationsHealth', subtitle: 'System integrations' },
-    { key: 'dailyLogins', title: 'Daily Logins', icon: <SpeedIcon />, dataKey: 'dailyLogins', subtitle: 'Today' }
+    { key: 'onLeave', title: 'On Leave', icon: <SpeedIcon />, dataKey: 'onLeaveHeadcount', subtitle: 'On leave today' }
   ],
 
   [Role.HR]: [

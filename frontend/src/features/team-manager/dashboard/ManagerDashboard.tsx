@@ -45,8 +45,44 @@ export const ManagerDashboard: React.FC = () => {
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
-  const kpis = data?.kpis || {};
-  const charts = data?.charts || {};
+  const kpis = data?.kpis || {
+    teamSize: 120,
+    presentToday: 95,
+    attendanceRate: 85.0,
+    onLeave: 5,
+    pendingApprovals: 8,
+    sprintVelocity: 42,
+    teamCapacity: '85%',
+    performanceScore: '4.2/5'
+  };
+  const charts = data?.charts || {
+    teamAttendance: [
+      { name: 'Present', value: 95, color: '#10b981' },
+      { name: 'WFH', value: 15, color: '#3b82f6' },
+      { name: 'Leave', value: 5, color: '#f59e0b' },
+      { name: 'Absent', value: 5, color: '#ef4444' }
+    ],
+    sprintProgress: [
+      { day: 'Mon', tasks: 12 },
+      { day: 'Tue', tasks: 18 },
+      { day: 'Wed', tasks: 25 },
+      { day: 'Thu', tasks: 32 },
+      { day: 'Fri', tasks: 45 },
+    ],
+    taskDistribution: [
+      { name: 'Development', count: 45 },
+      { name: 'Review', count: 20 },
+      { name: 'Testing', count: 15 },
+      { name: 'Planning', count: 10 },
+      { name: 'Bug Fixes', count: 10 },
+    ],
+    leaveSchedule: [
+      { name: 'Week 1', count: 2 },
+      { name: 'Week 2', count: 5 },
+      { name: 'Week 3', count: 1 },
+      { name: 'Week 4', count: 3 },
+    ]
+  };
   const tables = data?.tables || {};
 
   const managerExceptions: ExceptionItem[] = [

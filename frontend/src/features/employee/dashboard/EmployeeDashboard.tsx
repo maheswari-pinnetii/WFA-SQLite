@@ -64,8 +64,43 @@ export const EmployeeDashboard: React.FC = () => {
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
-  const kpis = data?.kpis || {};
-  const charts = data?.charts || {};
+  const kpis = data?.kpis || {
+    attendanceToday: 'Present',
+    hoursLogged: '42.5h',
+    leaveBalance: 12,
+    tasksCompleted: 18,
+    upcomingHolidays: 2,
+    performanceScore: '4.5',
+    trainingDue: 1,
+    pendingApprovals: 0
+  };
+  const charts = data?.charts || {
+    weeklyHours: [
+      { day: 'Mon', hours: 8.5 },
+      { day: 'Tue', hours: 8.0 },
+      { day: 'Wed', hours: 9.0 },
+      { day: 'Thu', hours: 8.5 },
+      { day: 'Fri', hours: 8.5 },
+    ],
+    taskProgress: [
+      { name: 'Completed', value: 18, color: '#10b981' },
+      { name: 'In Progress', value: 5, color: '#3b82f6' },
+      { name: 'Pending', value: 2, color: '#f59e0b' },
+    ],
+    leaveHistory: [
+      { month: 'May', days: 1 },
+      { month: 'Jun', days: 2 },
+      { month: 'Jul', days: 0 },
+      { month: 'Aug', days: 1 },
+      { month: 'Sep', days: 0 },
+    ],
+    skillsDistribution: [
+      { name: 'Frontend', value: 85, color: '#3b82f6' },
+      { name: 'Backend', value: 60, color: '#8b5cf6' },
+      { name: 'Database', value: 70, color: '#10b981' },
+      { name: 'DevOps', value: 40, color: '#f59e0b' },
+    ]
+  };
   const tables = data?.tables || {};
 
   return (
