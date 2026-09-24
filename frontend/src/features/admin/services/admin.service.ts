@@ -1,5 +1,5 @@
 import { userApi } from '../../../api/endpoints/user.api';
-import { User } from '../../../auth/types/auth.types';
+import { User } from '../../../features/auth/types/auth.types';
 
 export const adminService = {
   fetchUsers: async (): Promise<User[]> => {

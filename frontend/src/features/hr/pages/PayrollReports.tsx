@@ -28,8 +28,8 @@ import {
   Award,
   Palmtree
 } from 'lucide-react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { Button, MotionButton } from '../../../components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';

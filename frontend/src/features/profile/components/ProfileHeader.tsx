@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { getRoleBadgeClass } from '../../../shared/utils/helpers';
 import { LogOut as LogOutIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

@@ -1,9 +1,9 @@
 import React from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Lock, ShieldCheck, AlertTriangle, History, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { auditLogger } from '../../../security/audit/auditLogger';
+import { auditLogger } from '../../../features/auth/security/audit/auditLogger';
 
 export const AccessControlPage: React.FC = () => {
   const auditLogs = auditLogger.getLogs();

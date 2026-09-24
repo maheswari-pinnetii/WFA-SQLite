@@ -1,5 +1,5 @@
-import { TaxCalculationService } from '../../backend/src/services/tax-calculation.service';
-import { ComplianceService } from '../../backend/src/services/compliance.service';
+import { TaxCalculationService } from '../../backend/src/modules/payroll/tax-calculation.service';
+import { ComplianceService } from '../../backend/src/modules/core/compliance.service';
 
 describe('Payroll Engine Unit Tests', () => {
   describe('CTC Breakdown Calculator', () => {

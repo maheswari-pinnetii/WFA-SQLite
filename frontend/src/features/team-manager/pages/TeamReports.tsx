@@ -1,6 +1,6 @@
 import React from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { ExportReport } from '../../reports/components/ExportReport';
 
 export const TeamReports: React.FC = () => {

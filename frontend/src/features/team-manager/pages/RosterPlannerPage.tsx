@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar as CalendarIcon, Users, Clock, AlertTriangle, Plus, Check } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { apiClient as api } from '../../../api/client';
 
 interface Shift {

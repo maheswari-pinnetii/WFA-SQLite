@@ -1,6 +1,6 @@
 import React from 'react';
 import { History, ShieldCheck, Lock, FileText } from 'lucide-react';
-import { auditLogger } from '../../../security/audit/auditLogger';
+import { auditLogger } from '../../../features/auth/security/audit/auditLogger';
 
 export const AuditorDashboard: React.FC = () => {
   const logs = auditLogger.getLogs();

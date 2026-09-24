@@ -1,26 +1,26 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ProtectedRoute } from '../../security/guards/ProtectedRoute';
-import { RoleGuard } from '../../security/guards/RoleGuard';
-import { GuestGuard } from '../../security/guards/GuestGuard';
+import { ProtectedRoute } from '../../features/auth/security/guards/ProtectedRoute';
+import { RoleGuard } from '../../features/auth/security/guards/RoleGuard';
+import { GuestGuard } from '../../features/auth/security/guards/GuestGuard';
 import { MainLayout } from '../../shared/layouts/MainLayout';
 import { CommandPalette } from '../../shared/components/CommandPalette';
-import { LoginPage } from '../../auth/pages/LoginPage';
+import { LoginPage } from '../../features/auth/pages/LoginPage';
 
-import { SignUpPage } from '../../auth/pages/SignUpPage';
-import { LogoutPage } from '../../auth/pages/LogoutPage';
-import { SsoCallbackPage } from '../../auth/pages/SsoCallbackPage';
-import { ForgotPasswordPage } from '../../auth/pages/ForgotPasswordPage';
-import { ResetPasswordPage } from '../../auth/pages/ResetPasswordPage';
-import { VerifyEmailPage } from '../../auth/pages/VerifyEmailPage';
-import { ChangePasswordPage } from '../../auth/pages/ChangePasswordPage';
-import { Role, ROLE_HOME_PATHS } from '../../security/roles/roles';
-import { useAuth } from '../../auth/hooks/useAuth';
+import { SignUpPage } from '../../features/auth/pages/SignUpPage';
+import { LogoutPage } from '../../features/auth/pages/LogoutPage';
+import { SsoCallbackPage } from '../../features/auth/pages/SsoCallbackPage';
+import { ForgotPasswordPage } from '../../features/auth/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '../../features/auth/pages/ResetPasswordPage';
+import { VerifyEmailPage } from '../../features/auth/pages/VerifyEmailPage';
+import { ChangePasswordPage } from '../../features/auth/pages/ChangePasswordPage';
+import { Role, ROLE_HOME_PATHS } from '../../features/auth/security/roles/roles';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 
 const ALL_ROLES = [Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD, Role.EMPLOYEE];
 
 // Admin Dashboards & Pages
-import { AdminDashboardPage as AdminDashboard } from '../../features/admin/dashboard/AdminDashboardPage';
+import { AdminDashboardPage as AdminDashboard } from '../../features/dashboards/admin/AdminDashboardPage';
 import { UserManagement } from '../../features/admin/pages/UserManagement';
 import { RoleManagement } from '../../features/admin/pages/RoleManagement';
 import { PermissionsManagement } from '../../features/admin/pages/PermissionsManagement';
@@ -32,7 +32,7 @@ import { SystemConfiguration } from '../../features/admin/pages/SystemConfigurat
 import { SecurityAdminDashboard } from '../../features/admin/pages/SecurityAdminDashboard';
 
 // HR Dashboards & Pages
-import { HrDashboardPage as HRDashboard } from '../../features/hr/dashboard/HrDashboardPage';
+import { HrDashboardPage as HRDashboard } from '../../features/dashboards/hr/HrDashboardPage';
 import { EmployeeManagement } from '../../features/hr/pages/EmployeeManagement';
 import { EmployeeProfilePage } from '../../features/hr/pages/EmployeeProfilePage';
 import { AttendanceManagement } from '../../features/hr/pages/AttendanceManagement';
@@ -42,7 +42,7 @@ import { PayrollReports } from '../../features/hr/pages/PayrollReports';
 import { HRReports } from '../../features/hr/pages/HRReports';
 
 // Manager Dashboards & Pages
-import { ManagerDashboardPage as ManagerDashboard } from '../../features/team-manager/dashboard/ManagerDashboardPage';
+import { ManagerDashboardPage as ManagerDashboard } from '../../features/dashboards/manager/ManagerDashboardPage';
 import { TeamAnalytics } from '../../features/team-manager/pages/TeamAnalytics';
 import { TeamReports } from '../../features/team-manager/pages/TeamReports';
 import { ApprovalsPage } from '../../features/team-manager/pages/ApprovalsPage';
@@ -53,7 +53,7 @@ import { ManagerTasksPage } from '../../features/team-manager/pages/ManagerTasks
 import { RosterPlannerPage } from '../../features/team-manager/pages/RosterPlannerPage';
 
 // Team Lead Dashboards & Pages
-import { TeamLeadDashboardPage as TeamLeadDashboard } from '../../features/team-lead/dashboard/TeamLeadDashboardPage';
+import { TeamLeadDashboardPage as TeamLeadDashboard } from '../../features/dashboards/team-lead/TeamLeadDashboardPage';
 import { TeamMembersPage } from '../../features/team-lead/pages/TeamMembersPage';
 import { TaskTrackingPage } from '../../features/team-lead/pages/TaskTrackingPage';
 import { Productivity } from '../../features/team-lead/pages/Productivity';
@@ -61,7 +61,7 @@ import { FeedbackManagement } from '../../features/team-lead/pages/FeedbackManag
 import { TeamLeadSprintsPage } from '../../features/team-lead/pages/TeamLeadSprintsPage';
 
 // Employee Dashboards & Pages
-import { EmployeeDashboard } from '../../features/employee/dashboard/EmployeeDashboard';
+import { EmployeeDashboard } from '../../features/dashboards/employee/EmployeeDashboard';
 import { DocumentsPage } from '../../features/employee/pages/DocumentsPage';
 import { ProfileRouter as Profile } from '../../features/profile/ProfileRouter';
 import { MyAttendance } from '../../features/employee/pages/MyAttendance';

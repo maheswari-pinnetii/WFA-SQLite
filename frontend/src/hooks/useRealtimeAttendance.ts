@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useDispatch } from 'react-redux';
 import { socket, SOCKET_EVENTS } from '../websocket/socket';
 import { addNotification, fetchAttendanceDataThunk } from '../store/attendanceSlice';
-import { useAuth } from '../auth/hooks/useAuth';
+import { useAuth } from '../features/auth/hooks/useAuth';
 
 export const useRealtimeAttendance = (onEventReceived?: (event: string, data: any) => void) => {
   const queryClient = useQueryClient();

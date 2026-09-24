@@ -13,7 +13,7 @@ import {
   RefreshCw,
   Plus
 } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { payrollApi } from '../../../api/endpoints/payroll.api';
 
 interface FnFSettlement {

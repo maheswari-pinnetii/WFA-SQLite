@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { apiClient } from '../../api/client';
-import { useAuth } from '../../auth/hooks/useAuth';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 
 export const usePushNotifications = () => {
   const { isAuthenticated } = useAuth();

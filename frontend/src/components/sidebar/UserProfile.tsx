@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../auth/hooks/useAuth';
-import { ROLE_LABELS } from '../../security/roles/roles';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { ROLE_LABELS } from '../../features/auth/security/roles/roles';
 import { User, Settings, LogOut, ChevronUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { LogoutModal } from '../../auth/components/LogoutModal';
+import { LogoutModal } from '../../features/auth/components/LogoutModal';
 
 interface UserProfileProps {
   collapsed?: boolean;
@@ -58,7 +58,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({ collapsed }) => {
               <p className="sidebar-profile-name text-xs font-black text-white truncate">{user.name || 'David Sterling'}</p>
               <span className="sidebar-profile-status text-[9.5px] font-bold text-emerald-400">Active</span>
             </div>
-            <p className="sidebar-profile-role text-[10px] font-bold text-emerald-400 truncate">{user.title || ROLE_LABELS[role] || 'Department Manager'}</p>
+            <p className="sidebar-profile-role text-[10px] font-bold text-emerald-400 truncate">{user.title || (role ? ROLE_LABELS[role as keyof typeof ROLE_LABELS] : '') || 'Department Manager'}</p>
             <p className="sidebar-profile-dept text-[9.5px] font-medium text-slate-400 truncate">
               {user.department || 'Engineering'}
             </p>

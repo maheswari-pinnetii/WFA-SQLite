@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Download, Trash2, Upload, Plus, FileBadge2 } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { apiClient as api } from '../../../api/client';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 
 export const DocumentsPage: React.FC = () => {
   const { user } = useAuth();

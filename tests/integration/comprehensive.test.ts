@@ -6,9 +6,9 @@ import { Attendance, BreakSession, AttendanceEvent, IdempotencyRecord, Correctio
 import { User, MfaChallenge } from '../../backend/src/models/User.js';
 import { Employee } from '../../backend/src/models/Employee.js';
 import { Department, Team, Shift, Task } from '../../backend/src/models/Department.js';
-import { authService } from '../../backend/src/services/auth.service.js';
-import { attendanceService } from '../../backend/src/services/attendance.service.js';
-import { analyticsService } from '../../backend/src/services/analytics.service.js';
+import { authService } from '../../backend/src/modules/core/auth.service.js';
+import { attendanceService } from '../../backend/src/modules/attendance/attendance.service.js';
+import { analyticsService } from '../../backend/src/modules/analytics/analytics.service.js';
 import jwt from 'jsonwebtoken';
 
 import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';

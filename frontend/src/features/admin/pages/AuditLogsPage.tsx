@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { History, Download } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 import { analyticsApi } from '../../../api/endpoints/analytics.api';
-import { auditLogger } from '../../../security/audit/auditLogger';
+import { auditLogger } from '../../../features/auth/security/audit/auditLogger';
 
 export const AuditLogsPage: React.FC = () => {
   const [logs, setLogs] = useState<Array<{ id: string; timestamp: string; actor: string; role: string; action: string; target: string; ip: string; status: string }>>([]);

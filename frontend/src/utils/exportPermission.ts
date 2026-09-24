@@ -1,4 +1,4 @@
-import { User } from '../auth/types/auth.types';
+import { User } from '../features/auth/types/auth.types';
 
 export const filterExportData = (data: any[], user: User | null): any[] => {
   if (!user) return [];

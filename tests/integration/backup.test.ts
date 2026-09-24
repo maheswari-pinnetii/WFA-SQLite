@@ -5,7 +5,7 @@ import path from 'path';
 import { app } from '../../backend/src/app.js';
 import { initDb, getDb } from '../../backend/src/config/db.js';
 import { connectDatabase } from '../../backend/src/database/sqlite-cloud.js';
-import { backupService } from '../../backend/src/services/backup.service.js';
+import { backupService } from '../../backend/src/modules/core/backup.service.js';
 
 let adminToken = '';
 

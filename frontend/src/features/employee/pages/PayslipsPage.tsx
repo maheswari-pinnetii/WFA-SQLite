@@ -5,8 +5,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../..
 import { Button } from '../../../components/ui/button';
 import { payrollApi } from '../../../api/endpoints/payroll.api';
 import { Skeleton } from '../../../components/ui/skeleton';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 
 export const PayslipsPage: React.FC = () => {
   const { data: payslips = [], isLoading } = useQuery({

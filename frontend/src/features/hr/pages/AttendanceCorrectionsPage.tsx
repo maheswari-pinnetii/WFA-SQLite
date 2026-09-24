@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { ClipboardList, ShieldCheck, Activity, Users, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { attendanceApi, CorrectionRequest } from '../../../api/attendanceApi';

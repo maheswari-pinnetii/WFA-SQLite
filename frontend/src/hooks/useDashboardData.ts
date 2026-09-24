@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { dashboardApi } from '../api/endpoints/dashboard.api';
-import { Role } from '../security/roles/roles';
+import { Role } from '../features/auth/security/roles/roles';
 
 export const useDashboardData = (role: Role) => {
   const [data, setData] = useState<any>(null);

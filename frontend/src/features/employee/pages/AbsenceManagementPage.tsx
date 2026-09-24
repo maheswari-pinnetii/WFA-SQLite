@@ -23,7 +23,7 @@ import {
   ShieldAlert,
   ArrowRight
 } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { 
   absenceService, 
   LEAVE_TYPE_CONFIGS, 

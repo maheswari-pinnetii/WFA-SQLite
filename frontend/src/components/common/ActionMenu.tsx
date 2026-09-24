@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { ChevronDown, LucideIcon } from 'lucide-react';
 import { usePermission } from '../../hooks/usePermission';
-import { Permission } from '../../security/permissions/permissions';
+import { Permission } from '../../features/auth/security/permissions/permissions';
 
 export interface ActionMenuItem<T = any> {
   id: string;

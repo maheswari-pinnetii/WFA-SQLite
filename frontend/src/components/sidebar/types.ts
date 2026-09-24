@@ -1,5 +1,5 @@
-import { Role } from '../../security/roles/roles';
-import { Permission } from '../../security/permissions/permissions';
+import { Role } from '../../features/auth/security/roles/roles';
+import { Permission } from '../../features/auth/security/permissions/permissions';
 
 export interface MenuItemConfig {
   id: string;

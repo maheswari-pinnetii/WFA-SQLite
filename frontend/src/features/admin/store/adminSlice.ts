@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User } from '../../../auth/types/auth.types';
+import { User } from '../../../features/auth/types/auth.types';
 import { adminService } from '../services/admin.service';
-import { Role } from '../../../security/roles/roles';
+import { Role } from '../../../features/auth/security/roles/roles';
 
 interface AdminState {
   users: User[];

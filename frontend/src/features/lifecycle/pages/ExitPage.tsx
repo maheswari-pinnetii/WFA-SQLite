@@ -50,7 +50,7 @@ export const ExitPage: React.FC = () => {
   const columns: Column<Employee>[] = [
     {
       header: 'Employee',
-      accessor: 'name',
+      accessorKey: 'name',
       render: (emp) => (
         <div>
           <div className="font-medium text-[var(--text-primary)]">{emp.name}</div>
@@ -60,12 +60,12 @@ export const ExitPage: React.FC = () => {
     },
     {
       header: 'Role',
-      accessor: 'designation',
+      accessorKey: 'designation',
       render: (emp) => <span className="text-sm text-slate-300">{emp.designation || emp.role}</span>
     },
     {
       header: 'Status',
-      accessor: 'status',
+      accessorKey: 'status',
       render: (emp) => (
         <div className="space-y-1">
           <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5 w-max">
@@ -81,7 +81,7 @@ export const ExitPage: React.FC = () => {
     },
     {
       header: 'Actions',
-      accessor: 'id',
+      accessorKey: 'id',
       render: (emp) => (
         <div className="flex gap-2">
           {activeTab === 'pending' && <Button size="sm" variant="outline" className="text-xs h-8">Calculate F&F</Button>}
@@ -126,10 +126,9 @@ export const ExitPage: React.FC = () => {
       <DataTable
         data={employees}
         columns={columns}
-        isLoading={isLoading}
         page={page}
         pageSize={pageSize}
-        totalItems={totalItems}
+        totalCount={totalItems}
         onPageChange={setPage}
         searchPlaceholder="Search employees..."
         emptyMessage={activeTab === 'completed' ? 'No recent completed offboardings.' : 'No pending exits.'}
@@ -137,3 +136,5 @@ export const ExitPage: React.FC = () => {
     </div>
   );
 };
+
+

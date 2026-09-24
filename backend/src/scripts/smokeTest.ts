@@ -1,8 +1,8 @@
 import { execute } from '../database/sqlite-cloud.js';
-import { OrganizationService } from '../services/organization.service.js';
-import { PerformanceService } from '../services/performance.service.js';
-import { ComplianceService } from '../services/compliance.service.js';
-import { AuditService } from '../services/audit.service.js';
+import { OrganizationService } from '../modules/users/organization.service.js';
+import { PerformanceService } from '../modules/hr/performance.service.js';
+import { ComplianceService } from '../modules/core/compliance.service.js';
+import { AuditService } from '../modules/core/audit.service.js';
 
 async function runSmokeTests() {
   console.log('🚀 Starting Stackly Enterprise Platform Smoke Tests...\n');

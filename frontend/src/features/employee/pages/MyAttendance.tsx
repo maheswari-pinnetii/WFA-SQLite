@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../app/store';
 import { fetchAttendanceDataThunk } from '../../../store/attendanceSlice';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { LiveCheckInWidget } from '../../../components/attendance/LiveCheckInWidget';
 import { AttendanceCalendarView } from '../../../components/attendance/AttendanceCalendarView';
 import { AnalyticsOverview } from '../../../components/dashboard/AnalyticsOverview';

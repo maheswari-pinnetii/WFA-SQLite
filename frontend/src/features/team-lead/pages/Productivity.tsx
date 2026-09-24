@@ -1,7 +1,7 @@
 import React from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
-import { Permission } from '../../../security/permissions/permissions';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
+import { Permission } from '../../../features/auth/security/permissions/permissions';
 import { AnalyticsOverview } from '../../../components/dashboard/AnalyticsOverview';
 
 export const Productivity: React.FC = () => {

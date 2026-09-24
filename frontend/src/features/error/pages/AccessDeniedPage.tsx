@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldAlert, ArrowLeft, Home, Lock } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
-import { ROLE_LABELS } from '../../../security/roles/roles';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
+import { ROLE_LABELS } from '../../../features/auth/security/roles/roles';
 import { StacklyLogo } from '../../../components/common/StacklyLogo';
 
 export const AccessDeniedPage: React.FC = () => {
@@ -33,7 +33,7 @@ export const AccessDeniedPage: React.FC = () => {
         <div className="space-y-2">
           <h2 className="text-2xl font-black text-[var(--text-primary)]">Access Forbidden</h2>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            Your active role <span className="font-bold text-rose-400">({user?.role || ROLE_LABELS[role]})</span> does not hold permission to view or execute this resource.
+            Your active role <span className="font-bold text-rose-400">({user?.role || (role ? ROLE_LABELS[role as keyof typeof ROLE_LABELS] : 'Guest')})</span> does not hold permission to view or execute this resource.
           </p>
         </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Play, Coffee, Wifi, WifiOff, CheckCircle2, CheckSquare, ShieldCheck, AlertTriangle, RefreshCw, Radio } from 'lucide-react';
-import { useAuth } from '../../auth/hooks/useAuth';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 import { attendanceService, OFFICE_COORDS } from '../../services/attendance.service';
 import { syncLocalDataThunk, addNotification, fetchAttendanceDataThunk } from '../../store/attendanceSlice';
 import { RootState, AppDispatch } from '../../app/store';

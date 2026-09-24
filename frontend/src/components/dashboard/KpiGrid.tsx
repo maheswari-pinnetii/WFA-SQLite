@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Role } from '../../security/roles/roles';
+import { Role } from '../../features/auth/security/roles/roles';
 import { ROLE_KPI_CONFIGS, KpiItemConfig } from './kpi-config';
 import { KpiCard } from './KpiCard';
 import { KpiSkeleton } from './KpiSkeleton';

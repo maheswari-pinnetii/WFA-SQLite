@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { apiClient } from '../../../api/client';
 import { Settings, Eye, EyeOff, Shield, ShieldCheck, AlertTriangle } from 'lucide-react';
 

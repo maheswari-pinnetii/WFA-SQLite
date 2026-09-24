@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { useTheme } from '../../../design-system/theme/theme';
-import { ROLE_LABELS, Role } from '../../../security/roles/roles';
+import { ROLE_LABELS, Role } from '../../../features/auth/security/roles/roles';
 import { PanelLeftClose, Sun, Moon } from 'lucide-react';
 import { 
   MAIN_NAVIGATION, 

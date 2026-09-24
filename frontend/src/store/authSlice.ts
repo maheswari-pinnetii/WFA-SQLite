@@ -1,2 +1,2 @@
-export * from '../auth/store/authSlice';
-export { default } from '../auth/store/authSlice';
+export * from '../features/auth/store/authSlice';
+export { default } from '../features/auth/store/authSlice';

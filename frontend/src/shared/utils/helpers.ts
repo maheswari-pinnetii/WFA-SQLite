@@ -1,4 +1,4 @@
-import { Role } from '../../security/roles/roles';
+import { Role } from '../../features/auth/security/roles/roles';
 
 export const getRoleBadgeClass = (role: Role): string => {
   switch (role) {

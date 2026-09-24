@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { getDb, ORGANIZATION_ID } from '../src/config/db.js';
 import { connectDatabase } from '../src/database/sqlite-cloud.js';
 import fs from 'fs';

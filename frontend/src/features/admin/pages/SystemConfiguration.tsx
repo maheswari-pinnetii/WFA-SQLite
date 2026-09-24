@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { Layers, ShieldCheck, Save, Server } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 

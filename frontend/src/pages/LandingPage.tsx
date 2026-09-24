@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../auth/hooks/useAuth';
+import { useAuth } from '../features/auth/hooks/useAuth';
 import { CookieConsentBanner } from '../components/ui';
 import './LandingPage.css';
 

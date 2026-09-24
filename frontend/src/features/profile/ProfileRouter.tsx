@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../auth/hooks/useAuth';
-import { Role } from '../../security/roles/roles';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { Role } from '../../features/auth/security/roles/roles';
 
 // Import the specific profile pages
 import { AdminProfile } from '../admin/pages/AdminProfile';

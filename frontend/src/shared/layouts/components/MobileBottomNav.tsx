@@ -1,8 +1,8 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Clock, Calendar, BarChart3, Menu } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
-import { ROLE_HOME_PATHS, Role } from '../../../security/roles/roles';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
+import { ROLE_HOME_PATHS, Role } from '../../../features/auth/security/roles/roles';
 
 export const MobileBottomNav: React.FC<{ onOpenMobileMenu: () => void }> = ({ onOpenMobileMenu }) => {
   const { role } = useAuth();

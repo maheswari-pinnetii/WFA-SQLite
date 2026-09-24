@@ -6,7 +6,7 @@ export * from './CookieBanner';
 export * from './ShortcutsModal';
 export * from './FaqAccordion';
 export * from './SupportModal';
-export * from './ErrorBoundary';
+
 export * from './Loader';
 export * from './AdvancedFilterBar';
 export * from './DrillDownModal';

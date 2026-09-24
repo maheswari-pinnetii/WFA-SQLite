@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, CheckCircle2 } from 'lucide-react';
 import { apiClient as api } from '../../../api/client';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 
 export const TimesheetPage: React.FC = () => {
   const { user } = useAuth();

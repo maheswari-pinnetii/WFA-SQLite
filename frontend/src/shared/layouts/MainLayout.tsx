@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../auth/hooks/useAuth';
-import { ErrorBoundary } from '../../components/ErrorBoundary';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 import { EnterpriseHeader } from './components/EnterpriseHeader';
 import { Sidebar } from './components/Sidebar';
 import { SupportModal } from '../components/SupportModal';
 import { ShortcutsModal } from '../components/ShortcutsModal';
-import { DashboardShell } from '../components/dashboard';
+import { DashboardShell } from '../../components/layout/DashboardShell';
 import { OnboardingTourModal } from '../components/OnboardingTourModal';
 import { NetworkStatusBanner } from '../components/NetworkStatusBanner';
 import { BetaFeedbackModal } from '../components/BetaFeedbackModal';

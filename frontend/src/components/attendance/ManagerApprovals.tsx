@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Check, X, ShieldAlert, AlertCircle, Filter } from 'lucide-react';
-import { useAuth } from '../../auth/hooks/useAuth';
-import { Role } from '../../security/roles/roles';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { Role } from '../../features/auth/security/roles/roles';
 import { attendanceService } from '../../services/attendance.service';
 import { fetchAttendanceDataThunk, addNotification } from '../../store/attendanceSlice';
 import { RootState } from '../../app/store';

@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import target frontend services or utilities to test directly
-import { getDistance } from '../../frontend/src/services/attendance.service';
+import { getDistance } from '../../frontend/src/modules/attendance/attendance.service';
 import { Role, ROLE_LABELS, ROLE_LEVELS } from '../../frontend/src/security/roles/roles';
 import { Permission } from '../../frontend/src/security/permissions/permissions';
 

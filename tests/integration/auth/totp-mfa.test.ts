@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { enrollTotp, confirmTotpEnroll, verifyTotpChallenge, createTotpChallenge, disableTotp } from '../../../backend/src/services/auth.service.js';
+import { enrollTotp, confirmTotpEnroll, verifyTotpChallenge, createTotpChallenge, disableTotp } from '../../../backend/src/modules/core/auth.service.js';
 import { userRepository } from '../../../backend/src/repositories/user.repository.js';
 import { verifyTotpCode } from '../../../backend/src/utils/totp.js';
 import { initDb, getDb } from '../../../backend/src/config/db.js';

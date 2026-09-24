@@ -1,5 +1,5 @@
-import { leaveEngineService } from '../services/leave-engine.service.js';
-import { payrollService } from '../services/payroll.service.js';
+import { leaveEngineService } from '../modules/leave/leave-engine.service.js';
+import { payrollService } from '../modules/payroll/payroll.service.js';
 import { initDb } from '../config/db.js';
 import { logger } from '../config/logger.js';
 import { query } from '../database/sqlite-cloud.js';

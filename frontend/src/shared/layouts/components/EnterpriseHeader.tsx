@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { useTheme } from '../../../design-system/theme/theme';
-import { ROLE_LABELS, Role } from '../../../security/roles/roles';
+import { ROLE_LABELS, Role } from '../../../features/auth/security/roles/roles';
 import { getRoleBadgeClass } from '../../utils/helpers';
 import { StacklyLogo } from '../../../components/common/StacklyLogo';
-import { LogoutModal } from '../../../auth/components/LogoutModal';
+import { LogoutModal } from '../../../features/auth/components/LogoutModal';
 import LightModeOutlined from '@mui/icons-material/LightModeOutlined';
 import DarkModeOutlined from '@mui/icons-material/DarkModeOutlined';
 import {
@@ -400,7 +400,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
               onClick={() => toggleDropdown('profile')}
               aria-label="User Profile Menu"
               className="flex items-center gap-2 focus:outline-none group cursor-pointer p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
-              title={`${user.name} (${ROLE_LABELS[role]})`}
+              title={`${user.name} (${(role ? ROLE_LABELS[role as keyof typeof ROLE_LABELS] : '')})`}
             >
               <div className="relative shrink-0">
                 <img
@@ -421,7 +421,7 @@ export const EnterpriseHeader: React.FC<EnterpriseHeaderProps> = ({ onToggleSide
                   <p className="font-semibold text-sm text-slate-900 dark:text-slate-100 truncate">{user.name}</p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">{user.email}</p>
                   <div className="mt-2 flex items-center justify-between pt-1">
-                    <span className={`badge ${getRoleBadgeClass(role)}`}>{ROLE_LABELS[role]}</span>
+                    <span className={`badge ${getRoleBadgeClass(role)}`}>{(role ? ROLE_LABELS[role as keyof typeof ROLE_LABELS] : '')}</span>
                     <button
                       onClick={() => setShowPermissionsPreview(!showPermissionsPreview)}
                       className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"

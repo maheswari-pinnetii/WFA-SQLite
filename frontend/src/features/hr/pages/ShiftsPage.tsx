@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Clock, ShieldCheck, Activity, Users, Plus, Edit2, CheckCircle2, UserCheck, AlertCircle, Save } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { Button } from '../../../components/ui/button';
 import { apiClient as api } from '../../../api/client';
 

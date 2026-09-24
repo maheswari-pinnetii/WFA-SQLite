@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getAuthorizedRoomsForUser, isUserAuthorizedForRoom } from '../../backend/src/sockets/rooms.js';
 import { CircuitBreaker } from '../../backend/src/utils/circuitBreaker.js';
-import { featureFlagService } from '../../backend/src/services/featureFlag.service.js';
-import { jobScheduler } from '../../backend/src/services/jobScheduler.service.js';
+import { featureFlagService } from '../../backend/src/modules/core/featureFlag.service.js';
+import { jobScheduler } from '../../backend/src/modules/core/jobScheduler.service.js';
 
 describe('Real-Time Sockets & Room RBAC Authorization', () => {
   const employeeUser = {

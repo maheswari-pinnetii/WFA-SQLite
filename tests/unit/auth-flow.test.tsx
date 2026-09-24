@@ -24,7 +24,7 @@ vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('../../frontend/src/auth/services/auth.service', () => ({
+vi.mock('../../frontend/src/auth/modules/core/auth.service', () => ({
   authService: {
     passkeyLogin: vi.fn(),
     registerPasskey: vi.fn(),

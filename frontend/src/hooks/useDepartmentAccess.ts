@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "../app/store";
-import { auditLogger } from "../security/audit/auditLogger";
-import { Role } from "../security/roles/roles";
+import { auditLogger } from "../features/auth/security/audit/auditLogger";
+import { Role } from "../features/auth/security/roles/roles";
 
 /**
  * Enterprise DBAC Permission Verification Hook

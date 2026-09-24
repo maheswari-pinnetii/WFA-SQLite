@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, TrendingUp, FileText, Settings, Bell } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { ProfileHeader } from '../../profile/components/ProfileHeader';
 import { SecurityTab } from '../../profile/components/SecurityTab';
 import { DocumentsTab } from '../../profile/components/DocumentsTab';

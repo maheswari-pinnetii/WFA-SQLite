@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 import { Target, Plus, Clock, Edit2 } from 'lucide-react';
 import { Button } from '../../../shared/components/Button';
 import { performanceApi } from '../../../api/endpoints/performance.api';

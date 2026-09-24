@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { handleDeviceInit, handleGetRequest, handleCdata } from '../controllers/biometric.controller.js';
+import { handleDeviceInit, handleGetRequest, handleCdata } from '../modules/core/biometric.controller.js';
 
 const router = Router();
 

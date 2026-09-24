@@ -10,7 +10,7 @@ import { Button } from '../../shared/components/Button';
 import { useDepartmentAccess } from '../../hooks/useDepartmentAccess';
 import { StatusBadge } from '../common/StatusBadge';
 import { ActionMenu, ActionMenuItem } from '../common/ActionMenu';
-import { Permission } from '../../security/permissions/permissions';
+import { Permission } from '../../features/auth/security/permissions/permissions';
 import { DataTable, Column } from '../../shared/components/DataTable';
 
 interface EmployeeTableProps {

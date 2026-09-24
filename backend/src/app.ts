@@ -6,7 +6,7 @@ import { initDb, healthCheck } from './config/db.js';
 import { configureResilience } from './middleware/resilience.js';
 
 import { globalApiLimiter } from './middleware/rateLimiter.js';
-import { workflowService } from './services/workflow.service.js';
+import { workflowService } from './modules/core/workflow.service.js';
 import { inputSanitizer } from './middleware/validateInput.js';
 import { csrfProtection, ssrfGuard, prototypePollutionGuard, requestTimeoutGuard } from './middleware/securitySuite.js';
 import { authenticateToken, authorizeRoles } from './middleware/auth.js';

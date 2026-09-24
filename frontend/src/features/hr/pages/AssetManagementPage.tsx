@@ -14,7 +14,7 @@ import {
   RefreshCw,
   ShieldAlert
 } from 'lucide-react';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 
 interface Asset {
   id: string;

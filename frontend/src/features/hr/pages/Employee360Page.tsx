@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../auth/hooks/useAuth';
+import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { lifecycleApi } from '../../../api/endpoints/lifecycle.api';
 import {

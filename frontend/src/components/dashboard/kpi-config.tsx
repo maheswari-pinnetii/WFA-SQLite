@@ -25,7 +25,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 
-import { Role } from '../../security/roles/roles';
+import { Role } from '../../features/auth/security/roles/roles';
 
 export interface KpiItemConfig {
   key: string;

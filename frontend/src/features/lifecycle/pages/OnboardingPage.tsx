@@ -55,7 +55,7 @@ export const OnboardingPage: React.FC = () => {
   const columns: Column<Employee>[] = [
     {
       header: 'Employee',
-      accessor: 'name',
+      accessorKey: 'name',
       render: (emp) => (
         <div>
           <div className="font-medium text-[var(--text-primary)]">{emp.name}</div>
@@ -65,17 +65,17 @@ export const OnboardingPage: React.FC = () => {
     },
     {
       header: 'Role / Designation',
-      accessor: 'designation',
+      accessorKey: 'designation',
       render: (emp) => <span className="text-sm text-slate-300">{emp.designation || emp.role}</span>
     },
     {
       header: 'Join Date',
-      accessor: 'joining_date',
+      accessorKey: 'joining_date',
       render: (emp) => <span className="text-sm text-slate-300">{emp.joining_date}</span>
     },
     {
       header: 'Status',
-      accessor: 'status',
+      accessorKey: 'status',
       render: (emp) => (
         <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5 w-max">
           <Clock size={12} /> {emp.status || 'Documents Pending'}
@@ -84,7 +84,7 @@ export const OnboardingPage: React.FC = () => {
     },
     {
       header: 'Actions',
-      accessor: 'id',
+      accessorKey: 'id',
       render: (emp) => (
         <Button size="sm" variant="outline" className="text-xs h-8" onClick={() => navigate(`/employee-details/${emp.id}`)}>
           View Checklist
@@ -126,10 +126,9 @@ export const OnboardingPage: React.FC = () => {
       <DataTable
         data={employees}
         columns={columns}
-        isLoading={isLoading}
         page={page}
         pageSize={pageSize}
-        totalItems={totalItems}
+        totalCount={totalItems}
         onPageChange={setPage}
         searchPlaceholder="Search employees..."
         emptyMessage={activeTab === 'completed' ? 'No completed onboardings found.' : 'No pending onboardings found.'}
@@ -137,3 +136,5 @@ export const OnboardingPage: React.FC = () => {
     </div>
   );
 };
+
+

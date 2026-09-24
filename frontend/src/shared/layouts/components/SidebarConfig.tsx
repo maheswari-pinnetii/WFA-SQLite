@@ -35,7 +35,7 @@ import {
   Globe2,
   Database
 } from 'lucide-react';
-import { Role } from '../../../security/roles/roles';
+import { Role } from '../../../features/auth/security/roles/roles';
 
 export interface NavigationItem {
   id: string;

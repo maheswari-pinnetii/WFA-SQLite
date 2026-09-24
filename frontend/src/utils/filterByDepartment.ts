@@ -1,5 +1,5 @@
-import { auditLogger } from '../security/audit/auditLogger';
-import { Role } from '../security/roles/roles';
+import { auditLogger } from '../features/auth/security/audit/auditLogger';
+import { Role } from '../features/auth/security/roles/roles';
 
 export interface DepartmentScopedItem {
   departmentId?: string;

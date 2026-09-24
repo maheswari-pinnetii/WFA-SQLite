@@ -8,7 +8,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../../api/queryClient';
 
 import { ToastProvider } from '../../components/common/ToastContext';
-import { AuthProvider } from '../../auth/AuthProvider';
+import { AuthProvider } from '../../features/auth/AuthProvider';
 import { GlobalErrorBoundary } from '../../shared/components/GlobalErrorBoundary';
 
 // Initialize Axios Interceptors
@@ -17,7 +17,7 @@ setupAuthInterceptors();
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <GlobalErrorBoundary>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <BrowserRouter>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider>

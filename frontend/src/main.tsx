@@ -12,7 +12,7 @@ import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/inter/700.css';
 import App from './App';
-import { ErrorBoundary } from './shared/components/ErrorBoundary';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 import './index.css';
 
 import { registerSW } from 'virtual:pwa-register';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Lock, ShieldCheck, AlertTriangle, History, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { auditLogger } from '../../../security/audit/auditLogger';
+import { auditLogger } from '../../../features/auth/security/audit/auditLogger';
 
 export const SecurityAdminDashboard: React.FC = () => {
   const auditLogs = auditLogger.getLogs();

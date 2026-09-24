@@ -1,6 +1,6 @@
-import { useAuth } from '../../auth/hooks/useAuth';
-import { Permission } from '../../security/permissions/permissions';
-import { Role } from '../../security/roles/roles';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { Permission } from '../../features/auth/security/permissions/permissions';
+import { Role } from '../../features/auth/security/roles/roles';
 
 export const usePermission = () => {
   const { role, permissions } = useAuth();

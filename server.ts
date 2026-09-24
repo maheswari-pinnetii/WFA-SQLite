@@ -34,10 +34,10 @@ if (process.env.NODE_ENV !== 'test') {
   initSockets(io);
 
   // Initialize delayed job scheduler & default feature flags
-  import('./backend/src/services/jobScheduler.service.js').then(({ jobScheduler }) => {
+  import('./backend/src/modules/core/jobScheduler.service.js').then(({ jobScheduler }) => {
     jobScheduler.start(10000);
   });
-  import('./backend/src/services/featureFlag.service.js').then(({ featureFlagService }) => {
+  import('./backend/src/modules/core/featureFlag.service.js').then(({ featureFlagService }) => {
     featureFlagService.initDefaults().catch(() => undefined);
   });
 
@@ -134,5 +134,6 @@ process.on('SIGTERM', () => handleGracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => handleGracefulShutdown('SIGINT'));
 
 export { app, server };
+
 
 

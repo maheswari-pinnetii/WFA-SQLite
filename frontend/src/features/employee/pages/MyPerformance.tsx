@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { AnalyticsOverview } from '../../../components/dashboard/AnalyticsOverview';
 import { Star, Award, Target } from 'lucide-react';
 import { performanceApi } from '../../../api/endpoints/performance.api';
-import { RoleGuard } from '../../../security/guards/RoleGuard';
-import { Role } from '../../../security/roles/roles';
+import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
+import { Role } from '../../../features/auth/security/roles/roles';
 
 export const MyPerformance: React.FC = () => {
   const [cycles, setCycles] = useState<any[]>([]);
