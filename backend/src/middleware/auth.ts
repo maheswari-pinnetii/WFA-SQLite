@@ -114,7 +114,7 @@ export const enforceScope = async (req, res, next) => {
       return res.status(403).json({ success: false, message: 'Access Denied: Cross-organization access is forbidden.' });
     }
 
-    if (role === 'ADMIN' || role === 'HR') {
+    if (role === 'ADMIN' || role === 'HR' || role === 'EXECUTIVE') {
       return next();
     }
 

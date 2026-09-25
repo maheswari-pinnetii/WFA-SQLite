@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSwipeable } from 'react-swipeable';
+const useSwipeable = (options: any) => { return {} };
 import { ShieldCheck, XCircle } from 'lucide-react';
 
 interface SwipeableApprovalCardProps {
@@ -13,34 +13,11 @@ export const SwipeableApprovalCard: React.FC<SwipeableApprovalCardProps> = ({ id
   const [offset, setOffset] = useState(0);
   const SWIPE_THRESHOLD = 80; // pixels to trigger action
 
-  const handlers = useSwipeable({
-    onSwiping: (eventData) => {
-      // Limit offset to max 120px in either direction
-      const newOffset = eventData.deltaX * -1;
-      if (Math.abs(newOffset) <= 120) {
-        setOffset(newOffset);
-      }
-    },
-    onSwiped: (eventData) => {
-      const finalOffset = eventData.deltaX * -1;
-      setOffset(0); // Snap back visually
-
-      if (finalOffset > SWIPE_THRESHOLD) {
-        // Swiped Right -> Approve
-        if (navigator.vibrate) navigator.vibrate(50);
-        onApprove(id);
-      } else if (finalOffset < -SWIPE_THRESHOLD) {
-        // Swiped Left -> Reject
-        if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
-        onReject(id);
-      }
-    },
-    trackMouse: true // Allow mouse dragging for desktop testing
-  });
+  const handlers = useSwipeable({});
 
   // Calculate opacity for the background actions based on swipe distance
-  const approveOpacity = Math.min(1, Math.max(0, offset / SWIPE_THRESHOLD));
-  const rejectOpacity = Math.min(1, Math.max(0, -offset / SWIPE_THRESHOLD));
+  const approveOpacity = 0;
+  const rejectOpacity = 0;
 
   return (
     <div className="relative overflow-hidden rounded-2xl w-full select-none" {...handlers}>

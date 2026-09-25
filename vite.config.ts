@@ -113,6 +113,11 @@ export default defineConfig({
     globals: true,
     fileParallelism: false,
     testTimeout: 30000,
+    environmentMatchGlobs: [
+      ['tests/unit/**', 'jsdom'],
+      ['tests/integration/**', 'node'],
+      ['tests/security/**', 'node']
+    ],
     setupFiles: ['./tests/setup/test-env.ts', './tests/setup/cleanup.ts'],
     globalSetup: ['./tests/setup/global.setup.ts'],
     server: {
