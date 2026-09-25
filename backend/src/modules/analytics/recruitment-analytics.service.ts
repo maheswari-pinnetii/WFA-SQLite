@@ -26,12 +26,12 @@ export class RecruitmentAnalyticsService {
     const shortlisted = Math.max(0, applications - interviewing - offered - hired);
 
     const funnel = [
-      { name: "Open Positions", value: openPositions || 10, fill: "#6366f1" },
-      { name: "Applications", value: applications || Math.round((openPositions || 10) * 12), fill: "#06b6d4" },
-      { name: "Shortlisted", value: shortlisted || Math.round((openPositions || 10) * 5), fill: "#10b981" },
-      { name: "Interviews", value: interviewing || Math.round((openPositions || 10) * 3), fill: "#f59e0b" },
-      { name: "Offers Made", value: offered || Math.round((openPositions || 10) * 1.5), fill: "#8b5cf6" },
-      { name: "Hired", value: hired || Math.round((openPositions || 10) * 0.8), fill: "#ef4444" },
+      { name: "Open Positions", value: openPositions, fill: "#6366f1" },
+      { name: "Applications", value: applications, fill: "#06b6d4" },
+      { name: "Shortlisted", value: shortlisted, fill: "#10b981" },
+      { name: "Interviews", value: interviewing, fill: "#f59e0b" },
+      { name: "Offers Made", value: offered, fill: "#8b5cf6" },
+      { name: "Hired", value: hired, fill: "#ef4444" },
     ];
 
     // Department Distribution
@@ -55,13 +55,8 @@ export class RecruitmentAnalyticsService {
       ...counts
     }));
 
-    const sourceDistribution = [
-      { name: "LinkedIn", value: Math.max(5, Math.round(applications * 0.4)) },
-      { name: "Referral", value: Math.max(3, Math.round(applications * 0.3)) },
-      { name: "Job Board", value: Math.max(2, Math.round(applications * 0.2)) },
-      { name: "Campus", value: Math.max(1, Math.round(applications * 0.05)) },
-      { name: "Direct", value: Math.max(1, Math.round(applications * 0.05)) },
-    ];
+    // We don't have source in job_applications so return an empty array or basic fallback
+    const sourceDistribution: any[] = [];
 
     const kpis = {
       openPositions,

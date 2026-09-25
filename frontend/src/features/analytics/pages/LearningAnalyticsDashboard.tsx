@@ -34,8 +34,8 @@ export const LearningAnalyticsDashboard: React.FC = () => {
       const enrollmentsByStatus = courseStatus || [];
       const assessmentScores = topCourses.map((c: any) => ({
         name: c.name,
-        avgScore: 70 + Math.random() * 20, // Fallback since no assessment data
-        passRate: 65 + Math.random() * 30
+        avgScore: kpis.avgScore || 0, // Fallback since no assessment data per course
+        passRate: kpis.completionRate || 0
       }));
 
       setData({ 

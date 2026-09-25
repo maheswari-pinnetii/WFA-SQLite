@@ -202,10 +202,10 @@ export const HeadcountAnalyticsPage: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={locationDistribution || []} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
-                <XAxis dataKey="locationName" stroke="var(--text-muted)" fontSize={12} />
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} />
                 <Tooltip cursor={{ fill: 'var(--bg-primary)' }} contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
-                <Bar dataKey="employeeCount" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" fill="#06b6d4" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

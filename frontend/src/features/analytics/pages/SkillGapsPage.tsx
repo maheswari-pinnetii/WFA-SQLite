@@ -3,14 +3,21 @@ import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
 import { Role } from '../../../features/auth/security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Target, ShieldAlert, Award, Compass } from 'lucide-react';
+import { useAnalytics } from '../../../hooks/useAnalytics';
 
 export const SkillGapsPage: React.FC = () => {
-  const missingSkills = [
-    { skill: 'AWS CloudFormation / IaC', team: 'DevOps & Infrastructure', gapCount: 6, priority: 'Critical' },
-    { skill: 'PyTorch / ML Pipelines', team: 'Analytics Engine Group', gapCount: 4, priority: 'High' },
-    { skill: 'React Native / Mobile UI', team: 'Consumer Mobile Roster', gapCount: 3, priority: 'Medium' },
-    { skill: 'GraphQL / Federation', team: 'Core API Integration', gapCount: 2, priority: 'Low' }
-  ];
+  const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
+
+  if (analyticsLoading) {
+    return <div className="text-sm text-[var(--text-muted)] p-6">Loading gap analysis...</div>;
+  }
+
+  const missingSkills = analytics?.skillsAnalysis?.missingSkills?.map((skill: any) => ({
+    skill: skill.name || skill.skillName,
+    team: 'Various Teams', // This data isn't in skillsAnalysis yet, defaulting
+    gapCount: skill.gap || 0,
+    priority: (skill.gap || 0) > 5 ? 'Critical' : (skill.gap || 0) > 2 ? 'High' : 'Medium'
+  })) || [];
 
   return (
     <>

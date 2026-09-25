@@ -58,16 +58,17 @@ export class PlacementAnalyticsService {
       count
     })).sort((a, b) => b.count - a.count).slice(0, 5);
 
-    const placementTrend = [
-      { month: "Jan", placements: Math.max(1, Math.round(activePlacements * 0.1)) },
-      { month: "Feb", placements: Math.max(2, Math.round(activePlacements * 0.15)) },
-      { month: "Mar", placements: Math.max(1, Math.round(activePlacements * 0.12)) },
-      { month: "Apr", placements: Math.max(3, Math.round(activePlacements * 0.2)) },
-      { month: "May", placements: Math.max(2, Math.round(activePlacements * 0.18)) },
-      { month: "Jun", placements: Math.max(4, Math.round(activePlacements * 0.25)) }
-    ];
+    const topEmployers = Object.entries(employerMap).map(([name, count]) => ({
+      name,
+      placements: count,
+      avgSalary: placedCount > 0 ? Math.round(totalSalary / placedCount) : 0 // Basic approximation for now, or you could do it per employer if you track it
+    })).sort((a, b) => b.placements - a.placements).slice(0, 5);
 
-    return { kpis, placementByDept, topSkills, placementTrend };
+    const placementTrend: any[] = [];
+    // Could aggregate by actual month but since we don't have createdAt in the aggregation right now, we can omit it or group properly.
+    // For now returning empty array and will rely on frontend or proper DB grouping if needed
+
+    return { kpis, placementByDept, topSkills, placementTrend, topEmployers };
   }
 }
 

@@ -134,7 +134,7 @@ import { ConfirmationPage } from '../../features/lifecycle/pages/ConfirmationPag
 import { TransfersPage } from '../../features/lifecycle/pages/TransfersPage';
 import { PromotionsPage } from '../../features/lifecycle/pages/PromotionsPage';
 import { ExitPage } from '../../features/lifecycle/pages/ExitPage';
-import { ExecutiveDashboard } from '../../features/dashboards/executive/ExecutiveDashboard';
+import { ExecutivePortalPage } from '../../features/analytics/pages/ExecutivePortalPage';
 
 
 const DefaultHomeRedirect: React.FC = () => {
@@ -224,7 +224,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/admin/approvals" element={<RoleGuard allowedRoles={[Role.ADMIN]}><ApprovalsPage /></RoleGuard>} />
 
                 {/* ==================== 1.5 EXECUTIVE ROUTES ==================== */}
-                <Route path="/executive/dashboard" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN]}><ExecutiveDashboard /></RoleGuard>} />
+                <Route path="/executive/dashboard" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN]}><ExecutivePortalPage /></RoleGuard>} />
 
                 {/* ==================== 2. HR ROUTES ==================== */}
                 <Route path="/hr/dashboard" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><HRDashboard /></RoleGuard>} />

@@ -368,6 +368,12 @@ router.get('/reports/workforce/export', authenticateToken, enforceScope, authori
 router.get('/reports/leave/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportLeaveReport);
 router.get('/reports/payroll/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportPayrollReport);
 router.get('/reports/statutory/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportStatutoryReport);
+router.get('/reports/placement/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportPlacementReport);
+router.get('/reports/recruitment/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportRecruitmentReport);
+router.get('/reports/learning/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), reportController.exportLearningReport);
+router.get('/reports/performance/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportPerformanceReport);
+router.get('/reports/attrition-risk/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportAttritionRiskReport);
+router.get('/reports/demand-forecast/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportDemandForecastReport);
 router.get('/reports/metrics', authenticateToken, authenticatedUserLimiter, reportController.getReportMetrics);
 
 // Audit Logs & Security Dashboard

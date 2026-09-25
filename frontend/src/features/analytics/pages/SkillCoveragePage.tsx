@@ -5,12 +5,38 @@ import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Map, ShieldCheck, Award, Users } from 'lucide-react';
 
 export const SkillCoveragePage: React.FC = () => {
-  const certifications = [
-    { title: 'AWS Solutions Architect', authority: 'Amazon Web Services', activeHolders: 12, renewalRate: '100%' },
-    { title: 'Google Professional Cloud Architect', authority: 'Google Cloud Platform', activeHolders: 8, renewalRate: '92%' },
-    { title: 'Certified Kubernetes Administrator', authority: 'CNCF / Linux Foundation', activeHolders: 6, renewalRate: '100%' },
-    { title: 'Certified Scrum Product Owner', authority: 'Scrum Alliance', activeHolders: 15, renewalRate: '95%' }
-  ];
+  const [certifications, setCertifications] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [stats, setStats] = React.useState({ active: 0, expired: 0, expiring: 0 });
+
+  React.useEffect(() => {
+    const fetchCerts = async () => {
+      try {
+        const { apiClient } = await import('../../../api/client');
+        const response = await apiClient.get('/v1/analytics/certifications');
+        const certs = response.data?.data || [];
+        setCertifications(certs);
+        
+        let active = 0;
+        let expired = 0;
+        let expiring = 0;
+        certs.forEach((c: any) => {
+          active += c.certified || 0;
+          expired += c.expired || 0;
+          expiring += c.expiringSoon || 0;
+        });
+        setStats({ active, expired, expiring });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCerts();
+  }, []);
+
+  if (loading) return <div className="text-sm text-[var(--text-muted)] p-6">Loading certification data...</div>;
+
 
   return (
     <>
@@ -30,10 +56,10 @@ export const SkillCoveragePage: React.FC = () => {
 
         {/* KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <MinimalKpiCard title="Active Certifications" value="48 Certificates" icon={<Award size={26} />} iconBgColor="emerald" trend="Authorized holders" trendType="positive" />
-          <MinimalKpiCard title="Compliance Rate" value="98.5%" icon={<ShieldCheck size={26} />} iconBgColor="blue" trend="Zero expired status" trendType="positive" />
-          <MinimalKpiCard title="Staff Coverage" value="86 Employees" icon={<Users size={26} />} iconBgColor="purple" trend="+12 holders this Q" trendType="positive" />
-          <MinimalKpiCard title="Certification Index" value="Stable" icon={<Map size={26} />} iconBgColor="amber" trend="Full audit alignment" trendType="positive" />
+          <MinimalKpiCard title="Active Certifications" value={`${certifications.length} Unique`} icon={<Award size={26} />} iconBgColor="emerald" trend={`${stats.active} holders`} trendType="positive" />
+          <MinimalKpiCard title="Compliance Rate" value="100%" icon={<ShieldCheck size={26} />} iconBgColor="blue" trend={`${stats.expired} expired`} trendType="positive" />
+          <MinimalKpiCard title="Staff Coverage" value={`${stats.active} Employees`} icon={<Users size={26} />} iconBgColor="purple" trend="Active" trendType="positive" />
+          <MinimalKpiCard title="Expiring Soon" value={`${stats.expiring} Expiring`} icon={<Map size={26} />} iconBgColor="amber" trend="Next 90 days" trendType="negative" />
         </div>
 
         {/* Certificates List */}
@@ -44,18 +70,18 @@ export const SkillCoveragePage: React.FC = () => {
               <thead>
                 <tr className="border-b border-[var(--border-color)] text-slate-400 font-bold">
                   <th className="p-3">Certification Title</th>
-                  <th className="p-3">Issuing Authority</th>
                   <th className="p-3">Active Holders</th>
-                  <th className="p-3">Renewal Compliance</th>
+                  <th className="p-3">Expired</th>
+                  <th className="p-3">Expiring Soon (90d)</th>
                 </tr>
               </thead>
               <tbody>
                 {certifications.map((cert, idx) => (
                   <tr key={idx} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] transition-colors">
-                    <td className="p-3 font-semibold text-[var(--text-primary)]">{cert.title}</td>
-                    <td className="p-3 text-slate-300">{cert.authority}</td>
-                    <td className="p-3 font-bold text-emerald-400">{cert.activeHolders} Employees</td>
-                    <td className="p-3 text-emerald-400 font-bold uppercase">{cert.renewalRate}</td>
+                    <td className="p-3 font-semibold text-[var(--text-primary)]">{cert.name}</td>
+                    <td className="p-3 font-bold text-emerald-400">{cert.certified} Employees</td>
+                    <td className="p-3 text-rose-400 font-bold">{cert.expired}</td>
+                    <td className="p-3 text-amber-400 font-bold">{cert.expiringSoon}</td>
                   </tr>
                 ))}
               </tbody>

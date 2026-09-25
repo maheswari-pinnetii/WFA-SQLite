@@ -2,8 +2,8 @@ import { apiClient } from './client';
 import { AnalyticsData } from './endpoints/analytics.api';
 
 export const analyticsApi = {
-  getAnalytics: async (): Promise<any> => {
-    const response = await apiClient.get('/v1/analytics');
+  getAnalytics: async (filters?: Record<string, any>): Promise<any> => {
+    const response = await apiClient.get('/v1/analytics', { params: filters });
     return response.data?.data;
   },
 

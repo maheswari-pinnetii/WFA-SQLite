@@ -40,18 +40,20 @@ export class AttritionService {
     };
 
     return {
-      overview: {
-        totalEmployees: employees.length,
+      summary: {
+        totalAnalyzed: employees.length,
         highRiskCount: riskDistribution.find(d => d.name === 'High Risk')?.value || 0,
         mediumRiskCount: riskDistribution.find(d => d.name === 'Medium Risk')?.value || 0,
         lowRiskCount: riskDistribution.find(d => d.name === 'Low Risk')?.value || 0,
         overallRiskScore: employees.length ? Math.round((riskScored.reduce((sum: number, e: any) => sum + e.riskScore, 0)) / employees.length) : 0,
       },
-      riskByDepartment: Object.entries(deptRisk).map(([dept, counts]) => ({
+      departmentRisk: Object.entries(deptRisk).map(([dept, counts]) => ({
         department: dept, ...counts
       })).sort((a, b) => b.high - a.high),
-      topFactors,
+      riskDistribution,
+      topContributingFactors: topFactors,
       modelMetrics,
+      highRiskEmployees: riskScored.filter((e: any) => e.riskCategory === 'High').sort((a: any, b: any) => b.riskScore - a.riskScore).slice(0, 50),
       riskDetails: riskScored.sort((a: any, b: any) => b.riskScore - a.riskScore).slice(0, 50),
     };
   }

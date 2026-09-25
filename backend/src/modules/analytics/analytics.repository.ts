@@ -313,11 +313,11 @@ export class AnalyticsRepository {
     const rows = await query(`
       SELECT
         CASE
-          WHEN julianday('now') - julianday(joinDate) < 365 THEN '0-1 yr'
-          WHEN julianday('now') - julianday(joinDate) < 1095 THEN '1-3 yrs'
-          WHEN julianday('now') - julianday(joinDate) < 1825 THEN '3-5 yrs'
-          WHEN julianday('now') - julianday(joinDate) < 3650 THEN '5-10 yrs'
-          ELSE '10+ yrs'
+          WHEN julianday('now') - julianday(joinDate) < 365 THEN '0-1 years'
+          WHEN julianday('now') - julianday(joinDate) < 1095 THEN '1-3 years'
+          WHEN julianday('now') - julianday(joinDate) < 1825 THEN '3-5 years'
+          WHEN julianday('now') - julianday(joinDate) < 2920 THEN '5-8 years'
+          ELSE '8+ years'
         END as name,
         COUNT(*) as value
       FROM employees
@@ -325,10 +325,10 @@ export class AnalyticsRepository {
       GROUP BY name
       ORDER BY
         CASE name
-          WHEN '0-1 yr' THEN 1
-          WHEN '1-3 yrs' THEN 2
-          WHEN '3-5 yrs' THEN 3
-          WHEN '5-10 yrs' THEN 4
+          WHEN '0-1 years' THEN 1
+          WHEN '1-3 years' THEN 2
+          WHEN '3-5 years' THEN 3
+          WHEN '5-8 years' THEN 4
           ELSE 5
         END
     `, params);

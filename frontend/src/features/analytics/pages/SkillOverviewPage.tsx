@@ -3,14 +3,21 @@ import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
 import { Role } from '../../../features/auth/security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { Compass, Award, Tag, Activity } from 'lucide-react';
+import { useAnalytics } from '../../../hooks/useAnalytics';
 
 export const SkillOverviewPage: React.FC = () => {
-  const skillCategories = [
-    { category: 'Frontend Development', skillsCount: 14, expertCount: 48, status: 'Stable' },
-    { category: 'Backend & APIs', skillsCount: 12, expertCount: 32, status: 'Stable' },
-    { category: 'Cloud Infrastructure', skillsCount: 8, expertCount: 12, status: 'Gaps Found' },
-    { category: 'Data Science & ML', skillsCount: 6, expertCount: 8, status: 'High Mismatch' }
-  ];
+  const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
+
+  if (analyticsLoading) {
+    return <div className="text-sm text-[var(--text-muted)] p-6">Loading skill overview...</div>;
+  }
+
+  const skillCategories = analytics?.skillsAnalysis?.coverage?.map((skill: any) => ({
+    category: skill.name || skill.skillName,
+    skillsCount: skill.people || 0,
+    expertCount: skill.covered || 0,
+    status: (skill.gap || 0) > 3 ? 'High Mismatch' : (skill.gap || 0) > 0 ? 'Gaps Found' : 'Stable'
+  })) || [];
 
   return (
     <>

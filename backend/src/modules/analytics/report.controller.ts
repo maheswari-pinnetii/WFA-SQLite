@@ -592,3 +592,239 @@ export const getReportMetrics = async (req: any, res: any) => {
     return handleControllerError(err, req, res, 'report.getReportMetrics', 500, 'Failed to retrieve report metrics.');
   }
 };
+
+/**
+ * GET /api/v1/reports/placement/export
+ */
+export const exportPlacementReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv' } = req.query;
+
+    const sql = `SELECT * FROM placements WHERE organizationId = ?`;
+    const records = await query(sql, [orgId]) || [];
+
+    const formattedRecords = records.map((r: any) => ({
+      id: r.id,
+      employeeId: r.employeeId,
+      employerId: r.employerId,
+      role: r.role,
+      status: r.status,
+      startDate: r.startDate,
+      endDate: r.endDate,
+      feedbackScore: r.feedbackScore,
+      skillsMatched: r.skillsMatched,
+      contractValue: r.contractValue
+    }));
+
+    await logAudit(
+      req.user.id,
+      'EXPORT_PLACEMENT',
+      `Exported ${formattedRecords.length} placement records as ${format}`,
+      orgId
+    );
+
+    if (format === 'json') {
+      return res.json({ success: true, data: formattedRecords });
+    }
+
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="placement_report.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportPlacementReport', 500, 'Failed to export placement report.');
+  }
+};
+
+/**
+ * GET /api/v1/reports/recruitment/export
+ */
+export const exportRecruitmentReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv' } = req.query;
+
+    const sql = `SELECT * FROM job_applications WHERE organizationId = ?`;
+    const records = await query(sql, [orgId]) || [];
+
+    const formattedRecords = records.map((r: any) => ({
+      id: r.id,
+      positionId: r.positionId,
+      applicantId: r.applicantId,
+      status: r.status,
+      score: r.score,
+      createdAt: r.createdAt
+    }));
+
+    await logAudit(
+      req.user.id,
+      'EXPORT_RECRUITMENT',
+      `Exported ${formattedRecords.length} recruitment records as ${format}`,
+      orgId
+    );
+
+    if (format === 'json') {
+      return res.json({ success: true, data: formattedRecords });
+    }
+
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="recruitment_report.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportRecruitmentReport', 500, 'Failed to export recruitment report.');
+  }
+};
+
+/**
+ * GET /api/v1/reports/learning/export
+ */
+export const exportLearningReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv' } = req.query;
+
+    const sql = `SELECT * FROM training_enrollments WHERE organizationId = ?`;
+    const records = await query(sql, [orgId]) || [];
+
+    const formattedRecords = records.map((r: any) => ({
+      id: r.id,
+      employeeId: r.employeeId,
+      courseId: r.courseId,
+      courseName: r.courseName,
+      status: r.status,
+      score: r.score,
+      enrolledAt: r.enrolledAt,
+      completedAt: r.completedAt,
+      trainingHours: r.trainingHours
+    }));
+
+    await logAudit(
+      req.user.id,
+      'EXPORT_LEARNING',
+      `Exported ${formattedRecords.length} learning records as ${format}`,
+      orgId
+    );
+
+    if (format === 'json') {
+      return res.json({ success: true, data: formattedRecords });
+    }
+
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="learning_report.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportLearningReport', 500, 'Failed to export learning report.');
+  }
+};
+
+/**
+ * GET /api/v1/reports/performance/export
+ */
+export const exportPerformanceReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv' } = req.query;
+    
+    // We export a summary for now
+    const sql = `SELECT * FROM employees WHERE organizationId = ?`;
+    const records = await query(sql, [orgId]) || [];
+    
+    const formattedRecords = records.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      department: r.department,
+      role: r.role,
+      performanceScore: r.performanceScore || 0,
+      potential: (r.performanceScore || 0) >= 85 ? 'High' : ((r.performanceScore || 0) >= 70 ? 'Core' : 'Low')
+    }));
+
+    await logAudit(
+      req.user.id,
+      'EXPORT_PERFORMANCE',
+      `Exported ${formattedRecords.length} performance records as ${format}`,
+      orgId
+    );
+
+    if (format === 'json') return res.json({ success: true, data: formattedRecords });
+    
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="performance_report.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportPerformance', 500, 'Failed to export performance report.');
+  }
+};
+
+/**
+ * GET /api/v1/reports/attrition-risk/export
+ */
+export const exportAttritionRiskReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv' } = req.query;
+    
+    const records = await query(`SELECT * FROM employees WHERE organizationId = ? AND status = 'ACTIVE'`, [orgId]) || [];
+    const formattedRecords = records.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      department: r.department,
+      role: r.role,
+      performanceScore: r.performanceScore,
+      attendanceRate: r.attendanceRate
+    }));
+
+    await logAudit(
+      req.user.id,
+      'EXPORT_ATTRITION_RISK',
+      `Exported ${formattedRecords.length} attrition risk records as ${format}`,
+      orgId
+    );
+
+    if (format === 'json') return res.json({ success: true, data: formattedRecords });
+    
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="attrition_risk_report.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportAttrition', 500, 'Failed to export attrition report.');
+  }
+};
+
+/**
+ * GET /api/v1/reports/demand-forecast/export
+ */
+export const exportDemandForecastReport = async (req: any, res: any) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { format = 'csv' } = req.query;
+    
+    const records = await query(`SELECT department, COUNT(*) as headcount FROM employees WHERE organizationId = ? AND status = 'ACTIVE' GROUP BY department`, [orgId]) || [];
+    const formattedRecords = records.map((r: any) => ({
+      department: r.department,
+      currentHeadcount: r.headcount,
+      projectedGrowth: Math.round(r.headcount * 0.15),
+      targetHeadcount: Math.round(r.headcount * 1.15)
+    }));
+
+    await logAudit(
+      req.user.id,
+      'EXPORT_DEMAND_FORECAST',
+      `Exported demand forecast records as ${format}`,
+      orgId
+    );
+
+    if (format === 'json') return res.json({ success: true, data: formattedRecords });
+    
+    const csvContent = convertToCSV(formattedRecords);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="demand_forecast_report.csv"');
+    return res.status(200).send(csvContent);
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'report.exportDemand', 500, 'Failed to export demand report.');
+  }
+};

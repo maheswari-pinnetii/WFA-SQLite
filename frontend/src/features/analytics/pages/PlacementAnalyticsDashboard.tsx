@@ -23,7 +23,7 @@ export const PlacementAnalyticsDashboard: React.FC = () => {
       const byDept = (a.placementByDept || []).map((d: any) => ({
         dept: d.department,
         placements: d.placements,
-        avgSalary: 60000 + Math.random() * 20000,
+        avgSalary: a.kpis?.avgSalary || 0, // Fallback if per-department isn't available
       }));
 
       const byStatus = [
@@ -34,14 +34,12 @@ export const PlacementAnalyticsDashboard: React.FC = () => {
       const bySkill = (a.topSkills || []).map((s: any) => ({
         skill: s.name,
         placements: s.count,
-        avgSalary: 55000 + Math.random() * 20000,
+        avgSalary: a.kpis?.avgSalary || 0, // Fallback
       }));
 
-      const employers = [
-        { name: "Top Employers (Placeholder)", placements: a.kpis?.totalPlacements || 0, avgSalary: a.kpis?.avgSalary || 0 },
-      ];
+      const employers = a.topEmployers || [];
 
-      setData({ kpis: a.kpis || {}, byDept, byStatus, bySkill, employers });
+      setData({ kpis: a.kpis || {}, byDept, byStatus, bySkill, employers, placementTrend: a.placementTrend || [] });
     } catch (err: any) {
       setError(err.message || "Failed to load placement data");
     } finally {
