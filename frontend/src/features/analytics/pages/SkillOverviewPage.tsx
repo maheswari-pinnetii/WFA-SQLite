@@ -57,7 +57,7 @@ export const SkillOverviewPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {skillCategories.map((item, idx) => (
+                {skillCategories.map((item: any, idx: number) => (
                   <tr key={idx} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{item.category}</td>
                     <td className="p-3 text-slate-300 font-bold">{item.skillsCount} Skills</td>

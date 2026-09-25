@@ -57,7 +57,7 @@ export const SkillGapsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {missingSkills.map((item, idx) => (
+                {missingSkills.map((item: any, idx: number) => (
                   <tr key={idx} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{item.skill}</td>
                     <td className="p-3 text-slate-300">{item.team}</td>

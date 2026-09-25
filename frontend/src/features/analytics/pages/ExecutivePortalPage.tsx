@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Download, Building, Users, Activity, Target, Shield, AlertTriangle, Briefcase, RefreshCw, AlertCircle, FileText } from "lucide-react";
+import { Download, Building, Users, Activity, Target, Shield, AlertTriangle, Briefcase, RefreshCw, AlertCircle, FileText, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from "recharts";
 
 const getAuthToken = () => localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token") || "";

@@ -103,7 +103,7 @@ export const PerformanceOverviewPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {ratingsDistribution.map((item, idx) => (
+                {ratingsDistribution.map((item: any, idx: number) => (
                   <tr key={idx} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{item.rating}</td>
                     <td className="p-3 text-slate-300 font-bold">{item.count} Staff</td>
