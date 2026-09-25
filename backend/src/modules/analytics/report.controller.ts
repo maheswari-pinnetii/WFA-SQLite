@@ -645,15 +645,19 @@ export const exportRecruitmentReport = async (req: any, res: any) => {
     const orgId = getOrganizationId(req);
     const { format = 'csv' } = req.query;
 
-    const sql = `SELECT * FROM job_applications WHERE organizationId = ?`;
+    const sql = `
+      SELECT a.id, a.jobRequisitionId as positionId, a.candidateName as applicantName, a.status, a.appliedAt as createdAt
+      FROM applications a
+      JOIN job_requisitions r ON a.jobRequisitionId = r.id
+      WHERE r.organizationId = ?
+    `;
     const records = await query(sql, [orgId]) || [];
 
     const formattedRecords = records.map((r: any) => ({
       id: r.id,
       positionId: r.positionId,
-      applicantId: r.applicantId,
+      applicantName: r.applicantName,
       status: r.status,
-      score: r.score,
       createdAt: r.createdAt
     }));
 

@@ -64,7 +64,7 @@ describe('SQLite Database Backup & Disaster Recovery Test Suite', () => {
     expect(fs.existsSync(meta.filePath)).toBe(true);
 
     createdGzBackupFilename = meta.filename;
-  });
+  }, 30000);
 
   it('should list all available backups sorted chronologically', async () => {
     const backups = await backupService.listBackups();

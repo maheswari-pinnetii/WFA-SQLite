@@ -1,37 +1,49 @@
 import { query } from '../../database/sqlite-cloud.js';
 
-function buildWhereClause(queryData: any) {
+export function buildWhereClause(queryData: any, alias: string = '') {
   const clauses: string[] = [];
   const params: any[] = [];
+  const pfx = alias ? `${alias}.` : '';
   
   for (const [key, value] of Object.entries(queryData)) {
     if (value === undefined || value === null) continue;
     
     if (key === 'companyId' || key === 'organizationId') {
-      clauses.push(`(companyId = ? OR organizationId = ?)`);
+      clauses.push(`(${pfx}companyId = ? OR ${pfx}organizationId = ?)`);
       params.push(value, value);
     } else if (value instanceof RegExp) {
       const val = value.source.replace('^', '').replace('$', '').replace(/\\/g, '');
-      clauses.push(`${key} LIKE ?`);
+      clauses.push(`${pfx}${key} LIKE ?`);
       params.push(`%${val}%`);
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
       const operators = Object.keys(value);
       operators.forEach(op => {
         if (op === '$ne') {
-          clauses.push(`${key} != ?`);
-          params.push((value as any)[op]);
+          clauses.push(`${pfx}${key} != ?`);
+          const val = (value as any)[op];
+          params.push(val instanceof Date ? val.toISOString() : val);
+        } else if (op === '$gte') {
+          clauses.push(`${pfx}${key} >= ?`);
+          const val = (value as any)[op];
+          params.push(val instanceof Date ? val.toISOString() : val);
+        } else if (op === '$lte') {
+          clauses.push(`${pfx}${key} <= ?`);
+          const val = (value as any)[op];
+          params.push(val instanceof Date ? val.toISOString() : val);
         } else if (op === '$in') {
           const list = (value as any)[op];
           if (Array.isArray(list) && list.length > 0) {
             const placeholders = list.map(() => '?').join(', ');
-            clauses.push(`${key} IN (${placeholders})`);
+            clauses.push(`${pfx}${key} IN (${placeholders})`);
             params.push(...list);
+          } else if (Array.isArray(list) && list.length === 0) {
+            clauses.push(`1=0`);
           }
         }
       });
     } else {
-      clauses.push(`${key} = ?`);
-      params.push(value);
+      clauses.push(`${pfx}${key} = ?`);
+      params.push(value instanceof Date ? value.toISOString() : value);
     }
   }
 
@@ -133,14 +145,8 @@ export class AnalyticsRepository {
   }
 
   async getPerformanceByQuarter(queryData: any) {
-    const clauses: string[] = ['(p.companyId = ? OR p.organizationId = ?)'];
-    const orgId = queryData.organizationId || queryData.companyId || 'org-stackly';
-    const params: any[] = [orgId, orgId];
-    if (queryData.employeeId) {
-      clauses.push('p.employeeId = ?');
-      params.push(queryData.employeeId);
-    }
-    const where = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
+    const { clause, params } = buildWhereClause(queryData, 'p');
+    const where = clause ? `${clause} AND (p.createdAt >= e.joinDate OR e.joinDate IS NULL)` : `WHERE (p.createdAt >= e.joinDate OR e.joinDate IS NULL)`;
     const rows = await query(`
       SELECT 
         p.quarter as name,
@@ -149,7 +155,7 @@ export class AnalyticsRepository {
         ROUND(AVG(p.productivityScore), 1) as productivity
       FROM performancerecords p
       JOIN employees e ON p.employeeId = e.id
-      ${where} AND (p.createdAt >= e.joinDate OR e.joinDate IS NULL)
+      ${where}
       GROUP BY p.quarter
       ORDER BY name ASC
     `, params);
@@ -157,14 +163,8 @@ export class AnalyticsRepository {
   }
 
   async getTeamProductivity(queryData: any) {
-    const clauses: string[] = ['(p.companyId = ? OR p.organizationId = ?)'];
-    const orgId = queryData.organizationId || queryData.companyId || 'org-stackly';
-    const params: any[] = [orgId, orgId];
-    if (queryData.employeeId) {
-      clauses.push('p.employeeId = ?');
-      params.push(queryData.employeeId);
-    }
-    const where = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
+    const { clause, params } = buildWhereClause(queryData, 'p');
+    const where = clause ? `${clause} AND (p.createdAt >= e.joinDate OR e.joinDate IS NULL)` : `WHERE (p.createdAt >= e.joinDate OR e.joinDate IS NULL)`;
     const rows = await query(`
       SELECT 
         COALESCE(p.team, 'Unassigned') as name,
@@ -172,7 +172,7 @@ export class AnalyticsRepository {
         COUNT(DISTINCT p.employeeId) as members
       FROM performancerecords p
       JOIN employees e ON p.employeeId = e.id
-      ${where} AND (p.createdAt >= e.joinDate OR e.joinDate IS NULL)
+      ${where}
       GROUP BY p.team
       ORDER BY productivity DESC
     `, params);
@@ -196,14 +196,7 @@ export class AnalyticsRepository {
   }
 
   async getStaffSkillsRoster(queryData: any) {
-    const clauses: string[] = ['(e.companyId = ? OR e.organizationId = ?)'];
-    const orgId = queryData.organizationId || queryData.companyId || 'org-stackly';
-    const params: any[] = [orgId, orgId];
-    if (queryData.employeeId) {
-      clauses.push('e.id = ?');
-      params.push(queryData.employeeId);
-    }
-    const where = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
+    const { clause, params } = buildWhereClause(queryData, 'e');
     const rows = await query(`
       SELECT 
         e.id,
@@ -213,7 +206,7 @@ export class AnalyticsRepository {
         'N/A' as certification
       FROM employees e
       LEFT JOIN skills s ON e.id = s.employeeId
-      ${where}
+      ${clause}
       GROUP BY e.id
       ORDER BY e.name ASC
       LIMIT 100
@@ -335,14 +328,20 @@ export class AnalyticsRepository {
     return rows;
   }
 
-  async getOpenPositionsCount(orgId: string) {
+  async getOpenPositionsCount(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    // Since job_requisitions might not have all employee fields, we map the filters safely
+    // Or we just rely on buildWhereClause to filter by department, location, etc.
+    // Ensure status is OPEN, ACTIVE, or APPROVED
+    const statusClause = clause ? `AND status IN ('OPEN', 'ACTIVE', 'APPROVED')` : `WHERE status IN ('OPEN', 'ACTIVE', 'APPROVED')`;
+    const finalClause = clause ? `${clause} ${statusClause}` : statusClause;
+    
     try {
       const rows = await query(`
         SELECT COUNT(*) as count
         FROM job_requisitions
-        WHERE (organizationId = ? OR companyId = ?)
-          AND status IN ('OPEN', 'ACTIVE', 'APPROVED')
-      `, [orgId, orgId]);
+        ${finalClause}
+      `, params);
       return rows[0]?.count || 0;
     } catch {
       return 0;
@@ -395,8 +394,12 @@ export class AnalyticsRepository {
     }
   }
 
-  async getAttritionRiskScores(orgId: string) {
+  async getAttritionRiskScores(queryData: any) {
     try {
+      const { clause, params } = buildWhereClause(queryData, 'e');
+      // Always enforce active employees for risk score
+      const finalClause = clause ? `${clause} AND e.status = 'Active'` : `WHERE e.status = 'Active'`;
+      
       const rows = await query(`
         SELECT 
           e.id,
@@ -407,13 +410,45 @@ export class AnalyticsRepository {
           COALESCE(e.attendanceRate, 90) as attendanceRate,
           COALESCE(julianday('now') - julianday(e.joinDate), 730) as tenureDays
         FROM employees e
-        WHERE (e.organizationId = ? OR e.companyId = ?)
-          AND e.status = 'Active'
-        LIMIT 200
-      `, [orgId, orgId]);
+        ${finalClause}
+      `, params);
       return rows;
     } catch {
       return [];
+    }
+  }
+
+  async getHistoricalRates(queryData: any) {
+    try {
+      const { clause, params } = buildWhereClause(queryData, 'e');
+      
+      const rows = await query(`
+        SELECT 
+          COUNT(CASE WHEN e.status = 'Active' THEN 1 END) as activeHeadcount,
+          COUNT(CASE WHEN e.status IN ('Resigned', 'Terminated') AND julianday('now') - julianday(e.updatedAt) <= 365 THEN 1 END) as departuresLastYear,
+          COUNT(CASE WHEN julianday('now') - julianday(e.joinDate) <= 365 THEN 1 END) as hiredLastYear
+        FROM employees e
+        ${clause}
+      `, params);
+      
+      if (!rows || rows.length === 0) return { growthRate: 0.15, attritionRate: 0.10, activeHeadcount: 1 };
+      
+      const active = rows[0].activeHeadcount || 1;
+      const departed = rows[0].departuresLastYear || 0;
+      const hired = rows[0].hiredLastYear || 0;
+      
+      // Calculate rates
+      const attritionRate = departed / (active + departed);
+      const headcountLastYear = active + departed - hired;
+      const growthRate = headcountLastYear > 0 ? (active - headcountLastYear) / headcountLastYear : hired / active;
+      
+      return {
+        growthRate: Math.max(-0.5, Math.min(1.0, growthRate)), // Cap between -50% and +100%
+        attritionRate: Math.max(0, Math.min(0.5, attritionRate)), // Cap between 0 and 50%
+        activeHeadcount: active
+      };
+    } catch (e) {
+      return { growthRate: 0.15, attritionRate: 0.10, activeHeadcount: 1 };
     }
   }
 }

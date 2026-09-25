@@ -1,20 +1,30 @@
 import { query } from '../../database/sqlite-cloud.js';
+import { buildWhereClause } from './analytics.repository.js';
 
 export class RecruitmentAnalyticsService {
   async getRecruitmentDashboard(user: any, filters?: any) {
     const orgId = user.organizationId || 'org-stackly';
     
+    const queryFilters = { ...filters, organizationId: orgId };
+    const { clause: reqClause, params: reqParams } = buildWhereClause(queryFilters, 'r');
+    
+    // Build the query clause for reqs, handling the existing WHERE correctly
+    const reqWhere = reqClause ? `${reqClause} AND r.status = 'OPEN'` : `WHERE r.status = 'OPEN'`;
+    
     // Fetch open positions (job_requisitions)
     const reqs = await query(
-      `SELECT id, department, targetHireDate FROM job_requisitions WHERE organizationId = ? AND status = 'OPEN'`,
-      [orgId]
+      `SELECT r.id, r.department, r.targetHireDate FROM job_requisitions r ${reqWhere}`,
+      reqParams
     );
     const openPositions = reqs.length;
 
     // Fetch applications
     const apps = await query(
-      `SELECT id, status, positionId, createdAt FROM job_applications WHERE organizationId = ?`,
-      [orgId]
+      `SELECT a.id, a.status, a.jobRequisitionId, a.appliedAt 
+       FROM applications a
+       JOIN job_requisitions r ON a.jobRequisitionId = r.id
+       ${reqClause}`,
+      reqParams
     );
 
     const applications = apps.length;
@@ -22,7 +32,6 @@ export class RecruitmentAnalyticsService {
     const offered = apps.filter((a: any) => a.status === 'OFFERED').length;
     const hired = apps.filter((a: any) => a.status === 'HIRED').length;
     
-    // Some mock/heuristic data for missing fields to prevent UI crashing while keeping it realistic
     const shortlisted = Math.max(0, applications - interviewing - offered - hired);
 
     const funnel = [
@@ -42,8 +51,7 @@ export class RecruitmentAnalyticsService {
       deptMap[dept].openings++;
     });
     apps.forEach((a: any) => {
-      // Find dept from positionId if mapped, or just fallback
-      const req = reqs.find((r: any) => r.id === a.positionId);
+      const req = reqs.find((r: any) => r.id === a.jobRequisitionId);
       const dept = req ? req.department : 'Unknown';
       if (!deptMap[dept]) deptMap[dept] = { openings: 0, applications: 0, hired: 0 };
       deptMap[dept].applications++;
@@ -55,15 +63,14 @@ export class RecruitmentAnalyticsService {
       ...counts
     }));
 
-    // We don't have source in job_applications so return an empty array or basic fallback
     const sourceDistribution: any[] = [];
 
     const kpis = {
       openPositions,
       totalApplications: applications,
       offerAcceptanceRate: offered > 0 ? Math.round((hired / offered) * 100) : 0,
-      avgTimeToHire: 32, // Proxy
-      costPerHire: 45000,
+      avgTimeToHire: 0, // Replaced hardcoded proxy with 0 until tracking added
+      costPerHire: 0,   // Replaced hardcoded proxy with 0 until tracking added
       hiredThisQuarter: hired,
     };
 

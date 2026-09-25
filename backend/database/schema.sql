@@ -1147,6 +1147,28 @@ CREATE TABLE IF NOT EXISTS employee_education (
   FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS placements (
+  id TEXT PRIMARY KEY,
+  employeeId TEXT NOT NULL,
+  employerId TEXT,
+  employer TEXT,
+  role TEXT,
+  department TEXT,
+  skill TEXT,
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  startDate TEXT,
+  endDate TEXT,
+  salary REAL,
+  placementTimeDays INTEGER,
+  feedbackScore REAL,
+  skillsMatched TEXT,
+  contractValue REAL,
+  organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS employee_certifications (
   id TEXT PRIMARY KEY,
   employeeId TEXT NOT NULL,

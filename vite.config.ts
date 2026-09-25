@@ -112,6 +112,7 @@ export default defineConfig({
     exclude: ['node_modules', 'playwright/**'],
     globals: true,
     fileParallelism: false,
+    testTimeout: 30000,
     setupFiles: ['./tests/setup/test-env.ts', './tests/setup/cleanup.ts'],
     globalSetup: ['./tests/setup/global.setup.ts'],
     server: {

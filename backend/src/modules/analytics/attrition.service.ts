@@ -2,9 +2,10 @@ import { analyticsRepository } from './analytics.repository.js';
 import { statisticalEngine } from '../ai/services/statisticalEngine.js';
 
 export class AttritionService {
-  async getAttritionRiskDashboard(reqUser: any) {
+  async getAttritionRiskDashboard(reqUser: any, filters?: any) {
     const orgId = reqUser.organizationId || 'org-stackly';
-    const employees = await analyticsRepository.getAttritionRiskScores(orgId);
+    const queryFilters = { ...filters, organizationId: orgId };
+    const employees = await analyticsRepository.getAttritionRiskScores(queryFilters);
 
     // Provide the raw data to the statistical engine to do the scoring
     const riskScored = statisticalEngine.calculateAttritionRisk(employees);

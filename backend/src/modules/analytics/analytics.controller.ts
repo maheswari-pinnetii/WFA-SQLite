@@ -103,7 +103,8 @@ export const getAttendanceTrend = async (req: Request, res: Response) => {
 
 export const getPerformanceAnalytics = async (req: Request, res: Response) => {
   try {
-    const data = await analyticsService.getPerformanceAnalytics((req as any).user);
+    const filters = req.query || {};
+    const data = await analyticsService.getPerformanceAnalytics((req as any).user, filters);
     return res.json({ success: true, data });
   } catch (err: any) {
     sendError(res, err);
@@ -112,7 +113,8 @@ export const getPerformanceAnalytics = async (req: Request, res: Response) => {
 
 export const getAttritionRiskDashboard = async (req: Request, res: Response) => {
   try {
-    const data = await attritionService.getAttritionRiskDashboard((req as any).user);
+    const filters = req.query || {};
+    const data = await attritionService.getAttritionRiskDashboard((req as any).user, filters);
     return res.json({ success: true, data });
   } catch (err: any) {
     sendError(res, err);
@@ -121,7 +123,8 @@ export const getAttritionRiskDashboard = async (req: Request, res: Response) => 
 
 export const getDemandForecasting = async (req: Request, res: Response) => {
   try {
-    const data = await demandService.getDemandForecasting((req as any).user);
+    const filters = req.query || {};
+    const data = await demandService.getDemandForecasting((req as any).user, filters);
     return res.json({ success: true, data });
   } catch (err: any) {
     sendError(res, err);

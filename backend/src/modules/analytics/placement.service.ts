@@ -1,13 +1,17 @@
 import { query } from '../../database/sqlite-cloud.js';
+import { buildWhereClause } from './analytics.repository.js';
 
 export class PlacementAnalyticsService {
   async getPlacementDashboard(user: any, filters?: any) {
     const orgId = user.organizationId || 'org-stackly';
     
+    const queryFilters = { ...filters, organizationId: orgId };
+    const { clause, params } = buildWhereClause(queryFilters);
+
     // Fetch placements
     const placements = await query(
-      `SELECT * FROM placements WHERE organizationId = ?`,
-      [orgId]
+      `SELECT * FROM placements ${clause}`,
+      params
     );
 
     const totalPlacements = placements.length;

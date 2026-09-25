@@ -54,11 +54,34 @@ export class AnalyticsService {
   async getAnalytics(reqUser: any, filters?: any) {
     const employeeQuery = getScope(reqUser, 'id', filters);
     const attendanceQuery = getScope(reqUser, 'employeeId', filters);
+    delete attendanceQuery.status; delete attendanceQuery.department; delete attendanceQuery.role; delete attendanceQuery.location;
     const performanceQuery = getScope(reqUser, 'employeeId', filters);
+    delete performanceQuery.status; delete performanceQuery.department; delete performanceQuery.role; delete performanceQuery.location;
     const skillQuery = getScope(reqUser, 'employeeId', filters);
+    delete skillQuery.status; delete skillQuery.department; delete skillQuery.role; delete skillQuery.location; delete skillQuery.createdAt;
+
+    // Fetch employees first so we can use their IDs to filter the other tables
+    const employees = await analyticsRepository.getEmployeesSummary(employeeQuery);
+    const employeeIds = employees.map((e: any) => e.id);
+    
+    // SQLite has a parameter limit (usually 999). Limit the IDs passed to IN clauses.
+    const safeEmployeeIds = employeeIds.slice(0, 900);
+    
+    // Add employeeId filter if we have employee-level filters and matching employees
+    if (Object.keys(filters || {}).length > 0 && safeEmployeeIds.length > 0) {
+      attendanceQuery.employeeId = { $in: safeEmployeeIds };
+      performanceQuery.employeeId = { $in: safeEmployeeIds };
+      skillQuery.employeeId = { $in: safeEmployeeIds };
+      // employeeQuery is already filtered, but some repo methods use it for tasks/leaves
+      employeeQuery.id = { $in: safeEmployeeIds };
+    } else if (Object.keys(filters || {}).length > 0 && safeEmployeeIds.length === 0) {
+       attendanceQuery.employeeId = { $in: [] };
+       performanceQuery.employeeId = { $in: [] };
+       skillQuery.employeeId = { $in: [] };
+       employeeQuery.id = { $in: [] };
+    }
 
     const [
-      employees,
       attendance,
       departmentComparison,
       roleDistribution,
@@ -73,7 +96,6 @@ export class AnalyticsService {
       locationDistribution,
       experienceDistribution
     ] = await Promise.all([
-      analyticsRepository.getEmployeesSummary(employeeQuery),
       analyticsRepository.getAttendanceRecords(attendanceQuery),
       analyticsRepository.getDepartmentComparison(employeeQuery),
       analyticsRepository.getRoleDistribution(employeeQuery),
@@ -87,7 +109,7 @@ export class AnalyticsService {
       analyticsRepository.getStaffSkillsRoster(employeeQuery),
       analyticsRepository.getLocationDistribution(employeeQuery),
       analyticsRepository.getExperienceDistribution(employeeQuery)
-    ]) as [any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[]];
+    ]) as [any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[]];
 
     const growthData = await buildGrowth(reqUser, filters);
     const totalEmployees = employees.length;
@@ -201,9 +223,14 @@ export class AnalyticsService {
     const attritionRate = totalEmployees ? Number(((exits / (totalEmployees + exits)) * 100).toFixed(1)) : 0;
     const employeeGrowthRate = totalEmployees ? Number((((newJoiners - exits) / totalEmployees) * 100).toFixed(1)) : 0;
     
-    // Fetch real open positions from recruitment module
-    const orgId = reqUser.organizationId || 'org-stackly';
-    const openPositions = await analyticsRepository.getOpenPositionsCount(orgId);
+    // Fetch real open positions from recruitment module using filters
+    // We omit 'role' and 'location' from the job req query if they don't apply, but buildWhereClause ignores unmatched fields if we're careful.
+    // Actually job_requisitions has department.
+    const reqQuery = getScope(reqUser, 'id', filters);
+    // Remove filters that don't apply to job_requisitions
+    delete reqQuery.role;
+    delete reqQuery.status;
+    const openPositions = await analyticsRepository.getOpenPositionsCount(reqQuery);
     
     // Performance
     const teamPerformance = averagePerformance;
@@ -431,7 +458,7 @@ export class AnalyticsService {
       analyticsRepository.getDashboardSummaryMV(orgId),
       analyticsRepository.getEmployeesSummary(employeeQuery),
       analyticsRepository.getAttendanceRecords(attendanceQuery),
-      analyticsRepository.getOpenPositionsCount(orgId)
+      analyticsRepository.getOpenPositionsCount(employeeQuery)
     ]);
 
     // Use MV for total headcount if available, fallback to full count
@@ -648,8 +675,8 @@ export class AnalyticsService {
     });
   }
 
-  async getPerformanceAnalytics(reqUser: any) {
-    const performanceQuery = getScope(reqUser, 'employeeId');
+  async getPerformanceAnalytics(reqUser: any, filters?: any) {
+    const performanceQuery = getScope(reqUser, 'employeeId', filters);
     return analyticsRepository.getPerformanceByQuarter(performanceQuery);
   }
 

@@ -25,6 +25,7 @@
 - **Granular RBAC**: 5-Tier Role-Based Access Control (`ADMIN`, `HR`, `MANAGER`, `TEAM_LEAD`, `EMPLOYEE`).
 - **Real-Time Attendance**: Geofenced biometric punch tracking.
 - **Leave & Payroll Management**: Automated synchronization between live attendance, approved leaves, and payroll ledgers.
+- **Predictive Workforce Intelligence**: AI-powered attrition risk scoring, data-driven demand forecasting, and dynamic workforce scenario modeling (Best/Expected/Worst case) seamlessly integrated with historical SQLite metrics.
 - **Master Product Backlog**: 1,850-item audit checklist and feature roadmap available in [`docs/MASTER_PRODUCT_BACKLOG.md`](file:///c:/Users/91970/Downloads/WFA-SQLite/docs/MASTER_PRODUCT_BACKLOG.md).
 
 

@@ -1,27 +1,23 @@
 import { analyticsRepository } from './analytics.repository.js';
 
-const getScope = (user: any, employeeIdKey = 'employeeId') => {
-  const query: any = { organizationId: user.organizationId || 'org-stackly' };
-  if (user.role === 'MANAGER') query.department = user.department;
-  if (user.role === 'TEAM_LEAD') query.team = user.team;
-  if (user.role === 'EMPLOYEE') query[employeeIdKey] = user.id;
-  return query;
-};
-
 export class WorkforcePlanningService {
-  async getScenarios(reqUser: any) {
-    const employees = await analyticsRepository.getEmployeesSummary(getScope(reqUser, 'id'));
+  async getScenarios(reqUser: any, filters?: any) {
+    const orgId = reqUser.organizationId || 'org-stackly';
+    const queryFilters = { ...filters, organizationId: orgId };
+    
+    const employees = await analyticsRepository.getEmployeesSummary(queryFilters);
     const totalEmployees = employees.length || 1; // avoid div/0
     
-    // Baseline growth assumptions
-    const baseGrowthRate = 0.15; // 15%
-    const baseAttritionRate = 0.10; // 10%
+    // Dynamically calculate baseline assumptions based on real historical rates
+    const rates = await analyticsRepository.getHistoricalRates(queryFilters);
+    const baseGrowthRate = rates.growthRate;
+    const baseAttritionRate = rates.attritionRate;
     
     const scenarios = [
       {
         scenario: 'Best Case (Aggressive Growth, Low Attrition)',
-        projectedGrowthRate: baseGrowthRate + 0.10, // 25%
-        projectedAttritionRate: Math.max(0, baseAttritionRate - 0.05), // 5%
+        projectedGrowthRate: baseGrowthRate + 0.10, // 10% higher than baseline
+        projectedAttritionRate: Math.max(0, baseAttritionRate - 0.05), // 5% lower than baseline
         description: 'Assumes successful hiring campaigns and high employee retention.',
       },
       {
@@ -32,8 +28,8 @@ export class WorkforcePlanningService {
       },
       {
         scenario: 'Worst Case (Low Growth, High Attrition)',
-        projectedGrowthRate: Math.max(0, baseGrowthRate - 0.10), // 5%
-        projectedAttritionRate: baseAttritionRate + 0.08, // 18%
+        projectedGrowthRate: Math.max(0, baseGrowthRate - 0.10), // 10% lower
+        projectedAttritionRate: baseAttritionRate + 0.08, // 8% higher
         description: 'Assumes hiring freezes or difficulty attracting talent, coupled with elevated turnover.',
       }
     ];
@@ -47,10 +43,10 @@ export class WorkforcePlanningService {
       return {
         ...s,
         currentHeadcount: totalEmployees,
-        projectedNewHires: newHires,
-        projectedDepartures: departing,
+        projectedNewHires: Math.max(0, newHires),
+        projectedDepartures: Math.max(0, departing),
         netChange,
-        finalHeadcount
+        finalHeadcount: Math.max(0, finalHeadcount)
       };
     });
 

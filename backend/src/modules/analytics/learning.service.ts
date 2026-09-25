@@ -1,13 +1,17 @@
 import { query } from '../../database/sqlite-cloud.js';
+import { buildWhereClause } from './analytics.repository.js';
 
 export class LearningAnalyticsService {
   async getLearningDashboard(user: any, filters?: any) {
     const orgId = user.organizationId || 'org-stackly';
     
+    const queryFilters = { ...filters, organizationId: orgId };
+    const { clause, params } = buildWhereClause(queryFilters);
+
     // Fetch training enrollments
     const enrollments = await query(
-      `SELECT * FROM training_enrollments WHERE organizationId = ?`,
-      [orgId]
+      `SELECT * FROM training_enrollments ${clause}`,
+      params
     );
 
     const totalEnrollments = enrollments.length;
@@ -18,12 +22,12 @@ export class LearningAnalyticsService {
     const totalHours = enrollments.reduce((sum: number, e: any) => sum + (e.trainingHours || 0), 0);
     const avgScore = enrollments.reduce((sum: number, e: any) => sum + (e.score || 0), 0) / (completedTraining || 1);
 
-    // Fetch Certifications
+    // Fetch Certifications using employee_certifications
     const certs = await query(
-      `SELECT * FROM certifications WHERE organizationId = ?`,
-      [orgId]
+      `SELECT * FROM employee_certifications ${clause}`,
+      params
     );
-    const activeCertifications = certs.filter((c: any) => c.status === 'ACTIVE').length;
+    const activeCertifications = certs.filter((c: any) => c.status === 'ACTIVE' || !c.status).length;
 
     const kpis = {
       totalEnrollments,
