@@ -38,7 +38,7 @@ export const registrationSchema = z.object({
     .refine((val) => !['password123', 'StacklyWFA2026!', 'qwertyuiop', '1234567890'].includes(val), 'Password is too common or easily guessed.')
     .optional(),
   // Public self-registration — role is ALWAYS forced to EMPLOYEE server-side (anti-privilege-escalation)
-  role: z.enum(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE']).optional(),
+  role: z.enum(['ADMIN', 'HR', 'EXECUTIVE', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE']).optional(),
   // Accept both 'department' and 'departmentId' from different form versions
   department: z.string().trim().max(100).optional(),
   departmentId: z.string().trim().max(100).optional(),
@@ -171,7 +171,7 @@ export const reviewCorrectionSchema = z.object({
 // ─── ADMIN & SYSTEM SCHEMAS ──────────────────────────────────────────────────
 
 export const updateUserRoleSchema = z.object({
-  role: z.enum(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE'], {
+  role: z.enum(['ADMIN', 'HR', 'EXECUTIVE', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE'], {
     message: 'Invalid role specified.'
   })
 }).strict();
@@ -277,7 +277,7 @@ export const createEmployeeSchema = z.object({
   confirmationDate: z.string().trim().max(50).optional(),
   team: z.string().trim().max(100).optional(),
   location: z.string().trim().max(100).optional(),
-  role: z.enum(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE'], {
+  role: z.enum(['ADMIN', 'HR', 'EXECUTIVE', 'MANAGER', 'TEAM_LEAD', 'EMPLOYEE'], {
     message: 'Invalid role specified.'
   }).optional(),
   employeeCode: z.string().trim().max(100).optional(),

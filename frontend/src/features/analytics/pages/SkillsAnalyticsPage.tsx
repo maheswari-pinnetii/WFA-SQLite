@@ -9,36 +9,15 @@ import { useEmployees } from '../../../hooks/useEmployees';
 
 export const SkillsAnalyticsPage: React.FC = () => {
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
-  const { employees, isLoading: employeesLoading } = useEmployees({ pageSize: 10 });
 
-  if (analyticsLoading || employeesLoading) {
+  if (analyticsLoading) {
     return <div className="text-sm text-[var(--text-muted)] p-6">Loading skills metrics...</div>;
   }
 
   const skillsCoverage = analytics?.skillsAnalysis?.coverage || [];
   const topSkillsCount = analytics?.skillsAnalysis?.topSkills?.length || 0;
   const missingSkillsCount = analytics?.skillsAnalysis?.missingSkills?.length || 0;
-
-  const staffRoster = (employees || []).slice(0, 10).map((emp) => {
-    let skillsList = 'React, TypeScript, Node.js';
-    let cert = 'Certified Professional';
-    if (emp.department === 'Human Resources') {
-      skillsList = 'HR Ops, Recruitment, Talent Management';
-      cert = 'SHRM Certified Professional';
-    } else if (emp.department === 'Finance & Operations') {
-      skillsList = 'Accounting, Financial Analysis, ERP';
-      cert = 'CPA Accountant';
-    } else if (emp.department === 'Product Management') {
-      skillsList = 'Roadmapping, User Research, Wireframes';
-      cert = 'Scrum Product Owner';
-    }
-    return {
-      name: emp.name,
-      role: emp.designation || emp.role,
-      primarySkills: skillsList,
-      certification: cert
-    };
-  });
+  const staffRoster = analytics?.skillsAnalysis?.staffRoster || [];
 
   return (
     <>
@@ -90,7 +69,7 @@ export const SkillsAnalyticsPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {staffRoster.map((item, idx) => (
+                {staffRoster.map((item: any, idx: number) => (
                   <tr key={idx} className="border-b border-[var(--border-subtle)] hover:bg-[var(--bg-tertiary)] transition-colors">
                     <td className="p-3 font-semibold text-[var(--text-primary)]">{item.name}</td>
                     <td className="p-3 text-slate-300">{item.role}</td>

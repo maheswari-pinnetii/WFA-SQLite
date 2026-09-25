@@ -126,9 +126,9 @@ export const EmailLoginCard: React.FC<EmailLoginCardProps> = ({
       )}
 
       {/* Card Heading */}
-      <h2 className="card-heading centered" style={{ marginBottom: '1.25rem' }}>
+      <h1 className="card-heading centered" style={{ marginBottom: '1.25rem' }}>
         {step === 1 ? 'Sign in' : 'Enter your password'}
-      </h2>
+      </h1>
 
       {activeError && (
         <div className="auth-alert auth-alert-error" role="alert">

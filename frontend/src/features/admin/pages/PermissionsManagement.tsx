@@ -41,6 +41,12 @@ export const PermissionsManagement: React.FC = () => {
       Permission.ATTENDANCE_VIEW,
       Permission.PROFILE_VIEW,
     ],
+    [Role.EXECUTIVE]: [
+      Permission.EMPLOYEE_VIEW,
+      Permission.REPORT_VIEW,
+      Permission.REPORT_GENERATE,
+      Permission.TEAM_ANALYTICS_VIEW,
+    ],
   };
 
   const currentPermissions = rolePermissions[selectedRole] || [];

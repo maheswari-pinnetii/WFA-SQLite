@@ -3,6 +3,7 @@ import * as authController from '../modules/core/auth.controller.js';
 import * as authFlowController from '../modules/core/authFlow.controller.js';
 import * as attendanceController from '../modules/attendance/attendance.controller.js';
 import * as analyticsController from '../modules/analytics/analytics.controller.js';
+import * as workforcePlanningController from '../modules/analytics/workforce-planning.controller.js';
 import * as workforceController from '../modules/hr/workforce.controller.js';
 import * as employeeController from '../modules/users/employee.controller.js';
 import * as organizationController from '../modules/users/organization.controller.js';
@@ -339,6 +340,16 @@ router.get('/dashboard/risk', authenticateToken, enforceScope, authenticatedUser
 router.get('/analytics/employee-growth', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getEmployeeGrowth);
 router.get('/analytics/attendance-trend', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getAttendanceTrend);
 router.get('/analytics/performance', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getPerformanceAnalytics);
+
+// Sprint 2 – Skill & Certification Analytics
+router.get('/analytics/certifications', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getCertificationStatus);
+router.get('/analytics/training-recommendations', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getTrainingRecommendations);
+
+// Sprint 3 – Predictive Workforce Analytics
+router.get('/analytics/attrition-risk', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getAttritionRiskDashboard);
+router.get('/analytics/demand-forecast', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getDemandForecasting);
+router.get('/analytics/workforce-planning/scenarios', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), workforcePlanningController.getScenarios);
+
 
 // Compliance & Intelligence Reports Streaming (CSV / JSON)
 router.get('/reports/attendance/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportAttendanceReport);

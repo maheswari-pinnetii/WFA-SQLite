@@ -122,9 +122,9 @@ export const PasswordlessLoginCard: React.FC<PasswordlessLoginCardProps> = ({
       )}
 
       {/* Card Heading */}
-      <h2 className="card-heading centered">
+      <h1 className="card-heading centered">
         Sign in faster with your face, fingerprint, or PIN
-      </h2>
+      </h1>
 
       {activeError && (
         <div className="auth-alert auth-alert-error" role="alert">

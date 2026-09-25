@@ -90,5 +90,16 @@ export const ROLE_KPI_CONFIGS: Record<Role, KpiItemConfig[]> = {
     { key: 'coreHours', title: 'Core Hours', icon: <MoreTimeIcon />, dataKey: 'coreHours', subtitle: 'Compliance' },
     { key: 'openTickets', title: 'Open Tickets', icon: <PendingActionsIcon />, dataKey: 'openTickets', subtitle: 'IT / HR requests' },
     { key: 'training', title: 'Training', icon: <AssessmentIcon />, dataKey: 'training', subtitle: 'Modules completed' }
+  ],
+
+  [Role.EXECUTIVE]: [
+    { key: 'totalEmployees', title: 'Total Employees', icon: <PeopleAltIcon />, dataKey: 'headcount', trendKey: 'headcountTrend', subtitle: 'Active staff' },
+    { key: 'attritionRate', title: 'Attrition Rate', icon: <TrendingDownIcon />, dataKey: 'attritionRate', trendKey: 'attritionTrend', subtitle: 'Annualized turnover' },
+    { key: 'revenuePerEmployee', title: 'Revenue / Employee', icon: <PaymentsIcon />, dataKey: 'revenuePerEmployee', subtitle: 'Efficiency' },
+    { key: 'openRoles', title: 'Open Roles', icon: <WorkIcon />, dataKey: 'openRoles', subtitle: 'Active hiring' },
+    { key: 'productivity', title: 'Productivity', icon: <TrendingUpIcon />, dataKey: 'productivity', subtitle: 'Company output' },
+    { key: 'budget', title: 'Budget Status', icon: <PaymentsIcon />, dataKey: 'budget', subtitle: 'Utilization' },
+    { key: 'compliance', title: 'Compliance', icon: <TaskAltIcon />, dataKey: 'compliance', subtitle: 'Status' },
+    { key: 'training', title: 'Training ROI', icon: <AssessmentIcon />, dataKey: 'training', subtitle: 'Company-wide' }
   ]
 };

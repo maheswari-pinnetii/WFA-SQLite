@@ -29,7 +29,6 @@ async function seedData() {
     await execute('DELETE FROM attendancerecords');
     await execute('DELETE FROM performancerecords');
     await execute('DELETE FROM skills');
-    await execute('DELETE FROM workflow_instances');
 
     const now = new Date();
     const sixMonthsAgo = new Date(now);
@@ -112,16 +111,6 @@ async function seedData() {
           [crypto.randomUUID(), emp.id, skill, randomInt(1, 5), 0, 0, emp.department, emp.team || 'Unassigned', emp.organizationId, emp.organizationId, now.toISOString(), now.toISOString()]
         );
       }
-    }
-
-    console.log('Seeding HR workflows...');
-    for (let i = 0; i < 50; i++) {
-      const type = randomChoice(['ONBOARDING', 'OFFBOARDING', 'PAYROLL_ISSUE', 'COMPLIANCE', 'BENEFITS']);
-      const status = randomChoice(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'RESOLVED']);
-      await execute(
-        'INSERT INTO workflow_instances (id, organizationId, type, status, createdAt) VALUES (?, ?, ?, ?, ?)',
-        [crypto.randomUUID(), 'org-stackly', type, status, randomDate(sixMonthsAgo, now).toISOString()]
-      );
     }
 
     console.log('Successfully seeded all dashboard data!');

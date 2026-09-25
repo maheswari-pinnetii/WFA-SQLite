@@ -27,7 +27,7 @@ test.describe('Authentication E2E Flow', () => {
     await expect(loginPage.cardHeading).toContainText(/Enter your password/i);
   });
 
-  test('should complete full login flow into Dashboard for all 5 enterprise roles', async ({ loginPage, dashboardPage }) => {
+  test('should complete full login flow into Dashboard for all 6 enterprise roles', async ({ loginPage, dashboardPage }) => {
     // 1. ADMIN
     await loginPage.loginAs(TEST_ENV.USERS.ADMIN.email, 'StacklyWFA2026!');
     await dashboardPage.expectDashboardLoaded();
@@ -50,6 +50,13 @@ test.describe('Authentication E2E Flow', () => {
 
   test('should login as TEAM_LEAD and land on Team Lead Dashboard', async ({ loginPage, dashboardPage }) => {
     await loginPage.loginAs(TEST_ENV.USERS.TEAM_LEAD.email, 'StacklyWFA2026!');
+    await dashboardPage.expectDashboardLoaded();
+    await expect(loginPage.page).toHaveURL(/.*dashboard/);
+    await loginPage.page.context().clearCookies();
+  });
+  
+  test('should login as EXECUTIVE and land on Executive Dashboard', async ({ loginPage, dashboardPage }) => {
+    await loginPage.loginAs(TEST_ENV.USERS.EXECUTIVE.email, 'StacklyWFA2026!');
     await dashboardPage.expectDashboardLoaded();
     await expect(loginPage.page).toHaveURL(/.*dashboard/);
     await loginPage.page.context().clearCookies();

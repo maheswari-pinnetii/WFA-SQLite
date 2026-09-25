@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { analyticsService } from './analytics.service.js';
+import { attritionService } from './attrition.service.js';
+import { demandService } from './demand.service.js';
 import { sendError } from '../../utils/apiError.js';
 
 export const getAnalytics = async (req: Request, res: Response) => {
@@ -74,3 +76,40 @@ export const getPerformanceAnalytics = async (req: Request, res: Response) => {
     sendError(res, err);
   }
 };
+
+export const getAttritionRiskDashboard = async (req: Request, res: Response) => {
+  try {
+    const data = await attritionService.getAttritionRiskDashboard((req as any).user);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const getDemandForecasting = async (req: Request, res: Response) => {
+  try {
+    const data = await demandService.getDemandForecasting((req as any).user);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const getCertificationStatus = async (req: Request, res: Response) => {
+  try {
+    const data = await analyticsService.getCertificationStatus((req as any).user);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const getTrainingRecommendations = async (req: Request, res: Response) => {
+  try {
+    const data = await analyticsService.getTrainingRecommendations((req as any).user);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+

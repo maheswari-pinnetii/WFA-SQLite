@@ -77,6 +77,15 @@ export const ENTERPRISE_ROLE_PERMISSION_MAP: Record<Role, Permission[]> = {
     Permission.GOAL_UPDATE,
     Permission.DOCUMENT_UPLOAD,
   ],
+  [Role.EXECUTIVE]: [
+    Permission.EMPLOYEE_VIEW_ALL,
+    Permission.REPORT_VIEW_ALL,
+    Permission.REPORT_EXPORT,
+    Permission.REPORT_GENERATE,
+    Permission.TEAM_ANALYTICS_VIEW,
+    Permission.VIEW_ALL_DATA,
+    Permission.PROFILE_VIEW,
+  ],
 };
 
 export const PERMISSION_MATRIX = ENTERPRISE_ROLE_PERMISSION_MAP;

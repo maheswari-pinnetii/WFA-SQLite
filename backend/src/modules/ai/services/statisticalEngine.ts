@@ -134,6 +134,54 @@ export class StatisticalEngine {
 
     return insights;
   }
+  calculateAttritionRisk(employees: any[]): any[] {
+    return employees.map((emp: any) => {
+      let score = 0;
+      const factors: string[] = [];
+
+      // Performance factor (weight: 35%)
+      const perf = emp.performanceScore || 75;
+      if (perf < 60) { score += 35; factors.push('Critical performance deficit'); }
+      else if (perf < 75) { score += 22; factors.push('Below-average performance'); }
+      else if (perf < 85) { score += 10; factors.push('Moderate performance concerns'); }
+
+      // Attendance factor (weight: 30%)
+      const att = emp.attendanceRate || 90;
+      if (att < 70) { score += 30; factors.push('Severe attendance issues'); }
+      else if (att < 80) { score += 20; factors.push('Poor attendance pattern'); }
+      else if (att < 90) { score += 10; factors.push('Inconsistent attendance'); }
+
+      // Tenure factor (weight: 20%) — high risk in first 6 months and around 2-year mark
+      const tenureMonths = Math.floor((emp.tenureDays || 730) / 30);
+      if (tenureMonths < 6) { score += 20; factors.push('New hire retention risk'); }
+      else if (tenureMonths >= 18 && tenureMonths <= 28) { score += 15; factors.push('Mid-tenure flight risk window'); }
+
+      // Engagement proxy: no training (weight: 15%)
+      if (perf < 75 && att < 85) { score += 15; factors.push('Low engagement indicators'); }
+
+      const category: 'High' | 'Medium' | 'Low' = score >= 50 ? 'High' : score >= 25 ? 'Medium' : 'Low';
+      const confidence = Math.min(95, 60 + (factors.length * 8));
+
+      const actionMap: Record<string, string> = {
+        High: 'Schedule immediate 1:1 retention conversation',
+        Medium: 'Monitor closely; assign mentor or growth plan',
+        Low: 'Maintain engagement; recognize contributions',
+      };
+
+      return {
+        id: emp.id,
+        name: emp.name,
+        department: emp.department,
+        role: emp.role,
+        riskScore: Math.min(100, score),
+        riskCategory: category,
+        contributingFactors: factors,
+        confidence,
+        recommendedAction: actionMap[category],
+        modelVersion: 'stat-engine-v2.1',
+      };
+    });
+  }
 }
 
 export const statisticalEngine = new StatisticalEngine();

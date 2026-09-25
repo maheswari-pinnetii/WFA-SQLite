@@ -149,11 +149,7 @@ export const analyticsApi = {
     try {
       return unwrap(await apiClient.get('/v1/attendance/shifts'));
     } catch {
-      return [
-        { name: 'Regular', startTime: '09:00', endTime: '18:00' },
-        { name: 'Flexible', startTime: '10:00', endTime: '19:00' },
-        { name: 'Overnight', startTime: '21:00', endTime: '06:00' }
-      ];
+      return [];
     }
   },
   async getAuditLogs(): Promise<Array<{ id: string; timestamp: string; employeeId: string; action: string; details: string; status?: string; ipAddress?: string; userRole?: string }>> {

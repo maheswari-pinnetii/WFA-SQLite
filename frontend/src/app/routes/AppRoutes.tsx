@@ -118,6 +118,11 @@ import { HeadcountAnalyticsPage } from '../../features/analytics/pages/Headcount
 import { ComingSoonPage } from '../../pages/ComingSoonPage';
 import { NotificationPreferences } from '../../features/employee/pages/NotificationPreferences';
 import { AttritionAnalyticsPage } from '../../features/analytics/pages/AttritionAnalyticsPage';
+import { LearningAnalyticsDashboard } from '../../features/analytics/pages/LearningAnalyticsDashboard';
+import { RecruitmentAnalyticsDashboard } from '../../features/analytics/pages/RecruitmentAnalyticsDashboard';
+import { PlacementAnalyticsDashboard } from '../../features/analytics/pages/PlacementAnalyticsDashboard';
+import { DemandForecastingPage } from '../../features/analytics/pages/DemandForecastingPage';
+import { WorkforcePlanningPage } from '../../features/analytics/pages/WorkforcePlanningPage';
 import { MyTimesheetsPage } from '../../features/timesheets/pages/MyTimesheetsPage';
 import { TimesheetEntryPage } from '../../features/timesheets/pages/TimesheetEntryPage';
 
@@ -128,6 +133,7 @@ import { ConfirmationPage } from '../../features/lifecycle/pages/ConfirmationPag
 import { TransfersPage } from '../../features/lifecycle/pages/TransfersPage';
 import { PromotionsPage } from '../../features/lifecycle/pages/PromotionsPage';
 import { ExitPage } from '../../features/lifecycle/pages/ExitPage';
+import { ExecutiveDashboard } from '../../features/dashboards/executive/ExecutiveDashboard';
 
 
 const DefaultHomeRedirect: React.FC = () => {
@@ -215,6 +221,9 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/admin/shifts" element={<RoleGuard allowedRoles={[Role.ADMIN]}><ShiftManagementPage /></RoleGuard>} />
                 <Route path="/admin/corrections" element={<RoleGuard allowedRoles={[Role.ADMIN]}><AttendanceCorrectionsPage /></RoleGuard>} />
                 <Route path="/admin/approvals" element={<RoleGuard allowedRoles={[Role.ADMIN]}><ApprovalsPage /></RoleGuard>} />
+
+                {/* ==================== 1.5 EXECUTIVE ROUTES ==================== */}
+                <Route path="/executive/dashboard" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN]}><ExecutiveDashboard /></RoleGuard>} />
 
                 {/* ==================== 2. HR ROUTES ==================== */}
                 <Route path="/hr/dashboard" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><HRDashboard /></RoleGuard>} />
@@ -530,6 +539,11 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/analytics/attendance" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><AttendanceHistoryPage /></RoleGuard>} />
                 <Route path="/analytics/payroll" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollReports /></RoleGuard>} />
                 <Route path="/analytics/productivity" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><ProductivityAnalyticsPage /></RoleGuard>} />
+                <Route path="/analytics/learning" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><LearningAnalyticsDashboard /></RoleGuard>} />
+                <Route path="/analytics/recruitment" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><RecruitmentAnalyticsDashboard /></RoleGuard>} />
+                <Route path="/analytics/placement" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER]}><PlacementAnalyticsDashboard /></RoleGuard>} />
+                <Route path="/analytics/demand-forecasting" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.EXECUTIVE]}><DemandForecastingPage /></RoleGuard>} />
+                <Route path="/analytics/workforce-planning" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.EXECUTIVE]}><WorkforcePlanningPage /></RoleGuard>} />
                 <Route path="/analytics/*" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><TeamAnalytics /></RoleGuard>} />
 
 

@@ -73,4 +73,16 @@ export const ROLE_SECURITY_POLICIES: Record<Role, RoleSecurityPolicy> = {
       Permission.GOAL_UPDATE,
     ],
   },
+  [Role.EXECUTIVE]: {
+    role: Role.EXECUTIVE,
+    hierarchyLevel: 2,
+    description: 'Executive leadership with full view access to org analytics',
+    defaultPermissions: [
+      Permission.EMPLOYEE_VIEW_ALL,
+      Permission.REPORT_VIEW_ALL,
+      Permission.REPORT_EXPORT,
+      Permission.TEAM_ANALYTICS_VIEW,
+      Permission.VIEW_ALL_DATA,
+    ],
+  },
 };

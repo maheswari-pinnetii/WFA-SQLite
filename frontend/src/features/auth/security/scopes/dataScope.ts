@@ -32,6 +32,7 @@ export const DEFAULT_ROLE_SCOPES: Record<Role, DataScope> = {
   [Role.MANAGER]: 'DEPARTMENT',
   [Role.TEAM_LEAD]: 'TEAM',
   [Role.EMPLOYEE]: 'SELF',
+  [Role.EXECUTIVE]: 'ALL',
 };
 
 /**

@@ -27,6 +27,9 @@ describe('Security & Account Recovery', () => {
     await execute(`
       INSERT INTO users (id, name, email, password_hash, role, status)
       VALUES (?, 'Security User', ?, ?, 'EMPLOYEE', 'ACTIVE')
+      ON CONFLICT(email) DO UPDATE SET 
+        id = excluded.id,
+        password_hash = excluded.password_hash
     `, [id, testEmail, hash]);
   });
 

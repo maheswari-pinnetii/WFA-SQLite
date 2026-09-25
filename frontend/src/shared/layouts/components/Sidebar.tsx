@@ -25,6 +25,7 @@ const ROLE_ACCENTS: Record<Role, { className: string; shortLabel: string }> = {
   [Role.MANAGER]: { className: '', shortLabel: 'Department workspace' },
   [Role.TEAM_LEAD]: { className: '', shortLabel: 'Team workspace' },
   [Role.EMPLOYEE]: { className: '', shortLabel: 'Employee workspace' },
+  [Role.EXECUTIVE]: { className: '', shortLabel: 'Executive portal' },
 };
 
 // Helper to get all ancestor IDs for a given path

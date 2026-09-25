@@ -41,6 +41,12 @@ export const TEST_ENV = {
       role: 'TEAM_LEAD',
       expectedDashboardUrl: '/team-lead/dashboard',
     },
+    EXECUTIVE: {
+      email: 'executive@thestackly.com',
+      name: 'Stackly Executive',
+      role: 'EXECUTIVE',
+      expectedDashboardUrl: '/executive/dashboard',
+    },
   },
   ROUTES: {
     LOGIN: '/login',

@@ -195,6 +195,32 @@ export class AnalyticsRepository {
     return rows;
   }
 
+  async getStaffSkillsRoster(queryData: any) {
+    const clauses: string[] = ['(e.companyId = ? OR e.organizationId = ?)'];
+    const orgId = queryData.organizationId || queryData.companyId || 'org-stackly';
+    const params: any[] = [orgId, orgId];
+    if (queryData.employeeId) {
+      clauses.push('e.id = ?');
+      params.push(queryData.employeeId);
+    }
+    const where = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';
+    const rows = await query(`
+      SELECT 
+        e.id,
+        e.name,
+        COALESCE(e.designation, e.role) as role,
+        GROUP_CONCAT(s.skillName, ', ') as primarySkills,
+        'N/A' as certification
+      FROM employees e
+      LEFT JOIN skills s ON e.id = s.employeeId
+      ${where}
+      GROUP BY e.id
+      ORDER BY e.name ASC
+      LIMIT 100
+    `, params);
+    return rows;
+  }
+
   async getTasksSummary(queryData: any) {
     const { clause, params } = buildWhereClause(queryData);
     const rows = await query(`
@@ -267,6 +293,128 @@ export class AnalyticsRepository {
       ${clause}
     `, params);
     return rows;
+  }
+  async getLocationDistribution(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT 
+        COALESCE(locationId, location, 'Remote') as name,
+        COUNT(*) as value
+      FROM employees
+      ${clause}
+      GROUP BY name
+      ORDER BY value DESC
+    `, params);
+    return rows;
+  }
+
+  async getExperienceDistribution(queryData: any) {
+    const { clause, params } = buildWhereClause(queryData);
+    const rows = await query(`
+      SELECT
+        CASE
+          WHEN julianday('now') - julianday(joinDate) < 365 THEN '0-1 yr'
+          WHEN julianday('now') - julianday(joinDate) < 1095 THEN '1-3 yrs'
+          WHEN julianday('now') - julianday(joinDate) < 1825 THEN '3-5 yrs'
+          WHEN julianday('now') - julianday(joinDate) < 3650 THEN '5-10 yrs'
+          ELSE '10+ yrs'
+        END as name,
+        COUNT(*) as value
+      FROM employees
+      ${clause}
+      GROUP BY name
+      ORDER BY
+        CASE name
+          WHEN '0-1 yr' THEN 1
+          WHEN '1-3 yrs' THEN 2
+          WHEN '3-5 yrs' THEN 3
+          WHEN '5-10 yrs' THEN 4
+          ELSE 5
+        END
+    `, params);
+    return rows;
+  }
+
+  async getOpenPositionsCount(orgId: string) {
+    try {
+      const rows = await query(`
+        SELECT COUNT(*) as count
+        FROM job_requisitions
+        WHERE (organizationId = ? OR companyId = ?)
+          AND status IN ('OPEN', 'ACTIVE', 'APPROVED')
+      `, [orgId, orgId]);
+      return rows[0]?.count || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  async getCertificationStatus(queryData: any) {
+    const orgId = queryData.organizationId || queryData.companyId || 'org-stackly';
+    try {
+      const rows = await query(`
+        SELECT 
+          certificationName as name,
+          COUNT(DISTINCT employeeId) as certified,
+          SUM(CASE WHEN expiryDate IS NOT NULL AND expiryDate < date('now') THEN 1 ELSE 0 END) as expired,
+          SUM(CASE WHEN expiryDate IS NOT NULL AND expiryDate BETWEEN date('now') AND date('now','+90 days') THEN 1 ELSE 0 END) as expiringSoon
+        FROM certifications
+        WHERE (organizationId = ? OR companyId = ?)
+        GROUP BY certificationName
+        ORDER BY certified DESC
+        LIMIT 20
+      `, [orgId, orgId]);
+      return rows;
+    } catch {
+      return [];
+    }
+  }
+
+  async getTrainingRecommendations(queryData: any) {
+    const orgId = queryData.organizationId || queryData.companyId || 'org-stackly';
+    try {
+      const rows = await query(`
+        SELECT 
+          s.skillName,
+          COUNT(DISTINCT s.employeeId) as gapCount,
+          CASE
+            WHEN AVG(s.level) < 2 THEN 'Beginner Training'
+            WHEN AVG(s.level) < 3 THEN 'Intermediate Course'
+            ELSE 'Advanced Workshop'
+          END as recommendedTraining
+        FROM skills s
+        WHERE (s.organizationId = ? OR s.companyId = ?)
+          AND s.level < 3
+        GROUP BY s.skillName
+        ORDER BY gapCount DESC
+        LIMIT 10
+      `, [orgId, orgId]);
+      return rows;
+    } catch {
+      return [];
+    }
+  }
+
+  async getAttritionRiskScores(orgId: string) {
+    try {
+      const rows = await query(`
+        SELECT 
+          e.id,
+          e.name,
+          COALESCE(e.department, 'Unassigned') as department,
+          COALESCE(e.designation, e.role) as role,
+          COALESCE(e.performanceScore, 75) as performanceScore,
+          COALESCE(e.attendanceRate, 90) as attendanceRate,
+          COALESCE(julianday('now') - julianday(e.joinDate), 730) as tenureDays
+        FROM employees e
+        WHERE (e.organizationId = ? OR e.companyId = ?)
+          AND e.status = 'Active'
+        LIMIT 200
+      `, [orgId, orgId]);
+      return rows;
+    } catch {
+      return [];
+    }
   }
 }
 
