@@ -1,0 +1,15 @@
+{
+  "filename": "wfa-backup-2026-09-24T16-35-14-497Z-pre-restore-safety.sqlite.gz",
+  "filePath": "C:\\Users\\91970\\Downloads\\WFA-SQLite\\backend\\database\\backups\\wfa-backup-2026-09-24T16-35-14-497Z-pre-restore-safety.sqlite.gz",
+  "sizeBytes": 2366283,
+  "sizeFormatted": "2.26 MB",
+  "createdAt": "2026-09-24T16:35:14.873Z",
+  "checksumSha256": "06b051b755b7746dfdc6865c20363a7a80051540dfd462943c4d9dd66141de35",
+  "recordCount": {
+    "users": 1005,
+    "employees": 1000,
+    "attendance": 21822
+  },
+  "compressed": true,
+  "tag": "pre-restore-safety"
+}

@@ -1,0 +1,15 @@
+{
+  "filename": "wfa-backup-2026-09-24T16-41-46-668Z-api-test-snapshot.sqlite.gz",
+  "filePath": "C:\\Users\\91970\\Downloads\\WFA-SQLite\\backend\\database\\backups\\wfa-backup-2026-09-24T16-41-46-668Z-api-test-snapshot.sqlite.gz",
+  "sizeBytes": 2366279,
+  "sizeFormatted": "2.26 MB",
+  "createdAt": "2026-09-24T16:41:46.990Z",
+  "checksumSha256": "ed2f4f13c2646f1dbca8a46733bbaffb7bdfc7f553afb414b29a1956e1bf71bd",
+  "recordCount": {
+    "users": 1005,
+    "employees": 1000,
+    "attendance": 21822
+  },
+  "compressed": true,
+  "tag": "api-test-snapshot"
+}

@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import http from 'http';
 import { Server as SocketServer } from 'socket.io';
-import { app } from './backend/src/app.js';
-import { initSockets } from './backend/src/sockets/index.js';
-import { getDb } from './backend/src/config/db.js';
-import { logger } from './backend/src/config/logger.js';
+import { app } from './app.js';
+import { initSockets } from './sockets/index.js';
+import { getDb } from './config/db.js';
+import { logger } from './config/logger.js';
 
 const PORT = Number(process.env.PORT || 5001);
 
@@ -34,10 +34,10 @@ if (process.env.NODE_ENV !== 'test') {
   initSockets(io);
 
   // Initialize delayed job scheduler & default feature flags
-  import('./backend/src/modules/core/jobScheduler.service.js').then(({ jobScheduler }) => {
+  import('./modules/core/jobScheduler.service.js').then(({ jobScheduler }) => {
     jobScheduler.start(10000);
   });
-  import('./backend/src/modules/core/featureFlag.service.js').then(({ featureFlagService }) => {
+  import('./modules/core/featureFlag.service.js').then(({ featureFlagService }) => {
     featureFlagService.initDefaults().catch(() => undefined);
   });
 

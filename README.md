@@ -98,8 +98,8 @@ WFA-SQLite/
 ├── frontend/          # Frontend React 18 + TypeScript source code
 ├── backend/           # Node.js/Express backend source code
 ├── database/          # SQLite database files and migrations
-├── playwright/        # Playwright E2E browser tests (Page Object Models, fixtures)
-├── tests/             # Vitest test suites (unit, integration, security, load)
+├── docker/            # Dockerfiles and docker-compose configurations
+├── tests/             # Vitest test suites (unit, integration, security) and Playwright E2E
 ├── docs/              # Comprehensive Documentation Hub
 ├── package.json
 └── README.md

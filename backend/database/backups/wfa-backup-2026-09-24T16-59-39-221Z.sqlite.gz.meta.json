@@ -1,0 +1,14 @@
+{
+  "filename": "wfa-backup-2026-09-24T16-59-39-221Z.sqlite.gz",
+  "filePath": "C:\\Users\\91970\\Downloads\\WFA-SQLite\\backend\\database\\backups\\wfa-backup-2026-09-24T16-59-39-221Z.sqlite.gz",
+  "sizeBytes": 2508330,
+  "sizeFormatted": "2.39 MB",
+  "createdAt": "2026-09-24T16:59:39.653Z",
+  "checksumSha256": "41aa9533bdd185df9f6c6fef774d2803a3332fe2fd31fc6945d599af1f5bfff1",
+  "recordCount": {
+    "users": 1005,
+    "employees": 1000,
+    "attendance": 21800
+  },
+  "compressed": true
+}
