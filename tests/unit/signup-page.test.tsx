@@ -4,10 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
-import { SignUpPage } from '../../frontend/src/auth/pages/SignUpPage';
+import { SignUpPage } from '../../frontend/src/features/auth/pages/SignUpPage';
 
 const mockSignup = vi.fn();
-vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
+vi.mock('../../frontend/src/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     signup: mockSignup,
     isAuthenticated: false,

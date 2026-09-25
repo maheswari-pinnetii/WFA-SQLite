@@ -178,8 +178,7 @@ describe('3. Idempotency Record Consistency', () => {
     const res = await request(app)
       .post('/v1/attendance/check-in')
       .set('Authorization', `Bearer ${adminToken}`)
-      .set('Idempotency-Key', failKey)
-      .send({}); // Empty body — should fail validation
+      .send({ idempotencyKey: failKey }); // Empty body — should fail validation
 
     expect([400, 422]).toContain(res.status);
 
@@ -198,8 +197,7 @@ describe('3. Idempotency Record Consistency', () => {
     const res = await request(app)
       .post('/v1/attendance/check-in')
       .set('Authorization', `Bearer ${empToken}`)
-      .set('Idempotency-Key', successKey)
-      .send({ shiftType: 'Regular', workMode: 'Remote' });
+      .send({ shiftType: 'Regular', workMode: 'Remote', idempotencyKey: successKey });
 
     if (res.status === 200 || res.status === 201) {
       // Verify idempotency record was created

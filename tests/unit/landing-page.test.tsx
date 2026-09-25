@@ -7,7 +7,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { LandingPage } from '../../frontend/src/pages/LandingPage';
 
 // Mock useAuth hook
-vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
+vi.mock('../../frontend/src/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     isAuthenticated: false,
     role: 'EMPLOYEE',

@@ -5,9 +5,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import target frontend services or utilities to test directly
-import { getDistance } from '../../frontend/src/modules/attendance/attendance.service';
-import { Role, ROLE_LABELS, ROLE_LEVELS } from '../../frontend/src/security/roles/roles';
-import { Permission } from '../../frontend/src/security/permissions/permissions';
+import { getDistance } from '../../frontend/src/services/attendance.service';
+import { Role, ROLE_LABELS, ROLE_LEVELS } from '../../frontend/src/features/auth/security/roles/roles';
+import { Permission } from '../../frontend/src/features/auth/security/permissions/permissions';
 
 // Mock Lucide icons as simple SVGs or divs to avoid react import issues during test resolution
 vi.mock('lucide-react', () => ({

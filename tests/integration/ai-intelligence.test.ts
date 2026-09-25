@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { StatisticalEngine, statisticalEngine } from '../../backend/src/services/ai/statisticalEngine.js';
-import { AnalyticsContext } from '../../backend/src/services/ai/aiProvider.interface.js';
+import { StatisticalEngine, statisticalEngine } from '../../backend/src/modules/ai/services/statisticalEngine.js';
+import { AnalyticsContext } from '../../backend/src/modules/ai/services/aiProvider.interface.js';
 
 describe('StatisticalEngine Workforce Analytics', () => {
   const engine = new StatisticalEngine();

@@ -10,7 +10,7 @@ import { env } from '../../backend/src/config/env.js';
 import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
 
 let server: any;
-const PORT = 5098;
+const PORT = 5100;
 
 const mongoose = {
   startSession: async () => ({
@@ -90,6 +90,7 @@ describe('E2E User Flow Tests', () => {
     expect(token).toBeDefined();
 
     // 2. Check-In
+    await execute('DELETE FROM attendancerecords WHERE employeeId = ?', ['usr-emp-01']);
     const checkInRes = await client.post('/v1/attendance/check-in', employeeInfo, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -236,7 +237,7 @@ describe('E2E User Flow Tests', () => {
 
     // Pre-populate an active Attendance record for User B in Company B
     const recordB = await Attendance.create({
-      id: 'record-B',
+      id: `record-B-${Date.now()}`,
       employeeId: userB.id,
       employeeName: userB.name,
       date: '2026-08-18',

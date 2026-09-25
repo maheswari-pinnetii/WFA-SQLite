@@ -4,7 +4,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
-import { EmailLoginCard } from '../../frontend/src/auth/components/EmailLoginCard';
+import { EmailLoginCard } from '../../frontend/src/features/auth/components/EmailLoginCard';
 
 describe('Step 1: EmailLoginCard Component Unit Tests', () => {
   const renderCard = (props: React.ComponentProps<typeof EmailLoginCard>) => {

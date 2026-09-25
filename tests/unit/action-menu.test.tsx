@@ -4,7 +4,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { ActionMenu, ActionMenuItem } from '../../frontend/src/components/common/ActionMenu';
-import { Permission } from '../../frontend/src/security/permissions/permissions';
+import { Permission } from '../../frontend/src/features/auth/security/permissions/permissions';
 
 // Mock usePermission hook
 const mockHasPermission = vi.fn();

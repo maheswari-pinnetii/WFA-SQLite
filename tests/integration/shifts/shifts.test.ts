@@ -49,7 +49,7 @@ describe('Shift & Roster Management API Integration Tests', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         shiftId,
-        startDate: '2023-11-01'
+        startDate: '2098-05-01'
       });
       
     if (res.status !== 201) console.log('Assign shift error:', res.body);
@@ -63,7 +63,7 @@ describe('Shift & Roster Management API Integration Tests', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
         shiftId,
-        startDate: '2023-11-01'
+        startDate: '2098-05-01'
       });
       
     expect(res.status).toBe(409); // Conflict
@@ -78,7 +78,7 @@ describe('Shift & Roster Management API Integration Tests', () => {
 
     const res = await request(app)
       .get(`/api/scheduling/departments/${department}/roster`)
-      .query({ startDate: '2023-11-01', endDate: '2023-11-07' })
+      .query({ startDate: '2098-05-01', endDate: '2099-11-07' })
       .set('Authorization', `Bearer ${adminToken}`);
       
     if (res.status !== 200) console.log('Fetch roster error:', res.body);
@@ -90,7 +90,7 @@ describe('Shift & Roster Management API Integration Tests', () => {
     expect(employee).toBeDefined();
     if (employee) {
       expect(employee.shifts.length).toBeGreaterThan(0);
-      expect(employee.shifts[0].startDate).toBe('2023-11-01');
+      expect(employee.shifts[0].startDate).toBe('2098-05-01');
     }
   });
 });

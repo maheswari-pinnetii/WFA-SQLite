@@ -5,7 +5,7 @@ import {
   hasRoleAccess,
   MAIN_NAVIGATION 
 } from '../../frontend/src/shared/layouts/components/SidebarConfig';
-import { Role } from '../../frontend/src/security/roles/roles';
+import { Role } from '../../frontend/src/features/auth/security/roles/roles';
 
 describe('Sidebar Navigation Config & Role Filtering', () => {
   it('returns all items for ADMIN role', () => {

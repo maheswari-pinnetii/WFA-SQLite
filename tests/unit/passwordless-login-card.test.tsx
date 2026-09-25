@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
-import { PasswordlessLoginCard } from '../../frontend/src/auth/components/PasswordlessLoginCard';
+import { PasswordlessLoginCard } from '../../frontend/src/features/auth/components/PasswordlessLoginCard';
 
 describe('Step 2: PasswordlessLoginCard Component Unit Tests', () => {
   beforeEach(() => {

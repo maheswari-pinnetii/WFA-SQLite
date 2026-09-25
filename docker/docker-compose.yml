@@ -3,8 +3,8 @@ version: '3.8'
 services:
   stackly-app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: stackly_enterprise_platform
     ports:
       - "5000:5000"

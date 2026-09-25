@@ -131,7 +131,8 @@ describe('Security Hardening & Protection Verification Suite', () => {
         .send({
           token: 'short',
           newPassword: 'Password123!@#'
-        });
+        })
+        .set('X-Forwarded-For', `192.168.1.${Date.now() % 255}`);
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });

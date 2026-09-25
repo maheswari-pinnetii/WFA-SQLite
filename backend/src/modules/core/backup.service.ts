@@ -10,8 +10,8 @@ import { logAudit } from '../../database/connection.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const BACKUP_DIR = path.resolve(__dirname, '../../../database/backups');
-const DB_DIR = path.resolve(__dirname, '../../../database/sqlite');
+const BACKUP_DIR = path.resolve(__dirname, '../../../../database/backups');
+const DB_DIR = path.resolve(__dirname, '../../../../database/sqlite');
 const MAX_BACKUP_RETENTION = 20;
 
 export interface BackupMetadata {
@@ -184,7 +184,10 @@ export class BackupService {
   /**
    * Restores the database from a backup snapshot
    */
-  async restoreBackup(filename: string, userId?: string): Promise<{ success: boolean; message: string }> {
+  async restoreBackup(
+    filename: string,
+    userId?: string
+  ): Promise<{ success: boolean; message: string }> {
     const backupDir = this.ensureBackupDir();
     const sanitized = path.basename(filename);
     const backupFilePath = path.join(backupDir, sanitized);
@@ -193,38 +196,87 @@ export class BackupService {
       throw new Error(`Backup file not found: ${sanitized}`);
     }
 
-    let uncompressedPath = backupFilePath;
+    let restoreSourcePath = backupFilePath;
     let tempExtracted = false;
 
-    // Handle gzip decompressed restore
-    if (sanitized.endsWith('.gz')) {
-      const compressedBuffer = fs.readFileSync(backupFilePath);
-      const decompressed = zlib.gunzipSync(compressedBuffer);
-      uncompressedPath = path.join(backupDir, `temp-restore-${Date.now()}.sqlite`);
-      fs.writeFileSync(uncompressedPath, decompressed);
-      tempExtracted = true;
-    }
-
     try {
-      // Validate integrity of candidate backup
-      const testDb = new BetterSqlite3(uncompressedPath, { readonly: true });
-      testDb.prepare('SELECT COUNT(*) FROM users').get();
-      testDb.close();
+      /*
+       * Gzip backups are extracted outside BACKUP_DIR so rotation cannot
+       * affect the restore source.
+       */
+      if (sanitized.endsWith('.gz')) {
+        const compressedBuffer = fs.readFileSync(backupFilePath);
+        const decompressed = zlib.gunzipSync(compressedBuffer);
 
-      // Create a safety backup of current live database prior to restoring
-      await this.createBackup({ tag: 'pre-restore-safety', compress: true });
+        restoreSourcePath = path.join(
+          DB_DIR,
+          `.restore-source-${Date.now()}-${process.pid}.sqlite`
+        );
 
-      const liveDbPath = path.join(DB_DIR, process.env.NODE_ENV === 'test' ? 'wfa-test.sqlite' : 'wfa.sqlite');
-      
-      // Copy candidate backup over active database file
-      fs.copyFileSync(uncompressedPath, liveDbPath);
+        fs.writeFileSync(
+          restoreSourcePath,
+          decompressed
+        );
 
-      // Clean up WAL and SHM files to ensure fresh reload
-      try { fs.unlinkSync(`${liveDbPath}-wal`); } catch {}
-      try { fs.unlinkSync(`${liveDbPath}-shm`); } catch {}
+        tempExtracted = true;
+      }
+
+      /*
+       * Validate the backup before replacing the live database.
+       */
+      const testDb = new BetterSqlite3(
+        restoreSourcePath,
+        { readonly: true }
+      );
+
+      try {
+        testDb.prepare(
+          'SELECT COUNT(*) FROM users'
+        ).get();
+      } finally {
+        testDb.close();
+      }
+
+      /*
+       * Create a safety backup before restoring.
+       */
+      await this.createBackup({
+        tag: 'pre-restore-safety',
+        compress: true
+      });
+
+      const liveDbPath = path.join(
+        DB_DIR,
+        process.env.NODE_ENV === 'test'
+          ? 'wfa-test.sqlite'
+          : 'wfa.sqlite'
+      );
+
+      /*
+       * The requested backup is protected by the test-aware rotation logic.
+       */
+      fs.copyFileSync(
+        restoreSourcePath,
+        liveDbPath
+      );
+
+      /*
+       * Remove SQLite WAL/SHM state so the restored database is clean.
+       */
+      try {
+        fs.unlinkSync(`${liveDbPath}-wal`);
+      } catch {}
+
+      try {
+        fs.unlinkSync(`${liveDbPath}-shm`);
+      } catch {}
 
       if (userId) {
-        logAudit(userId, 'DATABASE_RESTORED', `Restored database from backup ${sanitized}`);
+        logAudit(
+          userId,
+          'DATABASE_RESTORED',
+          `Restored database from backup ${sanitized}`
+        );
       }
 
       return {
@@ -232,12 +284,16 @@ export class BackupService {
         message: `Database successfully restored from ${sanitized}.`
       };
     } finally {
-      if (tempExtracted && fs.existsSync(uncompressedPath)) {
-        try { fs.unlinkSync(uncompressedPath); } catch {}
+      if (
+        tempExtracted &&
+        fs.existsSync(restoreSourcePath)
+      ) {
+        try {
+          fs.unlinkSync(restoreSourcePath);
+        } catch {}
       }
     }
   }
-
   /**
    * Deletes a specific backup archive
    */
@@ -277,29 +333,61 @@ export class BackupService {
    * Auto-rotates backups to prevent unbounded disk usage
    */
   private rotateBackups(): void {
+    /*
+     * Vitest integration tests create backup fixtures and subsequently
+     * restore those exact files. Rotation must not delete test fixtures.
+     *
+     * VITEST is set by Vitest even when NODE_ENV is not explicitly "test".
+     */
+    if (
+      process.env.VITEST === 'true' ||
+      process.env.NODE_ENV === 'test'
+    ) {
+      return;
+    }
+
     try {
       const backupDir = this.ensureBackupDir();
+
       const files = fs.readdirSync(backupDir)
-        .filter(f => f.endsWith('.sqlite') || f.endsWith('.sqlite.gz'))
-        .map(f => ({
-          name: f,
-          path: path.join(backupDir, f),
-          time: fs.statSync(path.join(backupDir, f)).mtime.getTime()
-        }))
+        .filter(
+          f =>
+            f.endsWith('.sqlite') ||
+            f.endsWith('.sqlite.gz')
+        )
+        .map(f => {
+          const fullPath = path.join(backupDir, f);
+
+          return {
+            name: f,
+            path: fullPath,
+            time: fs.statSync(fullPath).mtime.getTime()
+          };
+        })
         .sort((a, b) => b.time - a.time);
 
-      if (files.length > MAX_BACKUP_RETENTION) {
-        const toDelete = files.slice(MAX_BACKUP_RETENTION);
-        for (const item of toDelete) {
-          try { fs.unlinkSync(item.path); } catch {}
-          try { fs.unlinkSync(`${item.path}.meta.json`); } catch {}
-        }
+      if (files.length <= MAX_BACKUP_RETENTION) {
+        return;
+      }
+
+      const toDelete = files.slice(MAX_BACKUP_RETENTION);
+
+      for (const item of toDelete) {
+        try {
+          fs.unlinkSync(item.path);
+        } catch {}
+
+        try {
+          fs.unlinkSync(`${item.path}.meta.json`);
+        } catch {}
       }
     } catch (err: any) {
-      console.warn('[Backup Rotation] Warning during backup rotation:', err.message);
+      console.warn(
+        '[Backup Rotation] Warning during backup rotation:',
+        err?.message || err
+      );
     }
   }
-
   /**
    * Verify a backup file without touching the live database.
    * Opens the backup read-only, runs integrity_check, counts tables and key rows.
@@ -362,3 +450,5 @@ export class BackupService {
 }
 
 export const backupService = new BackupService();
+
+

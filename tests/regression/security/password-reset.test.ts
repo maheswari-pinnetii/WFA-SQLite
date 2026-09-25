@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 
 describe('Security & Account Recovery', () => {
-  const testEmail = 'security-test@thestackly.com';
+  const testEmail = `security-test-${Date.now()}@thestackly.com`;
   let userId: string;
 
   beforeAll(async () => {

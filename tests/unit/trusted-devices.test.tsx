@@ -10,14 +10,14 @@ import { app } from '../../backend/src/app.js';
 import { initDb } from '../../backend/src/database/connection.js';
 import { execute, query } from '../../backend/src/database/sqlite-cloud.js';
 import { env } from '../../backend/src/config/env.js';
-import { PasswordlessLoginCard } from '../../frontend/src/auth/components/PasswordlessLoginCard';
-import { LoginPage } from '../../frontend/src/auth/pages/LoginPage';
-import { RealTimeDevicePinLock } from '../../frontend/src/auth/components/RealTimeDevicePinLock';
-import { RealTimePatternLock } from '../../frontend/src/auth/components/RealTimePatternLock';
-import { RealTimeScreenLock } from '../../frontend/src/auth/components/RealTimeScreenLock';
+import { PasswordlessLoginCard } from '../../frontend/src/features/auth/components/PasswordlessLoginCard';
+import { LoginPage } from '../../frontend/src/features/auth/pages/LoginPage';
+import { RealTimeDevicePinLock } from '../../frontend/src/features/auth/components/RealTimeDevicePinLock';
+import { RealTimePatternLock } from '../../frontend/src/features/auth/components/RealTimePatternLock';
+import { RealTimeScreenLock } from '../../frontend/src/features/auth/components/RealTimeScreenLock';
 
 // Mock useAuth hook for frontend tests
-vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
+vi.mock('../../frontend/src/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     isAuthenticated: false,
     role: 'ADMIN',

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { attendanceService, OFFICE_COORDS, getDistance } from '../../../frontend/src/modules/attendance/attendance.service';
+import { attendanceService, OFFICE_COORDS, getDistance } from '../../../frontend/src/services/attendance.service';
 
 const localStorageMock = (() => {
   let store: Record<string, string> = {};

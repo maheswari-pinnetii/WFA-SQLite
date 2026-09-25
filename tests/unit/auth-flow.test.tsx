@@ -4,14 +4,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
-import { LoginPage } from '../../frontend/src/auth/pages/LoginPage';
-import { SignUpPage } from '../../frontend/src/auth/pages/SignUpPage';
+import { LoginPage } from '../../frontend/src/features/auth/pages/LoginPage';
+import { SignUpPage } from '../../frontend/src/features/auth/pages/SignUpPage';
 
 const mockLogin = vi.fn();
 const mockSignup = vi.fn();
 const mockSetSession = vi.fn();
 
-vi.mock('../../frontend/src/auth/hooks/useAuth', () => ({
+vi.mock('../../frontend/src/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     isAuthenticated: false,
     role: 'EMPLOYEE',
