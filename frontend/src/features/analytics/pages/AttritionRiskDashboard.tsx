@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AlertTriangle, Users, TrendingDown, Shield, Brain, RefreshCw } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 
@@ -22,7 +22,7 @@ const getAuthToken = () =>
   sessionStorage.getItem("auth_token") ||
   "";
 
-export const AttritionAnalyticsPage: React.FC = () => {
+export const AttritionRiskDashboard: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -221,4 +221,4 @@ export const AttritionAnalyticsPage: React.FC = () => {
   );
 };
 
-export default AttritionAnalyticsPage;
+export default AttritionRiskDashboard;

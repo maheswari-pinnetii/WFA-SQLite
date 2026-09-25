@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import axios from 'axios';
-import { app } from '../../server.js';
+import { app } from '../../backend/src/server.js';
 import { initDb, getDb } from '../../backend/src/config/db.js';
 import { Attendance, BreakSession, AttendanceEvent, IdempotencyRecord, Correction } from '../../backend/src/models/Attendance.js';
 import { User, MfaChallenge } from '../../backend/src/models/User.js';

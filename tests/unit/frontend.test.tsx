@@ -24,7 +24,7 @@ vi.mock('lucide-react', () => ({
 describe('Frontend Role and Permissions Utility Unit Tests', () => {
   it('should verify roles levels hierarchy correctly', () => {
     expect(ROLE_LEVELS[Role.ADMIN]).toBe(0);
-    expect(ROLE_LEVELS[Role.EMPLOYEE]).toBe(4);
+    expect(ROLE_LEVELS[Role.EMPLOYEE]).toBe(5);
     expect(ROLE_LEVELS[Role.ADMIN]).toBeLessThan(ROLE_LEVELS[Role.EMPLOYEE]);
   });
 

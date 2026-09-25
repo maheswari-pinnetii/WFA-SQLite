@@ -1,16 +1,53 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { RoleGuard } from '../../../features/auth/security/guards/RoleGuard';
 import { Role } from '../../../features/auth/security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
-import { Star, BarChart3, TrendingUp, Users } from 'lucide-react';
+import { Star, BarChart3, TrendingUp, Users, RefreshCw, AlertCircle } from 'lucide-react';
+
+const getAuthToken = () => localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token") || "";
 
 export const PerformanceOverviewPage: React.FC = () => {
-  const ratingsDistribution = [
-    { rating: 'Exceptional (9-10)', count: 28, percentage: '18%' },
-    { rating: 'Strong (8-9)', count: 68, percentage: '45%' },
-    { rating: 'Meets Standards (7-8)', count: 48, percentage: '32%' },
-    { rating: 'Needs Improvement (<7)', count: 8, percentage: '5%' }
-  ];
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/v1/analytics/performance-overview", {
+        headers: { Authorization: "Bearer " + getAuthToken() },
+      });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const json = await res.json();
+      setData(json.data);
+    } catch (err: any) {
+      setError(err.message || "Failed to load performance overview");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, []);
+
+  if (loading) return (
+    <div className="flex h-64 flex-col items-center justify-center gap-3 text-[var(--text-muted)]">
+      <RefreshCw size={28} className="animate-spin text-blue-500" />
+      <span>Loading performance overview...</span>
+    </div>
+  );
+
+  if (error) return (
+    <div className="flex h-64 flex-col items-center justify-center gap-3">
+      <AlertCircle size={32} className="text-rose-500" />
+      <p className="text-[var(--text-muted)]">{error}</p>
+      <button onClick={fetchData} className="px-4 py-2 rounded-lg bg-blue-500/10 text-blue-400 text-sm">Retry</button>
+    </div>
+  );
+
+  if (!data) return null;
+
+  const { totalAppraised, topTalentTier, corporateAverage, growthReadiness, ratingsDistribution, talentGrid } = data;
 
   return (
     <>
@@ -30,10 +67,10 @@ export const PerformanceOverviewPage: React.FC = () => {
 
         {/* KPIs */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <MinimalKpiCard title="Total Appraised Staff" value="152 Appraised" icon={<Users size={26} />} iconBgColor="blue" trend="100% headcount coverage" trendType="positive" />
-          <MinimalKpiCard title="Top Talent Tier" value="28 Staff" icon={<Star size={26} />} iconBgColor="amber" trend="Rating: Exceptional (9-10)" trendType="positive" />
-          <MinimalKpiCard title="Corporate Average" value="8.4 / 10" icon={<TrendingUp size={26} />} iconBgColor="emerald" trend="Optimal talent density" trendType="positive" />
-          <MinimalKpiCard title="Growth Readiness" value="88.5%" icon={<BarChart3 size={26} />} iconBgColor="purple" trend="High leadership readiness" trendType="positive" />
+          <MinimalKpiCard title="Total Appraised Staff" value={`${totalAppraised} Appraised`} icon={<Users size={26} />} iconBgColor="blue" trend="100% headcount coverage" trendType="positive" />
+          <MinimalKpiCard title="Top Talent Tier" value={`${topTalentTier} Staff`} icon={<Star size={26} />} iconBgColor="amber" trend="Rating: Exceptional (9-10)" trendType="positive" />
+          <MinimalKpiCard title="Corporate Average" value={`${corporateAverage} / 10`} icon={<TrendingUp size={26} />} iconBgColor="emerald" trend="Optimal talent density" trendType="positive" />
+          <MinimalKpiCard title="Growth Readiness" value={`${growthReadiness}%`} icon={<BarChart3 size={26} />} iconBgColor="purple" trend="High leadership readiness" trendType="positive" />
         </div>
 
         {/* Talent Grid */}
@@ -43,12 +80,12 @@ export const PerformanceOverviewPage: React.FC = () => {
             <div className="p-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-2">
               <h4 className="font-bold text-sm text-[var(--text-primary)]">High Potential Leaders</h4>
               <p className="text-xs text-slate-400">High Performance & High Potential (Star Performers)</p>
-              <div className="text-2xl font-black text-emerald-400">12 Employees</div>
+              <div className="text-2xl font-black text-emerald-400">{talentGrid.highPotential} Employees</div>
             </div>
             <div className="p-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-2">
               <h4 className="font-bold text-sm text-[var(--text-primary)]">Core Contributors</h4>
               <p className="text-xs text-slate-400">Solid Performance & Moderate Potential</p>
-              <div className="text-2xl font-black text-emerald-400">68 Employees</div>
+              <div className="text-2xl font-black text-emerald-400">{talentGrid.coreContributors} Employees</div>
             </div>
           </div>
         </div>

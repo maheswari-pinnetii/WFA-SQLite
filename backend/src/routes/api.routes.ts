@@ -333,6 +333,8 @@ router.get('/dashboard/employee', authenticateToken, enforceScope, authenticated
 // Legacy Analytics endpoints
 router.get('/dashboard/summary', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getDashboardSummary);
 router.get('/dashboard/workforce', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getWorkforceDistribution);
+router.get('/dashboard/location-distribution', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getLocationDistribution);
+router.get('/dashboard/experience-distribution', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getExperienceDistribution);
 router.get('/dashboard/headcount', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getHeadcountAnalytics);
 router.get('/dashboard/risk', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getRiskAnalytics);
 
@@ -345,10 +347,19 @@ router.get('/analytics/performance', authenticateToken, enforceScope, authentica
 router.get('/analytics/certifications', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getCertificationStatus);
 router.get('/analytics/training-recommendations', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getTrainingRecommendations);
 
+// Sprint 1 – Historical Attrition
+router.get('/analytics/attrition', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EXECUTIVE']), analyticsController.getHistoricalAttrition);
+
+// Sprint 2 – Pipeline Analytics
+router.get('/analytics/recruitment', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getRecruitmentAnalytics);
+router.get('/analytics/learning', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getLearningAnalytics);
+router.get('/analytics/placement', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getPlacementAnalytics);
+
 // Sprint 3 – Predictive Workforce Analytics
 router.get('/analytics/attrition-risk', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getAttritionRiskDashboard);
 router.get('/analytics/demand-forecast', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getDemandForecasting);
 router.get('/analytics/workforce-planning/scenarios', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), workforcePlanningController.getScenarios);
+router.get('/analytics/performance-overview', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE', 'MANAGER']), analyticsController.getPerformanceOverview);
 
 
 // Compliance & Intelligence Reports Streaming (CSV / JSON)

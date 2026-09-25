@@ -1,4 +1,4 @@
-import { query, execute } from '../../database/connection';
+import { query, execute } from '../../database/connection.js';
 
 export class PushService {
   /**

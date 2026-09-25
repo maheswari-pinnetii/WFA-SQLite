@@ -1,7 +1,7 @@
 import { analyticsRepository } from './analytics.repository.js';
 import { Employee, LeaveBalance } from '../../models/index.js';
 
-const getScope = (user: any, employeeIdKey = 'employeeId') => {
+const getScope = (user: any, employeeIdKey = 'employeeId', filters: any = {}) => {
   const query: any = { organizationId: user.organizationId || 'org-stackly' };
 
   if (user.role === 'MANAGER') {
@@ -14,13 +14,24 @@ const getScope = (user: any, employeeIdKey = 'employeeId') => {
     query[employeeIdKey] = user.id;
   }
 
+  if (filters.department) query.department = filters.department;
+  if (filters.role) query.role = filters.role;
+  if (filters.location) query.$or = [{ locationId: filters.location }, { location: filters.location }];
+  if (filters.status) query.status = filters.status;
+  
+  if (filters.dateFrom || filters.dateTo) {
+      query.createdAt = {};
+      if (filters.dateFrom) query.createdAt.$gte = new Date(filters.dateFrom);
+      if (filters.dateTo) query.createdAt.$lte = new Date(filters.dateTo);
+  }
+
   return query;
 };
 
 const percentage = (value: number, total: number) => (total ? Number(((value / total) * 100).toFixed(1)) : 0);
 
-const buildGrowth = async (user: any) => {
-  const query = getScope(user, 'id');
+const buildGrowth = async (user: any, filters?: any) => {
+  const query = getScope(user, 'id', filters);
   const employees = await Employee.find(query).sort({ joinDate: 1 }) as any[];
   const monthlyHires: Record<string, number> = {};
   employees.forEach(emp => {
@@ -40,11 +51,11 @@ const buildGrowth = async (user: any) => {
 };
 
 export class AnalyticsService {
-  async getAnalytics(reqUser: any) {
-    const employeeQuery = getScope(reqUser, 'id');
-    const attendanceQuery = getScope(reqUser, 'employeeId');
-    const performanceQuery = getScope(reqUser, 'employeeId');
-    const skillQuery = getScope(reqUser, 'employeeId');
+  async getAnalytics(reqUser: any, filters?: any) {
+    const employeeQuery = getScope(reqUser, 'id', filters);
+    const attendanceQuery = getScope(reqUser, 'employeeId', filters);
+    const performanceQuery = getScope(reqUser, 'employeeId', filters);
+    const skillQuery = getScope(reqUser, 'employeeId', filters);
 
     const [
       employees,
@@ -78,7 +89,7 @@ export class AnalyticsService {
       analyticsRepository.getExperienceDistribution(employeeQuery)
     ]) as [any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[], any[]];
 
-    const growthData = await buildGrowth(reqUser);
+    const growthData = await buildGrowth(reqUser, filters);
     const totalEmployees = employees.length;
 
     const employeeJoinDateMap = new Map<string, string>();
@@ -293,15 +304,26 @@ export class AnalyticsService {
         const loc = emp.locationId || emp.location || 'Unknown';
         acc[loc] = (acc[loc] || 0) + 1;
         return acc;
-      }, {})).map(([name, value]) => ({ name, value: value as number })),
+      }, {})).map(([name, value]) => ({ 
+        locationId: name.toLowerCase().replace(/\s+/g, '-'), 
+        locationName: name, 
+        employeeCount: value as number 
+      })).sort((a, b) => b.employeeCount - a.employeeCount),
       experienceDistribution: Object.entries(employees.reduce((acc: any, emp: any) => {
-        const years = emp.joinDate ? (Date.now() - new Date(emp.joinDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25) : 0;
-        if (years < 3) acc['0-2 Years'] = (acc['0-2 Years'] || 0) + 1;
-        else if (years < 6) acc['3-5 Years'] = (acc['3-5 Years'] || 0) + 1;
-        else if (years < 11) acc['6-10 Years'] = (acc['6-10 Years'] || 0) + 1;
-        else acc['10+ Years'] = (acc['10+ Years'] || 0) + 1;
+        let years = 0;
+        if (emp.experience) {
+          years = parseFloat(emp.experience);
+        } else if (emp.joinDate) {
+          years = (Date.now() - new Date(emp.joinDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+        }
+        if (isNaN(years) || years < 0) years = 0;
+        if (years <= 1) acc['0–1 years'] = (acc['0–1 years'] || 0) + 1;
+        else if (years <= 3) acc['1–3 years'] = (acc['1–3 years'] || 0) + 1;
+        else if (years <= 5) acc['3–5 years'] = (acc['3–5 years'] || 0) + 1;
+        else if (years <= 8) acc['5–8 years'] = (acc['5–8 years'] || 0) + 1;
+        else acc['8+ years'] = (acc['8+ years'] || 0) + 1;
         return acc;
-      }, { '0-2 Years': 0, '3-5 Years': 0, '6-10 Years': 0, '10+ Years': 0 })).map(([name, value]) => ({ name, value: value as number })),
+      }, { '0–1 years': 0, '1–3 years': 0, '3–5 years': 0, '5–8 years': 0, '8+ years': 0 })).map(([name, value]) => ({ name, value: value as number })),
       growthData,
       workforceGrowth: growthData,
       attendanceOverview,
@@ -405,10 +427,11 @@ export class AnalyticsService {
     const employeeQuery = getScope(reqUser, 'id');
     const attendanceQuery = getScope(reqUser, 'employeeId');
 
-    const [mvSummary, employees, attendance] = await Promise.all([
+    const [mvSummary, employees, attendance, openPositionsCount] = await Promise.all([
       analyticsRepository.getDashboardSummaryMV(orgId),
       analyticsRepository.getEmployeesSummary(employeeQuery),
-      analyticsRepository.getAttendanceRecords(attendanceQuery)
+      analyticsRepository.getAttendanceRecords(attendanceQuery),
+      analyticsRepository.getOpenPositionsCount(orgId)
     ]);
 
     // Use MV for total headcount if available, fallback to full count
@@ -446,7 +469,7 @@ export class AnalyticsService {
       employeeGrowthRate: totalHeadcount ? Number((((employees.filter((e: any) => e.joinDate && new Date(e.joinDate) >= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length - employees.filter((e: any) => e.status === 'Terminated' || e.status === 'Resigned').length) / totalHeadcount) * 100).toFixed(1)) : 0,
       departmentCount: new Set(employees.map((e: any) => e.department).filter(Boolean)).size,
       locationCount: new Set(employees.map((e: any) => e.locationId || e.location).filter(Boolean)).size,
-      openPositions: 15, // TODO: From recruitment
+      openPositions: openPositionsCount,
     };
   }
 
@@ -454,6 +477,130 @@ export class AnalyticsService {
     const attendanceQuery = getScope(reqUser, 'employeeId');
     const rows = await analyticsRepository.getWorkModeDistribution(attendanceQuery);
     return rows.length ? rows : [{ name: 'No data', value: 0 }];
+  }
+
+  async getLocationDistribution(reqUser: any) {
+    const orgId = reqUser.organizationId || 'org-stackly';
+    const employeeQuery = getScope(reqUser, 'id');
+    const employees = await analyticsRepository.getEmployeesSummary(employeeQuery);
+
+    const locations: Record<string, number> = {};
+    employees.forEach((e: any) => {
+      const loc = e.locationId || e.location || 'Unknown';
+      locations[loc] = (locations[loc] || 0) + 1;
+    });
+
+    return Object.entries(locations).map(([locationName, employeeCount]) => ({
+      locationId: locationName.toLowerCase().replace(/\s+/g, '-'),
+      locationName,
+      employeeCount
+    })).sort((a, b) => b.employeeCount - a.employeeCount);
+  }
+
+  async getExperienceDistribution(reqUser: any) {
+    const orgId = reqUser.organizationId || 'org-stackly';
+    const employeeQuery = getScope(reqUser, 'id');
+    const employees = await analyticsRepository.getEmployeesSummary(employeeQuery);
+
+    const bands = {
+      '0–1 years': 0,
+      '1–3 years': 0,
+      '3–5 years': 0,
+      '5–8 years': 0,
+      '8+ years': 0
+    };
+
+    const now = new Date().getTime();
+    employees.forEach((e: any) => {
+      let expYears = 0;
+      if (e.experience) {
+        expYears = parseFloat(e.experience);
+      } else if (e.joinDate) {
+        const join = new Date(e.joinDate).getTime();
+        expYears = (now - join) / (1000 * 60 * 60 * 24 * 365.25);
+      }
+      
+      if (isNaN(expYears) || expYears < 0) expYears = 0;
+      
+      if (expYears <= 1) bands['0–1 years']++;
+      else if (expYears <= 3) bands['1–3 years']++;
+      else if (expYears <= 5) bands['3–5 years']++;
+      else if (expYears <= 8) bands['5–8 years']++;
+      else bands['8+ years']++;
+    });
+
+    return Object.entries(bands).map(([band, count]) => ({ band, count }));
+  }
+
+  async getHistoricalAttrition(reqUser: any, filters?: any) {
+    const employeeQuery = getScope(reqUser, 'id', filters);
+    const employees = await analyticsRepository.getEmployeesSummary(employeeQuery);
+
+    const exits = employees.filter((e: any) => e.status === 'Terminated' || e.status === 'Resigned');
+    const exitsCount = exits.length;
+    const totalEmployees = employees.length;
+    
+    // Total attrition rate
+    const attritionRate = totalEmployees > 0 ? Number(((exitsCount / totalEmployees) * 100).toFixed(1)) : 0;
+
+    // Department attrition
+    const deptMap: Record<string, { total: number, exits: number }> = {};
+    employees.forEach((e: any) => {
+      const dept = e.department || 'Unknown';
+      if (!deptMap[dept]) deptMap[dept] = { total: 0, exits: 0 };
+      deptMap[dept].total++;
+      if (e.status === 'Terminated' || e.status === 'Resigned') {
+        deptMap[dept].exits++;
+      }
+    });
+    const departmentAttrition = Object.entries(deptMap).map(([department, data]) => ({
+      department,
+      rate: data.total > 0 ? Number(((data.exits / data.total) * 100).toFixed(1)) : 0,
+      exits: data.exits
+    })).sort((a, b) => b.rate - a.rate);
+
+    // Location attrition
+    const locMap: Record<string, { total: number, exits: number }> = {};
+    employees.forEach((e: any) => {
+      const loc = e.locationId || e.location || 'Unknown';
+      if (!locMap[loc]) locMap[loc] = { total: 0, exits: 0 };
+      locMap[loc].total++;
+      if (e.status === 'Terminated' || e.status === 'Resigned') {
+        locMap[loc].exits++;
+      }
+    });
+    const locationAttrition = Object.entries(locMap).map(([location, data]) => ({
+      location,
+      rate: data.total > 0 ? Number(((data.exits / data.total) * 100).toFixed(1)) : 0,
+      exits: data.exits
+    })).sort((a, b) => b.rate - a.rate);
+
+    // Attrition Trend
+    const trendMap: Record<string, number> = {};
+    exits.forEach((e: any) => {
+      // Assuming exitDate is available or we use updatedAt
+      const date = e.exitDate || e.updatedAt;
+      if (date) {
+        const month = new Date(date).toISOString().substring(0, 7);
+        trendMap[month] = (trendMap[month] || 0) + 1;
+      }
+    });
+    
+    const sortedMonths = Object.keys(trendMap).sort().slice(-12);
+    const attritionTrend = sortedMonths.map(month => ({
+      month,
+      exits: trendMap[month]
+    }));
+
+    return {
+      summary: {
+        employeeExits: exitsCount,
+        attritionRate
+      },
+      departmentAttrition,
+      locationAttrition,
+      attritionTrend
+    };
   }
 
   async getHeadcountAnalytics(reqUser: any) {

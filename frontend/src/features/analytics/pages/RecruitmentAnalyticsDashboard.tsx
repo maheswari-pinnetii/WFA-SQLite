@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Target, Users, Clock, TrendingUp, Briefcase, RefreshCw, AlertCircle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, FunnelChart, Funnel, LabelList, PieChart, Pie, Cell, Legend } from "recharts";
 
@@ -15,47 +15,10 @@ export const RecruitmentAnalyticsDashboard: React.FC = () => {
     setError(null);
     try {
       const headers = { Authorization: "Bearer " + getAuthToken() };
-      const res = await fetch("/api/v1/analytics", { headers });
+      const res = await fetch("/api/v1/analytics/recruitment", { headers });
+      if (!res.ok) throw new Error("HTTP " + res.status);
       const json = await res.json();
-      const a = json.data || {};
-
-      const depts = (a.departmentDistribution || []).slice(0, 6);
-      const total = depts.reduce((s: number, d: any) => s + d.value, 0);
-
-      const funnel = [
-        { name: "Open Positions", value: a.metrics?.openPositions || 20, fill: "#6366f1" },
-        { name: "Applications", value: Math.round((a.metrics?.openPositions || 20) * 12), fill: "#06b6d4" },
-        { name: "Shortlisted", value: Math.round((a.metrics?.openPositions || 20) * 5), fill: "#10b981" },
-        { name: "Interviews", value: Math.round((a.metrics?.openPositions || 20) * 3), fill: "#f59e0b" },
-        { name: "Offers Made", value: Math.round((a.metrics?.openPositions || 20) * 1.5), fill: "#8b5cf6" },
-        { name: "Hired", value: a.metrics?.newEmployees || 8, fill: "#ef4444" },
-      ];
-
-      const hiringByDept = depts.map((d: any) => ({
-        dept: d.name,
-        openings: Math.max(1, Math.round(d.value * 0.1)),
-        applications: Math.max(5, Math.round(d.value * 1.2)),
-        hired: Math.max(0, Math.round(d.value * 0.05)),
-      }));
-
-      const sourceDistribution = [
-        { name: "LinkedIn", value: 35 },
-        { name: "Referral", value: 28 },
-        { name: "Job Board", value: 20 },
-        { name: "Campus", value: 10 },
-        { name: "Direct", value: 7 },
-      ];
-
-      const kpis = {
-        openPositions: a.metrics?.openPositions || 20,
-        totalApplications: funnel[1].value,
-        offerAcceptanceRate: 78,
-        avgTimeToHire: 32,
-        costPerHire: 45000,
-        hiredThisQuarter: a.metrics?.newEmployees || 8,
-      };
-
-      setData({ funnel, hiringByDept, sourceDistribution, kpis });
+      setData(json.data);
     } catch (err: any) {
       setError(err.message || "Failed to load recruitment data");
     } finally {

@@ -14,13 +14,13 @@ describe('RBAC & Roles Specifications Unit Tests', () => {
       expect(ROLE_HOME_PATHS[Role.ADMIN]).toBe('/admin/dashboard');
       expect(ROLE_HOME_PATHS[Role.EMPLOYEE]).toBe('/employee/dashboard');
     });
-
     it('should declare strict nested hierarchy ranks', () => {
       expect(ROLE_LEVELS[Role.ADMIN]).toBe(0); // Top level
-      expect(ROLE_LEVELS[Role.HR]).toBe(1);
-      expect(ROLE_LEVELS[Role.MANAGER]).toBe(2);
-      expect(ROLE_LEVELS[Role.TEAM_LEAD]).toBe(3);
-      expect(ROLE_LEVELS[Role.EMPLOYEE]).toBe(4); // Base level
+      expect(ROLE_LEVELS[Role.EXECUTIVE]).toBe(1);
+      expect(ROLE_LEVELS[Role.HR]).toBe(2);
+      expect(ROLE_LEVELS[Role.MANAGER]).toBe(3);
+      expect(ROLE_LEVELS[Role.TEAM_LEAD]).toBe(4);
+      expect(ROLE_LEVELS[Role.EMPLOYEE]).toBe(5); // Base level
     });
   });
 

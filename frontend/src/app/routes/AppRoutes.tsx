@@ -117,9 +117,10 @@ import { SalaryComponentsPage } from '../../features/hr/pages/SalaryComponentsPa
 import { HeadcountAnalyticsPage } from '../../features/analytics/pages/HeadcountAnalyticsPage';
 import { ComingSoonPage } from '../../pages/ComingSoonPage';
 import { NotificationPreferences } from '../../features/employee/pages/NotificationPreferences';
-import { AttritionAnalyticsPage } from '../../features/analytics/pages/AttritionAnalyticsPage';
-import { LearningAnalyticsDashboard } from '../../features/analytics/pages/LearningAnalyticsDashboard';
+import { HistoricalAttritionPage } from '../../features/analytics/pages/HistoricalAttritionPage';
+import { AttritionRiskDashboard } from '../../features/analytics/pages/AttritionRiskDashboard';
 import { RecruitmentAnalyticsDashboard } from '../../features/analytics/pages/RecruitmentAnalyticsDashboard';
+import { LearningAnalyticsDashboard } from '../../features/analytics/pages/LearningAnalyticsDashboard';
 import { PlacementAnalyticsDashboard } from '../../features/analytics/pages/PlacementAnalyticsDashboard';
 import { DemandForecastingPage } from '../../features/analytics/pages/DemandForecastingPage';
 import { WorkforcePlanningPage } from '../../features/analytics/pages/WorkforcePlanningPage';
@@ -263,7 +264,7 @@ export const AppRoutes: React.FC = () => {
                 <Route path="/hr/corrections" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><AttendanceCorrectionsPage /></RoleGuard>} />
                 <Route path="/hr/approvals" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><ApprovalsPage /></RoleGuard>} />
                 <Route path="/hr/performance-overview" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><PerformanceOverviewPage /></RoleGuard>} />
-                <Route path="/hr/recruitment-analytics" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><AttritionAnalyticsPage /></RoleGuard>} />
+                <Route path="/hr/recruitment-analytics" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><RecruitmentAnalyticsDashboard /></RoleGuard>} />
                 <Route path="/hr/workforce-planning" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><HeadcountAnalyticsPage /></RoleGuard>} />
                 <Route path="/hr/audit-logs" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><AuditLogsPage /></RoleGuard>} />
                 <Route path="/hr/settings" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><SystemSettings /></RoleGuard>} />
@@ -535,7 +536,8 @@ export const AppRoutes: React.FC = () => {
                 {/* Analytics */}
                 <Route path="/analytics/workforce" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><TeamAnalytics /></RoleGuard>} />
                 <Route path="/analytics/headcount" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><HeadcountAnalyticsPage /></RoleGuard>} />
-                <Route path="/analytics/attrition" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><AttritionAnalyticsPage /></RoleGuard>} />
+                <Route path="/analytics/attrition" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD, Role.EXECUTIVE]}><HistoricalAttritionPage /></RoleGuard>} />
+                <Route path="/analytics/attrition-risk" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.EXECUTIVE]}><AttritionRiskDashboard /></RoleGuard>} />
                 <Route path="/analytics/attendance" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><AttendanceHistoryPage /></RoleGuard>} />
                 <Route path="/analytics/payroll" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR]}><PayrollReports /></RoleGuard>} />
                 <Route path="/analytics/productivity" element={<RoleGuard allowedRoles={[Role.ADMIN, Role.HR, Role.MANAGER, Role.TEAM_LEAD]}><ProductivityAnalyticsPage /></RoleGuard>} />

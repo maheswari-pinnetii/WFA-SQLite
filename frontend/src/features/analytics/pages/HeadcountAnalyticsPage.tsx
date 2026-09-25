@@ -6,20 +6,49 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis
 export const HeadcountAnalyticsPage: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    department: '',
+    role: '',
+    location: '',
+    status: '',
+    dateFrom: '',
+    dateTo: ''
+  });
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Pass clean filters
+      const activeFilters = Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== ''));
+      const fullAnalytics = await analyticsApi.getAnalytics(activeFilters);
+      setData(fullAnalytics);
+    } catch (err) {
+      console.error('Failed to fetch headcount analytics', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fullAnalytics = await analyticsApi.getAnalytics();
-        setData(fullAnalytics);
-      } catch (err) {
-        console.error('Failed to fetch headcount analytics', err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
-  }, []);
+  }, [filters]);
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      department: '',
+      role: '',
+      location: '',
+      status: '',
+      dateFrom: '',
+      dateTo: ''
+    });
+  };
 
   if (loading) {
     return (
@@ -54,6 +83,42 @@ export const HeadcountAnalyticsPage: React.FC = () => {
             Real-time workforce distribution across departments, locations, employment types, and tenure bands.
           </p>
         </div>
+      </div>
+
+      <div className="bg-[var(--bg-card)] p-4 rounded-xl border border-[var(--border-color)] flex flex-wrap gap-4 items-end">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[var(--text-muted)]">Department</label>
+          <input type="text" className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm" placeholder="All" value={filters.department} onChange={(e) => handleFilterChange('department', e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[var(--text-muted)]">Location</label>
+          <input type="text" className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm" placeholder="All" value={filters.location} onChange={(e) => handleFilterChange('location', e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[var(--text-muted)]">Role</label>
+          <input type="text" className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm" placeholder="All" value={filters.role} onChange={(e) => handleFilterChange('role', e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[var(--text-muted)]">Status</label>
+          <select className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm" value={filters.status} onChange={(e) => handleFilterChange('status', e.target.value)}>
+            <option value="">All</option>
+            <option value="Active">Active</option>
+            <option value="On Leave">On Leave</option>
+            <option value="Resigned">Resigned</option>
+            <option value="Terminated">Terminated</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[var(--text-muted)]">Date From</label>
+          <input type="date" className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm" value={filters.dateFrom} onChange={(e) => handleFilterChange('dateFrom', e.target.value)} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-[var(--text-muted)]">Date To</label>
+          <input type="date" className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-md px-3 py-1.5 text-sm" value={filters.dateTo} onChange={(e) => handleFilterChange('dateTo', e.target.value)} />
+        </div>
+        <button onClick={resetFilters} className="px-4 py-1.5 bg-gray-200 dark:bg-gray-700 text-sm font-medium rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+          Reset
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -137,10 +202,10 @@ export const HeadcountAnalyticsPage: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={locationDistribution || []} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
-                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} />
+                <XAxis dataKey="locationName" stroke="var(--text-muted)" fontSize={12} />
                 <YAxis stroke="var(--text-muted)" fontSize={12} />
                 <Tooltip cursor={{ fill: 'var(--bg-primary)' }} contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }} />
-                <Bar dataKey="value" fill="#06b6d4" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="employeeCount" fill="#06b6d4" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

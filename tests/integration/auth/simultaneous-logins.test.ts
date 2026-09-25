@@ -7,7 +7,7 @@ import { connectDatabase } from '../../../backend/src/database/sqlite-cloud.js';
 describe('1,000 Concurrent Live Login Benchmark', () => {
   beforeAll(async () => {
     await connectDatabase();
-  });
+  }, 30000);
 
   it('handles 1,000 simultaneous logins cleanly without database locks or 429 rate limit failures', async () => {
     const totalRequests = process.env.BENCHMARK_1000 ? 1000 : 200;

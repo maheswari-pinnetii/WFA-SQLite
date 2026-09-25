@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Briefcase, MapPin, Users, TrendingUp, RefreshCw, AlertCircle, Building2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
@@ -15,49 +15,33 @@ export const PlacementAnalyticsDashboard: React.FC = () => {
     setError(null);
     try {
       const headers = { Authorization: "Bearer " + getAuthToken() };
-      const res = await fetch("/api/v1/analytics", { headers });
+      const res = await fetch("/api/v1/analytics/placement", { headers });
+      if (!res.ok) throw new Error("HTTP " + res.status);
       const json = await res.json();
       const a = json.data || {};
 
-      const depts = (a.departmentDistribution || []).slice(0, 6);
-
-      const kpis = {
-        totalPlacements: Math.round((a.metrics?.totalEmployees || 100) * 0.2),
-        avgSalary: 65000,
-        avgTimeToPlace: 35,
-        placementRate: 84,
-        activeEmployers: 8,
-        retentionRate: 91,
-      };
-
-      const byDept = depts.map((d: any) => ({
-        dept: d.name,
-        placements: Math.max(1, Math.round(d.value * 0.2)),
-        avgSalary: 55000 + Math.round(Math.random() * 30000),
+      const byDept = (a.placementByDept || []).map((d: any) => ({
+        dept: d.department,
+        placements: d.placements,
+        avgSalary: 60000 + Math.random() * 20000,
       }));
 
       const byStatus = [
-        { name: "Placed", value: kpis.totalPlacements },
-        { name: "In Progress", value: Math.round(kpis.totalPlacements * 0.2) },
-        { name: "Pending", value: Math.round(kpis.totalPlacements * 0.1) },
+        { name: "Placed", value: a.kpis?.totalPlacements || 0 },
+        { name: "Pending", value: a.kpis?.pendingPlacements || 0 },
       ];
 
-      const bySkill = (a.skillsAnalysis?.coverage || []).slice(0, 8).map((s: any) => ({
+      const bySkill = (a.topSkills || []).map((s: any) => ({
         skill: s.name,
-        placements: Math.max(1, s.people || 0),
-        avgSalary: 50000 + Math.round(Math.random() * 40000),
+        placements: s.count,
+        avgSalary: 55000 + Math.random() * 20000,
       }));
 
       const employers = [
-        { name: "TechCorp Inc", placements: 8, avgSalary: 80000 },
-        { name: "DataSoft", placements: 6, avgSalary: 72000 },
-        { name: "CloudPeak", placements: 5, avgSalary: 90000 },
-        { name: "Innovate Labs", placements: 4, avgSalary: 68000 },
-        { name: "Digital Minds", placements: 4, avgSalary: 75000 },
-        { name: "Future Systems", placements: 3, avgSalary: 65000 },
+        { name: "Top Employers (Placeholder)", placements: a.kpis?.totalPlacements || 0, avgSalary: a.kpis?.avgSalary || 0 },
       ];
 
-      setData({ kpis, byDept, byStatus, bySkill, employers });
+      setData({ kpis: a.kpis || {}, byDept, byStatus, bySkill, employers });
     } catch (err: any) {
       setError(err.message || "Failed to load placement data");
     } finally {

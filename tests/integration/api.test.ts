@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import axios from 'axios';
-import { app } from '../../server.js';
+import { app } from '../../backend/src/server.js';
 import { initDb, getDb } from '../../backend/src/config/db.js';
 import { Attendance, Correction } from '../../backend/src/models/Attendance.js';
 import { seedSqlite } from '../../backend/scripts/seed-sqlite.ts';
