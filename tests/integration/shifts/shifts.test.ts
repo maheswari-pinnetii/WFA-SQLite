@@ -27,7 +27,8 @@ describe('Shift & Roster Management API Integration Tests', () => {
     const empRes = await request(app)
       .get('/api/employees')
       .set('Authorization', `Bearer ${adminToken}`);
-    employeeId = empRes.body.data.data[0].id;
+    const stableEmp = empRes.body.data.data.find((e: any) => e.id === 'emp-1');
+    employeeId = stableEmp ? stableEmp.id : empRes.body.data.data[0].id;
   });
 
 
@@ -40,7 +41,8 @@ describe('Shift & Roster Management API Integration Tests', () => {
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data.length).toBeGreaterThan(0);
-    shiftId = res.body.data[0].id; // Save for next test
+    const stableShift = res.body.data.find((s: any) => s.id === 'shift-regular');
+    shiftId = stableShift ? stableShift.id : res.body.data[0].id; // Save for next test
   });
 
   it('should assign a shift to an employee', async () => {

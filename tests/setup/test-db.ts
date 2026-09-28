@@ -16,6 +16,8 @@ export async function createTestDatabase() {
       fs.unlinkSync(dbPath);
       console.log(`[Test DB] Removed old database at ${dbPath}`);
     }
+    if (fs.existsSync(dbPath + '-wal')) fs.unlinkSync(dbPath + '-wal');
+    if (fs.existsSync(dbPath + '-shm')) fs.unlinkSync(dbPath + '-shm');
   } catch (err: any) {
     console.warn(`[Test DB] Warning: could not remove old DB - ${err.message}`);
   }

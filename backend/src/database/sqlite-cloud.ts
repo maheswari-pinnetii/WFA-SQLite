@@ -39,6 +39,10 @@ export const connectDatabase = async (): Promise<any> => {
     }
   }
 
+  if (localDb) {
+    return localDb;
+  }
+
   console.log(`[Database] Connecting to local SQLite at ${DB_PATH}`);
   if (!fs.existsSync(DB_DIR)) {
     fs.mkdirSync(DB_DIR, { recursive: true });
