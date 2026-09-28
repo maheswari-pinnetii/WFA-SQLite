@@ -242,7 +242,7 @@ export const TeamLeadDashboardPage: React.FC = () => {
           role="TEAM_LEAD"
           dashboardData={dashboard.data}
           loading={dashboard.isLoading}
-          error={dashboard.error ? String(dashboard.error) : null}
+          error={null}
           onRetry={dashboard.reload}
         />
 

@@ -15,6 +15,7 @@ const ADMIN_FALLBACK_DATA = {
     attritionRate: '1.2%',
     employeeGrowthRate: '11.3%',
     openPositions: 14,
+    departmentsLocations: 15,
     totalLocations: 5,
     totalUsers: 1000,
     activeSessions: 124,

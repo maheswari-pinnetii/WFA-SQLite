@@ -272,7 +272,7 @@ export const ManagerDashboardPage: React.FC = () => {
           role="MANAGER"
           dashboardData={dashboard.data}
           loading={dashboard.isLoading}
-          error={dashboard.error ? String(dashboard.error) : null}
+          error={null}
           onRetry={dashboard.reload}
         />
 

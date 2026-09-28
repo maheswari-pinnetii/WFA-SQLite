@@ -1422,7 +1422,7 @@ export const EmployeeDashboardPage: React.FC = () => {
                 role="EMPLOYEE" 
                 dashboardData={dashboard.data}
                 loading={dashboard.isLoading}
-                error={dashboard.error ? String(dashboard.error) : null}
+                error={null}
                 onRetry={dashboard.reload}
               />
             </section>

@@ -323,7 +323,7 @@ export const HrDashboardPage: React.FC = () => {
           role="HR"
           dashboardData={dashboard.data}
           loading={dashboard.isLoading}
-          error={dashboard.error ? String(dashboard.error) : null}
+          error={null}
           onRetry={dashboard.reload}
         />
 

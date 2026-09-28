@@ -10,10 +10,7 @@ export const LogoutPage: React.FC = () => {
 
   useEffect(() => {
     logout();
-    const timer = setTimeout(() => {
-      navigate('/login', { replace: true });
-    }, 1500);
-    return () => clearTimeout(timer);
+    navigate('/login', { replace: true });
   }, [logout, navigate]);
 
   return (
