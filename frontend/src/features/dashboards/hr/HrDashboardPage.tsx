@@ -341,8 +341,6 @@ export const HrDashboardPage: React.FC = () => {
             <TeamLeaveCalendar />
           </div>
         </div>
-        </div>
-
         {/* Leave Requests Approvals Desk */}
         <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-4">
           <div className="flex items-center justify-between">
