@@ -11,7 +11,7 @@ import { ChartGrid } from '../../../components/dashboard/charts';
 import { employeeApi } from '../../../api/endpoints/employee.api';
 import { workforceApi, Task } from '../../../api/endpoints/workforce.api';
 import { Employee } from '../../../shared/types/common.types';
-import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Star, FileText, AlertTriangle, ArrowRight, Filter, Layers, Calendar } from 'lucide-react';
+import { Flame, GitPullRequest, Users, CheckCircle2, Zap, Clock, Star, FileText, AlertTriangle, ArrowRight, Filter, Layers, Calendar, XCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmployeeTable } from '../../../components/tables/EmployeeTable';
 
@@ -158,6 +158,20 @@ export const TeamLeadDashboardPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('');
   const [employeeFilter, setEmployeeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  
+  const [approvals, setApprovals] = useState<Array<{ id: string; employee: string; type: string; duration: string; reason: string; status: 'PENDING' | 'APPROVED' | 'REJECTED' }>>([]);
+
+  const loadApprovals = async () => {
+    const requests = await workforceApi.getLeaveRequests();
+    setApprovals(requests.map((request) => ({
+      id: request.id,
+      employee: request.employeeName,
+      type: request.type,
+      duration: `${request.startDate} - ${request.endDate}`,
+      reason: request.reason,
+      status: request.status
+    })));
+  };
 
   const teamName = 'Frontend';
 
@@ -175,7 +189,18 @@ export const TeamLeadDashboardPage: React.FC = () => {
     }).finally(() => {
       setLoading(false);
     });
+    
+    loadApprovals().catch(() => setApprovals([]));
   }, []);
+
+  const handleAction = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+    try {
+      await workforceApi.reviewLeaveRequest(id, status);
+      await loadApprovals();
+    } catch {
+      // Fallback
+    }
+  };
 
   const openDrillDown = (title: string, value: string | number, subtitle: string, details: { label: string; value: string | number }[]) => {
     setDrillDownData({
@@ -226,6 +251,53 @@ export const TeamLeadDashboardPage: React.FC = () => {
           statusFilter={statusFilter}
         />
         <TeamLeadSprintBoard sprintTasks={sprintTasks} />
+
+        {/* Leave Requests Approvals Desk */}
+        <div className="glass-panel p-6 rounded-2xl border-[var(--border-color)] space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <Clock size={18} className="text-amber-400" /> Pending Team Leave Approvals
+            </h3>
+            <Link to="/leave/requests" className="text-xs font-bold text-emerald-400 hover:underline flex items-center gap-1">
+              Approvals Desk <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {approvals.length === 0 ? <p className="text-sm text-[var(--text-muted)] md:col-span-3">No team leave requests are waiting.</p> : approvals.map((req) => (
+              <div key={req.id} className="p-4 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-[var(--text-primary)]">{req.employee}</span>
+                  <span className="badge badge-info text-[9px] uppercase font-bold">{req.type}</span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  <span className="font-semibold text-emerald-400">{req.duration}</span> — {req.reason}
+                </p>
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[var(--border-color)]">
+                  {req.status === 'PENDING' ? (
+                    <>
+                      <button
+                        onClick={() => void handleAction(req.id, 'APPROVED')}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                      >
+                        <CheckCircle2 size={14} /> Approve
+                      </button>
+                      <button
+                        onClick={() => void handleAction(req.id, 'REJECTED')}
+                        className="px-3 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30 font-bold text-xs flex items-center gap-1.5 transition-all"
+                      >
+                        <XCircle size={14} /> Reject
+                      </button>
+                    </>
+                  ) : (
+                    <span className={`badge ${req.status === 'APPROVED' ? 'badge-success' : 'badge-danger'} text-xs font-bold uppercase`}>
+                      {req.status}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <DrillDownModal isOpen={drillDownData !== null} onClose={() => setDrillDownData(null)} data={drillDownData} />
       </div>
