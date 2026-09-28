@@ -26,11 +26,11 @@ export const HrDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchDashboard = useCallback(async () => {
+  const fetchDashboard = useCallback(async (filters?: any) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await analyticsApi.getDashboard('hr').catch(() => null);
+      const res = await analyticsApi.getDashboard('hr', filters).catch(() => null);
       if (res && (res.kpis || res.charts)) {
         setData(res);
       } else {
@@ -159,7 +159,7 @@ export const HrDashboard: React.FC = () => {
       {/* Filter Bar */}
       <FilterBar
         onFilterChange={(filters: FilterState) => {
-          fetchDashboard();
+          fetchDashboard(filters);
         }}
       />
 

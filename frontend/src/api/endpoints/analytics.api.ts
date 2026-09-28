@@ -133,9 +133,9 @@ export const analyticsApi = {
       return fallbackAnalyticsData;
     }
   },
-  async getDashboard(role: string): Promise<any> {
+  async getDashboard(role: string, filters?: any): Promise<any> {
     try {
-      const response = await apiClient.get(`/v1/dashboard/${role}`);
+      const response = await apiClient.get(`/v1/dashboard/${role}`, { params: filters });
       if (response.data?.success && response.data.data !== undefined) {
         return response.data.data;
       }

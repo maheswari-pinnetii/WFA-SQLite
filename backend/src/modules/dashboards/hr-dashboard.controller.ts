@@ -2,7 +2,7 @@ import { hrDashboardService } from './hr-dashboard.service.js';
 
 export const getHrDashboard = async (req: any, res: any) => {
   try {
-    const data = await hrDashboardService.getDashboardData(req.user);
+    const data = await hrDashboardService.getDashboardData(req.user, req.query);
     return res.json({ success: true, data });
   } catch (error: any) {
     console.error('HR Dashboard Error:', error);

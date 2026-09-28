@@ -183,79 +183,7 @@ export const exportAttendanceReport = async (req: any, res: any) => {
   }
 };
 
-/**
- * GET /api/v1/reports/recruitment/export
- */
-export const exportRecruitmentReport = async (req: any, res: any) => {
-  try {
-    const orgId = getOrganizationId(req);
-    const { format = 'csv' } = req.query;
-    const sql = `
-      SELECT c.id, c.name, c.email, c.status as candidateStatus, c.appliedAt,
-             p.title as jobTitle, p.status as jobStatus, d.name as department
-      FROM candidates c
-      JOIN job_postings p ON c.jobId = p.id
-      LEFT JOIN departments d ON p.departmentId = d.id
-      WHERE c.organizationId = ?
-    `;
-    const data = await query(sql, [orgId]);
-    await logAudit(req.user.id, 'EXPORT_RECRUITMENT_REPORT', 'Exported recruitment report', orgId);
-    if (format === 'json') return res.json({ success: true, data });
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename=recruitment-report-${Date.now()}.csv`);
-    return res.send(convertToCSV(data));
-  } catch (err: any) {
-    return handleControllerError(err, req, res, 'report.exportRecruitmentReport', 500, 'Failed to export recruitment report.');
-  }
-};
 
-/**
- * GET /api/v1/reports/learning/export
- */
-export const exportLearningReport = async (req: any, res: any) => {
-  try {
-    const orgId = getOrganizationId(req);
-    const { format = 'csv' } = req.query;
-    const sql = `
-      SELECT e.id, e.programId, e.employeeId, e.status, e.enrolledAt, e.completedAt, e.score, e.courseName,
-             emp.name as employeeName, emp.department
-      FROM training_enrollments e
-      JOIN employees emp ON e.employeeId = emp.id
-      WHERE e.organizationId = ?
-    `;
-    const data = await query(sql, [orgId]);
-    await logAudit(req.user.id, 'EXPORT_LEARNING_REPORT', 'Exported learning report', orgId);
-    if (format === 'json') return res.json({ success: true, data });
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename=learning-report-${Date.now()}.csv`);
-    return res.send(convertToCSV(data));
-  } catch (err: any) {
-    return handleControllerError(err, req, res, 'report.exportLearningReport', 500, 'Failed to export learning report.');
-  }
-};
-
-/**
- * GET /api/v1/reports/placement/export
- */
-export const exportPlacementReport = async (req: any, res: any) => {
-  try {
-    const orgId = getOrganizationId(req);
-    const { format = 'csv' } = req.query;
-    const sql = `
-      SELECT p.id, p.candidateId, p.jobId, p.offerDate, p.joiningDate, p.status, p.salary, p.department, p.employer, p.location
-      FROM placements p
-      WHERE p.organizationId = ?
-    `;
-    const data = await query(sql, [orgId]);
-    await logAudit(req.user.id, 'EXPORT_PLACEMENT_REPORT', 'Exported placement report', orgId);
-    if (format === 'json') return res.json({ success: true, data });
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename=placement-report-${Date.now()}.csv`);
-    return res.send(convertToCSV(data));
-  } catch (err: any) {
-    return handleControllerError(err, req, res, 'report.exportPlacementReport', 500, 'Failed to export placement report.');
-  }
-};
 
 
 /**

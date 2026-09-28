@@ -198,7 +198,7 @@ const FALLBACK_BY_ROLE: Record<string, any> = {
   [Role.EMPLOYEE]: EMPLOYEE_FALLBACK_DATA,
 };
 
-export const useDashboardData = (role: Role) => {
+export const useDashboardData = (role: Role, filters?: any) => {
   const [data, setData] = useState<any>(FALLBACK_BY_ROLE[role] || null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -210,7 +210,7 @@ export const useDashboardData = (role: Role) => {
       let response;
       switch (role) {
         case Role.ADMIN:
-          response = await dashboardApi.getAdminDashboard();
+          response = await dashboardApi.getAdminDashboard(filters);
           break;
         case Role.HR:
           response = await dashboardApi.getHrDashboard();
@@ -245,7 +245,7 @@ export const useDashboardData = (role: Role) => {
     } finally {
       setIsLoading(false);
     }
-  }, [role]);
+  }, [role, filters]);
 
   useEffect(() => { void reload(); }, [reload]);
   return { data, isLoading, error, reload };
