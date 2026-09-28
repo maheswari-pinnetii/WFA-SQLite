@@ -1,8 +1,8 @@
 import { apiClient } from '../client';
 
 export const dashboardApi = {
-  getAdminDashboard: async () => {
-    return apiClient.get('/dashboard/admin');
+  getAdminDashboard: async (filters?: any) => {
+    return apiClient.get('/dashboard/admin', { params: filters });
   },
   getHrDashboard: async () => {
     return apiClient.get('/dashboard/hr');

@@ -241,18 +241,24 @@ export const AdminSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
 
 export const AdminDashboardPage: React.FC = () => {
   const { user } = useAuth();
-  const dashboard = useDashboardData(Role.ADMIN);
-  const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-
   // Filters
   const [dateFilter, setDateFilter] = useState('');
   const [locationFilter, setLocationFilter] = useState('All');
   const [deptFilter, setDeptFilter] = useState('All');
   const [teamFilter, setTeamFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const dashboard = useDashboardData(Role.ADMIN, {
+    date: dateFilter,
+    location: locationFilter,
+    department: deptFilter,
+    team: teamFilter,
+    status: statusFilter
+  });
+  
+  const [drillDownData, setDrillDownData] = useState<DrillDownData | null>(null);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {

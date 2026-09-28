@@ -10,6 +10,12 @@ const ADMIN_FALLBACK_DATA = {
     onLeaveHeadcount: 63,
     remoteHeadcount: 58,
     terminatedHeadcount: 32,
+    newEmployees: 125,
+    employeeExits: 12,
+    attritionRate: '1.2%',
+    employeeGrowthRate: '11.3%',
+    openPositions: 14,
+    totalLocations: 5,
     totalUsers: 1000,
     activeSessions: 124,
     totalStorage: '42.8 MB',
@@ -20,6 +26,18 @@ const ADMIN_FALLBACK_DATA = {
     dailyLogins: 312,
   },
   charts: {
+    locationDistribution: [
+      { name: 'New York (HQ)', headcount: 450 },
+      { name: 'London', headcount: 200 },
+      { name: 'Bangalore', headcount: 250 },
+      { name: 'Singapore', headcount: 100 }
+    ],
+    experienceDistribution: [
+      { name: '< 1 Year', headcount: 250 },
+      { name: '1-3 Years', headcount: 400 },
+      { name: '3-5 Years', headcount: 200 },
+      { name: '5+ Years', headcount: 150 }
+    ],
     headcountTrend: [
       { month: 'Jan 22', headcount: 125, joined: 125 },
       { month: 'Jul 22', headcount: 250, joined: 125 },
@@ -209,7 +227,10 @@ export const useDashboardData = (role: Role) => {
         default:
           throw new Error('Invalid role');
       }
-      const responseData = response?.data || response;
+      let responseData = response?.data?.data || response?.data || response;
+      if (responseData?.success && responseData?.data) {
+        responseData = responseData.data;
+      }
       // Only use API data if it has meaningful content, otherwise keep fallback
       if (responseData && (responseData.kpis || responseData.charts || responseData.metrics)) {
         setData(responseData);

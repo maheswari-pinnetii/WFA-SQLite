@@ -68,6 +68,22 @@ export const MAIN_NAVIGATION: NavigationItem[] = [
     roles: ALL_ROLES
   },
   {
+    id: 'analytics',
+    label: 'Analytics & Planning',
+    icon: <Activity size={18} strokeWidth={2} />,
+    roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE],
+    children: [
+      { id: 'analytics.executive', label: 'Executive Portal', path: '/executive/dashboard', roles: [Role.ADMIN, Role.EXECUTIVE] },
+      { id: 'analytics.attrition_risk', label: 'Attrition Risk', path: '/executive/attrition-risk', roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE] },
+      { id: 'analytics.historical_attrition', label: 'Historical Attrition', path: '/executive/historical-attrition', roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE] },
+      { id: 'analytics.demand_forecasting', label: 'Demand Forecasting', path: '/executive/demand-forecasting', roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE] },
+      { id: 'analytics.workforce_planning', label: 'Workforce Planning', path: '/executive/workforce-planning', roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE] },
+      { id: 'analytics.recruitment', label: 'Recruitment Analytics', path: '/executive/recruitment-analytics', roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE] },
+      { id: 'analytics.learning', label: 'Learning Analytics', path: '/executive/learning-analytics', roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE] },
+      { id: 'analytics.placement', label: 'Placement Analytics', path: '/executive/placement-analytics', roles: [Role.ADMIN, Role.HR, Role.EXECUTIVE] },
+    ]
+  },
+  {
     id: 'people',
     label: 'People',
     icon: <Users size={18} strokeWidth={2} />,

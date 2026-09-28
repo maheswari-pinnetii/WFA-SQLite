@@ -57,6 +57,62 @@ export const usePerformanceAnalytics = () => {
   });
 };
 
+export const useSkillDistribution = (filters?: any) => {
+  return useQuery({
+    queryKey: ['skillDistribution', filters],
+    queryFn: () => analyticsApi.getSkillDistribution(filters),
+  });
+};
+
+export const useSkillGaps = (filters?: any) => {
+  return useQuery({
+    queryKey: ['skillGaps', filters],
+    queryFn: () => analyticsApi.getSkillGaps(filters),
+  });
+};
+
+export const useSkillCoverage = (filters?: any) => {
+  return useQuery({
+    queryKey: ['skillCoverage', filters],
+    queryFn: () => analyticsApi.getSkillCoverage(filters),
+  });
+};
+
+export const useCertificationStatus = (filters?: any) => {
+  return useQuery({
+    queryKey: ['certificationStatus', filters],
+    queryFn: () => analyticsApi.getCertificationStatus(filters),
+  });
+};
+
+export const useTrainingRecommendations = (filters?: any) => {
+  return useQuery({
+    queryKey: ['trainingRecommendations', filters],
+    queryFn: () => analyticsApi.getTrainingRecommendations(filters),
+  });
+};
+
+export const useRecruitmentAnalytics = (filters?: any) => {
+  return useQuery({
+    queryKey: ['recruitmentAnalytics', filters],
+    queryFn: () => analyticsApi.getRecruitmentAnalytics(filters),
+  });
+};
+
+export const useLearningAnalytics = (filters?: any) => {
+  return useQuery({
+    queryKey: ['learningAnalytics', filters],
+    queryFn: () => analyticsApi.getLearningAnalytics(filters),
+  });
+};
+
+export const usePlacementAnalytics = (filters?: any) => {
+  return useQuery({
+    queryKey: ['placementAnalytics', filters],
+    queryFn: () => analyticsApi.getPlacementAnalytics(filters),
+  });
+};
+
 export const useDepartments = () => {
   return useQuery({
     queryKey: ['departments'],

@@ -157,6 +157,66 @@ export const employeeApi = {
     return list.find((employee: any) => employee.id === id || employee.employeeCode === id) || FALLBACK_EMPLOYEES[0];
   },
 
+  getFullProfile: async (id: string): Promise<any> => {
+    const response = await apiClient.get(`/v1/employees/${id}/profile`);
+    return response.data;
+  },
+
+  updateEmployee: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.put(`/v1/employees/${id}`, data);
+    return response.data;
+  },
+
+  updateBankDetails: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.put(`/v1/employees/${id}/bank-details`, data);
+    return response.data;
+  },
+
+  updateTaxInfo: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.put(`/v1/employees/${id}/tax-info`, data);
+    return response.data;
+  },
+
+  addSkill: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.post(`/v1/employees/${id}/skills`, data);
+    return response.data;
+  },
+
+  removeSkill: async (id: string, skillId: string): Promise<any> => {
+    const response = await apiClient.delete(`/v1/employees/${id}/skills/${skillId}`);
+    return response.data;
+  },
+
+  addEducation: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.post(`/v1/employees/${id}/education`, data);
+    return response.data;
+  },
+
+  removeEducation: async (id: string, eduId: string): Promise<any> => {
+    const response = await apiClient.delete(`/v1/employees/${id}/education/${eduId}`);
+    return response.data;
+  },
+
+  addExperience: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.post(`/v1/employees/${id}/experience`, data);
+    return response.data;
+  },
+
+  removeExperience: async (id: string, expId: string): Promise<any> => {
+    const response = await apiClient.delete(`/v1/employees/${id}/experience/${expId}`);
+    return response.data;
+  },
+
+  addEmergencyContact: async (id: string, data: any): Promise<any> => {
+    const response = await apiClient.post(`/v1/employees/${id}/emergency-contacts`, data);
+    return response.data;
+  },
+
+  removeEmergencyContact: async (id: string, contactId: string): Promise<any> => {
+    const response = await apiClient.delete(`/v1/employees/${id}/emergency-contacts/${contactId}`);
+    return response.data;
+  },
+
   getEmployee360: async (id: string): Promise<any> => {
     try {
       const response = await apiClient.get(`/v1/employees/${id}/360`);

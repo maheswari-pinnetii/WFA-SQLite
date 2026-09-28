@@ -71,8 +71,10 @@ const isConnectionError = (err: any): boolean => {
   if (!err) return false;
   const msg = (err.message || '').toLowerCase();
   
-  // Specific SQLiteCloud connection error code
+  // Specific SQLiteCloud connection error codes
   if (err.errorCode === '10010') return true;
+  if (err.errorCode === 'ERR_CONNECTION_ERROR') return true;
+  if (err.errorCode === '1' && err.externalErrorCode === '1' && err.offsetCode === 61) return true;
   
   // If it's a generic SQLiteCloudError, only treat it as a connection error if the message implies a network failure
   if (err.name === 'SQLiteCloudError' && !msg.includes('connection') && !msg.includes('unavailable') && !msg.includes('disconnected') && !msg.includes('paused') && !msg.includes('timeout')) {
@@ -93,8 +95,10 @@ const isConnectionError = (err: any): boolean => {
     msg.includes('econnrefused') ||
     msg.includes('etimedout') ||
     msg.includes('not connected') ||
+    msg.includes('econnreset') ||
     err.errorCode === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
-    err.code === 'ERR_CONNECTION_NOT_ESTABLISHED'
+    err.code === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
+    err.code === 'ECONNRESET'
   );
 };
 

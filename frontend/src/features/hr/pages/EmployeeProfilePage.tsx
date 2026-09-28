@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { employeeApi } from '../../../api/endpoints/employee.api';
 import { payrollApi } from '../../../api/endpoints/payroll.api';
 import { lifecycleApi } from '../../../api/endpoints/lifecycle.api';
 import { assetsApi } from '../../../api/endpoints/assets.api';
@@ -111,7 +111,7 @@ export const EmployeeProfilePage: React.FC = () => {
     if (!id) return;
     setLoading(true);
     try {
-      const { data } = await axios.get(`/api/employees/${id}/profile`);
+      const data = await employeeApi.getFullProfile(id);
       setEmployee(data.data);
       setPersonalForm(data.data);
       setBankForm(data.data.bankDetails || {});
@@ -187,7 +187,7 @@ export const EmployeeProfilePage: React.FC = () => {
   const savePersonal = async () => {
     setSaving(true);
     try {
-      await axios.put(`/api/employees/${id}`, personalForm);
+      await employeeApi.updateEmployee(id!, personalForm);
       setEditPersonal(false);
       showToast('Personal details updated.');
       fetchProfile();
@@ -198,7 +198,7 @@ export const EmployeeProfilePage: React.FC = () => {
   const saveBankDetails = async () => {
     setSaving(true);
     try {
-      await axios.put(`/api/employees/${id}/bank-details`, bankForm);
+      await employeeApi.updateBankDetails(id!, bankForm);
       showToast('Bank details updated.');
       fetchProfile();
     } catch { showToast('Failed to save bank details.', 'error'); }
@@ -208,7 +208,7 @@ export const EmployeeProfilePage: React.FC = () => {
   const saveTaxInfo = async () => {
     setSaving(true);
     try {
-      await axios.put(`/api/employees/${id}/tax-info`, taxForm);
+      await employeeApi.updateTaxInfo(id!, taxForm);
       showToast('Tax info updated.');
       fetchProfile();
     } catch { showToast('Failed to save tax info.', 'error'); }
@@ -218,7 +218,7 @@ export const EmployeeProfilePage: React.FC = () => {
   const addSkill = async () => {
     if (!newSkill.skillName) return;
     try {
-      await axios.post(`/api/employees/${id}/skills`, { ...newSkill, yearsOfExperience: newSkill.yearsOfExperience ? Number(newSkill.yearsOfExperience) : null });
+      await employeeApi.addSkill(id!, { ...newSkill, yearsOfExperience: newSkill.yearsOfExperience ? Number(newSkill.yearsOfExperience) : null });
       setNewSkill({ skillName: '', category: '', proficiencyLevel: 'INTERMEDIATE', yearsOfExperience: '' });
       showToast('Skill added.');
       fetchProfile();
@@ -227,7 +227,7 @@ export const EmployeeProfilePage: React.FC = () => {
 
   const removeSkill = async (skillId: string) => {
     try {
-      await axios.delete(`/api/employees/${id}/skills/${skillId}`);
+      await employeeApi.removeSkill(id!, skillId);
       showToast('Skill removed.');
       fetchProfile();
     } catch { showToast('Failed to remove skill.', 'error'); }
@@ -236,7 +236,7 @@ export const EmployeeProfilePage: React.FC = () => {
   const addEducation = async () => {
     if (!newEdu.degree || !newEdu.institutionName) return;
     try {
-      await axios.post(`/api/employees/${id}/education`, { ...newEdu, endYear: newEdu.endYear ? Number(newEdu.endYear) : null });
+      await employeeApi.addEducation(id!, { ...newEdu, endYear: newEdu.endYear ? Number(newEdu.endYear) : null });
       setNewEdu({ degree: '', fieldOfStudy: '', institutionName: '', endYear: '' });
       showToast('Education added.');
       fetchProfile();
@@ -245,7 +245,7 @@ export const EmployeeProfilePage: React.FC = () => {
 
   const removeEducation = async (eduId: string) => {
     try {
-      await axios.delete(`/api/employees/${id}/education/${eduId}`);
+      await employeeApi.removeEducation(id!, eduId);
       fetchProfile();
     } catch { showToast('Failed to remove education.', 'error'); }
   };
@@ -253,7 +253,7 @@ export const EmployeeProfilePage: React.FC = () => {
   const addExperience = async () => {
     if (!newExp.companyName || !newExp.startDate) return;
     try {
-      await axios.post(`/api/employees/${id}/experience`, newExp);
+      await employeeApi.addExperience(id!, newExp);
       setNewExp({ companyName: '', designation: '', startDate: '', endDate: '', isCurrent: false });
       showToast('Experience added.');
       fetchProfile();
@@ -263,7 +263,7 @@ export const EmployeeProfilePage: React.FC = () => {
   const addContact = async () => {
     if (!newContact.name || !newContact.relationship || !newContact.phone) return;
     try {
-      await axios.post(`/api/employees/${id}/emergency-contacts`, newContact);
+      await employeeApi.addEmergencyContact(id!, newContact);
       setNewContact({ name: '', relationship: '', phone: '', isPrimary: false });
       showToast('Contact added.');
       fetchProfile();
@@ -272,7 +272,7 @@ export const EmployeeProfilePage: React.FC = () => {
 
   const removeContact = async (contactId: string) => {
     try {
-      await axios.delete(`/api/employees/${id}/emergency-contacts/${contactId}`);
+      await employeeApi.removeEmergencyContact(id!, contactId);
       fetchProfile();
     } catch { showToast('Failed to remove contact.', 'error'); }
   };

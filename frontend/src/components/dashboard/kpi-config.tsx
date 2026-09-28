@@ -38,14 +38,14 @@ export interface KpiItemConfig {
 
 export const ROLE_KPI_CONFIGS: Record<Role, KpiItemConfig[]> = {
   [Role.ADMIN]: [
-    { key: 'totalHeadcount', title: 'Total Headcount', icon: <PeopleAltIcon />, dataKey: 'totalHeadcount', subtitle: 'All employees' },
+    { key: 'totalHeadcount', title: 'Total Employees', icon: <PeopleAltIcon />, dataKey: 'totalHeadcount', subtitle: 'All employees' },
     { key: 'activeHeadcount', title: 'Active Employees', icon: <PersonIcon />, dataKey: 'activeHeadcount', subtitle: 'Currently active' },
-    { key: 'totalStorage', title: 'Total Storage', icon: <BusinessIcon />, dataKey: 'totalStorage', subtitle: 'Database size' },
-    { key: 'errorRate', title: 'Error Rate', icon: <TrendingDownIcon />, dataKey: 'errorRate', subtitle: 'System errors' },
-    { key: 'pendingApprovals', title: 'Pending Approvals', icon: <PendingActionsIcon />, dataKey: 'pendingApprovals', subtitle: 'Requires action' },
-    { key: 'departments', title: 'Departments', icon: <BusinessIcon />, dataKey: 'totalDepartments', subtitle: 'Active departments' },
-    { key: 'integrationsHealth', title: 'Integrations Health', icon: <TaskAltIcon />, dataKey: 'integrationsHealth', subtitle: 'System integrations' },
-    { key: 'onLeave', title: 'On Leave', icon: <SpeedIcon />, dataKey: 'onLeaveHeadcount', subtitle: 'On leave today' }
+    { key: 'newEmployees', title: 'New Employees', icon: <PersonAddAltIcon />, dataKey: 'newEmployees', subtitle: 'Last 30 days' },
+    { key: 'employeeExits', title: 'Employee Exits', icon: <EventBusyIcon />, dataKey: 'employeeExits', subtitle: 'Last 30 days' },
+    { key: 'growthRate', title: 'Growth Rate', icon: <TrendingUpIcon />, dataKey: 'employeeGrowthRate', subtitle: 'Net headcount growth' },
+    { key: 'attritionRate', title: 'Attrition Rate', icon: <TrendingDownIcon />, dataKey: 'attritionRate', subtitle: 'Annualized turnover' },
+    { key: 'departmentsLocations', title: 'Depts & Locations', icon: <BusinessIcon />, dataKey: 'departmentsLocations', subtitle: 'Live count' },
+    { key: 'openPositions', title: 'Open Positions', icon: <WorkIcon />, dataKey: 'openPositions', subtitle: 'Active hiring requisitions' }
   ],
 
   [Role.HR]: [

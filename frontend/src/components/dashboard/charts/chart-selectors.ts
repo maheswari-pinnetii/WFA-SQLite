@@ -87,51 +87,52 @@ export const selectChartData = (config: DashboardChartConfig, rawData: any): any
         { date: 'Fri', presentPct: 79, latePct: 7 },
       ];
 
-    case 'admin_dept_overtime':
-      // Use dept data if available
-      if (dashboardData.departmentDistribution && dashboardData.departmentDistribution.length > 0) {
-        return dashboardData.departmentDistribution.slice(0, 6).map((d: any) => ({
-          department: (d.name || d.department || '').substring(0, 12),
-          otHours: Math.round((d.headcount || 30) * 0.5),
+    case 'admin_location_distribution':
+      if (dashboardData.locationDistribution && dashboardData.locationDistribution.length > 0) {
+        return dashboardData.locationDistribution.map((d: any) => ({
+          name: d.name,
+          headcount: d.headcount || 0,
         }));
       }
-      return dashboardData.deptOvertime || [
-        { department: 'Engineering', otHours: 140 },
-        { department: 'Customer Success', otHours: 95 },
-        { department: 'Sales', otHours: 60 },
-        { department: 'Operations', otHours: 45 },
-        { department: 'HR', otHours: 12 },
+      return [
+        { name: 'New York (HQ)', headcount: 450 },
+        { name: 'London', headcount: 200 },
+        { name: 'Bangalore', headcount: 250 },
+        { name: 'Singapore', headcount: 100 }
       ];
 
-    case 'admin_login_devices':
-      return dashboardData.loginDevices || [
-        { device: 'Web Desktop', count: 68 },
-        { device: 'Mobile App', count: 24 },
-        { device: 'Biometric Kiosk', count: 8 },
+    case 'admin_role_distribution':
+      if (dashboardData.roleDistribution && dashboardData.roleDistribution.length > 0) {
+        return dashboardData.roleDistribution;
+      }
+      return [
+        { name: 'EMPLOYEE', value: 68 },
+        { name: 'TEAM_LEAD', value: 24 },
+        { name: 'MANAGER', value: 8 },
       ];
 
-    case 'admin_audit_activity':
-      return dashboardData.auditActivity || [
-        { date: 'Mon', events: 142, alerts: 2 },
-        { date: 'Tue', events: 189, alerts: 0 },
-        { date: 'Wed', events: 165, alerts: 4 },
-        { date: 'Thu', events: 210, alerts: 1 },
-        { date: 'Fri', events: 178, alerts: 3 },
-      ];
-
-    case 'admin_work_location':
-      // Use employment status breakdown if available
+    case 'admin_employment_status':
       if (dashboardData.employmentStatusBreakdown && dashboardData.employmentStatusBreakdown.length > 0) {
-        return dashboardData.employmentStatusBreakdown.map((s: any) => ({
-          mode: s.name,
-          count: s.value,
+        return dashboardData.employmentStatusBreakdown;
+      }
+      return [
+        { name: 'Active', value: 847 },
+        { name: 'On Leave', value: 63 },
+        { name: 'Remote', value: 58 },
+      ];
+
+    case 'admin_experience_distribution':
+      if (dashboardData.experienceDistribution && dashboardData.experienceDistribution.length > 0) {
+        return dashboardData.experienceDistribution.map((s: any) => ({
+          name: s.name,
+          headcount: s.headcount,
         }));
       }
-      return dashboardData.workLocations || [
-        { mode: 'Office', count: 700 },
-        { mode: 'Remote', count: 100 },
-        { mode: 'On Leave', count: 100 },
-        { mode: 'Terminated', count: 100 },
+      return [
+        { name: '< 1 Year', headcount: 250 },
+        { name: '1-3 Years', headcount: 400 },
+        { name: '3-5 Years', headcount: 200 },
+        { name: '5+ Years', headcount: 150 }
       ];
 
 

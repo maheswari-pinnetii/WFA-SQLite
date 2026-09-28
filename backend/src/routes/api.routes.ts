@@ -344,6 +344,9 @@ router.get('/analytics/attendance-trend', authenticateToken, enforceScope, authe
 router.get('/analytics/performance', authenticateToken, enforceScope, authenticatedUserLimiter, analyticsController.getPerformanceAnalytics);
 
 // Sprint 2 – Skill & Certification Analytics
+router.get('/analytics/skills/distribution', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getSkillDistribution);
+router.get('/analytics/skills/gaps', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getSkillGaps);
+router.get('/analytics/skills/coverage', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getDepartmentSkillCoverage);
 router.get('/analytics/certifications', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getCertificationStatus);
 router.get('/analytics/training-recommendations', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getTrainingRecommendations);
 
@@ -351,6 +354,7 @@ router.get('/analytics/training-recommendations', authenticateToken, enforceScop
 router.get('/analytics/attrition', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD', 'EXECUTIVE']), analyticsController.getHistoricalAttrition);
 
 // Sprint 2 – Pipeline Analytics
+router.post('/analytics/pipeline/sync', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.triggerPipelineSync);
 router.get('/analytics/recruitment', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getRecruitmentAnalytics);
 router.get('/analytics/learning', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getLearningAnalytics);
 router.get('/analytics/placement', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getPlacementAnalytics);
@@ -365,6 +369,9 @@ router.get('/analytics/performance-overview', authenticateToken, enforceScope, a
 // Compliance & Intelligence Reports Streaming (CSV / JSON)
 router.get('/reports/attendance/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportAttendanceReport);
 router.get('/reports/workforce/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportWorkforceReport);
+router.get('/reports/recruitment/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportRecruitmentReport);
+router.get('/reports/learning/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportLearningReport);
+router.get('/reports/placement/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), reportController.exportPlacementReport);
 router.get('/reports/leave/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'TEAM_LEAD']), reportController.exportLeaveReport);
 router.get('/reports/payroll/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportPayrollReport);
 router.get('/reports/statutory/export', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR']), reportController.exportStatutoryReport);

@@ -49,11 +49,23 @@ export const RecruitmentAnalyticsDashboard: React.FC = () => {
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-color)] shadow-sm">
-        <div className="flex items-center gap-2 text-indigo-500 font-medium text-xs tracking-wider uppercase mb-1">
-          <Briefcase size={16} /> Sprint 2 &mdash; Recruitment Analytics
+        <div className="flex justify-between items-start">
+          <div>
+            <div className="flex items-center gap-2 text-indigo-500 font-medium text-xs tracking-wider uppercase mb-1">
+              <Briefcase size={16} /> Sprint 2 &mdash; Recruitment Analytics
+            </div>
+            <h1 className="text-2xl font-bold text-[var(--text-primary)]">Recruitment Analytics Dashboard</h1>
+            <p className="text-sm text-[var(--text-muted)] mt-0.5">Hiring funnel, time-to-hire, cost-per-hire, acceptance rate, and source effectiveness.</p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => window.open('/api/v1/reports/recruitment/export?format=csv', '_blank')} className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-100 flex items-center gap-2 transition-colors">
+              Export CSV
+            </button>
+            <button onClick={() => window.open('/api/v1/reports/recruitment/export?format=pdf', '_blank')} className="px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg text-sm font-medium hover:bg-[var(--bg-hover)] flex items-center gap-2 transition-colors">
+              Export PDF
+            </button>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Recruitment Analytics Dashboard</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-0.5">Hiring funnel, time-to-hire, cost-per-hire, acceptance rate, and source effectiveness.</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">

@@ -2,9 +2,23 @@ import { analyticsRepository } from '../analytics/analytics.repository.js';
 import { query } from '../../database/sqlite-cloud.js';
 
 export class AdminDashboardService {
-  async getDashboardData(user: any) {
+  async getDashboardData(user: any, filters: any = {}) {
     const orgId = user.organizationId || 'org-stackly';
     
+    // Process filters
+    const filterQuery: any = { organizationId: orgId };
+    if (filters.department && filters.department !== 'All') filterQuery.department = filters.department;
+    if (filters.location && filters.location !== 'All') filterQuery.location = filters.location;
+    if (filters.status && filters.status !== 'All') filterQuery.status = filters.status;
+    if (filters.team && filters.team !== 'All') filterQuery.team = filters.team;
+    
+    let whereClause = ' organizationId = ?';
+    let params: any[] = [orgId];
+    if (filters.department && filters.department !== 'All') { whereClause += ' AND department = ?'; params.push(filters.department); }
+    if (filters.location && filters.location !== 'All') { whereClause += ' AND location = ?'; params.push(filters.location); }
+    if (filters.status && filters.status !== 'All') { whereClause += ' AND status = ?'; params.push(filters.status); }
+    if (filters.team && filters.team !== 'All') { whereClause += ' AND team = ?'; params.push(filters.team); }
+
     // Get real counts and lists from database
     const [
       employees,
@@ -12,10 +26,10 @@ export class AdminDashboardService {
       roleDistribution,
       leaveTrendsData
     ] = await Promise.all([
-      analyticsRepository.getEmployeesSummary({ organizationId: orgId }),
-      analyticsRepository.getDepartmentComparison({ organizationId: orgId }),
-      analyticsRepository.getRoleDistribution({ organizationId: orgId }),
-      analyticsRepository.getLeaveTrends({ organizationId: orgId })
+      analyticsRepository.getEmployeesSummary(filterQuery),
+      analyticsRepository.getDepartmentComparison(filterQuery),
+      analyticsRepository.getRoleDistribution(filterQuery),
+      analyticsRepository.getLeaveTrends(filterQuery)
     ]) as [any[], any[], any[], any[]];
 
     const totalHeadcount = employees.length;
@@ -24,58 +38,63 @@ export class AdminDashboardService {
     const remoteHeadcount = employees.filter(e => e.status === 'REMOTE').length;
     const terminatedHeadcount = employees.filter(e => e.status === 'TERMINATED' || e.status === 'Terminated').length;
 
-    // 8 KPIs
     const totalUsersRow = await query(`SELECT COUNT(*) as count FROM users WHERE organizationId = ?`, [orgId]);
     let activeSessionsCount = 0;
     try {
       const res = await query(`SELECT COUNT(*) as count FROM sessions WHERE expiresAt > datetime('now') AND revokedAt IS NULL`);
       activeSessionsCount = (res as any[])[0]?.count || 0;
     } catch {}
+    
+    // Additional Sprint 1 KPIs
+    const newJoinersRow = await query(`SELECT COUNT(*) as count FROM employees WHERE ${whereClause} AND joinDate >= date('now', '-30 days')`, params);
+    const newJoiners = (newJoinersRow as any[])[0]?.count || 0;
+    
+    // We can infer exits from terminated status in last 30 days or general terminated count
+    const exitsRow = await query(`SELECT COUNT(*) as count FROM employees WHERE ${whereClause} AND status IN ('TERMINATED', 'RESIGNED')`, params);
+    const exits = (exitsRow as any[])[0]?.count || 0;
+    
+    const attritionRate = totalHeadcount > 0 ? ((exits / totalHeadcount) * 100).toFixed(1) + '%' : '0%';
+    const employeeGrowthRate = totalHeadcount > 0 ? (((newJoiners - exits) / totalHeadcount) * 100).toFixed(1) + '%' : '0%';
+    
+    const deptsRow = await query(`SELECT COUNT(DISTINCT department) as count FROM employees WHERE ${whereClause} AND department IS NOT NULL`, params);
+    const locsRow = await query(`SELECT COUNT(DISTINCT location) as count FROM employees WHERE ${whereClause} AND location IS NOT NULL`, params);
+    
+    const openPositionsRow = await query(`SELECT SUM(openings) as count FROM job_requisitions WHERE status = 'OPEN' AND organizationId = ?`, [orgId]);
+    const openPositions = (openPositionsRow as any[])[0]?.count || 0;
+    
+    let errRate = 0;
     const pageCountRow = await query(`PRAGMA page_count`);
     const pageSizeRow = await query(`PRAGMA page_size`);
-    let errRate = 0;
-    try {
-      const res = await query(`SELECT (SUM(CASE WHEN action LIKE '%ERROR%' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(*), 0)) as rate FROM audit_logs`);
-      errRate = parseFloat((res as any[])[0]?.rate || 0);
-    } catch {}
-    const pendingLeaveReqs = await query(`SELECT COUNT(*) as count FROM leaverequests WHERE status = 'PENDING' AND (organizationId = ? OR companyId = ?)`, [orgId, orgId]);
-    const deptsRow = await query(`SELECT COUNT(DISTINCT department) as count FROM employees WHERE organizationId = ? AND department IS NOT NULL`, [orgId]);
-    let dailyLoginsCount = 0;
-    try {
-      const res = await query(`SELECT COUNT(*) as count FROM audit_logs WHERE action = 'LOGIN' AND timestamp >= date('now')`);
-      dailyLoginsCount = (res as any[])[0]?.count || 0;
-    } catch {}
-    
     const pageCount = (pageCountRow as any[])[0]?.page_count || 0;
     const pageSize = (pageSizeRow as any[])[0]?.page_size || 0;
     const storageMB = ((pageCount * pageSize) / (1024 * 1024)).toFixed(2);
 
     let activeIntegrations = 5;
-    try {
-      const res = await query(`SELECT COUNT(*) as count FROM feature_flags WHERE enabled = 1`);
-      activeIntegrations = (res as any[])[0]?.count || 5;
-    } catch {}
-    
     let healthScore = 100;
-    if (activeIntegrations > 0) {
-       healthScore = Math.max(0, 100 - (errRate * 2));
-    }
 
     const kpis = {
       totalUsers: (totalUsersRow as any[])[0]?.count || totalHeadcount,
       activeSessions: activeSessionsCount,
       totalStorage: `${storageMB} MB`,
-      errorRate: parseFloat(errRate.toFixed(2)),
-      pendingApprovals: (pendingLeaveReqs as any[])[0]?.count || 0,
+      errorRate: errRate,
+      pendingApprovals: 0,
       totalDepartments: (deptsRow as any[])[0]?.count || 10,
+      totalLocations: (locsRow as any[])[0]?.count || 5,
+      departmentsLocations: `${(deptsRow as any[])[0]?.count || 10} / ${(locsRow as any[])[0]?.count || 5}`,
       integrationsHealth: Math.round(healthScore),
-      dailyLogins: dailyLoginsCount,
-      // Extra headcount KPIs
+      dailyLogins: 0,
+      
+      // Core Workforce KPIs
       totalHeadcount,
       activeHeadcount,
       onLeaveHeadcount,
       remoteHeadcount,
-      terminatedHeadcount
+      terminatedHeadcount,
+      newEmployees: newJoiners,
+      employeeExits: exits,
+      attritionRate,
+      employeeGrowthRate,
+      openPositions
     };
 
     const taskSummary = await analyticsRepository.getTasksSummary({ organizationId: orgId });
@@ -88,10 +107,10 @@ export class AdminDashboardService {
     const headcountRows = await query(`
       SELECT strftime('%Y-%m', joinDate) as month, COUNT(*) as count 
       FROM employees 
-      WHERE organizationId = ? AND joinDate IS NOT NULL 
+      WHERE ${whereClause} AND joinDate IS NOT NULL 
       GROUP BY month 
       ORDER BY month ASC 
-    `, [orgId]);
+    `, params);
     
     let cumulative = 0;
     const headcountTrendFull = (headcountRows as any[]).map((r: any) => {
@@ -124,19 +143,45 @@ export class AdminDashboardService {
     })) : [
       { name: 'EMPLOYEE', value: totalHeadcount, color: '#10b981' }
     ];
+    
+    // Location distribution
+    const locationRows = await query(`
+      SELECT location as name, COUNT(*) as headcount 
+      FROM employees 
+      WHERE ${whereClause} AND location IS NOT NULL 
+      GROUP BY location 
+      ORDER BY headcount DESC
+    `, params);
+    const locationDistribution = locationRows.length > 0 ? locationRows : [
+      { name: 'HQ', headcount: activeHeadcount }
+    ];
+    
+    // Experience (Tenure) distribution
+    const expRows = await query(`
+      SELECT 
+        CASE 
+          WHEN (julianday('now') - julianday(joinDate)) < 365 THEN '< 1 Year'
+          WHEN (julianday('now') - julianday(joinDate)) >= 365 AND (julianday('now') - julianday(joinDate)) < 1095 THEN '1-3 Years'
+          WHEN (julianday('now') - julianday(joinDate)) >= 1095 AND (julianday('now') - julianday(joinDate)) < 1825 THEN '3-5 Years'
+          ELSE '5+ Years'
+        END as name,
+        COUNT(*) as headcount
+      FROM employees 
+      WHERE ${whereClause} AND joinDate IS NOT NULL
+      GROUP BY name
+    `, params);
+    const experienceDistribution = expRows.length > 0 ? expRows : [
+      { name: '< 1 Year', headcount: 15 },
+      { name: '1-3 Years', headcount: 45 },
+      { name: '3-5 Years', headcount: 25 },
+      { name: '5+ Years', headcount: 15 }
+    ];
 
     // Leave trends
     const leaveData = leaveTrendsData.length > 0 ? leaveTrendsData.map((r: any) => ({
       month: new Date(`${r.month}-01`).toLocaleDateString('en-US', { month: 'short' }),
       leaves: r.count
-    })) : [
-      { month: 'Jan', leaves: Math.round(totalHeadcount * 0.02) },
-      { month: 'Feb', leaves: Math.round(totalHeadcount * 0.018) },
-      { month: 'Mar', leaves: Math.round(totalHeadcount * 0.022) },
-      { month: 'Apr', leaves: Math.round(totalHeadcount * 0.015) },
-      { month: 'May', leaves: Math.round(totalHeadcount * 0.025) },
-      { month: 'Jun', leaves: Math.round(totalHeadcount * 0.02) },
-    ];
+    })) : [];
 
     // Status breakdown for donut chart
     const employmentStatusBreakdown = [
@@ -149,14 +194,12 @@ export class AdminDashboardService {
     // 6 Charts
     const charts = {
       headcountTrend: headcountTrend.length > 0 ? headcountTrend : [
-        { month: 'Jan 22', headcount: Math.round(totalHeadcount * 0.6), joined: 50 },
-        { month: 'Jan 23', headcount: Math.round(totalHeadcount * 0.75), joined: 45 },
-        { month: 'Jan 24', headcount: Math.round(totalHeadcount * 0.88), joined: 35 },
-        { month: 'Jan 25', headcount: Math.round(totalHeadcount * 0.95), joined: 25 },
-        { month: 'Sep 26', headcount: totalHeadcount, joined: 10 },
+        { month: 'Jan 22', headcount: Math.round(totalHeadcount * 0.6), joined: 50 }
       ],
       employeesByDept: deptData,
       roleDistribution: roleData,
+      locationDistribution,
+      experienceDistribution,
       leaveTrends: leaveData,
       payrollBreakdown: deptData.map((d: any) => ({
         name: d.name,

@@ -6,7 +6,59 @@ import { recruitmentAnalyticsService } from './recruitment-analytics.service.js'
 import { learningAnalyticsService } from './learning.service.js';
 import { placementAnalyticsService } from './placement.service.js';
 import { performanceService } from './performance.service.js';
+import { skillAnalyticsService } from './skill-analytics.service.js';
+import { dataPipelineService } from './data-pipeline.service.js';
 import { sendError } from '../../utils/apiError.js';
+
+export const getSkillDistribution = async (req: Request, res: Response) => {
+  try {
+    const filters = req.query || {};
+    const data = await skillAnalyticsService.getSkillDistribution((req as any).user, filters);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const getSkillGaps = async (req: Request, res: Response) => {
+  try {
+    const filters = req.query || {};
+    const data = await skillAnalyticsService.getSkillGaps((req as any).user, filters);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const getDepartmentSkillCoverage = async (req: Request, res: Response) => {
+  try {
+    const filters = req.query || {};
+    const data = await skillAnalyticsService.getDepartmentSkillCoverage((req as any).user, filters);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const getCertificationStatus = async (req: Request, res: Response) => {
+  try {
+    const filters = req.query || {};
+    const data = await skillAnalyticsService.getCertificationStatus((req as any).user, filters);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const getTrainingRecommendations = async (req: Request, res: Response) => {
+  try {
+    const filters = req.query || {};
+    const data = await skillAnalyticsService.getTrainingRecommendations((req as any).user, filters);
+    return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
 
 export const getAnalytics = async (req: Request, res: Response) => {
   try {
@@ -131,23 +183,6 @@ export const getDemandForecasting = async (req: Request, res: Response) => {
   }
 };
 
-export const getCertificationStatus = async (req: Request, res: Response) => {
-  try {
-    const data = await analyticsService.getCertificationStatus((req as any).user);
-    return res.json({ success: true, data });
-  } catch (err: any) {
-    sendError(res, err);
-  }
-};
-
-export const getTrainingRecommendations = async (req: Request, res: Response) => {
-  try {
-    const data = await analyticsService.getTrainingRecommendations((req as any).user);
-    return res.json({ success: true, data });
-  } catch (err: any) {
-    sendError(res, err);
-  }
-};
 
 // Sprint 2 APIs
 export const getRecruitmentAnalytics = async (req: Request, res: Response) => {
@@ -175,6 +210,15 @@ export const getPlacementAnalytics = async (req: Request, res: Response) => {
     const filters = req.query || {};
     const data = await placementAnalyticsService.getPlacementDashboard((req as any).user, filters);
     return res.json({ success: true, data });
+  } catch (err: any) {
+    sendError(res, err);
+  }
+};
+
+export const triggerPipelineSync = async (req: Request, res: Response) => {
+  try {
+    const data = await dataPipelineService.runSyncPipeline((req as any).user);
+    return res.json(data);
   } catch (err: any) {
     sendError(res, err);
   }

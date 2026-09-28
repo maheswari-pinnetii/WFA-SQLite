@@ -847,6 +847,192 @@ export const initDb = async (): Promise<void> => {
         await execute(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_audit_logs_createdAt ON audit_logs(createdAt)`);
 
+        // Master Data & Organization Tables
+        await execute(`
+          CREATE TABLE IF NOT EXISTS departments (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            name TEXT NOT NULL,
+            headId TEXT,
+            description TEXT,
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS teams (
+            id TEXT PRIMARY KEY,
+            departmentId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            name TEXT NOT NULL,
+            leadId TEXT,
+            description TEXT,
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS roles (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            name TEXT NOT NULL,
+            description TEXT,
+            permissions TEXT,
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS locations (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            name TEXT NOT NULL,
+            address TEXT,
+            city TEXT,
+            state TEXT,
+            country TEXT,
+            timezone TEXT,
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS skills (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            name TEXT NOT NULL,
+            category TEXT,
+            description TEXT,
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS employee_skills (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            skillId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            level INTEGER NOT NULL,
+            isMissingSkill BOOLEAN DEFAULT 0,
+            createdAt TEXT NOT NULL,
+            FOREIGN KEY (employeeId) REFERENCES employees(id),
+            FOREIGN KEY (skillId) REFERENCES skills(id)
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS performance_cycles (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            name TEXT NOT NULL,
+            startDate TEXT NOT NULL,
+            endDate TEXT NOT NULL,
+            status TEXT DEFAULT 'ACTIVE',
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS reviews (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            reviewerId TEXT NOT NULL,
+            cycleId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            score REAL,
+            feedback TEXT,
+            status TEXT DEFAULT 'COMPLETED',
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS training_programs (
+            id TEXT PRIMARY KEY,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            title TEXT NOT NULL,
+            description TEXT,
+            durationHours INTEGER,
+            instructor TEXT,
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS training_enrollments (
+            id TEXT PRIMARY KEY,
+            programId TEXT NOT NULL,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            status TEXT DEFAULT 'ENROLLED',
+            enrolledAt TEXT NOT NULL,
+            completedAt TEXT,
+            trainingHours INTEGER,
+            score REAL,
+            department TEXT,
+            courseName TEXT
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS employee_certifications (
+            id TEXT PRIMARY KEY,
+            employeeId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            certificationName TEXT NOT NULL,
+            status TEXT DEFAULT 'ACTIVE',
+            issuedAt TEXT,
+            expiresAt TEXT
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS job_postings (
+            id TEXT PRIMARY KEY,
+            departmentId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            title TEXT NOT NULL,
+            description TEXT,
+            requirements TEXT,
+            status TEXT DEFAULT 'OPEN',
+            createdAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS candidates (
+            id TEXT PRIMARY KEY,
+            jobId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            phone TEXT,
+            resumeUrl TEXT,
+            status TEXT DEFAULT 'APPLIED',
+            appliedAt TEXT NOT NULL
+          )
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS placements (
+            id TEXT PRIMARY KEY,
+            candidateId TEXT NOT NULL,
+            jobId TEXT NOT NULL,
+            organizationId TEXT NOT NULL DEFAULT 'org-stackly',
+            offerDate TEXT NOT NULL,
+            joiningDate TEXT,
+            status TEXT DEFAULT 'OFFERED',
+            salary REAL,
+            placementTimeDays INTEGER,
+            department TEXT,
+            skill TEXT,
+            employer TEXT,
+            location TEXT,
+            createdAt TEXT NOT NULL
+          )
+        `);
+
         // Rate Limiting Table
         await execute(`
           CREATE TABLE IF NOT EXISTS rate_limits (

@@ -225,6 +225,13 @@ export const AppRoutes: React.FC = () => {
 
                 {/* ==================== 1.5 EXECUTIVE ROUTES ==================== */}
                 <Route path="/executive/dashboard" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN]}><ExecutivePortalPage /></RoleGuard>} />
+                <Route path="/executive/historical-attrition" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN, Role.HR]}><HistoricalAttritionPage /></RoleGuard>} />
+                <Route path="/executive/attrition-risk" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN, Role.HR]}><AttritionRiskDashboard /></RoleGuard>} />
+                <Route path="/executive/recruitment-analytics" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN, Role.HR]}><RecruitmentAnalyticsDashboard /></RoleGuard>} />
+                <Route path="/executive/learning-analytics" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN, Role.HR]}><LearningAnalyticsDashboard /></RoleGuard>} />
+                <Route path="/executive/placement-analytics" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN, Role.HR]}><PlacementAnalyticsDashboard /></RoleGuard>} />
+                <Route path="/executive/demand-forecasting" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN, Role.HR]}><DemandForecastingPage /></RoleGuard>} />
+                <Route path="/executive/workforce-planning" element={<RoleGuard allowedRoles={[Role.EXECUTIVE, Role.ADMIN, Role.HR]}><WorkforcePlanningPage /></RoleGuard>} />
 
                 {/* ==================== 2. HR ROUTES ==================== */}
                 <Route path="/hr/dashboard" element={<RoleGuard allowedRoles={[Role.HR, Role.ADMIN]}><HRDashboard /></RoleGuard>} />

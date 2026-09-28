@@ -9,21 +9,21 @@ export class RecruitmentAnalyticsService {
     const { clause: reqClause, params: reqParams } = buildWhereClause(queryFilters, 'r');
     
     // Build the query clause for reqs, handling the existing WHERE correctly
-    const reqWhere = reqClause ? `${reqClause} AND r.status = 'OPEN'` : `WHERE r.status = 'OPEN'`;
+    const reqWhere = reqClause ? `${reqClause} AND p.status = 'OPEN'` : `WHERE p.status = 'OPEN'`;
     
-    // Fetch open positions (job_requisitions)
+    // Fetch open positions (job_postings)
     const reqs = await query(
-      `SELECT r.id, r.department, r.targetHireDate FROM job_requisitions r ${reqWhere}`,
+      `SELECT p.id, 'General' as department, p.createdAt as targetHireDate FROM job_postings p ${reqWhere}`,
       reqParams
     );
     const openPositions = reqs.length;
 
     // Fetch applications
     const apps = await query(
-      `SELECT a.id, a.status, a.jobRequisitionId, a.appliedAt 
-       FROM applications a
-       JOIN job_requisitions r ON a.jobRequisitionId = r.id
-       ${reqClause}`,
+      `SELECT c.id, c.status, c.jobId, c.appliedAt 
+       FROM candidates c
+       JOIN job_postings p ON c.jobId = p.id
+       ${reqClause.replace('r.', 'p.')}`,
       reqParams
     );
 
@@ -51,7 +51,7 @@ export class RecruitmentAnalyticsService {
       deptMap[dept].openings++;
     });
     apps.forEach((a: any) => {
-      const req = reqs.find((r: any) => r.id === a.jobRequisitionId);
+      const req = reqs.find((r: any) => r.id === a.jobId);
       const dept = req ? req.department : 'Unknown';
       if (!deptMap[dept]) deptMap[dept] = { openings: 0, applications: 0, hired: 0 };
       deptMap[dept].applications++;
