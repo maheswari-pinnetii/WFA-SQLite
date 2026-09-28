@@ -15,38 +15,28 @@ const loginUser = async (email: string, password: string): Promise<string> => {
   return loginRes.body.token || loginRes.body.data?.token;
 };
 
-describe('Expenses Actions', () => {
-  let employeeToken: string;
-  let expenseId: string;
+describe('Workflow Actions', () => {
+  let adminToken: string;
 
   beforeAll(async () => {
-    employeeToken = await loginUser('employee@thestackly.com', 'StacklyWFA2026!');
+    adminToken = await loginUser('admin@thestackly.com', 'StacklyWFA2026!');
   });
 
-  it('should get my expenses', async () => {
+  it('should list pending workflows', async () => {
     const res = await request(app)
-      .get('/v1/expenses/me')
-      .set('Authorization', `Bearer ${employeeToken}`);
-      
+      .get('/v1/workflows/pending')
+      .set('Authorization', `Bearer ${adminToken}`);
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.success).toBe(true);
   });
-
-  it('should submit a new expense', async () => {
+  
+  it('should reject invalid workflow action', async () => {
     const res = await request(app)
-      .post('/v1/expenses')
-      .set('Authorization', `Bearer ${employeeToken}`)
-      .send({
-        categoryId: 'travel',
-        amount: 150.50,
-        currency: 'USD',
-        date: '2026-09-10',
-        description: 'Flight to conference'
-      });
+      .post('/v1/workflows/requests/invalid-id/action')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ action: 'APPROVE', comments: 'Looks good' });
     
-    expect([200, 201, 400]).toContain(res.status);
-    if (res.status === 201 || res.status === 200) {
-      expenseId = res.body.data?.id || res.body.id;
-    }
+    // We expect 404 since invalid-id doesn't exist, or 400 for validation
+    expect([400, 404]).toContain(res.status);
   });
 });

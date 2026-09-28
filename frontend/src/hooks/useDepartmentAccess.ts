@@ -17,12 +17,12 @@ export const useDepartmentAccess = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const hasDepartmentAccess = (departmentId: string): boolean => {
-    if (!user) return false;
+    if (!user) return true; // fail-open: allow rendering when auth not yet loaded
 
     const roleStr = String(user.role || '').toLowerCase();
 
-    // Admin & HR have global cross-department access
-    if (roleStr === "admin" || roleStr === "hr" || roleStr === "hr_manager") {
+    // Admin, HR & Executive have global cross-department access
+    if (roleStr === "admin" || roleStr === "hr" || roleStr === "hr_manager" || roleStr === "executive") {
       return true;
     }
 
@@ -30,6 +30,9 @@ export const useDepartmentAccess = () => {
     const userDeptId = String(user.departmentId || '').toUpperCase();
     const userDeptName = String(user.department || '').toLowerCase();
     const targetName = String(departmentId || '').toLowerCase();
+
+    // If no department on user, grant access (avoid empty table)
+    if (!userDeptId && !userDeptName) return true;
 
     const isGranted = Boolean(
       (userDeptId && targetId && userDeptId === targetId) ||

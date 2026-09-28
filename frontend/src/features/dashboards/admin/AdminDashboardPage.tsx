@@ -356,7 +356,7 @@ export const AdminDashboardPage: React.FC = () => {
         <KpiGrid
           role={Role.ADMIN}
           loading={loading || dashboard.isLoading}
-          data={dashboard.data?.kpis || {}}
+          data={dashboard.data?.kpis || dashboard.data || {}}
         />
 
 

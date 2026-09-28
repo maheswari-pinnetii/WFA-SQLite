@@ -11,7 +11,7 @@ const PORT = Number(process.env.PORT || 5001);
 let server: http.Server;
 let io: SocketServer;
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' || process.env.PLAYWRIGHT_TEST === 'true') {
   server = http.createServer(app);
   const allowedOrigins = [
     'http://localhost:3000',

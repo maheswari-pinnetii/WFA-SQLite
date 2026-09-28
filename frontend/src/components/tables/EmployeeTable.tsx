@@ -112,7 +112,12 @@ export const EmployeeTable: React.FC<EmployeeTableProps> = ({
   const { canAccessDepartment } = useDepartmentAccess();
 
   const safeEmployees = Array.isArray(employees) ? employees : (employees as any)?.employees || [];
-  const filteredEmployees = safeEmployees.filter((emp: any) => {
+  // Normalize joining_date -> joinDate so both API and fallback data work
+  const normalizedEmployees = safeEmployees.map((emp: any) => ({
+    ...emp,
+    joinDate: emp.joinDate || emp.joining_date || emp.createdAt || null,
+  }));
+  const filteredEmployees = normalizedEmployees.filter((emp: any) => {
     const deptId = (emp as any).departmentId || emp.department || '';
     const hasDbacAccess = canAccessDepartment(deptId) || canAccessDepartment(emp.department);
 

@@ -253,7 +253,7 @@ export const seedSqlite = async () => {
     }
 
     // 5. Seed Core Admin / HR / Manager users if missing
-    const passHash = '$2b$10$RurO1wlDA8rF7QLnqIKkM.PJmHnGiRcduYPxbrULJpiX/JB7UixMG'; // StacklyWFA2026!
+    const passHash = '$2b$10$WydnvD6fjOewqjHXSLz/rONar6dKe78qy2p/UQaRbVVQHA99wniZ.'; // StacklyWFA2026!
     const insertUser = db.prepare(`
       INSERT OR IGNORE INTO users (id, name, email, password_hash, role, department, team, location, title, clearanceLevel, status, permissions, mfa_enabled, organizationId, companyId, createdAt, updatedAt)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)

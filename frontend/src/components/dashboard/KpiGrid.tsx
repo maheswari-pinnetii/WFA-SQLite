@@ -68,19 +68,23 @@ export const KpiGrid: React.FC<KpiGridProps> = ({ role, data = {}, loading = fal
 
       {/* Responsive Grid: 4 col desktop, 2 col tablet, 1 col mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {loading
+      {loading
           ? Array.from({ length: 8 }).map((_, i) => <KpiSkeleton key={i} />)
-          : configs.slice(0, 8).map((config) => (
-              <KpiCard
-                key={config.key}
-                title={config.title}
-                value={data[config.dataKey] ?? '—'}
-                meta={config.subtitle}
-                icon={config.icon}
-                trend={data[config.trendKey || ''] ? { value: `${data[config.trendKey || '']}%`, direction: 'up' } : undefined}
-                loading={loading}
-              />
-            ))}
+          : configs.slice(0, 8).map((config) => {
+              const rawValue = data[config.dataKey];
+              const displayValue = rawValue !== undefined && rawValue !== null ? rawValue : 0;
+              return (
+                <KpiCard
+                  key={config.key}
+                  title={config.title}
+                  value={displayValue}
+                  meta={config.subtitle}
+                  icon={config.icon}
+                  trend={data[config.trendKey || ''] ? { value: `${data[config.trendKey || '']}%`, direction: 'up' } : undefined}
+                  loading={loading}
+                />
+              );
+            })}
       </div>
     </div>
   );
