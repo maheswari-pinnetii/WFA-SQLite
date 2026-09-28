@@ -225,7 +225,7 @@ export class AdminDashboardService {
     const allTablesList = [
       'employees', 'users', 'departments', 'attendance', 'attendancerecords',
       'leaverequests', 'leave_types', 'payroll_runs', 'payroll_run_employees',
-      'performance_cycles', 'reviews', 'tasks', 'workflow_instances',
+      'performance_cycles', 'reviews', 'tasks',
       'training_enrollments', 'employee_salary_structures', 'shifts',
       'locations', 'feature_flags', 'audit_logs', 'notifications'
     ];

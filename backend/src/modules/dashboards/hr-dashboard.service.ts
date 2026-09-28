@@ -44,29 +44,15 @@ export class HrDashboardService {
     const leaveReqs = await query(`SELECT COUNT(*) as count FROM leaverequests WHERE status = 'PENDING' AND (organizationId = ? OR companyId = ?)`, [orgId, orgId]);
     const leaveRequests = (leaveReqs as any[])[0]?.count || 0;
 
-    // HR Issues (workflow instances)
+    // HR Issues (mocked since workflow_instances table doesn't exist)
     let hrIssues = 0;
-    try {
-      const activeWorkflows = await query(`SELECT COUNT(*) as count FROM workflow_instances WHERE status IN ('OPEN', 'IN_PROGRESS') AND (organizationId = ? OR companyId = ?)`, [orgId, orgId]);
-      hrIssues = (activeWorkflows as any[])[0]?.count || 0;
-    } catch {}
-
+    
     // Workflow types for chart
-    let hrTicketTypes: any[] = [];
-    try {
-      const workflowTypesRows = await query(`SELECT type as name, COUNT(*) as value FROM workflow_instances WHERE (organizationId = ? OR companyId = ?) GROUP BY type`, [orgId, orgId]);
-      hrTicketTypes = (workflowTypesRows as any[]).length > 0 ? (workflowTypesRows as any[]) : [
-        { name: 'Onboarding', value: Math.round(newHires * 0.8) },
-        { name: 'Leave', value: leaveRequests },
-        { name: 'Offboarding', value: terminatedCount },
-      ];
-    } catch {
-      hrTicketTypes = [
-        { name: 'Onboarding', value: Math.round(newHires * 0.8) },
-        { name: 'Leave', value: leaveRequests },
-        { name: 'Offboarding', value: terminatedCount },
-      ];
-    }
+    let hrTicketTypes: any[] = [
+      { name: 'Onboarding', value: Math.round(newHires * 0.8) },
+      { name: 'Leave', value: leaveRequests },
+      { name: 'Offboarding', value: terminatedCount },
+    ];
 
     // Real Hiring Trend (Last 6 months)
     const hiringTrendRows = await query(`
