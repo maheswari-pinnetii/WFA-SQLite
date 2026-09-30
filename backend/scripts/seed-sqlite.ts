@@ -21,18 +21,20 @@ export const seedSqlite = async () => {
   }
 
   // Ensure columns on existing tables exist
-  try { db.exec('ALTER TABLE locations ADD COLUMN latitude REAL;'); } catch (e) {}
-  try { db.exec('ALTER TABLE locations ADD COLUMN longitude REAL;'); } catch (e) {}
-  try { db.exec('ALTER TABLE locations ADD COLUMN geofenceRadius INTEGER DEFAULT 100;'); } catch (e) {}
-  try { db.exec("ALTER TABLE users ADD COLUMN authProvider TEXT DEFAULT 'local';"); } catch (e) {}
-  try { db.exec("ALTER TABLE users ADD COLUMN providerSubject TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE mfachallenges ADD COLUMN type TEXT DEFAULT 'totp-mfa';"); } catch (e) {}
-  try { db.exec("ALTER TABLE failed_logins ADD COLUMN lockedAt TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE failed_logins ADD COLUMN lockReason TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE employees ADD COLUMN jobFamilyId TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE employees ADD COLUMN jobRoleId TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE audit_logs ADD COLUMN employeeId TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE audit_logs ADD COLUMN timestamp TEXT;"); } catch (e) {}
+  if (process.env.NODE_ENV !== 'test') {
+    try { await db.sql('ALTER TABLE locations ADD COLUMN latitude REAL;'); } catch (e) {}
+    try { await db.sql('ALTER TABLE locations ADD COLUMN longitude REAL;'); } catch (e) {}
+    try { await db.sql('ALTER TABLE locations ADD COLUMN geofenceRadius INTEGER DEFAULT 100;'); } catch (e) {}
+    try { await db.sql("ALTER TABLE users ADD COLUMN authProvider TEXT DEFAULT 'local';"); } catch (e) {}
+    try { await db.sql("ALTER TABLE users ADD COLUMN providerSubject TEXT;"); } catch (e) {}
+    try { await db.sql("ALTER TABLE mfachallenges ADD COLUMN type TEXT DEFAULT 'totp-mfa';"); } catch (e) {}
+    try { await db.sql("ALTER TABLE failed_logins ADD COLUMN lockedAt TEXT;"); } catch (e) {}
+    try { await db.sql("ALTER TABLE failed_logins ADD COLUMN lockReason TEXT;"); } catch (e) {}
+    try { await db.sql("ALTER TABLE employees ADD COLUMN jobFamilyId TEXT;"); } catch (e) {}
+    try { await db.sql("ALTER TABLE employees ADD COLUMN jobRoleId TEXT;"); } catch (e) {}
+    try { await db.sql("ALTER TABLE audit_logs ADD COLUMN employeeId TEXT;"); } catch (e) {}
+    try { await db.sql("ALTER TABLE audit_logs ADD COLUMN timestamp TEXT;"); } catch (e) {}
+  }
 
   console.log('[SQLite Seeder] Starting database seeding transaction...');
 

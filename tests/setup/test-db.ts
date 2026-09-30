@@ -44,8 +44,9 @@ export async function createTestDatabase() {
 }
 
 export async function seedTestDatabase() {
-  // Use existing seeder
-  await seedSqlite();
+  // SQLite Cloud DB is persistent and already seeded. 
+  // We don't want to re-seed or truncate concurrent tests.
+  // await seedSqlite();
 }
 
 export async function closeTestDatabase() {

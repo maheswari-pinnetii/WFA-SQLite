@@ -14,6 +14,11 @@ export const initDb = async (): Promise<void> => {
         // Connect to either SQLite Cloud or fallback to local SQLite
         await connectDatabase();
 
+        if (process.env.NODE_ENV === 'test') {
+          console.log('[Test DB] Skipping migrations for test environment');
+          return;
+        }
+
         const columnExists = async (tableName: string, columnName: string): Promise<boolean> => {
           try {
             const columns = await query(`PRAGMA table_info(${tableName})`);
