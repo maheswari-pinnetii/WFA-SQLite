@@ -247,7 +247,7 @@ export const AdminDashboard: React.FC = () => {
             icon: <PaymentsIcon />,
           },
         ].map((kpi) => (
-          <Grid key={kpi.title} size={{ xs: 12, sm: 6, lg: 3 }}>
+          <Grid key={kpi.title} item xs={12} sm={6} lg={3}>
             <KpiCard {...kpi} loading={loading} />
           </Grid>
         ))}

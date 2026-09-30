@@ -65,10 +65,16 @@ export class AdminDashboardService {
     const openPositions = (openPositionsRow as any[])[0]?.count || 0;
     
     let errRate = 0;
-    const pageCountRow = await query(`PRAGMA page_count`);
-    const pageSizeRow = await query(`PRAGMA page_size`);
-    const pageCount = (pageCountRow as any[])[0]?.page_count || 0;
-    const pageSize = (pageSizeRow as any[])[0]?.page_size || 0;
+    let pageCount = 0;
+    let pageSize = 0;
+    try {
+      const pageCountRow = await query(`PRAGMA page_count`);
+      const pageSizeRow = await query(`PRAGMA page_size`);
+      pageCount = (pageCountRow as any[])[0]?.page_count || 0;
+      pageSize = (pageSizeRow as any[])[0]?.page_size || 0;
+    } catch (e) {
+      console.warn('[AdminDashboard] PRAGMA queries failed, defaulting storage to 0', e);
+    }
     const storageMB = ((pageCount * pageSize) / (1024 * 1024)).toFixed(2);
 
     let activeIntegrations = 5;

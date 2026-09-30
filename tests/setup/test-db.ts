@@ -31,10 +31,13 @@ export async function createTestDatabase() {
   // Initialize DB Connection
   const db = await connectDatabase();
   
-  // Apply PRAGMAs explicitly for testing environment
-  db.pragma('foreign_keys = ON');
-  db.pragma('journal_mode = WAL');
-  db.pragma('synchronous = NORMAL');
+  try {
+    await db.sql('PRAGMA foreign_keys = ON');
+    await db.sql('PRAGMA journal_mode = WAL');
+    await db.sql('PRAGMA synchronous = NORMAL');
+  } catch (err: any) {
+    console.warn('[Test DB] PRAGMA queries unsupported or failed:', err.message);
+  }
   
   // initDb initializes schema 
   await initDb();
