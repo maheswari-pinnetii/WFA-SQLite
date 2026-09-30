@@ -1,4 +1,4 @@
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface IngestionPayload {

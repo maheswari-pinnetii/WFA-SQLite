@@ -1,4 +1,4 @@
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import { randomUUID } from 'crypto';
 
 export interface PayrollResult {

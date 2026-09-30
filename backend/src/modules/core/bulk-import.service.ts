@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { parse } from 'csv-parse/sync';
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { logger } from '../../config/logger.js';
 import { z } from 'zod';
 

@@ -1,5 +1,5 @@
 import { logAudit } from '../../database/connection.js';
-import { execute, query } from '../../database/sqlite-cloud.js';
+import { execute, query } from '../../database/connection.js';
 import crypto from 'crypto';
 import { emitToUser } from '../../sockets/socketEmitter.js';
 import { emailRetryService } from './emailRetry.service.js';

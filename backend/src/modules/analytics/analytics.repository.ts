@@ -1,4 +1,4 @@
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 
 export function buildWhereClause(queryData: any, alias: string = '') {
   const clauses: string[] = [];

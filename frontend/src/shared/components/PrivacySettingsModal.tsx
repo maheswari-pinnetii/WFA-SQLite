@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, Download, Trash2, X, Lock, CheckCircle2 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Switch } from '../../components/ui/switch';
+import { safeStorage } from '../../utils/storage';
 
 export interface PrivacySettingsModalProps {
   isOpen: boolean;
@@ -16,13 +17,13 @@ export const PrivacySettingsModal: React.FC<PrivacySettingsModalProps> = ({ isOp
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    const consent = JSON.parse(localStorage.getItem('privacy_consent_preferences') || '{}');
+    const consent = JSON.parse(safeStorage.getItem('privacy_consent_preferences') || '{}');
     if (consent.analytics !== undefined) setAnalytics(consent.analytics);
     if (consent.telemetry !== undefined) setTelemetry(consent.telemetry);
   }, [isOpen]);
 
   const handleSave = () => {
-    localStorage.setItem(
+    safeStorage.setItem(
       'privacy_consent_preferences',
       JSON.stringify({ essential: true, analytics, telemetry, updatedAt: new Date().toISOString() })
     );
@@ -35,7 +36,7 @@ export const PrivacySettingsModal: React.FC<PrivacySettingsModalProps> = ({ isOp
 
   const handleExportData = () => {
     const data = {
-      userData: JSON.parse(localStorage.getItem('user') || '{}'),
+      userData: JSON.parse(safeStorage.getItem('user') || '{}'),
       tokenFamily: 'Active Session',
       timestamp: new Date().toISOString()
     };

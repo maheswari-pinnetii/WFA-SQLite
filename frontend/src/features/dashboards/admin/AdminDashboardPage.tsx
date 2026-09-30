@@ -214,7 +214,7 @@ export const AdminSprintOverview: React.FC<{ tasks: Task[] }> = ({ tasks }) => (
         <tbody className="divide-y divide-[var(--border-color)]/80 text-xs">
           {tasks.slice(0, 8).map((task) => (
             <tr key={task.id} className="hover:bg-[var(--bg-hover)] transition-colors">
-              <td className="py-2.5 px-4 font-medium text-[var(--text-secondary)]">{task.projectId || 'Sprint 24B'}</td>
+              <td className="py-2.5 px-4 font-medium text-[var(--text-secondary)]">{(task as any).projectId || 'Sprint 24B'}</td>
               <td className="py-2.5 px-4 text-[var(--text-primary)] font-medium max-w-[200px] truncate">{task.title}</td>
               <td className="py-2.5 px-4 text-[var(--text-muted)]">{task.assigneeName || 'Unassigned'}</td>
               <td className="py-2.5 px-4">

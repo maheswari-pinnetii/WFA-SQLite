@@ -3,14 +3,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install native build tools required for C++ native modules like better-sqlite3
-RUN apk add --no-cache python3 make g++
-
 # Copy package manifests
 COPY package*.json ./
 
 # Install all project dependencies (including devDependencies required for tsc and vite)
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy full application source code
 COPY . .
@@ -23,9 +20,6 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Install runtime dependencies for SQLite
-RUN apk add --no-cache sqlite
-
 ENV NODE_ENV=production
 ENV PORT=5001
 
@@ -37,4 +31,4 @@ COPY --from=builder /app/database ./database
 
 EXPOSE 5001
 
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/backend/src/server.js"]

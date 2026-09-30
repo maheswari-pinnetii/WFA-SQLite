@@ -1,6 +1,5 @@
 import 'dotenv/config';
-import { getDb, ORGANIZATION_ID } from '../src/config/db.js';
-import { connectDatabase } from '../src/database/sqlite-cloud.js';
+import { getDb, ORGANIZATION_ID, connectDatabase, execute } from '../src/database/connection.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,18 +20,18 @@ export const seedSqlite = async () => {
   }
 
   // Ensure columns on existing tables exist
-  try { db.exec('ALTER TABLE locations ADD COLUMN latitude REAL;'); } catch (e) {}
-  try { db.exec('ALTER TABLE locations ADD COLUMN longitude REAL;'); } catch (e) {}
-  try { db.exec('ALTER TABLE locations ADD COLUMN geofenceRadius INTEGER DEFAULT 100;'); } catch (e) {}
-  try { db.exec("ALTER TABLE users ADD COLUMN authProvider TEXT DEFAULT 'local';"); } catch (e) {}
-  try { db.exec("ALTER TABLE users ADD COLUMN providerSubject TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE mfachallenges ADD COLUMN type TEXT DEFAULT 'totp-mfa';"); } catch (e) {}
-  try { db.exec("ALTER TABLE failed_logins ADD COLUMN lockedAt TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE failed_logins ADD COLUMN lockReason TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE employees ADD COLUMN jobFamilyId TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE employees ADD COLUMN jobRoleId TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE audit_logs ADD COLUMN employeeId TEXT;"); } catch (e) {}
-  try { db.exec("ALTER TABLE audit_logs ADD COLUMN timestamp TEXT;"); } catch (e) {}
+  try { await execute('ALTER TABLE locations ADD COLUMN latitude REAL;'); } catch(e) { console.error(e) }
+  try { await execute('ALTER TABLE locations ADD COLUMN longitude REAL;'); } catch(e) { console.error(e) }
+  try { await execute('ALTER TABLE locations ADD COLUMN geofenceRadius INTEGER DEFAULT 100;'); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE users ADD COLUMN authProvider TEXT DEFAULT 'local';"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE users ADD COLUMN providerSubject TEXT;"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE mfachallenges ADD COLUMN type TEXT DEFAULT 'totp-mfa';"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE failed_logins ADD COLUMN lockedAt TEXT;"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE failed_logins ADD COLUMN lockReason TEXT;"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE employees ADD COLUMN jobFamilyId TEXT;"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE employees ADD COLUMN jobRoleId TEXT;"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE audit_logs ADD COLUMN employeeId TEXT;"); } catch(e) { console.error(e) }
+  try { await execute("ALTER TABLE audit_logs ADD COLUMN timestamp TEXT;"); } catch(e) { console.error(e) }
 
   console.log('[SQLite Seeder] Starting database seeding transaction...');
 

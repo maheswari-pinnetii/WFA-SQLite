@@ -245,12 +245,14 @@ export class BackupService {
         compress: true
       });
 
-      const liveDbPath = path.join(
-        DB_DIR,
-        process.env.NODE_ENV === 'test'
-          ? 'wfa-test.sqlite'
-          : 'wfa.sqlite'
-      );
+      const liveDbPath = process.env.NODE_ENV === 'test' && process.env.TEST_DB_PATH
+        ? process.env.TEST_DB_PATH
+        : path.join(
+            DB_DIR,
+            process.env.NODE_ENV === 'test'
+              ? 'wfa-test.sqlite'
+              : 'wfa.sqlite'
+          );
 
       /*
        * The requested backup is protected by the test-aware rotation logic.

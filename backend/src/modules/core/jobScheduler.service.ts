@@ -1,4 +1,4 @@
-import { execute, query } from '../../database/sqlite-cloud.js';
+import { execute, query } from '../../database/connection.js';
 import { logger } from '../../config/logger.js'
 
 export type JobHandler = (payload: any) => Promise<void>;

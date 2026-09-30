@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { ORGANIZATION_ID } from '../../config/db.js';
 import { query, execute } from '../../database/sqlite-cloud.js';
+=======
+import { getDb, ORGANIZATION_ID } from '../../config/db.js';
+import { query } from '../../database/connection.js';
+>>>>>>> 375f3b4a5b63dca11ed1b205c35818ac1f283fa9
 import crypto from 'crypto';
 import { workflowService } from '../core/workflow.service.js';
 

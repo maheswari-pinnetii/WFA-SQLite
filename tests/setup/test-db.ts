@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { connectDatabase, getDatabase } from '../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase, getDb, execute } from '../../backend/src/database/connection.js';
 import { initDb } from '../../backend/src/config/db.js';
 import { seedSqlite } from '../../backend/scripts/seed-sqlite.js';
 
@@ -29,26 +29,29 @@ export async function createTestDatabase() {
   }
 
   // Initialize DB Connection
-  const db = await connectDatabase();
+  await connectDatabase();
   
-  // Apply PRAGMAs explicitly for testing environment
-  db.pragma('foreign_keys = ON');
-  db.pragma('journal_mode = WAL');
-  db.pragma('synchronous = NORMAL');
+  try {
+    await execute('PRAGMA foreign_keys = ON');
+    await execute('PRAGMA journal_mode = WAL');
+    await execute('PRAGMA synchronous = NORMAL');
+  } catch (err: any) {
+    console.warn('[Test DB] PRAGMA queries unsupported or failed:', err.message);
+  }
   
-  // initDb initializes schema 
+  // initDb initializes schema and triggers. We must seed the base schema first!
+  await seedTestDatabase();
   await initDb();
 }
 
 export async function seedTestDatabase() {
-  // Use existing seeder
   await seedSqlite();
 }
 
 export async function closeTestDatabase() {
   try {
-    const db = getDatabase();
-    if (db) {
+    const db = getDb();
+    if (db && typeof db.close === 'function') {
       db.close();
       console.log('[Test DB] Database connection closed.');
     }
@@ -58,5 +61,5 @@ export async function closeTestDatabase() {
 }
 
 export function getTestDbConnection() {
-  return getDatabase();
+  return getDb();
 }

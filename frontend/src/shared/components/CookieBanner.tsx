@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Cookie, Settings, Check, X, ShieldCheck } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { safeStorage } from '../../utils/storage';
 
 export const CookieBanner: React.FC = () => {
   const [visible, setVisible] = useState(false);
@@ -12,7 +13,7 @@ export const CookieBanner: React.FC = () => {
   });
 
   useEffect(() => {
-    const consent = localStorage.getItem('wfa_cookie_consent');
+    const consent = safeStorage.getItem('wfa_cookie_consent');
     if (!consent) {
       const timer = setTimeout(() => setVisible(true), 1000);
       return () => clearTimeout(timer);
@@ -20,7 +21,7 @@ export const CookieBanner: React.FC = () => {
   }, []);
 
   const handleAcceptAll = () => {
-    localStorage.setItem(
+    safeStorage.setItem(
       'wfa_cookie_consent',
       JSON.stringify({ essential: true, analytics: true, functional: true, timestamp: new Date().toISOString() })
     );
@@ -28,7 +29,7 @@ export const CookieBanner: React.FC = () => {
   };
 
   const handleAcceptEssential = () => {
-    localStorage.setItem(
+    safeStorage.setItem(
       'wfa_cookie_consent',
       JSON.stringify({ essential: true, analytics: false, functional: false, timestamp: new Date().toISOString() })
     );
@@ -36,7 +37,7 @@ export const CookieBanner: React.FC = () => {
   };
 
   const handleSavePreferences = () => {
-    localStorage.setItem(
+    safeStorage.setItem(
       'wfa_cookie_consent',
       JSON.stringify({ ...preferences, essential: true, timestamp: new Date().toISOString() })
     );

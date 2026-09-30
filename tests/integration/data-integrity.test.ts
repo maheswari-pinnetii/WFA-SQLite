@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { connectDatabase, query, execute } from '../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase, query, execute } from '../../backend/src/database/connection.js';
 import { randomUUID } from 'crypto';
 
 const ORG_ID = 'org-stackly';

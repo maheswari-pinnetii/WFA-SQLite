@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Employee } from '../models/Employee.js';
 import { User } from '../models/User.js';
 import { env } from '../config/env.js';
-import { query } from '../database/sqlite-cloud.js';
+import { query } from '../database/connection.js';
 
 const ORGANIZATION_ID = 'org-stackly';
 const JWT_SECRET = env.JWT_SECRET;

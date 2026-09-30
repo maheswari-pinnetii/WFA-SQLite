@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, ArrowRight, ArrowLeft, Shield, Clock, Users, BarChart3, X, Sparkles } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { safeStorage } from '../../utils/storage';
 
 export interface OnboardingTourModalProps {
   isOpen: boolean;
@@ -69,7 +70,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else {
-      localStorage.setItem('has_completed_onboarding', 'true');
+      safeStorage.setItem('has_completed_onboarding', 'true');
       onClose();
     }
   };
@@ -81,7 +82,7 @@ export const OnboardingTourModal: React.FC<OnboardingTourModalProps> = ({
   };
 
   const handleSkip = () => {
-    localStorage.setItem('has_completed_onboarding', 'true');
+    safeStorage.setItem('has_completed_onboarding', 'true');
     onClose();
   };
 

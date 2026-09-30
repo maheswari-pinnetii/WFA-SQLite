@@ -6,7 +6,7 @@ import { emitToUser, emitToDept, emitToTeam, emitToRole, SOCKET_EVENTS } from '.
 import { handleControllerError } from '../../utils/errorHandler.js';
 import { leaveEngineService } from '../leave/leave-engine.service.js';
 import { employeeLifecycleService } from '../users/employee-lifecycle.service.js';
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { randomUUID } from 'crypto';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';
@@ -382,5 +382,30 @@ export const createLeavePolicy = async (req, res) => {
     return res.status(201).json({ success: true, data: { id, ...req.body } });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'workforce.createLeavePolicy', 500, 'Failed to create leave policy.');
+  }
+};
+
+export const createTask = async (req, res) => {
+  try {
+    const { title, description, priority, assigneeId, dueDate } = req.body;
+    if (!title || !assigneeId) {
+      return res.status(400).json({ success: false, message: 'Title and assigneeId are required.' });
+    }
+    const orgId = getOrganizationId(req);
+    const newTask = {
+      id: randomUUID(),
+      organizationId: orgId,
+      title,
+      description: description || '',
+      priority: priority || 'MEDIUM',
+      status: 'TODO',
+      assigneeId,
+      dueDate,
+      createdAt: new Date().toISOString()
+    };
+    await Task.create(newTask);
+    return res.status(201).json({ success: true, data: newTask });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.createTask', 500, 'Failed to create task.');
   }
 };

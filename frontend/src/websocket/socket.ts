@@ -1,5 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { SOCKET_EVENTS } from './events';
+import { safeStorage } from '../utils/storage';
 
 export * from './events';
 
@@ -69,7 +70,7 @@ export const subscribeConnectionStatus = (listener: StatusListener) => {
 export const getConnectionStatus = (): ConnectionStatus => currentStatus;
 
 export const connectSocket = (token?: string, userId?: string, orgId?: string) => {
-  const authToken = token || localStorage.getItem('token') || sessionStorage.getItem('token');
+  const authToken = token || safeStorage.getItem('token') || sessionStorage.getItem('token');
   if (!authToken) return;
 
   socket.auth = { token: authToken };

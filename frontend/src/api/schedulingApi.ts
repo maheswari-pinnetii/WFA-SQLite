@@ -12,12 +12,12 @@ export const schedulingApi = {
   },
 
   assignShift: async (employeeId: string, data: { shiftId: string; effectiveFrom: string }) => {
-    const response = await apiClient.post(`/employees/${employeeId}/shift`, data);
+    const response = await apiClient.post(`/employees/${employeeId}/shift-assignment`, data);
     return response.data;
   },
 
   getWorkSchedules: async (employeeId: string) => {
-    const response = await apiClient.get(`/scheduling/schedule/${employeeId}`);
+    const response = await apiClient.get(`/scheduling/employees/${employeeId}/schedule`);
     return response.data;
   }
 };

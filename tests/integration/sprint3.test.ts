@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import axios from 'axios';
 import { app } from '../../backend/src/server.js';
 import { sign } from 'jsonwebtoken';
-import { getDb } from '../../backend/src/database/sqlite-cloud.js';
+import { getDb } from '../../backend/src/database/connection.js';
 
 const TEST_PORT = 3127;
 let server: any;

@@ -10,6 +10,7 @@ import {
   getNavigationForRole 
 } from './SidebarConfig';
 import { SidebarNavItem, hasActiveDescendant, isRouteActive } from './SidebarNavItem';
+import { safeStorage } from '../../../utils/storage';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -62,7 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // Load expanded items from localStorage
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
     try {
-      const saved = localStorage.getItem('stackly.sidebar.expanded');
+      const saved = safeStorage.getItem('stackly.sidebar.expanded');
       if (saved) {
         return new Set(JSON.parse(saved));
       }
@@ -79,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // Save expanded items to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('stackly.sidebar.expanded', JSON.stringify(Array.from(expandedItems)));
+    safeStorage.setItem('stackly.sidebar.expanded', JSON.stringify(Array.from(expandedItems)));
   }, [expandedItems]);
 
   // Auto-expand ancestors of active route on mount/location change

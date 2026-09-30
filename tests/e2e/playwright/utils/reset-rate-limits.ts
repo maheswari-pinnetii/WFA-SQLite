@@ -1,4 +1,4 @@
-import { execute } from '../../../../backend/src/database/sqlite-cloud.js';
+import { execute } from '../../../../backend/src/database/connection.js';
 
 export async function resetRateLimits(): Promise<void> {
   try {

@@ -1,221 +1,73 @@
 import { Database as SQLiteCloudDatabase } from '@sqlitecloud/drivers';
-import BetterSqlite3 from 'better-sqlite3';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { workflowService } from '../modules/core/workflow.service.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const DB_DIR = path.resolve(__dirname, '../../../database/sqlite');
-const DB_PATH = process.env.NODE_ENV === 'test' && process.env.TEST_DB_PATH 
-  ? process.env.TEST_DB_PATH 
-  : path.join(DB_DIR, process.env.NODE_ENV === 'test' ? 'wfa-test.sqlite' : 'wfa.sqlite');
 
 let cloudDb: SQLiteCloudDatabase | null = null;
-let localDb: BetterSqlite3.Database | null = null;
 
 export const connectDatabase = async (): Promise<any> => {
-  const cloudUrl = process.env.SQLITE_CLOUD_URL || process.env.SQLITE_CLOUD_CONNECTION_STRING;
-  if (cloudUrl && process.env.NODE_ENV !== 'test') {
+  const cloudUrl = process.env.SQLITE_CLOUD_URL || process.env.SQLITE_CLOUD_CONNECTION_STRING || "sqlitecloud://chrk2ahwvk.g2.sqlite.cloud:8860/auth.sqlitecloud?apikey=xenaeusZqMZhUIfNKX9p9qx8TNRR7Y1XisX4APazqdE";
+  
+  if (cloudUrl) {
     try {
       console.log('[Database] Connecting to SQLite Cloud database...');
-      // Only allow insecure TLS bypass in explicit non-production environments if explicitly requested
-      if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_INSECURE_TLS === 'true') {
-        console.warn('⚠️ [Security Warning]: Insecure TLS certificate verification is active via ALLOW_INSECURE_TLS=true');
-        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-      }
       const testDb = new SQLiteCloudDatabase(cloudUrl);
-      // Run test query immediately to check if server is paused/down
+      
+      // Run test query immediately to check if server is active
       await testDb.sql('SELECT 1 as active');
 
       console.log('[Database] Successfully connected to SQLite Cloud.');
       cloudDb = testDb;
       return cloudDb;
     } catch (err: any) {
-      console.error('[Database] SQLite Cloud unavailable (node may be paused or offline). Falling back to local SQLite. Error:', err.message);
-      cloudDb = null;
+      console.error('[Database] SQLite Cloud unavailable. Error:', err.message);
+      throw new Error(`Failed to connect to SQLite Cloud: ${err.message}`);
     }
   }
 
-  if (localDb) {
-    return localDb;
-  }
-
-  console.log(`[Database] Connecting to local SQLite at ${DB_PATH}`);
-  if (!fs.existsSync(DB_DIR)) {
-    fs.mkdirSync(DB_DIR, { recursive: true });
-  }
-  localDb = new BetterSqlite3(DB_PATH, { timeout: 10000 });
-  localDb.pragma('foreign_keys = ON');
-  localDb.pragma('journal_mode = WAL');
-  localDb.pragma('synchronous = NORMAL');
-  
-  // Validate database integrity on connection setup
-  const integrityResult = localDb.pragma('integrity_check');
-  if (integrityResult && integrityResult[0] && integrityResult[0].integrity_check !== 'ok') {
-    console.warn(`[Database] Warning: SQLite database integrity check returned: ${integrityResult[0].integrity_check}`);
-  }
-  
-  // Checkpoint WAL frames to base database file
-  localDb.pragma('wal_checkpoint(PASSIVE)');
-  
-  // Ensure base schema exists
-  initLocalSchema(localDb);
-
-  return localDb;
-};
-
-const isConnectionError = (err: any): boolean => {
-  if (!err) return false;
-  const msg = (err.message || '').toLowerCase();
-  
-  // Specific SQLiteCloud connection error codes
-  if (err.errorCode === '10010') return true;
-  if (err.errorCode === 'ERR_CONNECTION_ERROR') return true;
-  if (err.errorCode === '1' && err.externalErrorCode === '1' && err.offsetCode === 61) return true;
-  
-  // If it's a generic SQLiteCloudError, only treat it as a connection error if the message implies a network failure
-  if (err.name === 'SQLiteCloudError' && !msg.includes('connection') && !msg.includes('unavailable') && !msg.includes('disconnected') && !msg.includes('paused') && !msg.includes('timeout')) {
-    return false; // It's a query error (like syntax error, constraint violation), not a connection error
-  }
-
-  return (
-    msg.includes('connection') ||
-    msg.includes('unavailable') ||
-    msg.includes('disconnected') ||
-    msg.includes('paused') ||
-    msg.includes('inactive') ||
-    msg.includes('closed by the remote host') ||
-    msg.includes('socket') ||
-    msg.includes('tls') ||
-    msg.includes('timeout') ||
-    msg.includes('timed out') ||
-    msg.includes('econnrefused') ||
-    msg.includes('etimedout') ||
-    msg.includes('not connected') ||
-    msg.includes('econnreset') ||
-    err.errorCode === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
-    err.code === 'ERR_CONNECTION_NOT_ESTABLISHED' ||
-    err.code === 'ECONNRESET'
-  );
-};
-
-const initLocalSchema = (db: BetterSqlite3.Database) => {
-  try {
-    const schemaPath = path.join(process.cwd(), 'backend', 'database', 'schema.sql');
-    if (fs.existsSync(schemaPath)) {
-      const sql = fs.readFileSync(schemaPath, 'utf8');
-      db.exec(sql);
-    }
-  } catch (err: any) {
-    console.warn('[Database] Warning: Failed to execute initLocalSchema:', err.message);
-  }
-};
-
-const ensureLocalDbInitialized = async () => {
-  if (!localDb) {
-    if (!fs.existsSync(DB_DIR)) {
-      fs.mkdirSync(DB_DIR, { recursive: true });
-    }
-    localDb = new BetterSqlite3(DB_PATH, { timeout: 10000 });
-    localDb.pragma('foreign_keys = ON');
-    localDb.pragma('journal_mode = WAL');
-    localDb.pragma('synchronous = NORMAL');
-    initLocalSchema(localDb);
-  }
+  throw new Error("No SQLite Cloud URL provided.");
 };
 
 export const getDatabase = (): any => {
   if (cloudDb) return cloudDb;
-  if (localDb) return localDb;
   throw new Error('Database is not initialized. Please call connectDatabase() first.');
 };
 
 export const query = async <T = any>(sql: string, params: any[] = []): Promise<T[]> => {
-  if (cloudDb) {
-    try {
-      return await cloudDb.sql(sql, ...params) as T[];
-    } catch (err: any) {
-      if (isConnectionError(err)) {
-        console.error('[Database] SQLite Cloud connection lost or node paused. Swapping to local SQLite fallback database.');
-        cloudDb = null;
-        await ensureLocalDbInitialized();
-        return localDb!.prepare(sql).all(...params) as T[];
-      }
-      throw err;
-    }
+  if (!cloudDb) {
+    await connectDatabase();
   }
-  await ensureLocalDbInitialized();
-  return localDb!.prepare(sql).all(...params) as T[];
+  return await cloudDb!.sql(sql, ...params) as T[];
 };
 
 export const execute = async (sql: string, params: any[] = []): Promise<any> => {
-  if (cloudDb) {
-    try {
-      return await cloudDb.sql(sql, ...params);
-    } catch (err: any) {
-      if (isConnectionError(err)) {
-        console.error('[Database] SQLite Cloud connection lost or node paused. Swapping to local SQLite fallback database.');
-        cloudDb = null;
-        await ensureLocalDbInitialized();
-        return localDb!.prepare(sql).run(...params);
-      }
-      throw err;
-    }
+  if (!cloudDb) {
+    await connectDatabase();
   }
-  await ensureLocalDbInitialized();
-  return localDb!.prepare(sql).run(...params);
+  return await cloudDb!.sql(sql, ...params);
 };
 
 export const transaction = async <T>(fn: () => Promise<T>): Promise<T> => {
-  if (cloudDb) {
+  if (!cloudDb) {
+    await connectDatabase();
+  }
+  try {
+    await cloudDb!.sql('BEGIN TRANSACTION');
     try {
-      await cloudDb.sql('BEGIN TRANSACTION');
-      try {
-        const res = await fn();
-        await cloudDb.sql('COMMIT');
-        return res;
-      } catch (err) {
-        await cloudDb.sql('ROLLBACK');
-        throw err;
-      }
-    } catch (err: any) {
-      if (isConnectionError(err)) {
-        console.error('[Database] SQLite Cloud connection lost during transaction setup. Swapping to local SQLite fallback database.');
-        cloudDb = null;
-        await ensureLocalDbInitialized();
-        // Retry logic on localDb
-        localDb!.prepare('BEGIN TRANSACTION').run();
-        try {
-          const res = await fn();
-          localDb!.prepare('COMMIT').run();
-          return res;
-        } catch (localErr) {
-          localDb!.prepare('ROLLBACK').run();
-          throw localErr;
-        }
-      }
+      const res = await fn();
+      await cloudDb!.sql('COMMIT');
+      return res;
+    } catch (err) {
+      await cloudDb!.sql('ROLLBACK');
       throw err;
     }
-  }
-  await ensureLocalDbInitialized();
-  localDb!.prepare('BEGIN TRANSACTION').run();
-  try {
-    const res = await fn();
-    localDb!.prepare('COMMIT').run();
-    return res;
-  } catch (err) {
-    localDb!.prepare('ROLLBACK').run();
+  } catch (err: any) {
     throw err;
   }
 };
 
 export const healthCheck = async (): Promise<boolean> => {
   try {
-    const res = await query('SELECT 1 as active');
-    return res && res.length > 0 && res[0].active === 1;
+    if (!cloudDb) return false;
+    const res = await cloudDb.sql('SELECT 1 as active');
+    return Array.isArray(res) && res.length > 0 && res[0].active === 1;
   } catch (err) {
     console.error('[Database Health] Health check failed:', err);
     return false;

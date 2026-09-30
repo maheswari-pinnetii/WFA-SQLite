@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import { logger } from '../../config/logger.js';
 
 export const globalSearch = async (req: any, res: Response) => {

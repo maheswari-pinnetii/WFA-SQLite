@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import { handleControllerError } from '../../utils/errorHandler.js';
 
 export const getJobFamilies = async (req: Request, res: Response) => {

@@ -1,11 +1,19 @@
 import crypto from 'crypto';
-import { connectDatabase, query, execute, healthCheck } from './sqlite-cloud.js';
+import * as cloud from './sqlite-cloud.js';
+import * as local from './sqlite-local.js';
+
+const isTest = process.env.NODE_ENV === 'test';
 
 export const ORGANIZATION_ID = 'org-stackly';
 let initPromise: Promise<void> | null = null;
 
-// Re-export getDb and query/execute helpers
-export { getDatabase as getDb, query, execute } from './sqlite-cloud.js';
+export const connectDatabase = isTest ? local.connectDatabase : cloud.connectDatabase;
+export const getDb = isTest ? local.getDatabase : cloud.getDatabase;
+export const getDatabase = getDb; // alias for backwards-compat with services that import getDatabase
+export const query = isTest ? local.query : cloud.query;
+export const execute = isTest ? local.execute : cloud.execute;
+export const transaction = isTest ? local.transaction : cloud.transaction;
+export const healthCheck = isTest ? local.healthCheck : cloud.healthCheck;
 
 export const initDb = async (): Promise<void> => {
   if (!initPromise) {

@@ -1,5 +1,5 @@
 import { analyticsRepository } from '../analytics/analytics.repository.js';
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 
 export class EmployeeDashboardService {
   async getDashboardData(user: any) {

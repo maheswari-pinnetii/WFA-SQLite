@@ -15,6 +15,7 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { usePushNotifications } from '../hooks/usePushNotifications';
 import { useTheme } from '../../design-system/theme/theme';
+import { safeStorage } from '../../utils/storage';
 
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { role, user } = useAuth();
@@ -28,7 +29,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const [privacyModalOpen, setPrivacyModalOpen] = useState(false);
 
   useEffect(() => {
-    const completed = localStorage.getItem('has_completed_onboarding');
+    const completed = safeStorage.getItem('has_completed_onboarding');
     if (!completed) {
       setOnboardingOpen(true);
     }
@@ -37,7 +38,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   // Initialize collapsed state from localStorage (default to false / expanded on desktop)
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem('sidebar_collapsed');
+      const saved = safeStorage.getItem('sidebar_collapsed');
       if (saved === null) return false;
       const parsed = JSON.parse(saved);
       return parsed === true; // strictly boolean coerce — any non-boolean falls back to false
@@ -48,7 +49,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // Save collapsed state changes to localStorage
   useEffect(() => {
-    localStorage.setItem('sidebar_collapsed', JSON.stringify(collapsed));
+    safeStorage.setItem('sidebar_collapsed', JSON.stringify(collapsed));
   }, [collapsed]);
 
   // Standardized theme initialization without role-based color forcing

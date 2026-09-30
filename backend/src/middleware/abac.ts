@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError, ErrorCode, sendError } from '../utils/apiError.js';
-import { query } from '../database/sqlite-cloud.js';
+import { query } from '../database/connection.js';
 import { logger } from '../config/logger.js';
 
 /**

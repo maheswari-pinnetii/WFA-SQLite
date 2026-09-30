@@ -113,6 +113,7 @@ export default defineConfig({
     globals: true,
     fileParallelism: false,
     testTimeout: 30000,
+    // @ts-expect-error type
     environmentMatchGlobs: [
       ['tests/unit/**', 'jsdom'],
       ['tests/integration/**', 'node'],

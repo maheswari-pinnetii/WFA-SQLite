@@ -53,7 +53,7 @@ export const tenantScope = (req: Request, res: Response, next: NextFunction): vo
  *   router.get('/employees/:id', authenticateToken, tenantScope,
  *              ownershipGuard('employees', 'id'), handler);
  */
-import { query } from '../database/sqlite-cloud.js';
+import { query } from '../database/connection.js';
 import { logger } from '../config/logger.js';
 
 export const ownershipGuard = (table: string, paramName = 'id', orgField = 'organizationId') => {

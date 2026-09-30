@@ -1,4 +1,4 @@
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import { logAudit } from '../../config/db.js';
 import { handleControllerError } from '../../utils/errorHandler.js';
 import { analyticsRepository } from './analytics.repository.js';

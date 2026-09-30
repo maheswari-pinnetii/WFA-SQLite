@@ -12,7 +12,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../../backend/src/app.js';
-import { connectDatabase } from '../../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase } from '../../../backend/src/database/connection.js';
 import { initDb } from '../../../backend/src/config/db.js';
 
 const PASSWORD = 'StacklyWFA2026!';

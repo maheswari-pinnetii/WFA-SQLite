@@ -1,4 +1,4 @@
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { logAudit } from '../../config/db.js';
 import crypto from 'crypto';
 

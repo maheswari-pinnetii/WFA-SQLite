@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../features/auth/hooks/useAuth';
 import { apiClient } from '../../../api/client';
 import { Settings, Eye, EyeOff, Shield, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { safeStorage } from '../../../utils/storage';
+import { copyToClipboard } from '../../../utils/clipboard';
 
 export const SecurityTab: React.FC = () => {
   const { user } = useAuth();
@@ -37,14 +39,14 @@ const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: strin
         }
       }
       // Fallback to local storage if API didn't return devices
-      const local = localStorage.getItem('wfa_trusted_device');
+      const local = safeStorage.getItem('wfa_trusted_device');
       if (local) {
         const parsed = JSON.parse(local);
         setTrustedDevices([{ id: 'local_device', device_name: parsed.deviceName, auth_method: parsed.authMethod, trusted_until: '30 days', last_used_at: parsed.savedAt }]);
       }
     } catch {
       try {
-        const local = localStorage.getItem('wfa_trusted_device');
+        const local = safeStorage.getItem('wfa_trusted_device');
         if (local) {
           const parsed = JSON.parse(local);
           setTrustedDevices([{ id: 'local_device', device_name: parsed.deviceName, auth_method: parsed.authMethod, trusted_until: '30 days', last_used_at: parsed.savedAt }]);
@@ -61,7 +63,7 @@ const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: strin
         await fetch(`/api/auth/trusted-devices/${id}`, { method: 'DELETE' });
       }
       setTrustedDevices((prev) => prev.filter((d) => d.id !== id));
-      localStorage.removeItem('wfa_trusted_device');
+      safeStorage.removeItem('wfa_trusted_device');
     } catch (err) {
       console.error(err);
     }
@@ -194,10 +196,14 @@ const [mfaStatus, setMfaStatus] = useState<{ enabled: boolean; verifiedAt: strin
                   ))}
                 </div>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     const text = recoveryCodes.join('\n');
-                    navigator.clipboard.writeText(text);
-                    alert('Recovery codes copied to clipboard.');
+                    const success = await copyToClipboard(text);
+                    if (success) {
+                      alert('Recovery codes copied to clipboard.');
+                    } else {
+                      alert('Failed to copy to clipboard. Please copy manually.');
+                    }
                   }}
                   className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors cursor-pointer"
                 >

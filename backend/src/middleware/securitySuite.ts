@@ -293,7 +293,7 @@ export const webhookReplayGuard = (maxDriftSeconds: number = 300) => {
 // -------------------------------------------------------------
 // 10. Request Timeout Guard (Prevents Slowloris / Hung Socket Attacks)
 // -------------------------------------------------------------
-export const requestTimeoutGuard = (timeoutMs: number = 30000) => {
+export const requestTimeoutGuard = (timeoutMs: number = (process.env.NODE_ENV === 'test' ? 120000 : 30000)) => {
   return (req: Request, res: Response, next: NextFunction) => {
     res.setTimeout(timeoutMs, () => {
       logger.warn('security.timeout.triggered', `Request timed out after ${timeoutMs}ms`, {

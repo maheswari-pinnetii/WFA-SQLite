@@ -1,8 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../../backend/src/app';
-import { execute } from '../../../backend/src/database/sqlite-cloud';
-import { connectDatabase } from '../../../backend/src/database/sqlite-cloud';
+import { execute, connectDatabase } from '../../../backend/src/database/connection';
 import { initDb } from '../../../backend/src/config/db';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
