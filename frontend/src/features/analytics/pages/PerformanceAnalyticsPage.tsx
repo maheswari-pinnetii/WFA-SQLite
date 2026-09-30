@@ -7,6 +7,8 @@ import { Gauge, Target, Award, Users } from 'lucide-react';
 import { useAnalytics } from '../../../hooks/useAnalytics';
 import { useEmployees } from '../../../hooks/useEmployees';
 
+const getAuthToken = () => localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token") || "";
+
 export const PerformanceAnalyticsPage: React.FC = () => {
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
   const { employees, isLoading: employeesLoading } = useEmployees({ pageSize: 50 });
@@ -51,6 +53,20 @@ export const PerformanceAnalyticsPage: React.FC = () => {
             <p className="text-xs text-slate-400">
               Correlate team performance metrics, target completion percentages, and review status.
             </p>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => window.open(`/api/v1/reports/performance/export?format=xlsx&token=${getAuthToken()}`, '_blank')}
+              className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+            >
+              Export XLSX
+            </button>
+            <button 
+              onClick={() => window.open(`/api/v1/reports/performance/export?format=pdf&token=${getAuthToken()}`, '_blank')}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              Export PDF
+            </button>
           </div>
         </div>
 

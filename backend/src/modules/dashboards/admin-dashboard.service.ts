@@ -215,29 +215,13 @@ export class AdminDashboardService {
       employmentStatusBreakdown
     };
 
-    // Table
     const tables = {
       recentJoiners: [...employees].sort((a, b) => new Date(b.joinDate || 0).getTime() - new Date(a.joinDate || 0).getTime()).slice(0, 10),
       roster: employees.slice(0, 50)
     };
 
-    // Database Stats
-    const allTablesList = [
-      'employees', 'users', 'departments', 'attendance', 'attendancerecords',
-      'leaverequests', 'leave_types', 'payroll_runs', 'payroll_run_employees',
-      'performance_cycles', 'reviews', 'tasks',
-      'training_enrollments', 'employee_salary_structures', 'shifts',
-      'locations', 'feature_flags', 'audit_logs', 'notifications'
-    ];
-    const databaseStats = await Promise.all(allTablesList.map(async t => {
-      try {
-        const rows = await query(`SELECT * FROM ${t} LIMIT 3`);
-        const count = await query(`SELECT COUNT(*) as c FROM ${t}`);
-        return { name: t, rowCount: (count as any[])[0]?.c || 0, preview: rows };
-      } catch (e) {
-        return null;
-      }
-    })).then(res => res.filter(Boolean));
+    // Skip heavy databaseStats queries to prevent timeouts
+    const databaseStats: any[] = [];
 
     return { kpis, charts, tables, databaseStats };
   }

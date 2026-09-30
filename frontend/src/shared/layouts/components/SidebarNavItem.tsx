@@ -55,7 +55,9 @@ export const SidebarNavItem: React.FC<SidebarNavItemProps> = ({
 
   const handleToggle = (e: React.MouseEvent) => {
     if (item.children && item.children.length > 0) {
-      e.preventDefault();
+      if (!item.path) {
+        e.preventDefault();
+      }
       toggleItem(item.id);
     } else {
       setMobileOpen(false);

@@ -309,8 +309,8 @@ export const AdminDashboardPage: React.FC = () => {
     try {
       await workforceApi.reviewLeaveRequest(id, status);
       await loadApprovals();
-    } catch {
-      // Fallback
+    } catch (err: any) {
+      alert(`Failed to ${status.toLowerCase()} request: ${err.message || 'Unknown error'}`);
     }
   };
 

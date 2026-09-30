@@ -76,12 +76,28 @@ export const LearningAnalyticsDashboard: React.FC = () => {
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-color)] shadow-sm">
-        <div className="flex items-center gap-2 text-purple-500 font-medium text-xs tracking-wider uppercase mb-1">
-          <Target size={16} /> Sprint 2 &mdash; Learning Analytics
+      <div className="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-color)] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-purple-500 font-medium text-xs tracking-wider uppercase mb-1">
+            <Target size={16} /> Sprint 2 &mdash; Learning Analytics
+          </div>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">Learning &amp; Development Analytics</h1>
+          <p className="text-sm text-[var(--text-muted)] mt-0.5">Training enrollment, completion rates, assessment scores, certifications, and skill improvement metrics.</p>
         </div>
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">Learning &amp; Development Analytics</h1>
-        <p className="text-sm text-[var(--text-muted)] mt-0.5">Training enrollment, completion rates, assessment scores, certifications, and skill improvement metrics.</p>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => window.open(`/api/v1/reports/learning/export?format=xlsx&token=${getAuthToken()}`, '_blank')}
+            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+          >
+            Export XLSX
+          </button>
+          <button 
+            onClick={() => window.open(`/api/v1/reports/learning/export?format=pdf&token=${getAuthToken()}`, '_blank')}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

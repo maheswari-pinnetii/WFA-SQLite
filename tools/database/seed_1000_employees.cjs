@@ -12,7 +12,7 @@ db.pragma('journal_mode = WAL');
 
 const orgId = 'org-stackly';
 const companyId = 'org-stackly';
-const passHash = '$2b$10$WydnvD6fjOewqjHXSLz/rONar6dKe78qy2p/UQaRbVVQHA99wniZ.'; // StacklyWFA2026!
+const passHash = '$2b$10$bV6Bn0GPPdTcaqC0X8AWkuLm/ZwNDpZZzxcxifKgTd8fdBAAhZ9Mu'; // StacklyWFA2026!
 const now = new Date().toISOString();
 
 console.log('🌱 Starting 1000 Employee Seed...');

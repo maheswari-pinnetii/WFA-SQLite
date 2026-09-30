@@ -38,7 +38,7 @@ export const seedEmployees = (db: Database, orgId: string) => {
   // Seed employees & users
   const userCount = (db.prepare('SELECT COUNT(*) as count FROM users').get() as any).count;
   if (userCount === 0) {
-    const passHash = '$2b$10$WydnvD6fjOewqjHXSLz/rONar6dKe78qy2p/UQaRbVVQHA99wniZ.'; // StacklyWFA2026!
+    const passHash = '$2b$10$bV6Bn0GPPdTcaqC0X8AWkuLm/ZwNDpZZzxcxifKgTd8fdBAAhZ9Mu'; // StacklyWFA2026!
 
     const insertUser = db.prepare(`
       INSERT INTO users (id, name, email, password_hash, role, department, team, location, title, clearanceLevel, status, permissions, mfa_enabled, organizationId, companyId, createdAt, updatedAt)

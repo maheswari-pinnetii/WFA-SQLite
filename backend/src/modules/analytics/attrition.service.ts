@@ -34,10 +34,14 @@ export class AttritionService {
       count: riskScored.filter((e: any) => e.contributingFactors.includes(factor)).length,
     })).filter(f => f.count > 0).sort((a, b) => b.count - a.count);
 
+    // IMPORTANT: This is a rule-based scoring engine, NOT a trained ML model.
+    // Hard-coded model metrics (accuracy, precision, recall) have been removed.
+    // Real metrics must be generated from a model_evaluations run (see S3.3 spec).
     const modelMetrics = {
-      accuracy: 0.82, precision: 0.78, recall: 0.84,
-      f1Score: 0.81, falsePositiveRate: 0.18, modelVersion: 'stat-engine-v2.1',
-      lastTrained: new Date().toISOString().substring(0, 10),
+      scoringMethod: 'rule-based',
+      modelVersion: 'stat-engine-v2.1',
+      disclaimer: 'Rule-based risk scoring. Not a validated ML model. Accuracy/precision/recall metrics require a model evaluation pipeline (S3-GAP-02).',
+      lastUpdated: new Date().toISOString().substring(0, 10),
     };
 
     return {

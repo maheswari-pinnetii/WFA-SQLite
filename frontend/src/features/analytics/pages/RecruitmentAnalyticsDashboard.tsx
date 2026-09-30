@@ -58,10 +58,16 @@ export const RecruitmentAnalyticsDashboard: React.FC = () => {
             <p className="text-sm text-[var(--text-muted)] mt-0.5">Hiring funnel, time-to-hire, cost-per-hire, acceptance rate, and source effectiveness.</p>
           </div>
           <div className="flex gap-2">
-            <button onClick={() => window.open('/api/v1/reports/recruitment/export?format=csv', '_blank')} className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-100 flex items-center gap-2 transition-colors">
-              Export CSV
+            <button 
+              onClick={() => window.open(`/api/v1/reports/recruitment/export?format=xlsx&token=${getAuthToken()}`, '_blank')}
+              className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+            >
+              Export XLSX
             </button>
-            <button onClick={() => window.open('/api/v1/reports/recruitment/export?format=pdf', '_blank')} className="px-4 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-lg text-sm font-medium hover:bg-[var(--bg-hover)] flex items-center gap-2 transition-colors">
+            <button 
+              onClick={() => window.open(`/api/v1/reports/recruitment/export?format=pdf&token=${getAuthToken()}`, '_blank')}
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+            >
               Export PDF
             </button>
           </div>

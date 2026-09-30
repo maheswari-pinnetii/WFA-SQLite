@@ -204,6 +204,8 @@ export const useDashboardData = (role: Role, filters?: any) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const filtersString = JSON.stringify(filters);
+
   const reload = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -246,7 +248,7 @@ export const useDashboardData = (role: Role, filters?: any) => {
     } finally {
       setIsLoading(false);
     }
-  }, [role, filters]);
+  }, [role, filtersString]);
 
   useEffect(() => { void reload(); }, [reload]);
   return { data, isLoading, error, reload };

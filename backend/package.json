@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "cls-hooked": "^4.2.2",
+    "exceljs": "^4.4.0",
     "multer": "^2.3.0",
+    "pdfkit": "^0.20.2",
     "prom-client": "^15.1.3",
     "response-time": "^2.3.4",
     "swagger-jsdoc": "^6.3.0",
@@ -20,6 +22,7 @@
   },
   "devDependencies": {
     "@types/cls-hooked": "^4.3.9",
+    "@types/exceljs": "^0.5.3",
     "@types/multer": "^2.2.0",
     "@types/response-time": "^2.3.9",
     "@types/swagger-jsdoc": "^6.0.4",

@@ -9,9 +9,12 @@ export const LogoutPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    logout();
-    navigate('/login', { replace: true });
-  }, [logout, navigate]);
+    const processLogout = async () => {
+      await logout();
+      navigate('/login', { replace: true });
+    };
+    processLogout();
+  }, []);
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 bg-slate-50 dark:bg-[#0B1120] text-slate-900 dark:text-slate-100 font-sans transition-colors duration-300 relative overflow-hidden">

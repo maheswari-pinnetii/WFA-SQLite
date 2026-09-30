@@ -7,6 +7,8 @@ export function buildWhereClause(queryData: any, alias: string = '') {
   
   for (const [key, value] of Object.entries(queryData)) {
     if (value === undefined || value === null) continue;
+    if (key === 'page' || key === 'limit') continue;
+
     
     if (key === 'companyId' || key === 'organizationId') {
       clauses.push(`(${pfx}companyId = ? OR ${pfx}organizationId = ?)`);
@@ -49,17 +51,21 @@ export function buildWhereClause(queryData: any, alias: string = '') {
 
   return {
     clause: clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '',
-    params
+    params,
+    page: queryData.page ? parseInt(queryData.page as string, 10) : 1,
+    limit: queryData.limit ? parseInt(queryData.limit as string, 10) : 1000
   };
 }
 
 export class AnalyticsRepository {
   async getEmployeesSummary(queryData: any) {
-    const { clause, params } = buildWhereClause(queryData);
+    const { clause, params, page, limit } = buildWhereClause(queryData);
+    const offset = (page - 1) * limit;
     const sql = `
       SELECT id, employeeCode, name, designation, department, team, role, status, performanceScore, attendanceRate, joinDate 
       FROM employees 
       ${clause}
+      LIMIT ${limit} OFFSET ${offset}
     `;
     console.log('[DEBUG] getEmployeesSummary SQL:', sql, 'PARAMS:', params);
     try {

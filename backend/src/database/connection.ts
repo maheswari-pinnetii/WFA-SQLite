@@ -197,7 +197,7 @@ export const initDb = async (): Promise<void> => {
         await execute(`CREATE INDEX IF NOT EXISTS idx_evt_token_hash ON email_verification_tokens(token_hash)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_evt_user_id    ON email_verification_tokens(user_id)`);
 
-        // Ensure audit_logs table exists and has actorId and timestamp columns
+        // Ensure audit_logs table exists and has actorId, timestamp, and hash columns
         await execute(`
           CREATE TABLE IF NOT EXISTS audit_logs (
             id TEXT PRIMARY KEY,
@@ -208,11 +208,19 @@ export const initDb = async (): Promise<void> => {
             details TEXT,
             ipAddress TEXT,
             createdAt TEXT NOT NULL,
-            timestamp TEXT
+            timestamp TEXT,
+            previousHash TEXT,
+            hash TEXT
           )
         `);
         if (!(await columnExists('audit_logs', 'actorId'))) {
           try { await execute("ALTER TABLE audit_logs ADD COLUMN actorId TEXT DEFAULT 'anonymous';"); } catch (e) {}
+        }
+        if (!(await columnExists('audit_logs', 'previousHash'))) {
+          try { await execute("ALTER TABLE audit_logs ADD COLUMN previousHash TEXT;"); } catch (e) {}
+        }
+        if (!(await columnExists('audit_logs', 'hash'))) {
+          try { await execute("ALTER TABLE audit_logs ADD COLUMN hash TEXT;"); } catch (e) {}
         }
         if (!(await columnExists('audit_logs', 'entityType'))) {
           try { await execute("ALTER TABLE audit_logs ADD COLUMN entityType TEXT DEFAULT 'system';"); } catch (e) {}
@@ -784,6 +792,53 @@ export const initDb = async (): Promise<void> => {
           );
         `);
 
+        await execute(`
+          CREATE TABLE IF NOT EXISTS attrition_predictions (
+            prediction_id TEXT PRIMARY KEY,
+            employee_id TEXT NOT NULL,
+            organization_id TEXT NOT NULL,
+            model_version TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            risk_score REAL NOT NULL,
+            risk_category TEXT NOT NULL,
+            confidence REAL NOT NULL,
+            prediction_date TEXT NOT NULL,
+            feature_snapshot TEXT,
+            recommended_action TEXT
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS model_evaluations (
+            evaluation_id TEXT PRIMARY KEY,
+            organization_id TEXT NOT NULL,
+            model_version TEXT NOT NULL,
+            dataset_version TEXT NOT NULL,
+            accuracy REAL NOT NULL,
+            precision REAL NOT NULL,
+            recall REAL NOT NULL,
+            f1 REAL NOT NULL,
+            roc_auc REAL,
+            false_positive_rate REAL,
+            false_negative_rate REAL,
+            evaluated_at TEXT NOT NULL
+          );
+        `);
+
+        await execute(`
+          CREATE TABLE IF NOT EXISTS workforce_planning_scenarios (
+            scenario_id TEXT PRIMARY KEY,
+            organization_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            scenario_type TEXT NOT NULL,
+            assumptions TEXT NOT NULL,
+            created_by TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            status TEXT NOT NULL
+          );
+        `);
+
         // Materialized View for HR Dashboard
         await execute(`
           CREATE TABLE IF NOT EXISTS dashboard_summary_mv (
@@ -846,6 +901,11 @@ export const initDb = async (): Promise<void> => {
         await execute(`CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
         await execute(`CREATE INDEX IF NOT EXISTS idx_audit_logs_createdAt ON audit_logs(createdAt)`);
+        
+        await execute(`CREATE INDEX IF NOT EXISTS idx_attrition_predictions_emp ON attrition_predictions(employee_id)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_attrition_predictions_org_date ON attrition_predictions(organization_id, prediction_date)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_model_evaluations_org_version ON model_evaluations(organization_id, model_version)`);
+        await execute(`CREATE INDEX IF NOT EXISTS idx_workforce_scenarios_org_status ON workforce_planning_scenarios(organization_id, status)`);
 
         // Master Data & Organization Tables
         await execute(`
@@ -1119,10 +1179,17 @@ export const logAudit = async (userId: string, action: string, details: string, 
   const id = crypto.randomUUID();
   const ts = new Date().toISOString();
   try {
+    const lastLogRaw = await query('SELECT hash FROM audit_logs ORDER BY createdAt DESC LIMIT 1');
+    const lastLog = Array.isArray(lastLogRaw) ? lastLogRaw[0] : null;
+    const previousHash = lastLog?.hash || 'GENESIS';
+
+    const payload = `${id}|${userId || 'anonymous'}|${action}|system|server|${details}|${ts}|${previousHash}`;
+    const hash = crypto.createHash('sha256').update(payload).digest('hex');
+
     await execute(`
-      INSERT INTO audit_logs (id, actorId, action, entityType, entityId, details, createdAt, timestamp)
-      VALUES (?, ?, ?, 'system', 'server', ?, ?, ?)
-    `, [id, userId || 'anonymous', action, details, ts, ts]);
+      INSERT INTO audit_logs (id, actorId, action, entityType, entityId, details, createdAt, timestamp, previousHash, hash)
+      VALUES (?, ?, ?, 'system', 'server', ?, ?, ?, ?, ?)
+    `, [id, userId || 'anonymous', action, details, ts, ts, previousHash, hash]);
   } catch (err) {
     console.error('[logAudit] Failed to log audit event:', err);
   }

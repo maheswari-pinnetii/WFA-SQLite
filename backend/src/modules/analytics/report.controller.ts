@@ -1,8 +1,21 @@
 import { query } from '../../database/sqlite-cloud.js';
 import { logAudit } from '../../config/db.js';
 import { handleControllerError } from '../../utils/errorHandler.js';
+import { analyticsRepository } from './analytics.repository.js';
+import ExcelJS from 'exceljs';
+import PDFDocument from 'pdfkit';
 
 const getOrganizationId = (req: any): string => req.user?.organizationId || req.user?.companyId || 'org-stackly';
+
+/**
+ * Enforce RBAC/ABAC on exports.
+ */
+function authorizeExport(req: any) {
+  const allowedRoles = ['ADMIN', 'HR_MANAGER', 'EXECUTIVE'];
+  if (!allowedRoles.includes(req.user?.role)) {
+    throw new Error('Unauthorized: Insufficient permissions to export analytics reports.');
+  }
+}
 
 /**
  * Helper to convert an array of objects to CSV string
@@ -807,15 +820,26 @@ export const exportAttritionRiskReport = async (req: any, res: any) => {
  */
 export const exportDemandForecastReport = async (req: any, res: any) => {
   try {
+    authorizeExport(req);
     const orgId = getOrganizationId(req);
     const { format = 'csv' } = req.query;
     
-    const records = await query(`SELECT department, COUNT(*) as headcount FROM employees WHERE organizationId = ? AND status = 'ACTIVE' GROUP BY department`, [orgId]) || [];
-    const formattedRecords = records.map((r: any) => ({
+    // Use historically-derived growth rate, NOT a hard-coded 0.15 assumption
+    const [records, rates] = await Promise.all([
+      query(`SELECT department, COUNT(*) as headcount FROM employees WHERE organizationId = ? AND status = 'Active' GROUP BY department`, [orgId]),
+      analyticsRepository.getHistoricalRates({ organizationId: orgId }),
+    ]);
+    const safeRecords = records || [];
+    const growthRate = rates.growthRate;
+    const growthRateSource = rates.activeHeadcount <= 1 ? 'fallback_insufficient_data' : 'historical_calculation';
+
+    const formattedRecords = safeRecords.map((r: any) => ({
       department: r.department,
       currentHeadcount: r.headcount,
-      projectedGrowth: Math.round(r.headcount * 0.15),
-      targetHeadcount: Math.round(r.headcount * 1.15)
+      projectedGrowth: Math.round(r.headcount * Math.max(0, growthRate)),
+      targetHeadcount: Math.round(r.headcount * (1 + Math.max(0, growthRate))),
+      growthRateUsed: growthRate,
+      growthRateSource,
     }));
 
     await logAudit(
@@ -827,6 +851,43 @@ export const exportDemandForecastReport = async (req: any, res: any) => {
 
     if (format === 'json') return res.json({ success: true, data: formattedRecords });
     
+    if (format === 'xlsx') {
+      const workbook = new ExcelJS.Workbook();
+      const sheet = workbook.addWorksheet('Demand Forecast');
+      sheet.columns = [
+        { header: 'Department', key: 'department', width: 25 },
+        { header: 'Current Headcount', key: 'currentHeadcount', width: 20 },
+        { header: 'Projected Growth', key: 'projectedGrowth', width: 20 },
+        { header: 'Target Headcount', key: 'targetHeadcount', width: 20 },
+        { header: 'Growth Rate Used', key: 'growthRateUsed', width: 20 },
+        { header: 'Growth Rate Source', key: 'growthRateSource', width: 30 }
+      ];
+      sheet.addRows(formattedRecords);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename="demand_forecast_report.xlsx"');
+      await workbook.xlsx.write(res);
+      return res.end();
+    }
+
+    if (format === 'pdf') {
+      const doc = new PDFDocument({ margin: 50 });
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="demand_forecast_report.pdf"');
+      doc.pipe(res);
+
+      doc.fontSize(20).text('Demand Forecast Report', { align: 'center' });
+      doc.moveDown();
+      
+      formattedRecords.forEach((record: any) => {
+        doc.fontSize(14).text(`Department: ${record.department}`);
+        doc.fontSize(12).text(`  Current Headcount: ${record.currentHeadcount} | Projected Growth: ${record.projectedGrowth} | Target: ${record.targetHeadcount}`);
+        doc.text(`  Growth Rate: ${(record.growthRateUsed * 100).toFixed(1)}% (${record.growthRateSource})`);
+        doc.moveDown();
+      });
+      doc.end();
+      return;
+    }
+
     const csvContent = convertToCSV(formattedRecords);
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="demand_forecast_report.csv"');

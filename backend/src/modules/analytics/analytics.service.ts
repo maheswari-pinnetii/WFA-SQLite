@@ -4,7 +4,9 @@ import { Employee, LeaveBalance } from '../../models/index.js';
 const getScope = (user: any, employeeIdKey = 'employeeId', filters: any = {}) => {
   const query: any = { organizationId: user.organizationId || 'org-stackly' };
 
-  if (user.role === 'MANAGER') {
+  // Canonical roles: ADMIN | HR_MANAGER | EXECUTIVE | DEPARTMENT_MANAGER | TEAM_LEAD | EMPLOYEE
+  if (user.role === 'DEPARTMENT_MANAGER' || user.role === 'MANAGER') {
+    // MANAGER is a legacy alias — both map to department scope until DB migration is complete
     query.department = user.department;
   }
   if (user.role === 'TEAM_LEAD') {
@@ -368,84 +370,59 @@ export class AnalyticsService {
       },
       teamProductivity,
       performance: performanceByQuarter,
-      // HR specific charts
-      leaveTrend: [
-        { name: 'Mon', sick: 2, vacation: 5, other: 1 },
-        { name: 'Tue', sick: 3, vacation: 4, other: 0 },
-        { name: 'Wed', sick: 1, vacation: 5, other: 2 },
-        { name: 'Thu', sick: 4, vacation: 3, other: 1 },
-        { name: 'Fri', sick: 2, vacation: 6, other: 0 }
-      ],
-      joinersExits: [
-        { name: 'Q1', joiners: 12, exits: 4 },
-        { name: 'Q2', joiners: 18, exits: 6 },
-        { name: 'Q3', joiners: 15, exits: 5 },
-        { name: 'Q4', joiners: 22, exits: 3 }
-      ],
-      // Manager/TeamLead specific charts
-      taskCompletionTrend: [
-        { name: 'Week 1', completed: 15, total: 20 },
-        { name: 'Week 2', completed: 18, total: 25 },
-        { name: 'Week 3', completed: 22, total: 30 },
-        { name: 'Week 4', completed: Math.max(22, completedTasks), total: totalTasks }
-      ],
-      workloadByMember: [
-        { name: 'Alice M', tasks: 4 },
-        { name: 'Bob S', tasks: 6 },
-        { name: 'Charlie D', tasks: 3 },
-        { name: 'Dana R', tasks: 5 }
-      ],
+      // HR specific charts — real data from repository
+      // NOTE: leaveTrend previously hard-coded; now computed from real leave_requests records
+      leaveTrend: leaveRequests.reduce((acc: any[], req: any) => {
+        const day = req.createdAt ? new Date(req.createdAt).toLocaleDateString('en-US', { weekday: 'short' }) : 'Unknown';
+        const existing = acc.find(d => d.name === day);
+        const type = (req.leaveType || '').toLowerCase();
+        if (existing) {
+          if (type === 'sick') existing.sick++;
+          else if (type === 'vacation' || type === 'annual') existing.vacation++;
+          else existing.other++;
+        } else {
+          acc.push({ name: day, sick: type === 'sick' ? 1 : 0, vacation: (type === 'vacation' || type === 'annual') ? 1 : 0, other: (type !== 'sick' && type !== 'vacation' && type !== 'annual') ? 1 : 0 });
+        }
+        return acc;
+      }, []),
+      // joinersExits: real data from growthData (quarterly aggregation)
+      joinersExits: growthData.length > 0 ? growthData : [],
+      // Manager/TeamLead specific charts — real data from task repository
       taskStatusDistribution: [
         { name: 'To Do', value: todoTasks },
         { name: 'In Progress', value: inProgressTasks },
         { name: 'Completed', value: completedTasks },
         { name: 'Blocked', value: blockedTasks }
       ],
-      blockedWork: [
-        { name: 'Frontend', blocked: 2, open: 5 },
-        { name: 'Backend', blocked: 1, open: 8 },
-        { name: 'Design', blocked: 0, open: 3 }
-      ],
+      // taskCompletionTrend, workloadByMember, blockedWork, sprintProgress:
+      // These require a dedicated tasks analytics repository method.
+      // Returning empty arrays until real task-level aggregation queries are implemented.
+      taskCompletionTrend: [],
+      workloadByMember: [],
+      blockedWork: [],
       sprintProgress: [
         { name: 'Day 1', completed: 0, remaining: totalTasks },
-        { name: 'Day 5', completed: Math.floor(completedTasks/2), remaining: totalTasks - Math.floor(completedTasks/2) },
-        { name: 'Day 10', completed: completedTasks, remaining: totalTasks - completedTasks }
+        { name: 'Day 10', completed: completedTasks, remaining: Math.max(0, totalTasks - completedTasks) }
       ],
-      // Employee specific charts
-      personalAttendanceTrend: attendanceOverview, // use the same shape
-      hoursTracked: [
-        { name: 'Mon', hours: 8.5 },
-        { name: 'Tue', hours: 8.2 },
-        { name: 'Wed', hours: 9.0 },
-        { name: 'Thu', hours: 8.0 },
-        { name: 'Fri', hours: 8.8 }
-      ],
-      personalTaskCompletion: [
-        { name: 'W1', completed: 3 },
-        { name: 'W2', completed: 5 },
-        { name: 'W3', completed: 4 },
-        { name: 'W4', completed: 6 }
-      ],
-      personalLeaveHistory: [
-        { name: 'Jan', days: 1 },
-        { name: 'Feb', days: 0 },
-        { name: 'Mar', days: 2 },
-        { name: 'Apr', days: 0 },
-        { name: 'May', days: 3 }
-      ],
-      personalOvertime: [
-        { name: 'Mon', hours: 0.5 },
-        { name: 'Tue', hours: 0.2 },
-        { name: 'Wed', hours: 1.0 },
-        { name: 'Thu', hours: 0 },
-        { name: 'Fri', hours: 0.8 }
-      ],
-      personalSprintBurndown: [
-        { name: 'Sprint 21', points: 12 },
-        { name: 'Sprint 22', points: 15 },
-        { name: 'Sprint 23', points: 10 },
-        { name: 'Sprint 24', points: 18 }
-      ]
+      // Employee specific charts — real attendance-based data
+      personalAttendanceTrend: attendanceOverview,
+      // hoursTracked, personalTaskCompletion, personalLeaveHistory, personalOvertime, personalSprintBurndown:
+      // These require employee-scoped time-tracking repository queries.
+      // Returning empty arrays until real queries are implemented.
+      hoursTracked: [],
+      personalTaskCompletion: [],
+      personalLeaveHistory: leaveRequests
+        .filter((req: any) => req.status === 'APPROVED')
+        .reduce((acc: any[], req: any) => {
+          const month = req.createdAt ? new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short' }) : 'Unknown';
+          const existing = acc.find(m => m.name === month);
+          const days = Number(req.days || req.durationDays || 1);
+          if (existing) existing.days += days;
+          else acc.push({ name: month, days });
+          return acc;
+        }, []),
+      personalOvertime: [],
+      personalSprintBurndown: []
     };
   }
 
@@ -766,10 +743,15 @@ export class AnalyticsService {
       count: riskScored.filter((e: any) => e.contributingFactors.includes(factor)).length,
     })).filter(f => f.count > 0).sort((a, b) => b.count - a.count);
 
+    // IMPORTANT: This is a rule-based scoring engine, NOT a trained ML model.
+    // These metrics are NOT generated from model evaluation — they are intentionally omitted
+    // until a real model evaluation pipeline is implemented (S3-GAP-02).
+    // Do NOT present these as ML model metrics in the UI.
     const modelMetrics = {
-      accuracy: 0.82, precision: 0.78, recall: 0.84,
-      f1Score: 0.81, falsePositiveRate: 0.18, modelVersion: 'stat-engine-v2.1',
-      lastTrained: new Date().toISOString().substring(0, 10),
+      scoringMethod: 'rule-based',
+      modelVersion: 'stat-engine-v2.1',
+      disclaimer: 'Rule-based risk scoring. Not a validated ML model. Accuracy/precision/recall metrics are not available until model evaluation is implemented.',
+      lastUpdated: new Date().toISOString().substring(0, 10),
     };
 
     return {
@@ -788,10 +770,30 @@ export class AnalyticsService {
     };
   }
 
-  async getDemandForecasting(reqUser: any) {
-    const orgId = reqUser.organizationId || 'org-stackly';
-    const employees = await analyticsRepository.getEmployeesSummary(getScope(reqUser, 'id'));
-    
+  /**
+   * getDemandForecasting — uses real historical rates from the database.
+   * growthRate is derived from actual hiring/exit history via analyticsRepository.getHistoricalRates().
+   * If insufficient history exists, a fallback rate is returned with a clear disclaimer.
+   * An optional scenarioAssumption (e.g. from a saved workforce_planning_scenario) can override the rate.
+   */
+  async getDemandForecasting(reqUser: any, scenarioAssumption?: { growthRate?: number }) {
+    const scope = getScope(reqUser, 'id');
+    const [employees, rates, skills] = await Promise.all([
+      analyticsRepository.getEmployeesSummary(scope),
+      analyticsRepository.getHistoricalRates(scope),
+      analyticsRepository.getSkillsMetrics(scope),
+    ]);
+
+    // Use explicit scenario assumption if provided, otherwise use historically-derived rate.
+    // NEVER default silently to 0.15 — expose the source of the rate to the consumer.
+    const growthRate = scenarioAssumption?.growthRate ?? rates.growthRate;
+    const isFallbackRate = !scenarioAssumption?.growthRate && rates.activeHeadcount <= 1;
+    const growthRateSource = scenarioAssumption?.growthRate
+      ? 'scenario_assumption'
+      : isFallbackRate
+        ? 'fallback_insufficient_data'
+        : 'historical_calculation';
+
     // Derive dept distribution from current workforce
     const deptCounts: Record<string, number> = {};
     employees.forEach((e: any) => {
@@ -799,42 +801,51 @@ export class AnalyticsService {
       deptCounts[dept] = (deptCounts[dept] || 0) + 1;
     });
 
-    const growthRate = 0.15; // Assumed 15% growth
-    const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
     const currentQuarter = Math.ceil((new Date().getMonth() + 1) / 3);
     const year = new Date().getFullYear();
 
-    const hiringByQuarter = quarters.map((q, i) => {
+    const hiringByQuarter = [0, 1, 2, 3].map(i => {
       const qNum = ((currentQuarter - 1 + i) % 4) + 1;
       const yr = year + Math.floor((currentQuarter - 1 + i) / 4);
-      const hiring = Math.round(employees.length * growthRate / 4);
+      const hiring = Math.round(employees.length * Math.max(0, growthRate) / 4);
       return { quarter: `${yr} Q${qNum}`, projected: hiring, confirmed: Math.round(hiring * 0.6) };
     });
 
     const hiringByDept = Object.entries(deptCounts).map(([dept, count]) => ({
       department: dept,
       current: count,
-      projected: Math.round(count * (1 + growthRate)),
-      needed: Math.round(count * growthRate),
+      projected: Math.round(count * (1 + Math.max(0, growthRate))),
+      needed: Math.round(count * Math.max(0, growthRate)),
     }));
 
-    const skills = await analyticsRepository.getSkillsMetrics(getScope(reqUser, 'id'));
     const requiredSkills = skills.slice(0, 10).map((s: any) => ({
       skill: s.name,
       currentCoverage: s.people,
-      projectedDemand: Math.round(s.people * 1.2),
-      gap: Math.max(0, Math.round(s.people * 0.2)),
+      // Skill demand growth uses the same derived growth rate — not a fixed 1.2x multiplier
+      projectedDemand: Math.round(s.people * (1 + Math.max(0, growthRate))),
+      gap: Math.max(0, Math.round(s.people * Math.max(0, growthRate))),
     }));
 
     return {
+      metadata: {
+        growthRate,
+        growthRateSource,
+        attritionRate: rates.attritionRate,
+        activeHeadcount: rates.activeHeadcount,
+        forecastDisclaimer: isFallbackRate
+          ? 'Insufficient historical data. Growth rate is a system fallback. Add real hiring/exit history for accurate forecasting.'
+          : undefined,
+      },
       hiringByQuarter,
       hiringByDept,
       requiredSkills,
-      expectedShortages: hiringByDept.filter((d: any) => d.needed > 5).map((d: any) => ({
-        department: d.department,
-        shortage: d.needed,
-        severity: d.needed > 10 ? 'High' : d.needed > 5 ? 'Medium' : 'Low',
-      })),
+      expectedShortages: hiringByDept
+        .filter((d: any) => d.needed > 5)
+        .map((d: any) => ({
+          department: d.department,
+          shortage: d.needed,
+          severity: d.needed > 10 ? 'High' : 'Medium',
+        })),
       totalProjectedHiring: hiringByQuarter.reduce((sum: number, q: any) => sum + q.projected, 0),
     };
   }

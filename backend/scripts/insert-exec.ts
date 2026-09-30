@@ -3,7 +3,7 @@ import { Database } from '@sqlitecloud/drivers';
 async function run() {
   const db = new Database('sqlitecloud://chrk2ahwvk.g2.sqlite.cloud:8860/auth.sqlitecloud?apikey=xenaeusZqMZhUIfNKX9p9qx8TNRR7Y1XisX4APazqdE');
   
-  const hash = '$2b$10$WydnvD6fjOewqjHXSLz/rONar6dKe78qy2p/UQaRbVVQHA99wniZ.';
+  const hash = '$2b$10$bV6Bn0GPPdTcaqC0X8AWkuLm/ZwNDpZZzxcxifKgTd8fdBAAhZ9Mu';
   
   await db.sql`
     INSERT OR IGNORE INTO users (

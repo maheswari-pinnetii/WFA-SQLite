@@ -3,6 +3,8 @@ import { Users, TrendingUp, UserPlus, UserMinus, Building2, MapPin, Briefcase } 
 import { analyticsApi } from '../../../api/analyticsApi';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
+const getAuthToken = () => localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token") || "";
+
 export const HeadcountAnalyticsPage: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -82,6 +84,20 @@ export const HeadcountAnalyticsPage: React.FC = () => {
           <p className="text-sm text-[var(--text-muted)] mt-0.5">
             Real-time workforce distribution across departments, locations, employment types, and tenure bands.
           </p>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => window.open(`/api/v1/reports/workforce/export?format=xlsx&token=${getAuthToken()}`, '_blank')}
+            className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-sm font-medium transition-colors"
+          >
+            Export XLSX
+          </button>
+          <button 
+            onClick={() => window.open(`/api/v1/reports/workforce/export?format=pdf&token=${getAuthToken()}`, '_blank')}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+          >
+            Export PDF
+          </button>
         </div>
       </div>
 

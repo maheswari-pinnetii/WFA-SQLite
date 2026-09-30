@@ -77,7 +77,7 @@ export const AttritionRiskDashboard: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 text-rose-500 font-medium text-xs tracking-wider uppercase mb-1">
             <Brain size={16} />
-            <span>AI-Powered Risk Prediction &mdash; {modelMetrics?.modelVersion}</span>
+            <span>Rule-Based Risk Scoring &mdash; {modelMetrics?.modelVersion || 'v2.1'}</span>
           </div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Attrition Risk Dashboard</h1>
           <p className="text-sm text-[var(--text-muted)] mt-0.5">Statistical model scoring each employee on performance, attendance, tenure, and engagement signals.</p>
@@ -200,21 +200,27 @@ export const AttritionRiskDashboard: React.FC = () => {
           <h2 className="text-base font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
             <Brain size={16} className="text-purple-400" /> Model Explainability &amp; Metrics
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {[
-              { label: "Accuracy", value: (modelMetrics.accuracy * 100).toFixed(0) + "%", color: "text-emerald-400" },
-              { label: "Precision", value: (modelMetrics.precision * 100).toFixed(0) + "%", color: "text-blue-400" },
-              { label: "Recall", value: (modelMetrics.recall * 100).toFixed(0) + "%", color: "text-cyan-400" },
-              { label: "F1 Score", value: (modelMetrics.f1Score * 100).toFixed(0) + "%", color: "text-purple-400" },
-              { label: "False Positive Rate", value: (modelMetrics.falsePositiveRate * 100).toFixed(0) + "%", color: "text-amber-400" },
-            ].map((m, i) => (
-              <div key={i} className="p-3 rounded-lg bg-[var(--bg-secondary)] text-center">
-                <div className={"text-2xl font-bold " + m.color}>{m.value}</div>
-                <div className="text-xs text-[var(--text-muted)] mt-1">{m.label}</div>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-[var(--text-muted)] mt-3">Model: {modelMetrics.modelVersion} &middot; Last trained: {modelMetrics.lastTrained}</p>
+          {modelMetrics.scoringMethod === 'rule-based' ? (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm text-amber-500 mb-4">
+              {modelMetrics.disclaimer || 'Rule-based risk scoring. Not a validated ML model.'}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {[
+                { label: "Accuracy", value: (modelMetrics.accuracy * 100).toFixed(0) + "%", color: "text-emerald-400" },
+                { label: "Precision", value: (modelMetrics.precision * 100).toFixed(0) + "%", color: "text-blue-400" },
+                { label: "Recall", value: (modelMetrics.recall * 100).toFixed(0) + "%", color: "text-cyan-400" },
+                { label: "F1 Score", value: (modelMetrics.f1Score * 100).toFixed(0) + "%", color: "text-purple-400" },
+                { label: "False Positive Rate", value: (modelMetrics.falsePositiveRate * 100).toFixed(0) + "%", color: "text-amber-400" },
+              ].map((m, i) => (
+                <div key={i} className="p-3 rounded-lg bg-[var(--bg-secondary)] text-center">
+                  <div className={"text-2xl font-bold " + m.color}>{m.value}</div>
+                  <div className="text-xs text-[var(--text-muted)] mt-1">{m.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-[var(--text-muted)] mt-3">Model: {modelMetrics.modelVersion} &middot; Last updated: {modelMetrics.lastUpdated || modelMetrics.lastTrained}</p>
         </div>
       )}
     </div>
