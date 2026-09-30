@@ -83,6 +83,9 @@ export const LiveCheckInWidget: React.FC<LiveCheckInWidgetProps> = ({
 
       if (workMode === 'Office' && !useCustomLocation) {
         try {
+          if (!navigator.geolocation) {
+            throw new Error('Geolocation is not supported by your browser or requires a secure HTTPS connection.');
+          }
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000, enableHighAccuracy: true });
           });

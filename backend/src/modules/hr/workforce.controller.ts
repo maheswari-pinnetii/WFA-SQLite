@@ -384,3 +384,28 @@ export const createLeavePolicy = async (req, res) => {
     return handleControllerError(err, req, res, 'workforce.createLeavePolicy', 500, 'Failed to create leave policy.');
   }
 };
+
+export const createTask = async (req, res) => {
+  try {
+    const { title, description, priority, assigneeId, dueDate } = req.body;
+    if (!title || !assigneeId) {
+      return res.status(400).json({ success: false, message: 'Title and assigneeId are required.' });
+    }
+    const orgId = getOrganizationId(req);
+    const newTask = {
+      id: randomUUID(),
+      organizationId: orgId,
+      title,
+      description: description || '',
+      priority: priority || 'MEDIUM',
+      status: 'TODO',
+      assigneeId,
+      dueDate,
+      createdAt: new Date().toISOString()
+    };
+    await Task.create(newTask);
+    return res.status(201).json({ success: true, data: newTask });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'workforce.createTask', 500, 'Failed to create task.');
+  }
+};

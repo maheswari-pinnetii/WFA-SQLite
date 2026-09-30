@@ -208,6 +208,9 @@ router.post('/employees/:id/experience', authenticateToken, enforceScope, valida
 router.put('/employees/:id/experience/:expId', authenticateToken, enforceScope, validateIdParam, employeeController.updateExperience);
 router.delete('/employees/:id/experience/:expId', authenticateToken, enforceScope, validateIdParam, employeeController.deleteExperience);
 
+// Employee Master — 360 Feedback (Stub)
+router.get('/employees/:id/360', authenticateToken, enforceScope, validateIdParam, employeeController.get360Feedback);
+
 // Team CRUD Route mappings
 router.get('/teams', authenticateToken, authenticatedUserLimiter, employeeController.getTeams);
 router.get('/teams/:id/members', authenticateToken, enforceScope, validateIdParam, employeeController.getTeamMembers);
@@ -279,6 +282,7 @@ router.get('/leave-blackout-periods', authenticateToken, authenticatedUserLimite
 router.post('/leave-blackout-periods', authenticateToken, authorizeRoles(['ADMIN', 'HR']), leaveController.createBlackoutPeriod);
 
 router.get('/tasks', authenticateToken, enforceScope, authenticatedUserLimiter, workforceController.getTasks);
+router.post('/tasks', authenticateToken, enforceScope, authenticatedUserLimiter, workforceController.createTask);
 router.put('/tasks/:id', authenticateToken, validateIdParam, validateUpdateTask, workforceController.updateTask);
 
 // Corrections Requests

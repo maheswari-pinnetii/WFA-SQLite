@@ -4,6 +4,7 @@ import { Role } from '../../../features/auth/security/roles/roles';
 import { MinimalKpiCard } from '../../../components/cards/MinimalKpiCard';
 import { ClipboardList, ShieldCheck, Activity, Users, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { attendanceApi, CorrectionRequest } from '../../../api/attendanceApi';
+import { safeStorage } from '../../../utils/storage';
 
 export const AttendanceCorrectionsPage: React.FC = () => {
   const [requests, setRequests] = useState<CorrectionRequest[]>([]);
@@ -20,7 +21,7 @@ export const AttendanceCorrectionsPage: React.FC = () => {
         data = [];
       }
 
-      const saved = localStorage.getItem('wfa_attendance_corrections');
+      const saved = safeStorage.getItem('wfa_attendance_corrections');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -48,7 +49,7 @@ export const AttendanceCorrectionsPage: React.FC = () => {
             managerComment: null
           }
         ];
-        localStorage.setItem('wfa_attendance_corrections', JSON.stringify(data));
+        safeStorage.setItem('wfa_attendance_corrections', JSON.stringify(data));
       }
 
       setRequests(data);
@@ -80,7 +81,7 @@ export const AttendanceCorrectionsPage: React.FC = () => {
     });
 
     setRequests(updated);
-    localStorage.setItem('wfa_attendance_corrections', JSON.stringify(updated));
+    safeStorage.setItem('wfa_attendance_corrections', JSON.stringify(updated));
     setAlertMsg(`Correction request ${id} ${status.toLowerCase()}! Employee dashboard record synchronized.`);
     setTimeout(() => setAlertMsg(''), 4000);
   };

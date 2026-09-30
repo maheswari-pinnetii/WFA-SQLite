@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bug, Sparkles, Send, X, Star, ThumbsUp } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { safeStorage } from '../../utils/storage';
 
 export interface BetaFeedbackModalProps {
   isOpen: boolean;
@@ -19,7 +20,7 @@ export const BetaFeedbackModal: React.FC<BetaFeedbackModalProps> = ({ isOpen, on
     if (!message.trim()) return;
 
     // Persist feedback locally / audit
-    const reports = JSON.parse(localStorage.getItem('beta_feedback_reports') || '[]');
+    const reports = JSON.parse(safeStorage.getItem('beta_feedback_reports') || '[]');
     reports.push({
       type: feedbackType,
       rating,
@@ -27,7 +28,7 @@ export const BetaFeedbackModal: React.FC<BetaFeedbackModalProps> = ({ isOpen, on
       timestamp: new Date().toISOString(),
       url: window.location.pathname
     });
-    localStorage.setItem('beta_feedback_reports', JSON.stringify(reports));
+    safeStorage.setItem('beta_feedback_reports', JSON.stringify(reports));
 
     setIsSubmitted(true);
     setTimeout(() => {

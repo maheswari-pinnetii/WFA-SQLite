@@ -615,3 +615,25 @@ export const deleteExperience = async (req: any, res: any) => {
     return handleControllerError(err, req, res, 'employee.deleteExperience', 500, 'Failed to delete experience.');
   }
 };
+
+export const get360Feedback = async (req, res) => {
+  try {
+    // Stub implementation for 360-degree feedback
+    return res.json({
+      success: true,
+      data: {
+        strengths: ['Leadership', 'Communication'],
+        areasForImprovement: ['Time Management'],
+        peerReviewsCount: 3,
+        managerReview: 'Excellent performance this quarter.',
+        scores: {
+          technical: 4.5,
+          softSkills: 4.0,
+          overall: 4.2
+        }
+      }
+    });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'employee.get360Feedback', 500, 'Failed to fetch 360 feedback.');
+  }
+};

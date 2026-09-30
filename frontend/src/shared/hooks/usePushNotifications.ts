@@ -8,8 +8,8 @@ export const usePushNotifications = () => {
   useEffect(() => {
     const registerPush = async () => {
       try {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-          console.warn('Push messaging is not supported.');
+        if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+          console.warn('Push messaging or Notifications are not supported in this environment.');
           return;
         }
 

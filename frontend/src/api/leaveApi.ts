@@ -6,17 +6,17 @@ export const leaveApi = {
     if (filters?.status && filters.status !== 'ALL') params.append('status', filters.status);
     if (filters?.employeeId) params.append('employeeId', filters.employeeId);
     
-    const response = await apiClient.get(`/workforce/leave-requests?${params.toString()}`);
+    const response = await apiClient.get(`/v1/leave-requests?${params.toString()}`);
     return response.data;
   },
 
   createRequest: async (data: any) => {
-    const response = await apiClient.post('/workforce/leave-requests', data);
+    const response = await apiClient.post('/v1/leave-requests', data);
     return response.data;
   },
 
   reviewRequest: async (id: string, status: 'APPROVED' | 'REJECTED', reviewComment?: string) => {
-    const response = await apiClient.post(`/workforce/leave-requests/${id}/review`, { status, reviewComment });
+    const response = await apiClient.put(`/v1/leave-requests/${id}/review`, { status, reviewComment });
     return response.data;
   },
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Settings, Plus, Save, Activity } from 'lucide-react';
 import { workforceApi } from '../../../api/endpoints/workforce.api';
+import { safeStorage } from '../../../utils/storage';
 
 export const LeavePoliciesPage: React.FC = () => {
   const [policies, setPolicies] = useState<any[]>([]);
@@ -19,7 +20,7 @@ export const LeavePoliciesPage: React.FC = () => {
     setLoading(true);
     try {
       const res = await fetch('/api/v1/leave-policies', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${safeStorage.getItem('token')}` }
       });
       if (res.ok) {
         const json = await res.json();
@@ -47,7 +48,7 @@ export const LeavePoliciesPage: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${safeStorage.getItem('token')}`
         },
         body: JSON.stringify({ ...form, leaveTypeId: form.leaveTypeId || 'lt-earned' })
       });
