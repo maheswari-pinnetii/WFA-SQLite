@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { app } from '../../backend/src/app.js';
-import { execute, query } from '../../backend/src/database/sqlite-cloud.js';
+import { execute, query } from '../../backend/src/database/connection.js';
 import { env } from '../../backend/src/config/env.js';
 
 const JWT_SECRET = env.JWT_SECRET || 'stackly_wfa_super_secret_jwt_key_2026';

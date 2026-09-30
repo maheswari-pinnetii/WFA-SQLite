@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { logger } from '../../config/logger.js';
 import { ComplianceService } from '../core/compliance.service.js';
 import { leaveEngineService } from '../leave/leave-engine.service.js';

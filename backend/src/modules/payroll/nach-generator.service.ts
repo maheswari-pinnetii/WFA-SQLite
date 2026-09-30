@@ -1,4 +1,4 @@
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import { logger } from '../../config/logger.js';
 
 export interface NachRecord {

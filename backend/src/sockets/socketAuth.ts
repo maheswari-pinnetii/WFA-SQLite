@@ -4,7 +4,7 @@ import { env } from '../config/env.js';
 import { getAuthorizedRoomsForUser, SocketUserContext } from './rooms.js';
 import { logger } from '../config/logger.js'
 import { User } from '../models/User.js';
-import { query } from '../database/sqlite-cloud.js';
+import { query } from '../database/connection.js';
 
 const JWT_SECRET = env.JWT_SECRET;
 

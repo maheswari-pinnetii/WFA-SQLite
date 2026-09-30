@@ -1,4 +1,4 @@
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import { ComplianceService } from '../core/compliance.service.js';
 
 export interface CtcCalculationInput {

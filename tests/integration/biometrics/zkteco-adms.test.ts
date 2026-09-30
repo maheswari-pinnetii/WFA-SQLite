@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../../backend/src/app.js';
-import { connectDatabase, execute, query } from '../../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase, execute, query } from '../../../backend/src/database/connection.js';
 import { v4 as uuidv4 } from 'uuid';
 
 describe('ZKTeco / Matrix ADMS Gateway', () => {

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { app } from '../../../backend/src/server.js';
 import { initDb, getDb } from '../../../backend/src/config/db.js';
 import { seedSqlite } from '../../../backend/scripts/seed-sqlite.ts';
-import { execute } from '../../../backend/src/database/sqlite-cloud.js';
+import { execute } from '../../../backend/src/database/connection.js';
 
 let server: any;
 const PORT = 5097;

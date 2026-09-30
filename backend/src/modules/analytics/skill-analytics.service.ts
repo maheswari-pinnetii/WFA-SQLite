@@ -1,4 +1,4 @@
-import { getDatabase, query } from '../../database/sqlite-cloud.js';
+import { getDatabase, query } from '../../database/connection.js';
 
 export const skillAnalyticsService = {
   getSkillDistribution: async (user: any, filters: any = {}) => {

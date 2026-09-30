@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import rateLimit, { Store, IncrementResponse, ipKeyGenerator } from 'express-rate-limit';
-import { query, execute } from '../database/sqlite-cloud.js';
+import { query, execute } from '../database/connection.js';
 import { env } from '../config/env.js';
 import { logger } from '../config/logger.js'
 

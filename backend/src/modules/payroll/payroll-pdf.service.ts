@@ -1,4 +1,4 @@
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import { TaxCalculationService } from './tax-calculation.service.js';
 
 export class PayrollPdfService {

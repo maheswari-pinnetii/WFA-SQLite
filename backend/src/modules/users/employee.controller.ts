@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { employeeService } from './employee.service.js';
 import { logAudit } from '../../config/db.js';
 import { emitToOrg, emitToUser, SOCKET_EVENTS } from '../../sockets/index.js';
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { handleControllerError } from '../../utils/errorHandler.js';
 
 const getOrganizationId = (req: any) => req.user?.organizationId || 'org-stackly';

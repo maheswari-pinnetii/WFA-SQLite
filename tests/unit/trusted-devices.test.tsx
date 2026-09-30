@@ -8,7 +8,7 @@ import axios, { AxiosInstance } from 'axios';
 import jwt from 'jsonwebtoken';
 import { app } from '../../backend/src/app.js';
 import { initDb } from '../../backend/src/database/connection.js';
-import { execute, query } from '../../backend/src/database/sqlite-cloud.js';
+import { execute, query } from '../../backend/src/database/connection.js';
 import { env } from '../../backend/src/config/env.js';
 import { PasswordlessLoginCard } from '../../frontend/src/features/auth/components/PasswordlessLoginCard';
 import { LoginPage } from '../../frontend/src/features/auth/pages/LoginPage';

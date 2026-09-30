@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import axios from 'axios';
 import { app } from '../../backend/src/server.js';
 import { initDb, getDb } from '../../backend/src/config/db.js';
-import { transaction, execute } from '../../backend/src/database/sqlite-cloud.js';
+import { transaction, execute } from '../../backend/src/database/connection.js';
 import { Attendance, Correction, BreakSession, AttendanceEvent, IdempotencyRecord } from '../../backend/src/models/Attendance.js';
 import { User } from '../../backend/src/models/User.js';
 import jwt from 'jsonwebtoken';

@@ -1,5 +1,5 @@
 import { analyticsRepository } from './analytics.repository.js';
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 
 const getScope = (user: any, employeeIdKey = 'employeeId') => {
   const q: any = { organizationId: user.organizationId || 'org-stackly' };

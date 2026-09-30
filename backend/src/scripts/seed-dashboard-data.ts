@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { execute, query } from '../database/sqlite-cloud.js';
+import { execute, query } from '../database/connection.js';
 
 function randomChoice<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];

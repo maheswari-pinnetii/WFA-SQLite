@@ -66,7 +66,7 @@ describe('WFA Comprehensive Backend Unit and Integration Testing', () => {
     
     // Ensure test companies exist to satisfy foreign keys
     try {
-      const { execute } = await import('../../backend/src/database/sqlite-cloud.js');
+      const { execute } = await import('../../backend/src/database/connection.js');
       await execute(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('company-a', 'Company A', 'comp-a.com', 'ACTIVE', '${new Date().toISOString()}', '${new Date().toISOString()}')`);
       await execute(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('company-b', 'Company B', 'comp-b.com', 'ACTIVE', '${new Date().toISOString()}', '${new Date().toISOString()}')`);
       await execute(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('org-stackly', 'Stackly Enterprise HQ', 'thestackly.com', 'ACTIVE', '${new Date().toISOString()}', '${new Date().toISOString()}')`);
@@ -227,6 +227,13 @@ describe('WFA Comprehensive Backend Unit and Integration Testing', () => {
   });
 
   describe('Company/Tenant Isolation Tests', () => {
+    beforeAll(async () => {
+      const { execute: execLocal } = await import('../../backend/src/database/connection.js');
+      const now = new Date().toISOString();
+      await execLocal(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('company-a', 'Company A', 'comp-a.com', 'ACTIVE', '${now}', '${now}')`).catch(() => {});
+      await execLocal(`INSERT OR IGNORE INTO companies (id, name, domain, status, createdAt, updatedAt) VALUES ('company-b', 'Company B', 'comp-b.com', 'ACTIVE', '${now}', '${now}')`).catch(() => {});
+    });
+
     it('should strictly isolate company data and prevent Company A from reading Company B records', async () => {
       // Setup Company A and B employees
       await Employee.create({

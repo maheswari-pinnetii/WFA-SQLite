@@ -6,7 +6,7 @@ import { emitToUser, emitToDept, emitToTeam, emitToRole, SOCKET_EVENTS } from '.
 import { handleControllerError } from '../../utils/errorHandler.js';
 import { leaveEngineService } from '../leave/leave-engine.service.js';
 import { employeeLifecycleService } from '../users/employee-lifecycle.service.js';
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { randomUUID } from 'crypto';
 
 const getOrganizationId = (req) => req.user.organizationId || 'org-stackly';

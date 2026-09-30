@@ -13,7 +13,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../../backend/src/app.js';
-import { connectDatabase, execute, query } from '../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase, execute, query } from '../../backend/src/database/connection.js';
 import { assertValidTransition, normalizeStatus } from '../../backend/src/utils/attendanceStateMachine.js';
 import { AppError, ErrorCode } from '../../backend/src/utils/apiError.js';
 

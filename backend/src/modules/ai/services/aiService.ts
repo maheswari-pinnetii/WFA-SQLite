@@ -1,4 +1,4 @@
-import { query, execute } from '../../../database/sqlite-cloud.js';
+import { query, execute } from '../../../database/connection.js';
 import { AIInsight, AnalyticsContext, AIProvider } from './aiProvider.interface.js';
 import { statisticalEngine } from './statisticalEngine.js';
 import { CircuitBreaker } from '../../../utils/circuitBreaker.js';

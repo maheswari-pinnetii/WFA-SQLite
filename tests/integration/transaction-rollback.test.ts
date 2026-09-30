@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { connectDatabase, query, execute } from '../../backend/src/database/sqlite-cloud.js';
+import { connectDatabase, query, execute } from '../../backend/src/database/connection.js';
 import request from 'supertest';
 import { app } from '../../backend/src/app.js';
 import { randomUUID } from 'crypto';

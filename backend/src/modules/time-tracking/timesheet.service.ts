@@ -1,5 +1,5 @@
 import { getDb, ORGANIZATION_ID } from '../../config/db.js';
-import { query } from '../../database/sqlite-cloud.js';
+import { query } from '../../database/connection.js';
 import crypto from 'crypto';
 import { workflowService } from '../core/workflow.service.js';
 

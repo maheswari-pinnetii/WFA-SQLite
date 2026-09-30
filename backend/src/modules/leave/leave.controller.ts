@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { leaveService } from './leave.service.js';
 import { leaveEngineService } from './leave-engine.service.js';
-import { query, execute } from '../../database/sqlite-cloud.js';
+import { query, execute } from '../../database/connection.js';
 import { randomUUID } from 'crypto';
 
 export const getMyLeaveBalances = async (req: Request, res: Response) => {

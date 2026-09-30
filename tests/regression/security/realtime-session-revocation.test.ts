@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { app } from '../../../backend/src/app.js';
-import { execute, query } from '../../../backend/src/database/sqlite-cloud.js';
+import { execute, query } from '../../../backend/src/database/connection.js';
 import { env } from '../../../backend/src/config/env.js';
 
 import { initDb } from '../../../backend/src/config/db.js';
