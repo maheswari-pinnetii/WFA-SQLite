@@ -261,13 +261,19 @@ export const LeaveManagement: React.FC = () => {
   }, [filteredRequests, page, pageSize]);
 
   // Handle Approve / Reject
-  const handleApprove = (id: string) => {
-    setRequests(prev => prev.map(r => r.id === id ? {
-      ...r,
-      status: 'APPROVED',
-      approvedBy: 'Admin (You)',
-      approvedOn: new Date().toISOString().split('T')[0]
-    } : r));
+  const handleApprove = async (id: string) => {
+    try {
+      await leaveApi.reviewRequest(id, 'APPROVED');
+      setRequests(prev => prev.map(r => r.id === id ? {
+        ...r,
+        status: 'APPROVED',
+        approvedBy: 'You',
+        approvedOn: new Date().toISOString().split('T')[0]
+      } : r));
+      addToast('Leave request approved successfully.', 'success');
+    } catch (err: any) {
+      addToast(err?.response?.data?.message || 'Failed to approve leave request.', 'error');
+    }
   };
 
   const handleOpenReject = (record: LeaveRecord) => {
@@ -275,18 +281,23 @@ export const LeaveManagement: React.FC = () => {
     setRejectionNote('');
   };
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!rejectModalRecord) return;
-    setRequests(prev => prev.map(r => r.id === rejectModalRecord.id ? {
-      ...r,
-      status: 'REJECTED',
-      approvedBy: 'Admin (You)',
-      approvedOn: new Date().toISOString().split('T')[0],
-      rejectionReason: rejectionNote || 'Schedule conflict or business priority requirement.'
-    } : r));
-    setRejectModalRecord(null);
-    addToast(`Leave request rejected.`, 'success');
-    console.log(`Leave request ${rejectModalRecord.id} rejected.`);
+    try {
+      await leaveApi.reviewRequest(rejectModalRecord.id, 'REJECTED', rejectionNote || 'Schedule conflict or business priority requirement.');
+      setRequests(prev => prev.map(r => r.id === rejectModalRecord!.id ? {
+        ...r,
+        status: 'REJECTED',
+        approvedBy: 'You',
+        approvedOn: new Date().toISOString().split('T')[0],
+        rejectionReason: rejectionNote || 'Schedule conflict or business priority requirement.'
+      } : r));
+      addToast('Leave request rejected.', 'success');
+    } catch (err: any) {
+      addToast(err?.response?.data?.message || 'Failed to reject leave request.', 'error');
+    } finally {
+      setRejectModalRecord(null);
+    }
   };
 
   // Handle Leave Cancellation / Withdrawal
@@ -309,7 +320,7 @@ export const LeaveManagement: React.FC = () => {
   };
 
   // Handle Submit New Leave Request
-  const handleSubmitNewRequest = (e: React.FormEvent) => {
+  const handleSubmitNewRequest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRequest.reason.trim()) {
       alert('Please provide a valid reason for the leave application.');
@@ -325,23 +336,38 @@ export const LeaveManagement: React.FC = () => {
       calculatedDays = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
     }
 
-    const newRecord: LeaveRecord = {
-      id: `LR-${1000 + requests.length + 1}`,
-      employeeId: 'EMP-001',
-      employeeName: newRequest.employeeName,
-      department: newRequest.department,
-      type: newRequest.type,
-      duration: newRequest.duration,
-      startDate: newRequest.startDate,
-      endDate: newRequest.duration === 'MULTIPLE_DAYS' ? newRequest.endDate : newRequest.startDate,
-      totalDays: calculatedDays,
-      reason: newRequest.reason,
-      status: 'PENDING',
-      appliedOn: new Date().toISOString().split('T')[0]
-    };
+    try {
+      const resp = await leaveApi.createRequest({
+        type: newRequest.type,
+        duration: newRequest.duration,
+        startDate: newRequest.startDate,
+        endDate: newRequest.duration === 'MULTIPLE_DAYS' ? newRequest.endDate : newRequest.startDate,
+        reason: newRequest.reason,
+        isHalfDay: newRequest.duration === 'FIRST_HALF' || newRequest.duration === 'SECOND_HALF',
+        halfDayPeriod: newRequest.duration === 'FIRST_HALF' ? 'FIRST' : newRequest.duration === 'SECOND_HALF' ? 'SECOND' : undefined,
+      });
+      // Merge the server-returned record into local state
+      const serverRecord = resp?.data || {
+        id: `LR-${1000 + requests.length + 1}`,
+        employeeId: 'EMP-001',
+        employeeName: newRequest.employeeName,
+        department: newRequest.department,
+        type: newRequest.type,
+        duration: newRequest.duration,
+        startDate: newRequest.startDate,
+        endDate: newRequest.duration === 'MULTIPLE_DAYS' ? newRequest.endDate : newRequest.startDate,
+        totalDays: calculatedDays,
+        reason: newRequest.reason,
+        status: 'PENDING' as const,
+        appliedOn: new Date().toISOString().split('T')[0]
+      };
+      setRequests(prev => [serverRecord, ...prev]);
+      setIsApplyModalOpen(false);
+      addToast('Leave request submitted successfully.', 'success');
+    } catch (err: any) {
+      addToast(err?.response?.data?.message || 'Failed to submit leave request.', 'error');
+    }
 
-    setRequests([newRecord, ...requests]);
-    setIsApplyModalOpen(false);
     setNewRequest({
       employeeName: 'Sarah Connor',
       department: 'Engineering',

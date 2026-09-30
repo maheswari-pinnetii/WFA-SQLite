@@ -59,17 +59,17 @@ export default defineConfig({
     },
     proxy: {
       '/v1': {
-        target: 'http://localhost:5001',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5003',
         changeOrigin: true,
         secure: false,
       },
       '/api': {
-        target: 'http://localhost:5001',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5003',
         changeOrigin: true,
         secure: false,
       },
       '/socket.io': {
-        target: 'http://localhost:5001',
+        target: process.env.VITE_BACKEND_URL || 'http://localhost:5003',
         ws: true,
         changeOrigin: true,
         secure: false,

@@ -157,13 +157,18 @@ export const login = async (req: Request, res: Response): Promise<any> => {
       return res.status(400).json({ success: false, message: 'Password is required' });
     }
 
-    if (!email.endsWith('@thestackly.com') && !email.endsWith('@company.com')) {
+    const ALLOWED_DOMAINS = ['@thestackly.com', '@company.com', '@stackly.com', '@stackly.in'];
+    const domainAllowed = ALLOWED_DOMAINS.some(d => email.endsWith(d));
+    if (!domainAllowed) {
       logAudit('anonymous', 'FAILED_AUTHENTICATION', `Login domain rejected for ${email}`);
       return res.status(403).json({ success: false, message: 'Domain access denied. Only corporate email domains permitted.' });
     }
 
-    const lookupEmail = email.endsWith('@company.com')
-      ? email.replace('@company.com', '@thestackly.com')
+    // Normalize aliases → canonical @thestackly.com for DB lookup
+    const lookupEmail = (email.endsWith('@company.com') || email.endsWith('@stackly.com') || email.endsWith('@stackly.in'))
+      ? email.replace(/@company\.com$/, '@thestackly.com')
+             .replace(/@stackly\.com$/, '@thestackly.com')
+             .replace(/@stackly\.in$/, '@thestackly.com')
       : email;
 
     const user = await userRepository.findByEmail(lookupEmail);

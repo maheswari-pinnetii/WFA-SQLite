@@ -21,17 +21,17 @@ export const leaveApi = {
   },
 
   getBalances: async (employeeId: string) => {
-    const response = await apiClient.get(`/leave/balances/${employeeId}`);
+    const response = await apiClient.get(`/v1/leave/balances/${employeeId}`);
     return response.data;
   },
 
   getTypes: async () => {
-    const response = await apiClient.get('/leave/types');
+    const response = await apiClient.get('/v1/leave/types');
     return response.data;
   },
 
   getHolidays: async () => {
-    const response = await apiClient.get('/leave/holidays');
+    const response = await apiClient.get('/v1/leave/holidays');
     return response.data;
   }
 };
