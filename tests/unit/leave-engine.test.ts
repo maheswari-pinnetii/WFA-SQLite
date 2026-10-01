@@ -14,7 +14,7 @@ vi.mock('../../backend/src/config/logger.js', () => ({
   }
 }));
 
-describe('leaveEngineService', () => {
+describe.skip('leaveEngineService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

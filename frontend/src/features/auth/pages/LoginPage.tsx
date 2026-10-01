@@ -30,11 +30,19 @@ export const LoginPage: React.FC = () => {
     navigate(target, { replace: true });
   };
 
+  useEffect(() => {
+    console.log('LoginPage useEffect', { isAuthenticated, user });
+    if (isAuthenticated && user) {
+      console.log('Redirecting to dashboard...', user.role);
+      proceedToDashboard(user.role as Role);
+    }
+  }, [isAuthenticated, user]);
+
   /**
    * Handle Standard Email + Password Login (Step 1)
    * Validates credentials with backend, then proceeds to Step 2 Verification
    */
-  const handleEmailLogin = async (payload: EmailLoginPayload) => {
+    const handleEmailLogin = async (payload: EmailLoginPayload) => {
     setLoading(true);
     setErrorMessage(null);
 
@@ -49,10 +57,9 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
       setCurrentEmail(payload.email);
       setErrorMessage(null);
-      proceedToDashboard(userRole);
+      // Let useEffect handle redirect
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
       setErrorMessage(msg);
@@ -78,8 +85,7 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      const userRole = (res?.payload?.user?.role || res?.user?.role || role || Role.ADMIN) as Role;
-      proceedToDashboard(userRole);
+      // Let useEffect handle redirect
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Invalid email or password credentials.';
       setErrorMessage(msg);
@@ -94,7 +100,7 @@ export const LoginPage: React.FC = () => {
     try {
       const result = await authService.passkeyLogin(currentEmail || undefined);
       setSession({ user: result.user, token: result.token });
-      proceedToDashboard(result.user.role as Role);
+      // Let useEffect handle redirect
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'Passkey sign-in failed.');
     } finally {

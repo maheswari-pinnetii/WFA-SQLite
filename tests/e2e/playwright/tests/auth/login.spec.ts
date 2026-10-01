@@ -28,6 +28,7 @@ test.describe('Authentication E2E Flow', () => {
   });
 
   test('should complete full login flow into Dashboard for all 6 enterprise roles', async ({ loginPage, dashboardPage }) => {
+    loginPage.page.on('console', msg => console.log('BROWSER:', msg.text()));
     // 1. ADMIN
     await loginPage.loginAs(TEST_ENV.USERS.ADMIN.email, 'StacklyWFA2026!');
     await dashboardPage.expectDashboardLoaded();
