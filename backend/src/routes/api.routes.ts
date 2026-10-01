@@ -359,6 +359,8 @@ router.get('/analytics/attrition', authenticateToken, enforceScope, authorizeRol
 
 // Sprint 2 – Pipeline Analytics
 router.post('/analytics/pipeline/sync', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.triggerPipelineSync);
+router.get('/analytics/pipeline/issues', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getDataQualityIssues);
+router.get('/analytics/pipeline/batches', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getImportBatches);
 router.get('/analytics/recruitment', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getRecruitmentAnalytics);
 router.get('/analytics/learning', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'MANAGER', 'EXECUTIVE']), analyticsController.getLearningAnalytics);
 router.get('/analytics/placement', authenticateToken, enforceScope, authorizeRoles(['ADMIN', 'HR', 'EXECUTIVE']), analyticsController.getPlacementAnalytics);
@@ -393,6 +395,7 @@ router.get('/audit/logs/:id', authenticateToken, authorizeRoles(['ADMIN', 'HR'])
 router.get('/admin/security/dashboard', authenticateToken, authorizeRoles(['ADMIN', 'HR']), auditController.getSecurityDashboard);
 router.get('/admin/security/failed-logins', authenticateToken, authorizeRoles(['ADMIN']), auditController.getFailedLogins);
 router.get('/admin/security/integrity', authenticateToken, authorizeRoles(['ADMIN']), auditController.getDatabaseIntegrity);
+router.get('/admin/security/audit-chain', authenticateToken, authorizeRoles(['ADMIN']), auditController.verifyAuditChain);
 
 // User Management (Admin Only)
 router.get('/users', authenticateToken, authorizeRoles(['ADMIN']), employeeController.getUsers);

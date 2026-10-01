@@ -1,9 +1,19 @@
 import React from 'react';
 import { Lock, ShieldCheck, AlertTriangle, History, ShieldAlert, CheckCircle2 } from 'lucide-react';
-import { auditLogger } from '../../../features/auth/security/audit/auditLogger';
+import { apiClient } from '../../../api/client';
+import { useEffect, useState } from 'react';
 
 export const SecurityAdminDashboard: React.FC = () => {
-  const auditLogs = auditLogger.getLogs();
+  const [dashboard, setDashboard] = useState<any>(null);
+  const [chainStatus, setChainStatus] = useState<any>(null);
+
+  useEffect(() => {
+    apiClient.get('/v1/admin/security/dashboard').then(res => setDashboard(res.data?.data)).catch(() => {});
+    apiClient.get('/v1/admin/security/audit-chain').then(res => setChainStatus(res.data?.data)).catch(() => {});
+  }, []);
+
+  const auditLogs = dashboard?.recentEvents || [];
+
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -59,7 +69,7 @@ export const SecurityAdminDashboard: React.FC = () => {
             <span>Audit Trail Entries</span>
             <History size={18} className="text-cyan-400" />
           </div>
-          <p className="text-2xl font-black text-[var(--text-primary)]">{auditLogs.length} Events</p>
+          <p className="text-2xl font-black text-[var(--text-primary)]">{dashboard?.securityEvents24h || 0} 24h Events</p>
           <p className="text-[11px] text-emerald-400 font-bold">Real-time Stream</p>
         </div>
       </div>
@@ -71,7 +81,7 @@ export const SecurityAdminDashboard: React.FC = () => {
         </h3>
 
         <div className="space-y-2">
-          {auditLogs.map((log) => (
+          {auditLogs.map((log: any) => (
             <div
               key={log.id}
               className="p-3.5 rounded-xl bg-[var(--bg-tertiary)] border border-[var(--border-color)] flex items-center justify-between text-xs"

@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+import { query } from '../../database/connection.js';
 import { AuditLog } from '../../models/AuditLog.js';
 import { query } from '../../database/connection.js';
 import { getDb } from '../../config/db.js';
@@ -60,9 +62,25 @@ export const getSecurityDashboard = async (req: any, res: any) => {
     `, [yesterdayIso]);
 
     // 4. Quick integrity status
-    const db = getDb();
+    
+    const recentEvents = await query(`
+      SELECT id, actorId, action, details, timestamp, 'SUCCESS' as status, 'ADMIN' as userRole
+      FROM audit_logs
+      ORDER BY timestamp DESC
+      LIMIT 20
+    `) as any[];
+const db = getDb();
     const integrityResult = db.pragma('integrity_check') as any[];
     const isIntegrityOk = integrityResult && integrityResult[0]?.integrity_check === 'ok';
+    
+    // 5. Cryptographic Audit Chain Status
+    const logs = await query('SELECT * FROM audit_logs ORDER BY createdAt ASC LIMIT 100') as any[];
+    let isAuditChainIntact = true;
+    let prevHash = 'GENESIS';
+    for (const l of logs) {
+      if (l.previousHash !== prevHash) { isAuditChainIntact = false; break; }
+      prevHash = l.hash;
+    }
 
     return res.json({
       success: true,
@@ -114,5 +132,49 @@ export const getDatabaseIntegrity = async (req: any, res: any) => {
     });
   } catch (err: any) {
     return handleControllerError(err, req, res, 'audit.getDatabaseIntegrity', 500, 'Failed to execute database integrity check.');
+  }
+};
+
+export const verifyAuditChain = async (req: any, res: any) => {
+  try {
+    const logs = await query('SELECT * FROM audit_logs ORDER BY createdAt ASC') as any[];
+    
+    let previousHash = 'GENESIS';
+    let isIntact = true;
+    let brokenAt = null;
+    let validCount = 0;
+    
+    for (const log of logs) {
+      if (log.previousHash !== previousHash) {
+         isIntact = false;
+         brokenAt = log.id;
+         break;
+      }
+      
+      const payload = `${log.id}|${log.actorId}|${log.action}|${log.entityType}|${log.entityId}|${log.details}|${log.createdAt}|${log.previousHash}`;
+      const expectedHash = crypto.createHash('sha256').update(payload).digest('hex');
+      
+      if (log.hash !== expectedHash) {
+         isIntact = false;
+         brokenAt = log.id;
+         break;
+      }
+      
+      previousHash = log.hash;
+      validCount++;
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        isIntact,
+        validLogsCount: validCount,
+        brokenAtRecordId: brokenAt,
+        totalLogs: logs.length,
+        checkedAt: new Date().toISOString()
+      }
+    });
+  } catch (err: any) {
+    return handleControllerError(err, req, res, 'audit.verifyAuditChain', 500, 'Failed to execute audit chain verification.');
   }
 };

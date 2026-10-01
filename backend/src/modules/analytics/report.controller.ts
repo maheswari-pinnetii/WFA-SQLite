@@ -1,21 +1,14 @@
 import { query } from '../../database/connection.js';
 import { logAudit } from '../../config/db.js';
 import { handleControllerError } from '../../utils/errorHandler.js';
+import { authorizeExport, getExportScope, sendExport } from '../../utils/exportHandler.js';
 import { analyticsRepository } from './analytics.repository.js';
 import ExcelJS from 'exceljs';
 import PDFDocument from 'pdfkit';
 
 const getOrganizationId = (req: any): string => req.user?.organizationId || req.user?.companyId || 'org-stackly';
 
-/**
- * Enforce RBAC/ABAC on exports.
- */
-function authorizeExport(req: any) {
-  const allowedRoles = ['ADMIN', 'HR_MANAGER', 'EXECUTIVE'];
-  if (!allowedRoles.includes(req.user?.role)) {
-    throw new Error('Unauthorized: Insufficient permissions to export analytics reports.');
-  }
-}
+
 
 /**
  * Helper to convert an array of objects to CSV string
@@ -168,29 +161,8 @@ export const exportAttendanceReport = async (req: any, res: any) => {
       };
     });
 
-    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported attendance report (${formattedRecords.length} records, format: ${format})`, orgId);
-
-    const filenameDate = new Date().toISOString().slice(0, 10);
-    if (String(format).toLowerCase() === 'json') {
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.setHeader('Content-Disposition', 'attachment; filename="attendance_report_' + filenameDate + '.json"');
-      return res.json({
-        success: true,
-        meta: {
-          exportedAt: new Date().toISOString(),
-          recordCount: formattedRecords.length,
-          organizationId: orgId,
-          generatedBy: req.user.id
-        },
-        data: formattedRecords
-      });
-    }
-
-    // Default: CSV format
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="attendance_report_' + filenameDate + '.csv"');
-    return res.status(200).send(csvContent);
+    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported report (${formattedRecords.length} records, format: ${format})`, orgId);
+    return sendExport(res, format, 'attendance_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportAttendanceReport', 500, 'Failed to export attendance report.');
   }
@@ -267,28 +239,8 @@ export const exportWorkforceReport = async (req: any, res: any) => {
       'Joining Date': e.joinDate || 'N/A'
     }));
 
-    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported workforce directory report (${formattedEmployees.length} employees, format: ${format})`, orgId);
-
-    const filenameDate = new Date().toISOString().slice(0, 10);
-    if (String(format).toLowerCase() === 'json') {
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.setHeader('Content-Disposition', 'attachment; filename="workforce_roster_' + filenameDate + '.json"');
-      return res.json({
-        success: true,
-        meta: {
-          exportedAt: new Date().toISOString(),
-          recordCount: formattedEmployees.length,
-          organizationId: orgId,
-          generatedBy: req.user.id
-        },
-        data: formattedEmployees
-      });
-    }
-
-    const csvContent = convertToCSV(formattedEmployees);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="workforce_roster_' + filenameDate + '.csv"');
-    return res.status(200).send(csvContent);
+    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported report (${formattedEmployees.length} records, format: ${format})`, orgId);
+    return sendExport(res, format, 'workforce_report', formattedEmployees);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportWorkforceReport', 500, 'Failed to export workforce report.');
   }
@@ -380,28 +332,8 @@ export const exportLeaveReport = async (req: any, res: any) => {
       };
     });
 
-    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported leave requests report (${formattedLeaves.length} records, format: ${format})`, orgId);
-
-    const filenameDate = new Date().toISOString().slice(0, 10);
-    if (String(format).toLowerCase() === 'json') {
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.setHeader('Content-Disposition', 'attachment; filename="leave_report_' + filenameDate + '.json"');
-      return res.json({
-        success: true,
-        meta: {
-          exportedAt: new Date().toISOString(),
-          recordCount: formattedLeaves.length,
-          organizationId: orgId,
-          generatedBy: req.user.id
-        },
-        data: formattedLeaves
-      });
-    }
-
-    const csvContent = convertToCSV(formattedLeaves);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="leave_report_' + filenameDate + '.csv"');
-    return res.status(200).send(csvContent);
+    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported report (${formattedLeaves.length} records, format: ${format})`, orgId);
+    return sendExport(res, format, 'leave_report', formattedLeaves);
   } catch (err: any) {
     console.error('EXPORT LEAVE ERROR:', err);
     return handleControllerError(err, req, res, 'report.exportLeaveReport', 500, 'Failed to export leave report.');
@@ -470,28 +402,8 @@ export const exportPayrollReport = async (req: any, res: any) => {
       'Status': r.status || 'DRAFT'
     }));
 
-    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported payroll report (${formattedRecords.length} records, format: ${format})`, orgId);
-
-    const filenameDate = new Date().toISOString().slice(0, 10);
-    if (String(format).toLowerCase() === 'json') {
-      res.setHeader('Content-Type', 'application/json; charset=utf-8');
-      res.setHeader('Content-Disposition', 'attachment; filename="payroll_report_' + filenameDate + '.json"');
-      return res.json({
-        success: true,
-        meta: {
-          exportedAt: new Date().toISOString(),
-          recordCount: formattedRecords.length,
-          organizationId: orgId,
-          generatedBy: req.user.id
-        },
-        data: formattedRecords
-      });
-    }
-
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="payroll_report_' + filenameDate + '.csv"');
-    return res.status(200).send(csvContent);
+    logAudit(req.user.id, 'REPORT_EXPORTED', `Exported report (${formattedRecords.length} records, format: ${format})`, orgId);
+    return sendExport(res, format, 'payroll_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportPayrollReport', 500, 'Failed to export payroll report.');
   }
@@ -617,8 +529,10 @@ export const exportPlacementReport = async (req: any, res: any) => {
     const orgId = getOrganizationId(req);
     const { format = 'csv' } = req.query;
 
-    const sql = `SELECT * FROM placements WHERE organizationId = ?`;
-    const records = await query(sql, [orgId]) || [];
+    authorizeExport(req);
+      const { query: scopeQuery, params: scopeParams } = getExportScope(req.user);
+      const sql = `SELECT * FROM placements WHERE organizationId = ? ${scopeQuery}`;
+      const records = await query(sql, [orgId, ...scopeParams]) || [];
 
     const formattedRecords = records.map((r: any) => ({
       id: r.id,
@@ -640,14 +554,7 @@ export const exportPlacementReport = async (req: any, res: any) => {
       orgId
     );
 
-    if (format === 'json') {
-      return res.json({ success: true, data: formattedRecords });
-    }
-
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="placement_report.csv"');
-    return res.status(200).send(csvContent);
+    return sendExport(res, format, 'placement_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportPlacementReport', 500, 'Failed to export placement report.');
   }
@@ -661,13 +568,15 @@ export const exportRecruitmentReport = async (req: any, res: any) => {
     const orgId = getOrganizationId(req);
     const { format = 'csv' } = req.query;
 
-    const sql = `
-      SELECT a.id, a.jobRequisitionId as positionId, a.candidateName as applicantName, a.status, a.appliedAt as createdAt
-      FROM applications a
-      JOIN job_requisitions r ON a.jobRequisitionId = r.id
-      WHERE r.organizationId = ?
-    `;
-    const records = await query(sql, [orgId]) || [];
+    authorizeExport(req);
+      const { query: scopeQuery, params: scopeParams } = getExportScope(req.user);
+      const sql = `
+        SELECT a.id, a.jobRequisitionId as positionId, a.candidateName as applicantName, a.status, a.appliedAt as createdAt
+        FROM applications a
+        JOIN job_requisitions r ON a.jobRequisitionId = r.id
+        WHERE r.organizationId = ? ${scopeQuery.replace(/team/g, 'r.team').replace(/department/g, 'r.department')}
+      `;
+      const records = await query(sql, [orgId, ...scopeParams]) || [];
 
     const formattedRecords = records.map((r: any) => ({
       id: r.id,
@@ -684,14 +593,7 @@ export const exportRecruitmentReport = async (req: any, res: any) => {
       orgId
     );
 
-    if (format === 'json') {
-      return res.json({ success: true, data: formattedRecords });
-    }
-
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="recruitment_report.csv"');
-    return res.status(200).send(csvContent);
+    return sendExport(res, format, 'recruitment_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportRecruitmentReport', 500, 'Failed to export recruitment report.');
   }
@@ -705,8 +607,10 @@ export const exportLearningReport = async (req: any, res: any) => {
     const orgId = getOrganizationId(req);
     const { format = 'csv' } = req.query;
 
-    const sql = `SELECT * FROM training_enrollments WHERE organizationId = ?`;
-    const records = await query(sql, [orgId]) || [];
+    authorizeExport(req);
+      const { query: scopeQuery, params: scopeParams } = getExportScope(req.user);
+      const sql = `SELECT * FROM training_enrollments WHERE organizationId = ? ${scopeQuery}`;
+      const records = await query(sql, [orgId, ...scopeParams]) || [];
 
     const formattedRecords = records.map((r: any) => ({
       id: r.id,
@@ -727,14 +631,7 @@ export const exportLearningReport = async (req: any, res: any) => {
       orgId
     );
 
-    if (format === 'json') {
-      return res.json({ success: true, data: formattedRecords });
-    }
-
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="learning_report.csv"');
-    return res.status(200).send(csvContent);
+    return sendExport(res, format, 'learning_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportLearningReport', 500, 'Failed to export learning report.');
   }
@@ -749,8 +646,10 @@ export const exportPerformanceReport = async (req: any, res: any) => {
     const { format = 'csv' } = req.query;
     
     // We export a summary for now
-    const sql = `SELECT * FROM employees WHERE organizationId = ?`;
-    const records = await query(sql, [orgId]) || [];
+    authorizeExport(req);
+    const { query: scopeQuery, params: scopeParams } = getExportScope(req.user);
+    const sql = `SELECT * FROM employees WHERE organizationId = ? ${scopeQuery}`;
+    const records = await query(sql, [orgId, ...scopeParams]) || [];
     
     const formattedRecords = records.map((r: any) => ({
       id: r.id,
@@ -768,12 +667,7 @@ export const exportPerformanceReport = async (req: any, res: any) => {
       orgId
     );
 
-    if (format === 'json') return res.json({ success: true, data: formattedRecords });
-    
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="performance_report.csv"');
-    return res.status(200).send(csvContent);
+    return sendExport(res, format, 'performance_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportPerformance', 500, 'Failed to export performance report.');
   }
@@ -787,7 +681,9 @@ export const exportAttritionRiskReport = async (req: any, res: any) => {
     const orgId = getOrganizationId(req);
     const { format = 'csv' } = req.query;
     
-    const records = await query(`SELECT * FROM employees WHERE organizationId = ? AND status = 'ACTIVE'`, [orgId]) || [];
+    authorizeExport(req);
+    const { query: scopeQuery, params: scopeParams } = getExportScope(req.user);
+    const records = await query(`SELECT * FROM employees WHERE organizationId = ? AND status = 'ACTIVE' ${scopeQuery}`, [orgId, ...scopeParams]) || [];
     const formattedRecords = records.map((r: any) => ({
       id: r.id,
       name: r.name,
@@ -804,12 +700,7 @@ export const exportAttritionRiskReport = async (req: any, res: any) => {
       orgId
     );
 
-    if (format === 'json') return res.json({ success: true, data: formattedRecords });
-    
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="attrition_risk_report.csv"');
-    return res.status(200).send(csvContent);
+    return sendExport(res, format, 'attrition_risk_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportAttrition', 500, 'Failed to export attrition report.');
   }
@@ -849,49 +740,7 @@ export const exportDemandForecastReport = async (req: any, res: any) => {
       orgId
     );
 
-    if (format === 'json') return res.json({ success: true, data: formattedRecords });
-    
-    if (format === 'xlsx') {
-      const workbook = new ExcelJS.Workbook();
-      const sheet = workbook.addWorksheet('Demand Forecast');
-      sheet.columns = [
-        { header: 'Department', key: 'department', width: 25 },
-        { header: 'Current Headcount', key: 'currentHeadcount', width: 20 },
-        { header: 'Projected Growth', key: 'projectedGrowth', width: 20 },
-        { header: 'Target Headcount', key: 'targetHeadcount', width: 20 },
-        { header: 'Growth Rate Used', key: 'growthRateUsed', width: 20 },
-        { header: 'Growth Rate Source', key: 'growthRateSource', width: 30 }
-      ];
-      sheet.addRows(formattedRecords);
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', 'attachment; filename="demand_forecast_report.xlsx"');
-      await workbook.xlsx.write(res);
-      return res.end();
-    }
-
-    if (format === 'pdf') {
-      const doc = new PDFDocument({ margin: 50 });
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', 'attachment; filename="demand_forecast_report.pdf"');
-      doc.pipe(res);
-
-      doc.fontSize(20).text('Demand Forecast Report', { align: 'center' });
-      doc.moveDown();
-      
-      formattedRecords.forEach((record: any) => {
-        doc.fontSize(14).text(`Department: ${record.department}`);
-        doc.fontSize(12).text(`  Current Headcount: ${record.currentHeadcount} | Projected Growth: ${record.projectedGrowth} | Target: ${record.targetHeadcount}`);
-        doc.text(`  Growth Rate: ${(record.growthRateUsed * 100).toFixed(1)}% (${record.growthRateSource})`);
-        doc.moveDown();
-      });
-      doc.end();
-      return;
-    }
-
-    const csvContent = convertToCSV(formattedRecords);
-    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', 'attachment; filename="demand_forecast_report.csv"');
-    return res.status(200).send(csvContent);
+    return sendExport(res, format, 'demand_forecast_report', formattedRecords);
   } catch (err: any) {
     return handleControllerError(err, req, res, 'report.exportDemand', 500, 'Failed to export demand report.');
   }

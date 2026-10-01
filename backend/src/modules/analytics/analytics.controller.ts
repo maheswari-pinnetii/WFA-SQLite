@@ -217,13 +217,15 @@ export const getPlacementAnalytics = async (req: Request, res: Response) => {
 
 export const triggerPipelineSync = async (req: Request, res: Response) => {
   try {
-    const data = await dataPipelineService.runSyncPipeline((req as any).user);
+    const data = await dataPipelineService.runSyncPipeline((req as any).user, req.body);
     return res.json(data);
   } catch (err: any) {
     sendError(res, err);
   }
 };
 
+export const getDataQualityIssues = async (req: Request, res: Response) => { try { const orgId = (req as any).user.organizationId || 'org-stackly'; const { batchId } = req.query; const rows = await dataPipelineService.getDataQualityIssues(orgId, batchId as string); return res.json({ success: true, data: rows }); } catch (err: any) { sendError(res, err); } };
+export const getImportBatches = async (req: Request, res: Response) => { try { const orgId = (req as any).user.organizationId || 'org-stackly'; const rows = await dataPipelineService.getImportBatches(orgId); return res.json({ success: true, data: rows }); } catch (err: any) { sendError(res, err); } };
 export const getPerformanceOverview = async (req: Request, res: Response) => {
   try {
     const data = await performanceService.getPerformanceOverview((req as any).user);

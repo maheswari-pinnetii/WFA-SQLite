@@ -706,13 +706,13 @@ export class AnalyticsService {
       };
 
       return {
-        id: emp.id,
+        employeeId: emp.id,
         name: emp.name,
         department: emp.department,
         role: emp.role,
         riskScore: Math.min(100, score),
         riskCategory: category,
-        contributingFactors: factors,
+        riskFactors: factors, predictionTimestamp: new Date().toISOString(),
         confidence,
         recommendedAction: actionMap[category],
         modelVersion: 'stat-engine-v2.1',

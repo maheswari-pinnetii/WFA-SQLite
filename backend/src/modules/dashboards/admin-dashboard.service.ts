@@ -135,22 +135,10 @@ export class AdminDashboardService {
     const headcountTrend = headcountTrendFull.slice(-12);
 
     // Department comparison with actual data
-    const deptData = departmentComparison.length > 0 ? departmentComparison : [
-      { name: 'Engineering', headcount: 280, performance: 88, attendance: 94 },
-      { name: 'Sales & Marketing', headcount: 150, performance: 82, attendance: 91 },
-      { name: 'Customer Success', headcount: 120, performance: 85, attendance: 93 },
-      { name: 'Finance & Operations', headcount: 80, performance: 90, attendance: 96 },
-      { name: 'Product Management', headcount: 80, performance: 87, attendance: 92 },
-    ];
+    const deptData = departmentComparison;
 
     // Role distribution
-    const roleData = roleDistribution.length > 0 ? roleDistribution.map((r: any, i: number) => ({
-      name: r.name,
-      value: r.value,
-      color: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'][i % 6]
-    })) : [
-      { name: 'EMPLOYEE', value: totalHeadcount, color: '#10b981' }
-    ];
+    const roleData = roleDistribution;
     
     // Location distribution
     const locationRows = await query(`
@@ -160,9 +148,7 @@ export class AdminDashboardService {
       GROUP BY location 
       ORDER BY headcount DESC
     `, params);
-    const locationDistribution = locationRows.length > 0 ? locationRows : [
-      { name: 'HQ', headcount: activeHeadcount }
-    ];
+    const locationDistribution = locationRows;
     
     // Experience (Tenure) distribution
     const expRows = await query(`
@@ -178,12 +164,7 @@ export class AdminDashboardService {
       WHERE ${whereClause} AND joinDate IS NOT NULL
       GROUP BY name
     `, params);
-    const experienceDistribution = expRows.length > 0 ? expRows : [
-      { name: '< 1 Year', headcount: 15 },
-      { name: '1-3 Years', headcount: 45 },
-      { name: '3-5 Years', headcount: 25 },
-      { name: '5+ Years', headcount: 15 }
-    ];
+    const experienceDistribution = expRows;
 
     // Leave trends
     const leaveData = leaveTrendsData.length > 0 ? leaveTrendsData.map((r: any) => ({
@@ -201,9 +182,7 @@ export class AdminDashboardService {
 
     // 6 Charts
     const charts = {
-      headcountTrend: headcountTrend.length > 0 ? headcountTrend : [
-        { month: 'Jan 22', headcount: Math.round(totalHeadcount * 0.6), joined: 50 }
-      ],
+      headcountTrend: headcountTrend,
       employeesByDept: deptData,
       roleDistribution: roleData,
       locationDistribution,

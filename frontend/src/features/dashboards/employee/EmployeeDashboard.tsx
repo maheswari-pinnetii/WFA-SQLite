@@ -70,43 +70,8 @@ export const EmployeeDashboard: React.FC = () => {
 
   // Field names MUST match what backend returns: attendance, timeLogs, upcomingLeave, training,
   // taskProgress, productivity, coreHours, openTickets
-  const kpis = data?.kpis || {
-    attendance: 0,
-    timeLogs: 0,
-    upcomingLeave: 0,
-    training: 0,
-    taskProgress: 0,
-    productivity: 0,
-    coreHours: 0,
-    openTickets: 0,
-  };
-  const charts = data?.charts || {
-    weeklyHours: [
-      { day: 'Mon', hours: 8.5 },
-      { day: 'Tue', hours: 8.0 },
-      { day: 'Wed', hours: 9.0 },
-      { day: 'Thu', hours: 8.5 },
-      { day: 'Fri', hours: 8.5 },
-    ],
-    taskProgress: [
-      { name: 'Completed', value: 18, color: '#10b981' },
-      { name: 'In Progress', value: 5, color: '#3b82f6' },
-      { name: 'Pending', value: 2, color: '#f59e0b' },
-    ],
-    leaveHistory: [
-      { month: 'May', days: 1 },
-      { month: 'Jun', days: 2 },
-      { month: 'Jul', days: 0 },
-      { month: 'Aug', days: 1 },
-      { month: 'Sep', days: 0 },
-    ],
-    skillsDistribution: [
-      { name: 'Frontend', value: 85, color: '#3b82f6' },
-      { name: 'Backend', value: 60, color: '#8b5cf6' },
-      { name: 'Database', value: 70, color: '#10b981' },
-      { name: 'DevOps', value: 40, color: '#f59e0b' },
-    ]
-  };
+  const kpis = data?.kpis || {};
+    const charts = data?.charts || {};
   const tables = data?.tables || {};
 
   return (

@@ -45,74 +45,8 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => { fetchDashboard(); }, [fetchDashboard]);
 
-  const kpis = data?.kpis || {
-    totalHeadcount: 1000,
-    activeHeadcount: 700,
-    onLeaveHeadcount: 100,
-    remoteHeadcount: 100,
-    terminatedHeadcount: 100,
-    totalUsers: 2255,
-    activeSessions: 0,
-    totalStorage: '—',
-    errorRate: 0,
-    pendingApprovals: 12,
-    totalDepartments: 10,
-    integrationsHealth: 100,
-    dailyLogins: 0,
-  };
-  const charts = data?.charts || {
-    headcountTrend: [
-      { month: 'Jan 22', headcount: 125, joined: 125 },
-      { month: 'Jul 22', headcount: 250, joined: 125 },
-      { month: 'Jan 23', headcount: 375, joined: 125 },
-      { month: 'Jul 23', headcount: 500, joined: 125 },
-      { month: 'Jan 24', headcount: 625, joined: 125 },
-      { month: 'Jul 24', headcount: 750, joined: 125 },
-      { month: 'Jan 25', headcount: 875, joined: 125 },
-      { month: 'Sep 26', headcount: 1000, joined: 125 },
-    ],
-    employeesByDept: [
-      { name: 'Engineering', headcount: 280 },
-      { name: 'Sales & Marketing', headcount: 150 },
-      { name: 'Customer Success', headcount: 120 },
-      { name: 'Finance & Ops', headcount: 80 },
-      { name: 'Product Mgmt', headcount: 80 },
-      { name: 'Data Science', headcount: 70 },
-      { name: 'Design', headcount: 60 },
-      { name: 'HR', headcount: 60 },
-      { name: 'IT Infra', headcount: 60 },
-      { name: 'Legal', headcount: 40 },
-    ],
-    leaveTrends: [
-      { month: 'Apr', leaves: 18 },
-      { month: 'May', leaves: 22 },
-      { month: 'Jun', leaves: 19 },
-      { month: 'Jul', leaves: 25 },
-      { month: 'Aug', leaves: 21 },
-      { month: 'Sep', leaves: 17 },
-    ],
-    payrollBreakdown: [
-      { name: 'Engineering', cost: 18200000 },
-      { name: 'Sales & Mktg', cost: 9750000 },
-      { name: 'Customer Success', cost: 7800000 },
-      { name: 'Finance & Ops', cost: 5200000 },
-      { name: 'Product Mgmt', cost: 5200000 },
-    ],
-    employmentStatusBreakdown: [
-      { name: 'Active', value: 700, color: '#10b981' },
-      { name: 'On Leave', value: 100, color: '#f59e0b' },
-      { name: 'Remote', value: 100, color: '#3b82f6' },
-      { name: 'Terminated', value: 100, color: '#ef4444' },
-    ],
-    taskCompletion: [
-      { name: 'Completed', value: 45, color: '#10b981' },
-      { name: 'In Progress', value: 30, color: '#f59e0b' },
-      { name: 'To Do', value: 25, color: '#64748b' },
-    ],
-    roleDistribution: [
-      { name: 'EMPLOYEE', value: 1000, color: '#10b981' },
-    ]
-  };
+  const kpis = data?.kpis || {};
+    const charts = data?.charts || {};
   const tables = data?.tables || {};
 
   const adminExceptions: ExceptionItem[] = [

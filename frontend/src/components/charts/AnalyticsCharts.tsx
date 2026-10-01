@@ -50,29 +50,8 @@ const tickStyle = {
   fontSize: 12,
 };
 
-const DEFAULT_LINE_DATA = [
-  { month: 'Jan', headcount: 450, leaves: 12, hires: 12, rate: 95, value: 450 },
-  { month: 'Feb', headcount: 465, leaves: 15, hires: 15, rate: 96, value: 465 },
-  { month: 'Mar', headcount: 480, leaves: 10, hires: 18, rate: 94, value: 480 },
-  { month: 'Apr', headcount: 490, leaves: 14, hires: 14, rate: 97, value: 490 },
-  { month: 'May', headcount: 500, leaves: 16, hires: 16, rate: 98, value: 500 },
-];
 
-const DEFAULT_BAR_DATA = [
-  { name: 'Engineering', headcount: 210, cost: 6500000, value: 94, rating: '4.8' },
-  { name: 'Sales', headcount: 115, cost: 2500000, value: 88, rating: '4.5' },
-  { name: 'Product', headcount: 75, cost: 1800000, value: 92, rating: '4.6' },
-  { name: 'Support', headcount: 50, cost: 1000000, value: 90, rating: '4.2' },
-  { name: 'HR & Ops', headcount: 50, cost: 700000, value: 96, rating: '4.9' },
-];
 
-const DEFAULT_DONUT_DATA = [
-  { name: 'Employee', value: 375 },
-  { name: 'Team Lead', value: 75 },
-  { name: 'Manager', value: 35 },
-  { name: 'HR', value: 10 },
-  { name: 'Admin', value: 5 },
-];
 
 export const AnalyticsLineChart: React.FC<BaseChartProps & { xKey?: string; series?: Series[] }> = ({
   title,
@@ -85,7 +64,7 @@ export const AnalyticsLineChart: React.FC<BaseChartProps & { xKey?: string; seri
   xKey = 'month',
   series = [{ key: 'headcount', name: 'Value', color: '#10B981' }],
 }) => {
-  const chartData = data && data.length > 0 ? data : DEFAULT_LINE_DATA;
+  const chartData = data || [];
 
   return (
     <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={!data || data.length === 0} onRetry={onRetry} minHeight={height + 100}>
@@ -119,7 +98,7 @@ export const AnalyticsBarChart: React.FC<BaseChartProps & { xKey?: string; serie
   series = [{ key: 'headcount', name: 'Value', color: '#10B981' }],
   layout = 'horizontal',
 }) => {
-  const chartData = data && data.length > 0 ? data : DEFAULT_BAR_DATA;
+  const chartData = data || [];
 
   return (
     <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={!data || data.length === 0} onRetry={onRetry} minHeight={height + 100}>
@@ -162,7 +141,7 @@ export const AnalyticsDonutChart: React.FC<BaseChartProps & { nameKey?: string; 
   valueKey = 'value',
   colors = ['#20BFB3', '#0EA5A0', '#5AD8CF', '#10B981', '#3B82F6', '#8B5CF6'],
 }) => {
-  const chartData = data && data.length > 0 ? data : DEFAULT_DONUT_DATA;
+  const chartData = data || [];
 
   return (
     <AnalyticsChartContainer title={title} subtitle={subtitle} isLoading={isLoading} error={error} isEmpty={!data || data.length === 0} onRetry={onRetry} minHeight={height + 100}>
