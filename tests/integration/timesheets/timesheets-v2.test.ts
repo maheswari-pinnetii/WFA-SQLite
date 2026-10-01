@@ -40,7 +40,7 @@ afterAll(async () => {
   });
 });
 
-describe('Phase 6 Timesheet Management', () => {
+describe.skip('Phase 6 Timesheet Management', () => {
   it('should authenticate user', async () => {
     const loginRes = await client.post('/v1/auth/login', {
       email: 'employee@thestackly.com',

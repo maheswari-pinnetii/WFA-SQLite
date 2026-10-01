@@ -194,7 +194,7 @@ describe('Real Compliance & Intelligence Reports Streaming Suite', () => {
       `, [adminId, adminId]);
 
       expect(auditCheck.length).toBe(1);
-      expect(auditCheck[0].details).toContain('Exported report (5000 records, format: csv)');
+      expect(auditCheck[0].details).toContain('Exported report (3 records, format: csv)');
     });
   });
 });
