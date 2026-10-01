@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import { query } from '../../database/connection.js';
 import { AuditLog } from '../../models/AuditLog.js';
 import { query } from '../../database/connection.js';
 import { getDb } from '../../config/db.js';

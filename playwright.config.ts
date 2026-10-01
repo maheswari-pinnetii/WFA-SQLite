@@ -3,7 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.spec.ts',
-  timeout: 30000, globalSetup: require.resolve('./tests/e2e/global.setup.ts'),
+  timeout: 30000, globalSetup: './tests/e2e/global.setup.ts',
   expect: {
     timeout: 8000,
   },

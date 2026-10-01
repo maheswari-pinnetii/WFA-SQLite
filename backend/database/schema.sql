@@ -1406,3 +1406,15 @@ CREATE TABLE IF NOT EXISTS attendance_events (
   createdAt TEXT NOT NULL,
   FOREIGN KEY (employeeId) REFERENCES employees(id) ON DELETE CASCADE
 );
+
+
+CREATE TABLE IF NOT EXISTS failed_logins (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  attempts INTEGER DEFAULT 0,
+  lockedUntil TEXT,
+  lockedAt TEXT,
+  lockReason TEXT,
+  createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+);
